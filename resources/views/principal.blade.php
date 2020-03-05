@@ -356,8 +356,8 @@
     
 
     <footer class="app-footer">
-        <span><a href="http://www.incanatoit.com/">IncanatoIT</a> &copy; 2017</span>
-        <span class="ml-auto">Desarrollado por <a href="http://www.incanatoit.com/">IncanatoIT</a></span>
+        <span><a href="http://www.incanatoit.com/">Zicandi - Eclipse</a> &copy; 2020</span>
+        <span class="ml-auto">Desarrollado por Nunduva IT</span>
     </footer>
 
     <!-- Bootstrap and necessary plugins -->
