@@ -12,5 +12,5 @@
 */
 
 Route::get('/', function () {
-    return view('contenido/contenido');
+    return view('frames/contenido_main');
 });
