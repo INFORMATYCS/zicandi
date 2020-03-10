@@ -3600,7 +3600,10 @@ window.Vue = __webpack_require__(35);
 Vue.component('example-component', __webpack_require__(39));
 
 var app = new Vue({
-  el: '#app'
+  el: '#app',
+  data: {
+    oppMenuSeleccion: 0
+  }
 });
 
 /***/ }),
