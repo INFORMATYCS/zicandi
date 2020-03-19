@@ -23,5 +23,6 @@ mix.styles([
    'resources/assets/plantilla/js/Chart.min.js',   
    'resources/assets/plantilla/js/pace.min.js',   
    'resources/assets/plantilla/js/template.js',
+   'resources/assets/plantilla/js/sweetalert2.all.min.js',   
 ], 'public/js/zicandi.js')
 .js('resources/assets/js/app.js', 'public/js/app.js');

@@ -1,11 +1,11 @@
 @extends('principal')
 @section('contenido_main')
     <template v-if="oppMenuSeleccion==0">
-        <example-component></example-component>
+        <h1>sdasd asdasd asdad  asdasd  asasdInicio</h1>        
     </template>
 
     <template v-if="oppMenuSeleccion==1">
-        <h1>Contenido menu 1</h1>
+        <proveedor-component></proveedor-component>
     </template>
 
     <template v-if="oppMenuSeleccion==2">

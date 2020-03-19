@@ -14,3 +14,11 @@
 Route::get('/', function () {
     return view('frames/contenido_main');
 });
+
+
+// - Rutas para Proveedores
+Route::get('/proveedores', 'ProveedorController@index');
+Route::post('/proveedores/registrar', 'ProveedorController@store');
+Route::put('/proveedores/actualizar', 'ProveedorController@update');
+Route::put('/proveedores/desactivar', 'ProveedorController@desactivar');
+Route::put('/proveedores/activar', 'ProveedorController@activar');
