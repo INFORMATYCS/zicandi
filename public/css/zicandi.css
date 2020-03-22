@@ -9266,3 +9266,108 @@ hr.transparent {
       float: left; }
   *[dir="rtl"] .callout-default {
     border-right-color: #536c79; }
+
+/*!
+Estilos exclusiuvos para las paginas en general
+*/
+
+
+/* - - Modales - -*/
+.modal-content{
+    width: 100% !important;
+    position: absolute !important;
+}
+.mostrar{
+    display: list-item !important;
+    opacity: 1 !important;
+    position: absolute !important;
+    background-color: #3c29297a !important;
+}
+
+/* - - Errores - -*/
+.div-error{
+    display: flex;
+    justify-content: center;
+}
+.text-error{
+    color: red !important;
+    font-weight: bold;
+}
+
+/* - - Loading - -*/
+.abrir-load-sbl{
+    display: block !important;        
+}
+
+.sbl-circ-ripple {
+  height: 120px;
+  width: 120px;
+  top:50%; left:50%;
+  margin-top:-60px;margin-left:-60px;
+  z-index: 56000;
+  color: #FFBF00;  
+  text-align:center;
+  border-radius: 50%;
+  position: absolute;
+  display: inline-block; 
+}
+
+.sbl-circ-ripple::after, .sbl-circ-ripple::before {
+    content: '';
+    height: 0;
+    width: 0;
+    border: inherit;
+    border: 5px solid;
+    border-radius: inherit;
+    position: absolute;
+    left: 40%;
+    top: 40%;
+    animation: circle-ripple  1s linear infinite; 
+}
+
+.sbl-circ-ripple::before {
+    animation-delay: -0.5s; 
+}
+
+.sbl-circ-ripple2 {
+  height: 120px;
+  width: 120px;
+  color: #5a5a5a;
+  border-radius: 50%;
+  position: relative;
+  display: inline-block; 
+}
+
+.sbl-circ-ripple::after, .sbl-circ-ripple::before {
+    content: '';
+    height: 0;
+    width: 0;
+    border: inherit;
+    border: 5px solid;
+    border-radius: inherit;
+    position: absolute;
+    left: 40%;
+    top: 40%;
+    animation: circle-ripple  1s linear infinite; 
+}
+
+.sbl-circ-ripple::before {
+    animation-delay: -0.5s; 
+}
+
+
+@keyframes circle-ripple {
+  0% {
+    height: 0;
+    width: 0;
+    left: 54px;
+    top: 54px; 
+  }
+  100% {
+    height: 120px;
+    width: 120px;
+    left: -5px;
+    top: -5px;
+    opacity: 0; 
+  }
+}

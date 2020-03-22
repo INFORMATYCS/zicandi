@@ -14,7 +14,8 @@ let mix = require('laravel-mix');
 mix.styles([
    'resources/assets/plantilla/css/font-awesome.min.css',
    'resources/assets/plantilla/css/simple-line-icons.min.css',
-   'resources/assets/plantilla/css/style.css',   
+   'resources/assets/plantilla/css/style.css',
+   'resources/assets/plantilla/css/pages-style.css',
 ], 'public/css/zicandi.css')
 .scripts([
    'resources/assets/plantilla/js/jquery.min.js',
@@ -24,5 +25,6 @@ mix.styles([
    'resources/assets/plantilla/js/pace.min.js',   
    'resources/assets/plantilla/js/template.js',
    'resources/assets/plantilla/js/sweetalert2.all.min.js',   
+   'resources/assets/plantilla/js/util.js',   
 ], 'public/js/zicandi.js')
 .js('resources/assets/js/app.js', 'public/js/app.js');

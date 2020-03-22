@@ -1,105 +1,118 @@
 <template>
+
+
+
     <main class="main">
+        <!-- Loading -->
+        <div style="display: none;" class="sbl-circ-ripple" :class="{'abrir-load-sbl' : isLoading}"></div>
+
         <!-- Breadcrumb -->
         <ol class="breadcrumb">
             <li class="breadcrumb-item">Home</li>
-            <li class="breadcrumb-item"><a href="#">Admin</a></li>
-            <li class="breadcrumb-item active">Dashboard</li>
+            <li class="breadcrumb-item">Catalogos</li>
+            <li class="breadcrumb-item active">Proveedores</li>
         </ol>
         
-        <div class="container-fluid">
-            <!-- Ejemplo de tabla Listado -->
+         
+        <div class="container-fluid">           
+            <!-- Barra con botones de tareas -->
             <div class="card">
                 <div class="card-header">
-                    <i class="fa fa-align-justify"></i> Categorías
+                    <i class="fa fa-align-justify"></i> Tareas:
                     <button type="button" class="btn btn-secondary" @click="showModal('proveedor','registrar')">
                         <i class="icon-plus"></i>&nbsp;Nuevo
-                    </button>
-                </div>
-                <div class="card-body">
-                    <div class="form-group row">
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <select class="form-control col-md-3" id="opcion" name="opcion">
-                                    <option value="nombre">Nombre</option>
-                                    <option value="descripcion">Descripción</option>
-                                </select>
-                                <input type="text" id="texto" name="texto" class="form-control" placeholder="Texto a buscar">
-                                <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Buscar</button>
-                            </div>
+                    </button>                    
+                </div>   
+            </div>
+            
+            <div class="card-body">
+
+                <!-- Buscador -->
+                <div class="form-group row">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <select class="form-control col-md-3" v-model="criterio">
+                                <option value="nombre_corto">Alias</option>
+                                <option value="nombre">Nombre</option>
+                                <option value="pagina_web">Pagina Web</option>
+                                <option value="contacto">Contacto</option>
+                            </select>
+                            <input type="text" v-model="buscar" @keyup.enter="listarProveedores(1, buscar, criterio, true)" class="form-control" placeholder="Texto a buscar">
+                            <button type="submit" class="btn btn-primary" @click="listarProveedores(1, buscar, criterio, true)"><i class="fa fa-search"></i> Buscar</button>
                         </div>
                     </div>
-                    <table class="table table-bordered table-striped table-sm">
-                        <thead>
-                            <tr>
-                                <th>Opciones</th>
-                                <th>Alias</th>
-                                <th>Nombre</th>
-                                <th>Pagina Web</th>
-                                <th>Contacto</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="proveedor in listaProveedor" :key="proveedor.id_proveedor">
-                                <td>
-                                    <button type="button" class="btn btn-warning btn-sm" @click="showModal('proveedor','actualizar', proveedor)">
-                                        <i class="icon-pencil"></i>
-                                    </button> &nbsp;
-                                    <template v-if="proveedor.xstatus">
-                                        <button type="button" class="btn btn-danger btn-sm" @click="desactivarProveedor(proveedor.id_proveedor)">
-                                            <i class="icon-trash"></i>
-                                        </button>
-                                    </template>
-
-                                    <template v-else>
-                                        <button type="button" class="btn btn-info btn-sm" @click="activarProveedor(proveedor.id_proveedor)">
-                                            <i class="icon-check"></i>
-                                        </button>
-                                    </template>
-                                </td>
-                                <td v-text="proveedor.nombre_corto">Equipos</td>
-                                <td v-text="proveedor.nombre">Equipos</td>
-                                <td v-text="proveedor.pagina_web">Equipos</td>
-                                <td v-text="proveedor.contacto">Equipos</td>                                
-                                <td>
-                                    <div v-if="proveedor.xstatus">
-                                        <span class="badge badge-success">Activo</span>
-                                    </div>
-                                    <div v-else>
-                                        <span class="badge badge-danger">Desactivado</span>
-                                    </div>
-                                    
-                                </td>
-                            </tr>                            
-                        </tbody>
-                    </table>
-                    <nav>
-                        <ul class="pagination">
-                            <li class="page-item">
-                                <a class="page-link" href="#">Ant</a>
-                            </li>
-                            <li class="page-item active">
-                                <a class="page-link" href="#">1</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">2</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">3</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">4</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">Sig</a>
-                            </li>
-                        </ul>
-                    </nav>
                 </div>
+
+
+                <!-- Grid -->
+                <table class="table table-bordered table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th>Opciones</th>
+                            <th>Alias</th>
+                            <th>Nombre</th>
+                            <th>Pagina Web</th>
+                            <th>Contacto</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="proveedor in listaProveedor" :key="proveedor.id_proveedor">
+                            <td>
+                                <button type="button" class="btn btn-warning btn-sm" @click="showModal('proveedor','actualizar', proveedor)">
+                                    <i class="icon-pencil"></i>
+                                </button> &nbsp;
+                                <template v-if="proveedor.xstatus">
+                                    <button type="button" class="btn btn-danger btn-sm" @click="desactivarProveedor(proveedor.id_proveedor)">
+                                        <i class="icon-trash"></i>
+                                    </button>
+                                </template>
+
+                                <template v-else>
+                                    <button type="button" class="btn btn-info btn-sm" @click="activarProveedor(proveedor.id_proveedor)">
+                                        <i class="icon-check"></i>
+                                    </button>
+                                </template>
+                            </td>
+                            <td v-text="proveedor.nombre_corto">Equipos</td>
+                            <td v-text="proveedor.nombre">Equipos</td>
+                            <td v-text="proveedor.pagina_web">Equipos</td>
+                            <td v-text="proveedor.contacto">Equipos</td>                                
+                            <td>
+                                <div v-if="proveedor.xstatus">
+                                    <span class="badge badge-success">Activo</span>
+                                </div>
+                                <div v-else>
+                                    <span class="badge badge-danger">Desactivado</span>
+                                </div>
+                                
+                            </td>
+                        </tr>                            
+                    </tbody>
+                </table>
+                <nav>
+                    <ul class="pagination">
+                        <li class="page-item" v-if="pagination.current_page > 1">
+                            <a class="page-link" href="#" @click.prevent="cambiarPagina(pagination.current_page-1, buscar, criterio)">Ant</a>
+                        </li>
+                        <li class="page-item" v-for="page in pagesNumber" :key="page" :class="[page == isActived ? 'active' : '']">
+                            <a class="page-link" href="#" @click.prevent="cambiarPagina(page, buscar, criterio)" v-text="page"></a>
+                        </li>                           
+                        <li class="page-item" v-if="pagination.current_page < pagination.last_page">
+                            <a class="page-link" href="#" @click.prevent="cambiarPagina(pagination.current_page+1, buscar, criterio)">Sig</a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
-            <!-- Fin ejemplo de tabla Listado -->
         </div>
+            
+        
+
+
+
+
+
+
         <!--Inicio del modal agregar/actualizar-->
         <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true" :class="{'mostrar' : modal}">
             <div class="modal-dialog modal-primary modal-lg" role="document">
@@ -157,14 +170,17 @@
             </div>
             <!-- /.modal-dialog -->
         </div>
-        <!--Fin del modal-->        
+        <!--Fin del modal-->       
+
+
+
     </main>    
 </template>
 
 <script>
     export default {
         data(){
-            return{
+            return{               
                 id_proveedor: 0,
                 nombre_corto: '',
                 nombre: '',
@@ -175,20 +191,68 @@
                 tituloModal: '',
                 tipoAccion: 0,
                 errorProveedor: 0,
-                erroresProveedorMsjList: []
+                erroresProveedorMsjList: [],
+                pagination: {
+                    'total' : 0,
+                    'current_page'  : 0,
+                    'per_page' : 0,
+                    'last_page' : 0,
+                    'from' : 0,
+                    'to' : 0
+                },
+                offset : 3,
+                criterio: 'nombre_corto',
+                buscar: '',
+                isLoading: 0
+            }
+        },
+        computed:{
+            isActived: function(){
+                return this.pagination.current_page;
+            },
+            pagesNumber: function(){
+                if(!this.pagination.to){
+                    return [];
+                }
+
+                var from = this.pagination.current_page - this.offset;
+                if(from < 1){
+                    from = 1;
+                }
+
+                var to = from + (this.offset * 2);
+                if(to >= this.pagination.last_page){
+                    to = this.pagination.last_page;
+                }
+
+                var pageArray = [];
+                while(from <= to){
+                    pageArray.push(from);
+                    from++;
+                }
+
+                return pageArray;
             }
         },
         methods:{
-            listarProveedores(){
-                let me=this;
+            listarProveedores(page, buscar, criterio, aplLoading=false){
 
-                axios.get('/zicandi/public/proveedores')
+                if(aplLoading){
+                    this.isLoading = 1;
+                }
+
+                let me=this;                
+                var url= '/zicandi/public/proveedores?page=' + page +'&buscar=' + buscar + '&criterio=' + criterio;
+                axios.get(url)
                 .then(function (response) {                    
-                    me.listaProveedor = response.data;
+                    var respuesta = response.data;  
+                    me.isLoading = 0;
+                    me.listaProveedor = respuesta.proveedor.data;
+                    me.pagination = respuesta.pagination;                    
                 })
-                .catch(function (error) {
-                    // handle error
-                    console.log(error);
+                .catch(function (error) {                    
+                    me.isLoading = 0;
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
             },
             registrarProveedor(){
@@ -197,7 +261,7 @@
                 }
 
                 let me = this;
-
+                this.isLoading = 1;
                 axios.post('/zicandi/public/proveedores/registrar',{
                     'nombre_corto': this.nombre_corto,
                     'nombre': this.nombre,
@@ -205,12 +269,15 @@
                     'contacto': this.contacto,
                 })
                 .then(function (response) {                    
+                    me.buscar = '';
+                    me.isLoading = 0;
                     me.closeModal();
-                    me.listarProveedores();
+                    util.AVISO('Perfecto, registro correcto', util.tipoOk);
+                    me.listarProveedores(1, '', 'nombre_corto');
                 })
-                .catch(function (error) {
-                    // handle error
-                    console.log(error);
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
             },
             actualizarProveedor(){
@@ -219,7 +286,7 @@
                 }
 
                 let me = this;
-
+                this.isLoading = 1;
                 axios.put('/zicandi/public/proveedores/actualizar',{
                     'id_proveedor': this.id_proveedor,
                     'nombre_corto': this.nombre_corto,
@@ -229,121 +296,63 @@
                 })
                 .then(function (response) {                    
                     me.closeModal();
-                    me.listarProveedores();
+                    me.isLoading = 0;
+                    util.AVISO('Actualizacion correcta!', util.tipoOk);                
+                    me.listarProveedores(me.pagination.current_page, me.buscar, me.criterio);
                 })
                 .catch(function (error) {
-                    // handle error
-                    console.log(error);
+                    me.isLoading = 0;
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
             },
-            desactivarProveedor(id_proveedor){                
-                const swalWithBootstrapButtons = Swal.mixin({
-                customClass: {
-                    confirmButton: 'btn btn-success',
-                    cancelButton: 'btn btn-danger'
-                },
-                buttonsStyling: false
-                })
+            desactivarProveedor(id_proveedor){     
+                util.MSG_SI_NO('Deseas desactivarlo','No podras usarlo...',util.tipoPreg).
+                then((result) => {
+                    if(result==util.btnSi){
+                        this.isLoading = 1;
+                        let me = this;
 
-                swalWithBootstrapButtons.fire({
-                title: 'Estas seguro de eliminar?',
-                text: "Este proceso inactivara el proveedor",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Si, borrar',
-                cancelButtonText: 'No, cancelar',
-                reverseButtons: true
-                }).then((result) => {
-                if (result.value) {
-                    let me = this;
+                        axios.put('/zicandi/public/proveedores/desactivar',{
+                            'id_proveedor': id_proveedor
+                        })
+                        .then(function (response) {
+                            me.isLoading = 0;
+                            util.AVISO('Desactivado!!!', util.tipoOk);                                       
+                            me.listarProveedores(me.pagination.current_page, me.buscar, me.criterio);
+                        })
+                        .catch(function (error) {
+                            me.isLoading = 0;
+                            util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                        });
 
-                    axios.put('/zicandi/public/proveedores/desactivar',{
-                        'id_proveedor': id_proveedor
-                    })
-                    .then(function (response) {                    
-                        me.listarProveedores();
+                    }
 
-                        swalWithBootstrapButtons.fire(
-                        'Desactivado!',
-                        'Registro desactivado correctamente.',
-                        'success'
-                        );                        
-                    })
-                    .catch(function (error) {
-                        // handle error
-                        console.log(error);
-
-                        swalWithBootstrapButtons.fire(
-                        'Cancelled',
-                        'Your imaginary file is safe :)'+error,
-                        'error'
-                        );
-
-                    });
-
-                    
-                } else if (
-                    /* Read more about handling dismissals below */
-                    result.dismiss === Swal.DismissReason.cancel
-                ) {
-                    
-                }
-                });
+                });                                               
 
             },
             activarProveedor(id_proveedor){
-                const swalWithBootstrapButtons = Swal.mixin({
-                customClass: {
-                    confirmButton: 'btn btn-success',
-                    cancelButton: 'btn btn-danger'
-                },
-                buttonsStyling: false
-                })
+                util.MSG_SI_NO('Deseas activarlo','Mientras no lo actives no estara disponible para usarse',util.tipoPreg).
+                then((result) => {
+                    if(result==util.btnSi){
+                        this.isLoading = 1;
+                        let me = this;
 
-                swalWithBootstrapButtons.fire({
-                title: 'Estas seguro de activar?',
-                text: "Este proceso inactivara el proveedor",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Si, activar',
-                cancelButtonText: 'No, cancelar',
-                reverseButtons: true
-                }).then((result) => {
-                if (result.value) {
-                    let me = this;
+                        axios.put('/zicandi/public/proveedores/activar',{
+                            'id_proveedor': id_proveedor
+                        })
+                        .then(function (response) {
+                            me.isLoading = 0;
+                            util.AVISO('Activado!!!', util.tipoOk);                    
+                            me.listarProveedores(me.pagination.current_page, me.buscar, me.criterio);
+                        })
+                        .catch(function (error) {                            
+                            me.isLoading = 0;
+                            util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                        });
 
-                    axios.put('/zicandi/public/proveedores/activar',{
-                        'id_proveedor': id_proveedor
-                    })
-                    .then(function (response) {                    
-                        me.listarProveedores();
+                    }
 
-                        swalWithBootstrapButtons.fire(
-                        'Desactivado!',
-                        'Registro activado correctamente.',
-                        'success'
-                        );                        
-                    })
-                    .catch(function (error) {
-                        // handle error
-                        console.log(error);
-
-                        swalWithBootstrapButtons.fire(
-                        'Cancelled',
-                        'Your imaginary file is safe :)'+error,
-                        'error'
-                        );
-
-                    });
-
-                    
-                } else if (
-                    /* Read more about handling dismissals below */
-                    result.dismiss === Swal.DismissReason.cancel
-                ) {
-                    
-                }
-                });
+                });               
             },
             showModal(modelo, accion, data=[]){
                 switch(modelo){
@@ -400,31 +409,17 @@
                 if(this.erroresProveedorMsjList.length) this.errorProveedor = 1;
 
                 return this.errorProveedor;
+            },
+            cambiarPagina(page, buscar, criterio){
+                let me = this;
+
+                me.pagination.current_page = page;
+
+                me.listarProveedores(page, buscar, criterio, true);
             }
         },
         mounted() {
-            this.listarProveedores();
+            this.listarProveedores(1, this.buscar, this.criterio, true);
         }
     }
 </script>
-
-<style>
-    .modal-content{
-        width: 100% !important;
-        position: absolute !important;
-    }
-    .mostrar{
-        display: list-item !important;
-        opacity: 1 !important;
-        position: absolute !important;
-        background-color: #3c29297a !important;
-    }
-    .div-error{
-        display: flex;
-        justify-content: center;
-    }
-    .text-error{
-        color: red !important;
-        font-weight: bold;
-    }
-</style>

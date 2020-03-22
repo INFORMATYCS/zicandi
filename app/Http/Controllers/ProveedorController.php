@@ -12,12 +12,32 @@ class ProveedorController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
-    {
+    public function index(Request $request){
+       
         if(!$request->ajax())return redirect('/');
+
+        $buscar = $request->buscar;
+        $criterio = $request->criterio;
         
-        $listaProveedores = Proveedor::all();
-        return $listaProveedores;
+        if($buscar==''){
+            $listaProveedores = Proveedor::orderBy('id_proveedor','desc')->paginate(10);
+        }else{
+            $listaProveedores = Proveedor::where($criterio, 'like', '%' . $buscar . '%')->orderBy('id_proveedor','desc')->paginate(10);
+        }
+        
+
+        return [
+            'pagination' => [
+                'total'         => $listaProveedores->total(),
+                'current_page'         => $listaProveedores->currentPage(),
+                'per_page'         => $listaProveedores->perPage(),
+                'last_page'         => $listaProveedores->lastPage(),
+                'from'         => $listaProveedores->firstItem(),
+                'to'         => $listaProveedores->lastItem()
+            ],
+            'proveedor'=> $listaProveedores
+        ];
+        
     }
 
     /**
@@ -28,6 +48,11 @@ class ProveedorController extends Controller
      */
     public function store(Request $request)
     {
+        //~Valida, el nombre del proveedor no puede ser zicandi
+        if($request->nombre=="zicandi"){
+            abort(585, 'El nombre del proveedor no puede ser zicandi');
+        }
+        
         $proveedor = new Proveedor();
         $proveedor->nombre_corto = $request->nombre_corto;
         $proveedor->nombre = $request->nombre;
@@ -47,8 +72,8 @@ class ProveedorController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
-    {
+    public function update(Request $request){
+        
         $id= $request->id_proveedor;
         $proveedor = Proveedor::findOrFail($request->id_proveedor);//~Se busca en base al ID entrante
         $proveedor->nombre_corto = $request->nombre_corto;
@@ -65,8 +90,7 @@ class ProveedorController extends Controller
      * 
      * 
      */
-    public function desactivar(Request $request)
-    {
+    public function desactivar(Request $request){
         $proveedor = Proveedor::findOrFail($request->id_proveedor);
         $proveedor->xstatus ='0';
 
@@ -77,8 +101,7 @@ class ProveedorController extends Controller
      * 
      * 
      */
-    public function activar(Request $request)
-    {
+    public function activar(Request $request){        
         $proveedor = Proveedor::findOrFail($request->id_proveedor);
         $proveedor->xstatus ='1';
 
