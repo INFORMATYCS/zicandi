@@ -49370,29 +49370,35 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
         return {
-            id_proveedor: 0,
-            nombre_corto: '',
-            nombre: '',
-            pagina_web: '',
-            contacto: '',
-            listaProveedor: [],
-            modal: 0,
-            tituloModal: '',
-            tipoAccion: 0,
-            errorProveedor: 0,
-            erroresProveedorMsjList: [],
-            pagination: {
-                'total': 0,
-                'current_page': 0,
-                'per_page': 0,
-                'last_page': 0,
-                'from': 0,
-                'to': 0
+            oProveedor: {
+                id_proveedor: 0,
+                nombre_corto: '',
+                nombre: '',
+                pagina_web: '',
+                contacto: ''
             },
-            offset: 3,
-            criterio: 'nombre_corto',
-            buscar: '',
+            listaProveedor: [],
+            modalProveedor: {
+                modal: 0,
+                tituloModal: '',
+                tipoAccion: 0,
+                errorProveedor: 0,
+                erroresProveedorMsjList: []
+            },
+            pagination: {
+                total: 0,
+                current_page: 0,
+                per_page: 0,
+                last_page: 0,
+                from: 0,
+                to: 0
+            },
+            buscador: {
+                criterio: 'nombre_corto',
+                textoBuscar: ''
+            },
             isLoading: 0
+
         };
     },
 
@@ -49401,27 +49407,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             return this.pagination.current_page;
         },
         pagesNumber: function pagesNumber() {
-            if (!this.pagination.to) {
-                return [];
-            }
-
-            var from = this.pagination.current_page - this.offset;
-            if (from < 1) {
-                from = 1;
-            }
-
-            var to = from + this.offset * 2;
-            if (to >= this.pagination.last_page) {
-                to = this.pagination.last_page;
-            }
-
-            var pageArray = [];
-            while (from <= to) {
-                pageArray.push(from);
-                from++;
-            }
-
-            return pageArray;
+            return paginador.getPagesNumber(this.pagination);
         }
     },
     methods: {
@@ -49453,12 +49439,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var me = this;
             this.isLoading = 1;
             axios.post('/zicandi/public/proveedores/registrar', {
-                'nombre_corto': this.nombre_corto,
-                'nombre': this.nombre,
-                'pagina_web': this.pagina_web,
-                'contacto': this.contacto
+                'nombre_corto': this.oProveedor.nombre_corto,
+                'nombre': this.oProveedor.nombre,
+                'pagina_web': this.oProveedor.pagina_web,
+                'contacto': this.oProveedor.contacto
             }).then(function (response) {
-                me.buscar = '';
+                me.buscador.textoBuscar = '';
                 me.isLoading = 0;
                 me.closeModal();
                 util.AVISO('Perfecto, registro correcto', util.tipoOk);
@@ -49476,16 +49462,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var me = this;
             this.isLoading = 1;
             axios.put('/zicandi/public/proveedores/actualizar', {
-                'id_proveedor': this.id_proveedor,
-                'nombre_corto': this.nombre_corto,
-                'nombre': this.nombre,
-                'pagina_web': this.pagina_web,
-                'contacto': this.contacto
+                'id_proveedor': this.oProveedor.id_proveedor,
+                'nombre_corto': this.oProveedor.nombre_corto,
+                'nombre': this.oProveedor.nombre,
+                'pagina_web': this.oProveedor.pagina_web,
+                'contacto': this.oProveedor.contacto
             }).then(function (response) {
                 me.closeModal();
                 me.isLoading = 0;
                 util.AVISO('Actualizacion correcta!', util.tipoOk);
-                me.listarProveedores(me.pagination.current_page, me.buscar, me.criterio);
+                me.listarProveedores(me.pagination.current_page, me.buscador.textoBuscar, me.buscador.criterio);
             }).catch(function (error) {
                 me.isLoading = 0;
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
@@ -49504,7 +49490,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     }).then(function (response) {
                         me.isLoading = 0;
                         util.AVISO('Desactivado!!!', util.tipoOk);
-                        me.listarProveedores(me.pagination.current_page, me.buscar, me.criterio);
+                        me.listarProveedores(me.pagination.current_page, me.buscador.textoBuscar, me.buscador.criterio);
                     }).catch(function (error) {
                         me.isLoading = 0;
                         util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
@@ -49525,7 +49511,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     }).then(function (response) {
                         me.isLoading = 0;
                         util.AVISO('Activado!!!', util.tipoOk);
-                        me.listarProveedores(me.pagination.current_page, me.buscar, me.criterio);
+                        me.listarProveedores(me.pagination.current_page, me.buscador.textoBuscar, me.buscador.criterio);
                     }).catch(function (error) {
                         me.isLoading = 0;
                         util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
@@ -49542,27 +49528,27 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                         switch (accion) {
                             case 'registrar':
                                 {
-                                    this.modal = 1;
-                                    this.nombre_corto = '';
-                                    this.nombre = '';
-                                    this.pagina_web = '';
-                                    this.contacto = '';
-                                    this.tituloModal = 'Registrar nuevo proveedor';
-                                    this.tipoAccion = 1;
+                                    this.modalProveedor.modal = 1;
+                                    this.oProveedor.nombre_corto = '';
+                                    this.oProveedor.nombre = '';
+                                    this.oProveedor.pagina_web = '';
+                                    this.oProveedor.contacto = '';
+                                    this.modalProveedor.tituloModal = 'Registrar nuevo proveedor';
+                                    this.modalProveedor.tipoAccion = 1;
 
                                     break;
                                 }
                             case 'actualizar':
                                 {
-                                    this.modal = 1;
-                                    this.tituloModal = 'Actualizar proveedor';
-                                    this.tipoAccion = 2;
+                                    this.modalProveedor.modal = 1;
+                                    this.modalProveedor.tituloModal = 'Actualizar proveedor';
+                                    this.modalProveedor.tipoAccion = 2;
 
-                                    this.nombre_corto = data['nombre_corto'];
-                                    this.nombre = data['nombre'];
-                                    this.pagina_web = data['pagina_web'];
-                                    this.contacto = data['contacto'];
-                                    this.id_proveedor = data['id_proveedor'];
+                                    this.oProveedor.nombre_corto = data['nombre_corto'];
+                                    this.oProveedor.nombre = data['nombre'];
+                                    this.oProveedor.pagina_web = data['pagina_web'];
+                                    this.oProveedor.contacto = data['contacto'];
+                                    this.oProveedor.id_proveedor = data['id_proveedor'];
 
                                     console.log(data);
                                 }
@@ -49571,24 +49557,24 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }
         },
         closeModal: function closeModal() {
-            this.modal = 0;
+            this.modalProveedor.modal = 0;
             this.nombre_corto = '';
             this.nombre = '';
             this.pagina_web = '';
             this.contacto = '';
-            this.tituloModal = '';
+            this.modalProveedor.tituloModal = '';
         },
         validarProveedor: function validarProveedor() {
-            this.errorProveedor = 0;
-            this.erroresProveedorMsjList = [];
+            this.modalProveedor.errorProveedor = 0;
+            this.modalProveedor.erroresProveedorMsjList = [];
 
-            if (!this.nombre_corto) this.erroresProveedorMsjList.push("Se requiere el nombre corto o alias del proveedor");
+            if (!this.oProveedor.nombre_corto) this.modalProveedor.erroresProveedorMsjList.push("Se requiere el nombre corto o alias del proveedor");
 
-            if (!this.nombre) this.erroresProveedorMsjList.push("Define el nombre del proveedor");
+            if (!this.oProveedor.nombre) this.modalProveedor.erroresProveedorMsjList.push("Define el nombre del proveedor");
 
-            if (this.erroresProveedorMsjList.length) this.errorProveedor = 1;
+            if (this.modalProveedor.erroresProveedorMsjList.length) this.modalProveedor.errorProveedor = 1;
 
-            return this.errorProveedor;
+            return this.modalProveedor.errorProveedor;
         },
         cambiarPagina: function cambiarPagina(page, buscar, criterio) {
             var me = this;
@@ -49599,7 +49585,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         }
     },
     mounted: function mounted() {
-        this.listarProveedores(1, this.buscar, this.criterio, true);
+        this.listarProveedores(1, this.buscador.textoBuscar, this.buscador.criterio, true);
     }
 });
 
@@ -49655,8 +49641,8 @@ var render = function() {
                     {
                       name: "model",
                       rawName: "v-model",
-                      value: _vm.criterio,
-                      expression: "criterio"
+                      value: _vm.buscador.criterio,
+                      expression: "buscador.criterio"
                     }
                   ],
                   staticClass: "form-control col-md-3",
@@ -49670,9 +49656,13 @@ var render = function() {
                           var val = "_value" in o ? o._value : o.value
                           return val
                         })
-                      _vm.criterio = $event.target.multiple
-                        ? $$selectedVal
-                        : $$selectedVal[0]
+                      _vm.$set(
+                        _vm.buscador,
+                        "criterio",
+                        $event.target.multiple
+                          ? $$selectedVal
+                          : $$selectedVal[0]
+                      )
                     }
                   }
                 },
@@ -49700,13 +49690,13 @@ var render = function() {
                   {
                     name: "model",
                     rawName: "v-model",
-                    value: _vm.buscar,
-                    expression: "buscar"
+                    value: _vm.buscador.textoBuscar,
+                    expression: "buscador.textoBuscar"
                   }
                 ],
                 staticClass: "form-control",
                 attrs: { type: "text", placeholder: "Texto a buscar" },
-                domProps: { value: _vm.buscar },
+                domProps: { value: _vm.buscador.textoBuscar },
                 on: {
                   keyup: function($event) {
                     if (
@@ -49717,8 +49707,8 @@ var render = function() {
                     }
                     return _vm.listarProveedores(
                       1,
-                      _vm.buscar,
-                      _vm.criterio,
+                      _vm.buscador.textoBuscar,
+                      _vm.buscador.criterio,
                       true
                     )
                   },
@@ -49726,7 +49716,7 @@ var render = function() {
                     if ($event.target.composing) {
                       return
                     }
-                    _vm.buscar = $event.target.value
+                    _vm.$set(_vm.buscador, "textoBuscar", $event.target.value)
                   }
                 }
               }),
@@ -49740,8 +49730,8 @@ var render = function() {
                     click: function($event) {
                       return _vm.listarProveedores(
                         1,
-                        _vm.buscar,
-                        _vm.criterio,
+                        _vm.buscador.textoBuscar,
+                        _vm.buscador.criterio,
                         true
                       )
                     }
@@ -49886,8 +49876,8 @@ var render = function() {
                             $event.preventDefault()
                             return _vm.cambiarPagina(
                               _vm.pagination.current_page - 1,
-                              _vm.buscar,
-                              _vm.criterio
+                              _vm.buscador.textoBuscar,
+                              _vm.buscador.criterio
                             )
                           }
                         }
@@ -49915,8 +49905,8 @@ var render = function() {
                           $event.preventDefault()
                           return _vm.cambiarPagina(
                             page,
-                            _vm.buscar,
-                            _vm.criterio
+                            _vm.buscador.textoBuscar,
+                            _vm.buscador.criterio
                           )
                         }
                       }
@@ -49937,8 +49927,8 @@ var render = function() {
                             $event.preventDefault()
                             return _vm.cambiarPagina(
                               _vm.pagination.current_page + 1,
-                              _vm.buscar,
-                              _vm.criterio
+                              _vm.buscador.textoBuscar,
+                              _vm.buscador.criterio
                             )
                           }
                         }
@@ -49958,7 +49948,7 @@ var render = function() {
       "div",
       {
         staticClass: "modal fade",
-        class: { mostrar: _vm.modal },
+        class: { mostrar: _vm.modalProveedor.modal },
         staticStyle: { display: "none" },
         attrs: {
           tabindex: "-1",
@@ -49979,7 +49969,9 @@ var render = function() {
               _c("div", { staticClass: "modal-header" }, [
                 _c("h4", {
                   staticClass: "modal-title",
-                  domProps: { textContent: _vm._s(_vm.tituloModal) }
+                  domProps: {
+                    textContent: _vm._s(_vm.modalProveedor.tituloModal)
+                  }
                 }),
                 _vm._v(" "),
                 _c(
@@ -50029,19 +50021,23 @@ var render = function() {
                             {
                               name: "model",
                               rawName: "v-model",
-                              value: _vm.nombre_corto,
-                              expression: "nombre_corto"
+                              value: _vm.oProveedor.nombre_corto,
+                              expression: "oProveedor.nombre_corto"
                             }
                           ],
                           staticClass: "form-control",
                           attrs: { type: "text", placeholder: "Alias" },
-                          domProps: { value: _vm.nombre_corto },
+                          domProps: { value: _vm.oProveedor.nombre_corto },
                           on: {
                             input: function($event) {
                               if ($event.target.composing) {
                                 return
                               }
-                              _vm.nombre_corto = $event.target.value
+                              _vm.$set(
+                                _vm.oProveedor,
+                                "nombre_corto",
+                                $event.target.value
+                              )
                             }
                           }
                         })
@@ -50064,8 +50060,8 @@ var render = function() {
                             {
                               name: "model",
                               rawName: "v-model",
-                              value: _vm.nombre,
-                              expression: "nombre"
+                              value: _vm.oProveedor.nombre,
+                              expression: "oProveedor.nombre"
                             }
                           ],
                           staticClass: "form-control",
@@ -50073,13 +50069,17 @@ var render = function() {
                             type: "text",
                             placeholder: "Nombre del proveedor"
                           },
-                          domProps: { value: _vm.nombre },
+                          domProps: { value: _vm.oProveedor.nombre },
                           on: {
                             input: function($event) {
                               if ($event.target.composing) {
                                 return
                               }
-                              _vm.nombre = $event.target.value
+                              _vm.$set(
+                                _vm.oProveedor,
+                                "nombre",
+                                $event.target.value
+                              )
                             }
                           }
                         })
@@ -50102,19 +50102,23 @@ var render = function() {
                             {
                               name: "model",
                               rawName: "v-model",
-                              value: _vm.pagina_web,
-                              expression: "pagina_web"
+                              value: _vm.oProveedor.pagina_web,
+                              expression: "oProveedor.pagina_web"
                             }
                           ],
                           staticClass: "form-control",
                           attrs: { type: "email", placeholder: "Pagina web" },
-                          domProps: { value: _vm.pagina_web },
+                          domProps: { value: _vm.oProveedor.pagina_web },
                           on: {
                             input: function($event) {
                               if ($event.target.composing) {
                                 return
                               }
-                              _vm.pagina_web = $event.target.value
+                              _vm.$set(
+                                _vm.oProveedor,
+                                "pagina_web",
+                                $event.target.value
+                              )
                             }
                           }
                         })
@@ -50137,8 +50141,8 @@ var render = function() {
                             {
                               name: "model",
                               rawName: "v-model",
-                              value: _vm.contacto,
-                              expression: "contacto"
+                              value: _vm.oProveedor.contacto,
+                              expression: "oProveedor.contacto"
                             }
                           ],
                           staticClass: "form-control",
@@ -50146,13 +50150,17 @@ var render = function() {
                             type: "email",
                             placeholder: "Nombre Contacto y/o Telefono"
                           },
-                          domProps: { value: _vm.contacto },
+                          domProps: { value: _vm.oProveedor.contacto },
                           on: {
                             input: function($event) {
                               if ($event.target.composing) {
                                 return
                               }
-                              _vm.contacto = $event.target.value
+                              _vm.$set(
+                                _vm.oProveedor,
+                                "contacto",
+                                $event.target.value
+                              )
                             }
                           }
                         })
@@ -50166,8 +50174,8 @@ var render = function() {
                           {
                             name: "show",
                             rawName: "v-show",
-                            value: _vm.errorProveedor,
-                            expression: "errorProveedor"
+                            value: _vm.modalProveedor.errorProveedor,
+                            expression: "modalProveedor.errorProveedor"
                           }
                         ],
                         staticClass: "form-group row div-error"
@@ -50176,12 +50184,15 @@ var render = function() {
                         _c(
                           "div",
                           { staticClass: "text-center text-error" },
-                          _vm._l(_vm.erroresProveedorMsjList, function(error) {
-                            return _c("div", {
-                              key: error,
-                              domProps: { textContent: _vm._s(error) }
-                            })
-                          }),
+                          _vm._l(
+                            _vm.modalProveedor.erroresProveedorMsjList,
+                            function(error) {
+                              return _c("div", {
+                                key: error,
+                                domProps: { textContent: _vm._s(error) }
+                              })
+                            }
+                          ),
                           0
                         )
                       ]
@@ -50205,7 +50216,7 @@ var render = function() {
                   [_vm._v("Cerrar")]
                 ),
                 _vm._v(" "),
-                _vm.tipoAccion == 1
+                _vm.modalProveedor.tipoAccion == 1
                   ? _c(
                       "button",
                       {
@@ -50221,7 +50232,7 @@ var render = function() {
                     )
                   : _vm._e(),
                 _vm._v(" "),
-                _vm.tipoAccion == 2
+                _vm.modalProveedor.tipoAccion == 2
                   ? _c(
                       "button",
                       {

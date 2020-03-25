@@ -31,14 +31,14 @@
                 <div class="form-group row">
                     <div class="col-md-6">
                         <div class="input-group">
-                            <select class="form-control col-md-3" v-model="criterio">
+                            <select class="form-control col-md-3" v-model="buscador.criterio">
                                 <option value="nombre_corto">Alias</option>
                                 <option value="nombre">Nombre</option>
                                 <option value="pagina_web">Pagina Web</option>
                                 <option value="contacto">Contacto</option>
                             </select>
-                            <input type="text" v-model="buscar" @keyup.enter="listarProveedores(1, buscar, criterio, true)" class="form-control" placeholder="Texto a buscar">
-                            <button type="submit" class="btn btn-primary" @click="listarProveedores(1, buscar, criterio, true)"><i class="fa fa-search"></i> Buscar</button>
+                            <input type="text" v-model="buscador.textoBuscar" @keyup.enter="listarProveedores(1, buscador.textoBuscar, buscador.criterio, true)" class="form-control" placeholder="Texto a buscar">
+                            <button type="submit" class="btn btn-primary" @click="listarProveedores(1, buscador.textoBuscar, buscador.criterio, true)"><i class="fa fa-search"></i> Buscar</button>
                         </div>
                     </div>
                 </div>
@@ -93,13 +93,13 @@
                 <nav>
                     <ul class="pagination">
                         <li class="page-item" v-if="pagination.current_page > 1">
-                            <a class="page-link" href="#" @click.prevent="cambiarPagina(pagination.current_page-1, buscar, criterio)">Ant</a>
+                            <a class="page-link" href="#" @click.prevent="cambiarPagina(pagination.current_page-1, buscador.textoBuscar, buscador.criterio)">Ant</a>
                         </li>
                         <li class="page-item" v-for="page in pagesNumber" :key="page" :class="[page == isActived ? 'active' : '']">
-                            <a class="page-link" href="#" @click.prevent="cambiarPagina(page, buscar, criterio)" v-text="page"></a>
+                            <a class="page-link" href="#" @click.prevent="cambiarPagina(page, buscador.textoBuscar, buscador.criterio)" v-text="page"></a>
                         </li>                           
                         <li class="page-item" v-if="pagination.current_page < pagination.last_page">
-                            <a class="page-link" href="#" @click.prevent="cambiarPagina(pagination.current_page+1, buscar, criterio)">Sig</a>
+                            <a class="page-link" href="#" @click.prevent="cambiarPagina(pagination.current_page+1, buscador.textoBuscar, buscador.criterio)">Sig</a>
                         </li>
                     </ul>
                 </nav>
@@ -114,11 +114,11 @@
 
 
         <!--Inicio del modal agregar/actualizar-->
-        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true" :class="{'mostrar' : modal}">
+        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true" :class="{'mostrar' : modalProveedor.modal}">
             <div class="modal-dialog modal-primary modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title" v-text="tituloModal"></h4>
+                        <h4 class="modal-title" v-text="modalProveedor.tituloModal"></h4>
                         <button type="button" class="close" aria-label="Close" @click="closeModal();">
                             <span aria-hidden="true">×</span>
                         </button>
@@ -128,42 +128,42 @@
                             <div class="form-group row">
                                 <label class="col-md-3 form-control-label" for="text-input">Alias</label>
                                 <div class="col-md-9">
-                                    <input type="text" class="form-control" placeholder="Alias" v-model="nombre_corto">                                    
+                                    <input type="text" class="form-control" placeholder="Alias" v-model="oProveedor.nombre_corto">                                    
                                 </div>
                             </div>
 
                             <div class="form-group row">
                                 <label class="col-md-3 form-control-label" for="text-input">Nombre</label>
                                 <div class="col-md-9">
-                                    <input type="text" class="form-control" placeholder="Nombre del proveedor" v-model="nombre">                                    
+                                    <input type="text" class="form-control" placeholder="Nombre del proveedor" v-model="oProveedor.nombre">                                    
                                 </div>
                             </div>
 
                             <div class="form-group row">
                                 <label class="col-md-3 form-control-label" for="text-input">Pagina Web</label>
                                 <div class="col-md-9">
-                                    <input type="email" class="form-control" placeholder="Pagina web" v-model="pagina_web">
+                                    <input type="email" class="form-control" placeholder="Pagina web" v-model="oProveedor.pagina_web">
                                 </div>
                             </div>
 
                             <div class="form-group row">
                                 <label class="col-md-3 form-control-label" for="text-input">Contacto</label>
                                 <div class="col-md-9">
-                                    <input type="email" class="form-control" placeholder="Nombre Contacto y/o Telefono" v-model="contacto">
+                                    <input type="email" class="form-control" placeholder="Nombre Contacto y/o Telefono" v-model="oProveedor.contacto">
                                 </div>
                             </div>
 
-                            <div v-show="errorProveedor" class="form-group row div-error">
+                            <div v-show="modalProveedor.errorProveedor" class="form-group row div-error">
                                 <div class="text-center text-error">
-                                    <div v-for="error in erroresProveedorMsjList" :key="error" v-text="error"></div>
+                                    <div v-for="error in modalProveedor.erroresProveedorMsjList" :key="error" v-text="error"></div>
                                 </div>
                             </div>
                         </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>
-                        <button type="button" class="btn btn-primary" v-if="tipoAccion==1" @click="registrarProveedor();">Guardar</button>
-                        <button type="button" class="btn btn-primary" v-if="tipoAccion==2" @click="actualizarProveedor();">Actualizar</button>
+                        <button type="button" class="btn btn-primary" v-if="modalProveedor.tipoAccion==1" @click="registrarProveedor();">Guardar</button>
+                        <button type="button" class="btn btn-primary" v-if="modalProveedor.tipoAccion==2" @click="actualizarProveedor();">Actualizar</button>
                     </div>
                 </div>
                 <!-- /.modal-content -->
@@ -181,29 +181,35 @@
     export default {
         data(){
             return{               
-                id_proveedor: 0,
-                nombre_corto: '',
-                nombre: '',
-                pagina_web: '',
-                contacto: '',
+                oProveedor: {
+                    id_proveedor: 0,
+                    nombre_corto: '',
+                    nombre: '',
+                    pagina_web: '',
+                    contacto: '',
+                },                
                 listaProveedor: [],
-                modal: 0,
-                tituloModal: '',
-                tipoAccion: 0,
-                errorProveedor: 0,
-                erroresProveedorMsjList: [],
-                pagination: {
-                    'total' : 0,
-                    'current_page'  : 0,
-                    'per_page' : 0,
-                    'last_page' : 0,
-                    'from' : 0,
-                    'to' : 0
+                modalProveedor: {
+                    modal: 0,
+                    tituloModal: '',
+                    tipoAccion: 0,
+                    errorProveedor: 0,
+                    erroresProveedorMsjList: [],
                 },
-                offset : 3,
-                criterio: 'nombre_corto',
-                buscar: '',
+                pagination: {
+                    total : 0,
+                    current_page  : 0,
+                    per_page : 0,
+                    last_page : 0,
+                    from : 0,
+                    to : 0                    
+                },
+                buscador:{
+                    criterio: 'nombre_corto',
+                    textoBuscar: ''                    
+                },
                 isLoading: 0
+                
             }
         },
         computed:{
@@ -211,27 +217,7 @@
                 return this.pagination.current_page;
             },
             pagesNumber: function(){
-                if(!this.pagination.to){
-                    return [];
-                }
-
-                var from = this.pagination.current_page - this.offset;
-                if(from < 1){
-                    from = 1;
-                }
-
-                var to = from + (this.offset * 2);
-                if(to >= this.pagination.last_page){
-                    to = this.pagination.last_page;
-                }
-
-                var pageArray = [];
-                while(from <= to){
-                    pageArray.push(from);
-                    from++;
-                }
-
-                return pageArray;
+               return  paginador.getPagesNumber(this.pagination);                
             }
         },
         methods:{
@@ -263,13 +249,13 @@
                 let me = this;
                 this.isLoading = 1;
                 axios.post('/zicandi/public/proveedores/registrar',{
-                    'nombre_corto': this.nombre_corto,
-                    'nombre': this.nombre,
-                    'pagina_web': this.pagina_web,
-                    'contacto': this.contacto,
+                    'nombre_corto': this.oProveedor.nombre_corto,
+                    'nombre':       this.oProveedor.nombre,
+                    'pagina_web':   this.oProveedor.pagina_web,
+                    'contacto':     this.oProveedor.contacto,
                 })
                 .then(function (response) {                    
-                    me.buscar = '';
+                    me.buscador.textoBuscar = '';
                     me.isLoading = 0;
                     me.closeModal();
                     util.AVISO('Perfecto, registro correcto', util.tipoOk);
@@ -288,17 +274,17 @@
                 let me = this;
                 this.isLoading = 1;
                 axios.put('/zicandi/public/proveedores/actualizar',{
-                    'id_proveedor': this.id_proveedor,
-                    'nombre_corto': this.nombre_corto,
-                    'nombre': this.nombre,
-                    'pagina_web': this.pagina_web,
-                    'contacto': this.contacto,
+                    'id_proveedor': this.oProveedor.id_proveedor,
+                    'nombre_corto': this.oProveedor.nombre_corto,
+                    'nombre':       this.oProveedor.nombre,
+                    'pagina_web':   this.oProveedor.pagina_web,
+                    'contacto':     this.oProveedor.contacto,
                 })
                 .then(function (response) {                    
                     me.closeModal();
                     me.isLoading = 0;
                     util.AVISO('Actualizacion correcta!', util.tipoOk);                
-                    me.listarProveedores(me.pagination.current_page, me.buscar, me.criterio);
+                    me.listarProveedores(me.pagination.current_page, me.buscador.textoBuscar, me.buscador.criterio);
                 })
                 .catch(function (error) {
                     me.isLoading = 0;
@@ -318,7 +304,7 @@
                         .then(function (response) {
                             me.isLoading = 0;
                             util.AVISO('Desactivado!!!', util.tipoOk);                                       
-                            me.listarProveedores(me.pagination.current_page, me.buscar, me.criterio);
+                            me.listarProveedores(me.pagination.current_page, me.buscador.textoBuscar, me.buscador.criterio);
                         })
                         .catch(function (error) {
                             me.isLoading = 0;
@@ -343,7 +329,7 @@
                         .then(function (response) {
                             me.isLoading = 0;
                             util.AVISO('Activado!!!', util.tipoOk);                    
-                            me.listarProveedores(me.pagination.current_page, me.buscar, me.criterio);
+                            me.listarProveedores(me.pagination.current_page, me.buscador.textoBuscar, me.buscador.criterio);
                         })
                         .catch(function (error) {                            
                             me.isLoading = 0;
@@ -361,27 +347,27 @@
                         switch(accion){
                             case 'registrar':
                             {
-                                this.modal = 1;
-                                this.nombre_corto = '';
-                                this.nombre = '';
-                                this.pagina_web = '';
-                                this.contacto = '';
-                                this.tituloModal = 'Registrar nuevo proveedor';
-                                this.tipoAccion = 1;
+                                this.modalProveedor.modal = 1;
+                                this.oProveedor.nombre_corto = '';
+                                this.oProveedor.nombre = '';
+                                this.oProveedor.pagina_web = '';
+                                this.oProveedor.contacto = '';
+                                this.modalProveedor.tituloModal = 'Registrar nuevo proveedor';
+                                this.modalProveedor.tipoAccion = 1;
 
                                 break;
                             }
                             case 'actualizar':
                             {
-                                this.modal = 1;
-                                this.tituloModal = 'Actualizar proveedor'
-                                this.tipoAccion = 2;
+                                this.modalProveedor.modal = 1;
+                                this.modalProveedor.tituloModal = 'Actualizar proveedor'
+                                this.modalProveedor.tipoAccion = 2;
 
-                                this.nombre_corto = data['nombre_corto'];
-                                this.nombre = data['nombre'];
-                                this.pagina_web = data['pagina_web'];
-                                this.contacto = data['contacto'];
-                                this.id_proveedor = data['id_proveedor'];
+                                this.oProveedor.nombre_corto = data['nombre_corto'];
+                                this.oProveedor.nombre = data['nombre'];
+                                this.oProveedor.pagina_web = data['pagina_web'];
+                                this.oProveedor.contacto = data['contacto'];
+                                this.oProveedor.id_proveedor = data['id_proveedor'];
 
 
                                 console.log(data);
@@ -391,24 +377,24 @@
                 }
             },
             closeModal(){
-                this.modal = 0;
+                this.modalProveedor.modal = 0;
                 this.nombre_corto = '';
                 this.nombre = '';
                 this.pagina_web = '';
                 this.contacto = '';
-                this.tituloModal = '';
+                this.modalProveedor.tituloModal = '';
             },
             validarProveedor(){
-                this.errorProveedor = 0;
-                this.erroresProveedorMsjList = [];
+                this.modalProveedor.errorProveedor = 0;
+                this.modalProveedor.erroresProveedorMsjList = [];
 
-                if(!this.nombre_corto) this.erroresProveedorMsjList.push("Se requiere el nombre corto o alias del proveedor");
+                if(!this.oProveedor.nombre_corto) this.modalProveedor.erroresProveedorMsjList.push("Se requiere el nombre corto o alias del proveedor");
 
-                if(!this.nombre) this.erroresProveedorMsjList.push("Define el nombre del proveedor");
+                if(!this.oProveedor.nombre) this.modalProveedor.erroresProveedorMsjList.push("Define el nombre del proveedor");
 
-                if(this.erroresProveedorMsjList.length) this.errorProveedor = 1;
+                if(this.modalProveedor.erroresProveedorMsjList.length) this.modalProveedor.errorProveedor = 1;
 
-                return this.errorProveedor;
+                return this.modalProveedor.errorProveedor;
             },
             cambiarPagina(page, buscar, criterio){
                 let me = this;
@@ -419,7 +405,7 @@
             }
         },
         mounted() {
-            this.listarProveedores(1, this.buscar, this.criterio, true);
+            this.listarProveedores(1, this.buscador.textoBuscar, this.buscador.criterio, true);
         }
     }
 </script>
