@@ -17,6 +17,8 @@ window.Vue = require('vue');
 
 Vue.component('proveedor-component', require('./components/ProveedorComponent.vue'));
 
+Vue.component('producto-component', require('./components/ProductoComponent.vue'));
+
 const app = new Vue({
     el: '#app',
     data: {

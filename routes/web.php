@@ -22,3 +22,13 @@ Route::post('/proveedores/registrar', 'ProveedorController@store');
 Route::put('/proveedores/actualizar', 'ProveedorController@update');
 Route::put('/proveedores/desactivar', 'ProveedorController@desactivar');
 Route::put('/proveedores/activar', 'ProveedorController@activar');
+
+// - Rutas para Productos
+Route::get('/productos', 'ProductoController@index');
+Route::post('/productos/registrar', 'ProductoController@store');
+Route::put('/productos/actualizar', 'ProductoController@update');
+Route::put('/productos/desactivar', 'ProductoController@desactivar');
+Route::put('/productos/activar', 'ProductoController@activar');
+
+// - Rutas para Categorias
+Route::get('/categoria/selectCategoria', 'CategoriaController@selectCategoria');

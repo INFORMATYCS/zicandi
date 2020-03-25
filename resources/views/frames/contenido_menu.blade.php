@@ -14,12 +14,12 @@
                         <a @click="oppMenuSeleccion=1" class="nav-link" href="#"><i class="icon-bag"></i> Proveedores</a>
                     </li>
                     <li class="nav-item">
-                        <a @click="oppMenuSeleccion=2" class="nav-link" href="#"><i class="icon-bag"></i> Opciones</a>
+                        <a @click="oppMenuSeleccion=2" class="nav-link" href="#"><i class="icon-bag"></i> Productos</a>
                     </li>
                 </ul>
             </li>
             <li class="nav-item nav-dropdown">
-                <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-wallet"></i> Compras</a>
+                <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-wallet"></i> ComprasS</a>
                 <ul class="nav-dropdown-items">
                     <li class="nav-item">
                         <a class="nav-link" href="#"><i class="icon-wallet"></i> Ingresos</a>

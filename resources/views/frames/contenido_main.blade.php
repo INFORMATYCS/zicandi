@@ -9,7 +9,7 @@
     </template>
 
     <template v-if="oppMenuSeleccion==2">
-        <h1>Contenido menu 2</h1>
+        <producto-component></producto-component>
     </template>
     
 @endsection
