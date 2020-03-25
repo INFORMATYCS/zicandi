@@ -228,10 +228,10 @@
                 }
 
                 let me=this;                
-                var url= '/zicandi/public/proveedores?page=' + page +'&buscar=' + buscar + '&criterio=' + criterio;
+                let url= '/zicandi/public/proveedores?page=' + page +'&buscar=' + buscar + '&criterio=' + criterio;
                 axios.get(url)
                 .then(function (response) {                    
-                    var respuesta = response.data;  
+                    let respuesta = response.data;  
                     me.isLoading = 0;
                     me.listaProveedor = respuesta.proveedor.data;
                     me.pagination = respuesta.pagination;                    
