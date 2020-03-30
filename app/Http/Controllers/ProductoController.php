@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Producto;
+use App\DefineProducto;
 use App\Http\Lib\ProcesadorImagenes;
 
 class ProductoController extends Controller{
@@ -22,12 +23,14 @@ class ProductoController extends Controller{
         $criterio = $request->criterio;
         
         if($buscar==''){
-            $productos = Producto::join('categoria','producto.id_categoria','=','categoria.id_categoria')
+            $productos = Producto::with('atributos')
+            ->join('categoria','producto.id_categoria','=','categoria.id_categoria')
             ->select('producto.id_producto','producto.id_categoria','producto.codigo','producto.nombre as nombre','producto.url_imagen','producto.nota','categoria.codigo as codigo_categoria','.producto.promedio_precio_compra','producto.ultimo_precio_compra','producto.xstatus')
             ->orderBy('producto.id_producto', 'desc')
             ->paginate(10);
         }else{
-            $productos = Producto::join('categoria','producto.id_categoria','=','categoria.id_categoria')
+            $productos = Producto::with('atributos')
+            ->join('categoria','producto.id_categoria','=','categoria.id_categoria')
             ->select('producto.id_producto','producto.id_categoria','producto.codigo','producto.nombre as nombre','producto.url_imagen','producto.nota','categoria.codigo as codigo_categoria','.producto.promedio_precio_compra','producto.ultimo_precio_compra','producto.xstatus')
             ->where('producto.'.$criterio, 'like', '%' . $buscar . '%')
             ->orderBy('producto.id_producto', 'desc')
@@ -79,9 +82,23 @@ class ProductoController extends Controller{
         $producto->promedio_precio_compra = 0;
         $producto->xstatus ='1';
 
+        
+
         $producto->save();
 
 
+        foreach ($especificacionList['especificaciones'] as $atributo) {
+            if($atributo['xstatus']){
+                if($atributo['llave']!=null){
+                    $defineProducto = new DefineProducto();
+                    $defineProducto->atributo = $atributo['llave'];
+                    $defineProducto->valor = $atributo['valor'];
+                    $defineProducto->xstatus = 1;
+
+                    $producto->atributos()->save($defineProducto);
+                }
+            }
+        }
 
     }
 

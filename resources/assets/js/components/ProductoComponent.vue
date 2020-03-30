@@ -1,7 +1,4 @@
 <template>
-
-
-
     <main class="main">
         <!-- Loading -->
         <div style="display: none;" class="sbl-circ-ripple" :class="{'abrir-load-sbl' : isLoading}"></div>
@@ -71,10 +68,10 @@
                                 </template>
                             </td>
                             <td>                                
-                                <div class="contenido" style="width:20%; float:left;">
+                                <div class="contenido" style="width:30%; float:left;">
                                     <img :src="producto.url_imagen" alt="dog"> 
                                 </div>
-                                <div class="contenido" style="width:50%; float:left;">
+                                <div class="contenido" style="width:70%; float:left;">
                                     <h6 v-text="producto.nombre"></h6>
                                     <small class="text-muted" v-text="producto.codigo"></small>
                                     
@@ -92,12 +89,9 @@
                             </td>
                             <td>
                                 <lu>
-                                    <li>
-                                        Peso: 50KG
-                                    </li>
-                                    <li>
-                                        Color: Amarillo
-                                    </li>
+                                    <li  v-for="atributo in producto.atributos" :key="atributo.id_define_producto">
+                                        <span v-text="atributo.atributo"></span> : <span v-text="atributo.valor"></span>
+                                    </li>                                    
                                 </lu>
                             </td>                                
                             <td>
@@ -155,22 +149,32 @@
                             <div class="form-group row">
                                 <label class="col-md-3 form-control-label" for="text-input">Codigo</label>
                                 <div class="col-md-9">
-                                    <input type="text" class="form-control" placeholder="Codigo unico o de barras" v-model="oProducto.codigo">                                    
-                                </div>
+                                    <input type="text" class="form-control" placeholder="Codigo unico o de barras" maxlength="20" v-model="oProducto.codigo">                                                                        
+                                    <barcode :value="oProducto.codigo" :options="{format: 'EAN-13'}">
+                                        Generando codigo de barras...    
+                                    </barcode>
+                                </div>                                
                             </div>
 
                             <div class="form-group row">
                                 <label class="col-md-3 form-control-label" for="text-input">Nombre</label>
                                 <div class="col-md-9">
-                                    <input type="text" class="form-control" placeholder="Nombre del producto" v-model="oProducto.nombre">                                    
+                                    <input type="text" class="form-control" placeholder="Nombre del producto" maxlength="30" v-model="oProducto.nombre">                                    
                                 </div>
                             </div>
+
 
                             <div class="form-group">                                                 
                                
                                 <div class="row">
-                                    <label class="col-md-3 form-control-label" for="text-input">Imagen referencia</label>
-                                    <div class="col-md-6"><input type="file" class="form-control-file" @change="getImagenLocal" ></div>
+                                    <label class="col-md-3 form-control-label" for="text-input">Imagen referencia</label>                                    
+                                    <div class="col-md-3">
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" id="customFileLang" lang="es" accept="image/png, .jpeg, .jpg, image/gif" @change="getImagenLocal">
+                                            <label class="btn btn-primary custom-file-label" for="customFileLang">Seleccionar Archivo</label>                                            
+                                        </div>
+
+                                    </div>
                                     <div class="col-md-3"><img :src="oProducto.imagen.local" alt="Imagen del producto" contain height="100px" width="100px"></div>
                                 </div>
 
@@ -182,22 +186,22 @@
                                             Caracteristicas del producto...
                                         </div>
                                         <div class="card-body">
-                                            <span class="badge badge-pill badge-dark text-white" v-for="especificacion in oProducto.especificacionList" :key="especificacion.llave">                                                
+                                            <span class="badge badge-pill badge-light" v-for="especificacion in oProducto.especificacionList" :key="especificacion.llave">                                                
                                                 <div v-if="especificacion.xstatus">
                                                     <div v-if="!especificacion.edicion" style="font-size:14px;" @dblclick="especificacion.edicion=true;">                                                                                                                    
-                                                            <span class="text-warning" v-text="especificacion.llave"></span> : <span class="font-weight-normal" v-text="especificacion.valor"></span>
-                                                            <button type="button" class="close" aria-label="Close" style="float: right; padding-left: 10px; font-size:10        px;" @click="especificacion.xstatus=false;"><span aria-hidden="true">&times;</span></button>                                                                                                                
+                                                            <span class="text-primary" v-text="especificacion.llave"></span> : <span class="font-weight-normal" v-text="especificacion.valor"></span>
+                                                            <button type="button" class="close" aria-label="Close" style="float: right; padding-left: 10px; font-size:10px;" @click="especificacion.xstatus=false;"><span aria-hidden="true">&times;</span></button>                                                                                                                
                                                     </div>
 
-                                                    <div v-if="especificacion.edicion">
+                                                    <div v-if="especificacion.edicion" style="margin:10px 10px 10px 10px;">
                                                       
 
-                                                        <select class="form-control text-white" style="background: rgba(0, 0, 0, 0); border: none; font-size:10px;" v-model="especificacion.llave">
+                                                        <select class="form-control" style="background: rgba(0, 0, 0, 0); border: none; font-size:10px;" v-model="especificacion.llave">
                                                             <option value="0" disabled>Seleccione...</option>
                                                             <option v-for="atributo in atributosProducto" :key="atributo.llave" :value="atributo.llave" v-text="atributo.valor"></option>
                                                         </select>   
 
-                                                        <input type="text" class="form-control text-white" placeholder="valor" style="background: rgba(0, 0, 0, 0); border: none; font-size:10px;" v-model="especificacion.valor">
+                                                        <input type="text" class="form-control" placeholder="valor" maxlength="200" style="background: rgba(0, 0, 0, 0); border: none; font-size:10px;" v-model="especificacion.valor">
 
                                                         <button type="button" class="btn btn-primary" style="font-size:10px;" @click="especificacion.edicion=false;">Aceptar</button>
                                                         <button type="button" class="btn btn-secondary" style="font-size:10px;" @click="especificacion.edicion=false;">Cancelar</button>
@@ -206,7 +210,7 @@
                                                 </div>
                                             </span>
 
-                                            <button type="button" class="btn badge-pill badge-dark" @click="crearEspecificacion();"><h1 class="text-white">+</h1></button>
+                                            <button type="button" class="btn badge badge-pill badge-light" @click="crearEspecificacion();"><h3 class="text-secondary">+</h3></button>
                                             
                                         </div>
                                     </div>
@@ -216,7 +220,7 @@
                             <div class="form-group row">
                                 <label class="col-md-3 form-control-label" for="text-input">Notas</label>
                                 <div class="col-md-9">
-                                    <textarea class="form-control" rows="5" v-model="oProducto.nota"></textarea>                                    
+                                    <textarea class="form-control" rows="5" maxlength="300" v-model="oProducto.nota"></textarea>                                    
                                 </div>
                             </div>
 
@@ -244,7 +248,10 @@
     </main>    
 </template>
 
+
 <script>
+    import VueBarcode from 'vue-barcode';
+
     export default {
         data(){
             return{               
@@ -290,6 +297,9 @@
                 listaCategorias: [],
                 atributosProducto: []
             }
+        },
+        components: {
+            'barcode': VueBarcode
         },
         computed:{
             isActived: function(){

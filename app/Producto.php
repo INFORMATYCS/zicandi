@@ -20,6 +20,11 @@ class Producto extends Model
     public function categoria(){
         return $this->belongsTo('App\Categoria');
     }
+
+    //~Relacion One To Many
+    public function atributos(){
+        return $this->hasMany('App\DefineProducto', 'id_producto', 'id_producto');
+    }
 }
 
 
