@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Producto;
+use App\Http\Lib\ProcesadorImagenes;
 
 class ProductoController extends Controller{
     
@@ -22,12 +23,12 @@ class ProductoController extends Controller{
         
         if($buscar==''){
             $productos = Producto::join('categoria','producto.id_categoria','=','categoria.id_categoria')
-            ->select('producto.id_producto','producto.id_categoria','producto.codigo','producto.nombre as nombre_producto','producto.url_imagen','producto.modelo','categoria.codigo as codigo_categoria','.producto.promedio_precio_compra','producto.ultimo_precio_compra','producto.xstatus')
+            ->select('producto.id_producto','producto.id_categoria','producto.codigo','producto.nombre as nombre','producto.url_imagen','producto.nota','categoria.codigo as codigo_categoria','.producto.promedio_precio_compra','producto.ultimo_precio_compra','producto.xstatus')
             ->orderBy('producto.id_producto', 'desc')
             ->paginate(10);
         }else{
             $productos = Producto::join('categoria','producto.id_categoria','=','categoria.id_categoria')
-            ->select('producto.id_producto','producto.id_categoria','producto.codigo','producto.nombre as nombre_producto','producto.url_imagen','producto.modelo','categoria.codigo as codigo_categoria','.producto.promedio_precio_compra','producto.ultimo_precio_compra','producto.xstatus')
+            ->select('producto.id_producto','producto.id_categoria','producto.codigo','producto.nombre as nombre','producto.url_imagen','producto.nota','categoria.codigo as codigo_categoria','.producto.promedio_precio_compra','producto.ultimo_precio_compra','producto.xstatus')
             ->where('producto.'.$criterio, 'like', '%' . $buscar . '%')
             ->orderBy('producto.id_producto', 'desc')
             ->paginate(10);            
@@ -55,11 +56,27 @@ class ProductoController extends Controller{
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request){    
+        
+        $imagen = array(    
+            'nombre'=>$request->imagen_nombre,
+            'size'=>$request->imagen_size,
+            'type'=>$request->imagen_type,
+            'b64'=>$request->imagen_local
+        );
+
+        $procesadorImagenes = new ProcesadorImagenes();
+        $url_imagen = $procesadorImagenes->publicaImagenMini100($imagen);    
+        
+        $especificacionList = $request->especificaciones;
+        
         $producto = new Producto();
         $producto->id_categoria = $request->id_categoria;
         $producto->codigo = $request->codigo;
-        $producto->url_imagen = $request->url_imagen;
-        $producto->modelo = $request->modelo;
+        $producto->nombre = $request->nombre;
+        $producto->url_imagen = $url_imagen;
+        $producto->nota = $request->nota;
+        $producto->ultimo_precio_compra = 0;
+        $producto->promedio_precio_compra = 0;
         $producto->xstatus ='1';
 
         $producto->save();
@@ -80,7 +97,7 @@ class ProductoController extends Controller{
         $producto->id_categoria = $request->id_categoria;
         $producto->codigo = $request->codigo;
         $producto->url_imagen = $request->url_imagen;
-        $producto->modelo = $request->modelo;
+        $producto->nota = $request->nota;
         $producto->xstatus ='1';
 
         $producto->save();

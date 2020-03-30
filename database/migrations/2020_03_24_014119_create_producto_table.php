@@ -19,7 +19,7 @@ class CreateProductoTable extends Migration
             $table->string('codigo',20)->unique();
             $table->string('nombre',30);
             $table->string('url_imagen',200)->nullable();
-            $table->string('modelo',80)->nullable();
+            $table->string('nota',300)->nullable();
             $table->decimal('ultimo_precio_compra', 8, 2);
             $table->decimal('promedio_precio_compra', 8, 2);
             $table->boolean('xstatus')->default(1);

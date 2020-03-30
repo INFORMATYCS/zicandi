@@ -29,6 +29,13 @@ Route::post('/productos/registrar', 'ProductoController@store');
 Route::put('/productos/actualizar', 'ProductoController@update');
 Route::put('/productos/desactivar', 'ProductoController@desactivar');
 Route::put('/productos/activar', 'ProductoController@activar');
+Route::get('/productos/procesaimg', 'ProductoController@procesaImagen');
 
 // - Rutas para Categorias
 Route::get('/categoria/selectCategoria', 'CategoriaController@selectCategoria');
+
+
+// - Rutas para Parametria
+Route::post('parametria/getProceso', 'ParametriaController@getParametriaByProceso');
+Route::get('parametria/seqProductoCodigo_nextval', 'ParametriaController@seqProductoCodigo_nextval');
+

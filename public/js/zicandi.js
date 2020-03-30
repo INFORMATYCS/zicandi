@@ -450,7 +450,34 @@ var util = {
 
 
             return msgError;
+        },
+        
+        
+        /**Borrar sin uso */
+        edimensionaImagen(data){
+            // Variables
+            let inicioX = data.x;
+            let inicioY = data.y;
+            let nuevoAncho = 90;
+            let nuevaAltura = 90;
+            let zoom = 1;
+            let imagenEn64 = '';
+            // La imprimo
+            miCanvas.width = nuevoAncho;
+            miCanvas.height = nuevaAltura;
+            // La declaro
+            let miNuevaImagenTemp = new Image();
+            // Cuando la imagen se carge se procederá al recorte
+            miNuevaImagenTemp.onload = function() {
+                // Se recorta
+                contexto.drawImage(miNuevaImagenTemp, inicioX, inicioY, nuevoAncho * zoom, nuevaAltura * zoom, 0, 0, nuevoAncho, nuevaAltura);
+                // Se transforma a base64
+                imagenEn64 = miCanvas.toDataURL("image/jpeg");
+
+                console.log(imagenEn64);
+            }
         }
+
 
 };        
 var paginador = { 

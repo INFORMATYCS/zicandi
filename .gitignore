@@ -12,3 +12,6 @@ npm-debug.log
 yarn-error.log
 .env
 .phpunit.result.cache
+public/img/tmp
+public/repositorio/entrada
+public/repositorio/salida

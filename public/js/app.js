@@ -50551,6 +50551,54 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -50560,11 +50608,19 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 id_categoria: 0,
                 codigo_categoria: '',
                 codigo: '',
-                nombre_producto: '',
+                nombre: '',
                 url_imagen: '',
                 promedio_precio_compra: 0,
                 ultimo_precio_compra: 0,
-                modelo: ''
+                nota: '',
+                especificacionList: [],
+                imagen: {
+                    local: '',
+                    nombre: '',
+                    size: 0,
+                    type: ''
+                },
+                codigoNextVal: 0
             },
             listaProductos: [],
             modalProducto: {
@@ -50586,7 +50642,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             criterio: 'codigo',
             buscar: '',
             isLoading: 0,
-            listaCategorias: []
+            listaCategorias: [],
+            atributosProducto: []
         };
     },
 
@@ -50616,6 +50673,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }
 
             return pageArray;
+        },
+        imagen: function imagen() {
+            return this.oProducto.imagen.local;
         }
     },
     methods: {
@@ -50639,24 +50699,29 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
             });
         },
-        registrarProveedor: function registrarProveedor() {
-            if (this.validarProveedor()) {
+        registrarProducto: function registrarProducto() {
+            if (this.validarProducto()) {
                 return;
             }
 
             var me = this;
             this.isLoading = 1;
-            axios.post('/zicandi/public/proveedores/registrar', {
-                'nombre_corto': this.nombre_corto,
-                'nombre': this.nombre,
-                'pagina_web': this.pagina_web,
-                'contacto': this.contacto
+            axios.post('/zicandi/public/productos/registrar', {
+                'id_categoria': this.oProducto.id_categoria,
+                'codigo': this.oProducto.codigo,
+                'nombre': this.oProducto.nombre,
+                'nota': this.oProducto.nota,
+                'especificaciones': { especificaciones: this.oProducto.especificacionList },
+                'imagen_local': this.oProducto.imagen.local,
+                'imagen_nombre': this.oProducto.imagen.nombre,
+                'imagen_size': this.oProducto.imagen.size,
+                'imagen_type': this.oProducto.imagen.type
             }).then(function (response) {
                 me.buscar = '';
                 me.isLoading = 0;
                 me.closeModal();
                 util.AVISO('Perfecto, registro correcto', util.tipoOk);
-                me.listarProveedores(1, '', 'nombre_corto');
+                me.listarProductos(1, '', 'codigo');
             }).catch(function (error) {
                 me.isLoading = 0;
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
@@ -50736,13 +50801,21 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                         switch (accion) {
                             case 'registrar':
                                 {
+                                    this.seqCodigoProductoNextval();
                                     this.modalProducto.modal = 1;
-                                    this.nombre_corto = '';
-                                    this.nombre = '';
-                                    this.pagina_web = '';
-                                    this.contacto = '';
+                                    this.oProducto.id_producto = 0;
+                                    this.oProducto.id_categoria = 0;
+                                    this.oProducto.codigo_categoria = '';
+                                    this.oProducto.codigo = 0;
+                                    this.oProducto.nombre = '';
+                                    this.oProducto.nota = '';
+                                    this.oProducto.imagen.local = 'repositorio/sistema/no_disponible.png';
+                                    this.oProducto.imagen.nombre = '';
+                                    this.oProducto.imagen.size = 0;
+                                    this.oProducto.imagen.type = '';
                                     this.modalProducto.tituloModal = 'Registrar nuevo producto';
                                     this.modalProducto.tipoAccion = 1;
+                                    this.oProducto.especificacionList = [];
 
                                     break;
                                 }
@@ -50752,12 +50825,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                                     this.modalProducto.tituloModal = 'Actualizar producto';
                                     this.modalProducto.tipoAccion = 2;
 
-                                    this.nombre_corto = data['nombre_corto'];
-                                    this.nombre = data['nombre'];
-                                    this.pagina_web = data['pagina_web'];
-                                    this.contacto = data['contacto'];
-                                    this.id_proveedor = data['id_proveedor'];
-
+                                    this.oProducto.id_producto = data['id_producto'];
+                                    this.oProducto.id_categoria = data['id_categoria'];
+                                    this.oProducto.codigo_categoria = data['codigo_categoria'];
+                                    this.oProducto.codigo = data['codigo'];
+                                    this.oProducto.nombre = data['nombre'];
+                                    this.oProducto.url_imagen = data['url_imagen'];
                                     console.log(data);
                                 }
                         }
@@ -50767,24 +50840,33 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             this.selectCategoria();
         },
         closeModal: function closeModal() {
+
+            this.oProducto.id_producto = 0;
+            this.oProducto.id_categoria = 0;
+            this.oProducto.codigo_categoria = '';
+            this.oProducto.codigo = '';
+            this.oProducto.nombre = '';
+            this.oProducto.url_imagen = '';
+            this.oProducto.promedio_precio_compra = 0;
+            this.oProducto.ultimo_precio_compra = 0;
+            this.oProducto.nota = '';
+
             this.modalProducto.modal = 0;
-            this.nombre_corto = '';
-            this.nombre = '';
-            this.pagina_web = '';
-            this.contacto = '';
             this.modalProducto.tituloModal = '';
         },
-        validarProveedor: function validarProveedor() {
-            this.errorProveedor = 0;
-            this.erroresProveedorMsjList = [];
+        validarProducto: function validarProducto() {
+            this.modalProducto.errorProducto = 0;
+            this.modalProducto.erroresProductoMsjList = [];
 
-            if (!this.nombre_corto) this.erroresProveedorMsjList.push("Se requiere el nombre corto o alias del proveedor");
+            if (!this.oProducto.nombre) this.modalProducto.erroresProductoMsjList.push("Se requiere el nombre del Producto");
 
-            if (!this.nombre) this.erroresProveedorMsjList.push("Define el nombre del proveedor");
+            if (this.oProducto.id_categoria == 0) this.modalProducto.erroresProductoMsjList.push("Se requiere elegir una categoria");
 
-            if (this.erroresProveedorMsjList.length) this.errorProveedor = 1;
+            if (!this.oProducto.codigo) this.modalProducto.erroresProductoMsjList.push("Define el nombre del Producto");
 
-            return this.errorProveedor;
+            if (this.modalProducto.erroresProductoMsjList.length) this.modalProducto.errorProducto = 1;
+
+            return this.modalProducto.errorProducto;
         },
         cambiarPagina: function cambiarPagina(page, buscar, criterio) {
             var me = this;
@@ -50803,10 +50885,56 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }).catch(function (error) {
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
             });
+        },
+        selectAtributosProducto: function selectAtributosProducto() {
+            var me = this;
+            var url = '/zicandi/public/parametria/getProceso';
+            axios.post(url, { 'clave_proceso': 'ATT_PROD' }).then(function (response) {
+                var respuesta = response.data;
+
+                me.atributosProducto = respuesta.parametria;
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        seqCodigoProductoNextval: function seqCodigoProductoNextval() {
+            var me = this;
+            var url = '/zicandi/public/parametria/seqProductoCodigo_nextval';
+            axios.get(url).then(function (response) {
+                var respuesta = response.data;
+
+                me.oProducto.codigoNextVal = respuesta;
+                me.oProducto.codigo = me.oProducto.codigoNextVal;
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        getImagenLocal: function getImagenLocal(e) {
+            var _this3 = this;
+
+            var file = e.target.files[0];
+            this.oProducto.imagen.nombre = file.name;
+            this.oProducto.imagen.size = file.size;
+            this.oProducto.imagen.type = file.type;
+
+            console.log(file);
+
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                _this3.oProducto.imagen.local = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        },
+        crearEspecificacion: function crearEspecificacion() {
+            var especificacion = { llave: "", valor: "", edicion: true, xstatus: true };
+
+            this.oProducto.especificacionList.push(especificacion);
         }
     },
     mounted: function mounted() {
         this.listarProductos(1, this.buscar, this.criterio, true);
+        this.selectAtributosProducto();
     }
 });
 
@@ -50890,10 +51018,6 @@ var render = function() {
                   _vm._v(" "),
                   _c("option", { attrs: { value: "nombre" } }, [
                     _vm._v("Nombre")
-                  ]),
-                  _vm._v(" "),
-                  _c("option", { attrs: { value: "modelo" } }, [
-                    _vm._v("Modelo")
                   ])
                 ]
               ),
@@ -51048,9 +51172,7 @@ var render = function() {
                       },
                       [
                         _c("h6", {
-                          domProps: {
-                            textContent: _vm._s(producto.nombre_producto)
-                          }
+                          domProps: { textContent: _vm._s(producto.nombre) }
                         }),
                         _vm._v(" "),
                         _c("small", {
@@ -51103,9 +51225,25 @@ var render = function() {
                     ])
                   ]),
                   _vm._v(" "),
-                  _c("td", {
-                    domProps: { textContent: _vm._s(producto.modelo) }
-                  }),
+                  _c(
+                    "td",
+                    [
+                      _c("lu", [
+                        _c("li", [
+                          _vm._v(
+                            "\n                                    Peso: 50KG\n                                "
+                          )
+                        ]),
+                        _vm._v(" "),
+                        _c("li", [
+                          _vm._v(
+                            "\n                                    Color: Amarillo\n                                "
+                          )
+                        ])
+                      ])
+                    ],
+                    1
+                  ),
                   _vm._v(" "),
                   _c("td", [
                     producto.xstatus
@@ -51422,42 +51560,324 @@ var render = function() {
                       ])
                     ]),
                     _vm._v(" "),
+                    _c("div", { staticClass: "form-group" }, [
+                      _c("div", { staticClass: "row" }, [
+                        _c(
+                          "label",
+                          {
+                            staticClass: "col-md-3 form-control-label",
+                            attrs: { for: "text-input" }
+                          },
+                          [_vm._v("Imagen referencia")]
+                        ),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "col-md-6" }, [
+                          _c("input", {
+                            staticClass: "form-control-file",
+                            attrs: { type: "file" },
+                            on: { change: _vm.getImagenLocal }
+                          })
+                        ]),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "col-md-3" }, [
+                          _c("img", {
+                            attrs: {
+                              src: _vm.oProducto.imagen.local,
+                              alt: "Imagen del producto",
+                              contain: "",
+                              height: "100px",
+                              width: "100px"
+                            }
+                          })
+                        ])
+                      ])
+                    ]),
+                    _vm._v(" "),
                     _c("div", { staticClass: "form-group row" }, [
-                      _c(
-                        "label",
-                        {
-                          staticClass: "col-md-3 form-control-label",
-                          attrs: { for: "text-input" }
-                        },
-                        [_vm._v("Url Imagen")]
-                      ),
-                      _vm._v(" "),
-                      _c("div", { staticClass: "col-md-9" }, [
-                        _c("input", {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.oProducto.url_imagen,
-                              expression: "oProducto.url_imagen"
-                            }
-                          ],
-                          staticClass: "form-control",
-                          attrs: { type: "email", placeholder: "Url Imagen" },
-                          domProps: { value: _vm.oProducto.url_imagen },
-                          on: {
-                            input: function($event) {
-                              if ($event.target.composing) {
-                                return
-                              }
-                              _vm.$set(
-                                _vm.oProducto,
-                                "url_imagen",
-                                $event.target.value
+                      _c("div", { staticClass: "col-md-12" }, [
+                        _c("div", { staticClass: "card" }, [
+                          _c("div", { staticClass: "card-header" }, [
+                            _vm._v(
+                              "\n                                        Caracteristicas del producto...\n                                    "
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c(
+                            "div",
+                            { staticClass: "card-body" },
+                            [
+                              _vm._l(_vm.oProducto.especificacionList, function(
+                                especificacion
+                              ) {
+                                return _c(
+                                  "span",
+                                  {
+                                    key: especificacion.llave,
+                                    staticClass:
+                                      "badge badge-pill badge-dark text-white"
+                                  },
+                                  [
+                                    especificacion.xstatus
+                                      ? _c("div", [
+                                          !especificacion.edicion
+                                            ? _c(
+                                                "div",
+                                                {
+                                                  staticStyle: {
+                                                    "font-size": "14px"
+                                                  },
+                                                  on: {
+                                                    dblclick: function($event) {
+                                                      especificacion.edicion = true
+                                                    }
+                                                  }
+                                                },
+                                                [
+                                                  _c("span", {
+                                                    staticClass: "text-warning",
+                                                    domProps: {
+                                                      textContent: _vm._s(
+                                                        especificacion.llave
+                                                      )
+                                                    }
+                                                  }),
+                                                  _vm._v(" : "),
+                                                  _c("span", {
+                                                    staticClass:
+                                                      "font-weight-normal",
+                                                    domProps: {
+                                                      textContent: _vm._s(
+                                                        especificacion.valor
+                                                      )
+                                                    }
+                                                  }),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "button",
+                                                    {
+                                                      staticClass: "close",
+                                                      staticStyle: {
+                                                        float: "right",
+                                                        "padding-left": "10px",
+                                                        "font-size":
+                                                          "10        px"
+                                                      },
+                                                      attrs: {
+                                                        type: "button",
+                                                        "aria-label": "Close"
+                                                      },
+                                                      on: {
+                                                        click: function(
+                                                          $event
+                                                        ) {
+                                                          especificacion.xstatus = false
+                                                        }
+                                                      }
+                                                    },
+                                                    [
+                                                      _c(
+                                                        "span",
+                                                        {
+                                                          attrs: {
+                                                            "aria-hidden":
+                                                              "true"
+                                                          }
+                                                        },
+                                                        [_vm._v("×")]
+                                                      )
+                                                    ]
+                                                  )
+                                                ]
+                                              )
+                                            : _vm._e(),
+                                          _vm._v(" "),
+                                          especificacion.edicion
+                                            ? _c("div", [
+                                                _c(
+                                                  "select",
+                                                  {
+                                                    directives: [
+                                                      {
+                                                        name: "model",
+                                                        rawName: "v-model",
+                                                        value:
+                                                          especificacion.llave,
+                                                        expression:
+                                                          "especificacion.llave"
+                                                      }
+                                                    ],
+                                                    staticClass:
+                                                      "form-control text-white",
+                                                    staticStyle: {
+                                                      background:
+                                                        "rgba(0, 0, 0, 0)",
+                                                      border: "none",
+                                                      "font-size": "10px"
+                                                    },
+                                                    on: {
+                                                      change: function($event) {
+                                                        var $$selectedVal = Array.prototype.filter
+                                                          .call(
+                                                            $event.target
+                                                              .options,
+                                                            function(o) {
+                                                              return o.selected
+                                                            }
+                                                          )
+                                                          .map(function(o) {
+                                                            var val =
+                                                              "_value" in o
+                                                                ? o._value
+                                                                : o.value
+                                                            return val
+                                                          })
+                                                        _vm.$set(
+                                                          especificacion,
+                                                          "llave",
+                                                          $event.target.multiple
+                                                            ? $$selectedVal
+                                                            : $$selectedVal[0]
+                                                        )
+                                                      }
+                                                    }
+                                                  },
+                                                  [
+                                                    _c(
+                                                      "option",
+                                                      {
+                                                        attrs: {
+                                                          value: "0",
+                                                          disabled: ""
+                                                        }
+                                                      },
+                                                      [_vm._v("Seleccione...")]
+                                                    ),
+                                                    _vm._v(" "),
+                                                    _vm._l(
+                                                      _vm.atributosProducto,
+                                                      function(atributo) {
+                                                        return _c("option", {
+                                                          key: atributo.llave,
+                                                          domProps: {
+                                                            value:
+                                                              atributo.llave,
+                                                            textContent: _vm._s(
+                                                              atributo.valor
+                                                            )
+                                                          }
+                                                        })
+                                                      }
+                                                    )
+                                                  ],
+                                                  2
+                                                ),
+                                                _vm._v(" "),
+                                                _c("input", {
+                                                  directives: [
+                                                    {
+                                                      name: "model",
+                                                      rawName: "v-model",
+                                                      value:
+                                                        especificacion.valor,
+                                                      expression:
+                                                        "especificacion.valor"
+                                                    }
+                                                  ],
+                                                  staticClass:
+                                                    "form-control text-white",
+                                                  staticStyle: {
+                                                    background:
+                                                      "rgba(0, 0, 0, 0)",
+                                                    border: "none",
+                                                    "font-size": "10px"
+                                                  },
+                                                  attrs: {
+                                                    type: "text",
+                                                    placeholder: "valor"
+                                                  },
+                                                  domProps: {
+                                                    value: especificacion.valor
+                                                  },
+                                                  on: {
+                                                    input: function($event) {
+                                                      if (
+                                                        $event.target.composing
+                                                      ) {
+                                                        return
+                                                      }
+                                                      _vm.$set(
+                                                        especificacion,
+                                                        "valor",
+                                                        $event.target.value
+                                                      )
+                                                    }
+                                                  }
+                                                }),
+                                                _vm._v(" "),
+                                                _c(
+                                                  "button",
+                                                  {
+                                                    staticClass:
+                                                      "btn btn-primary",
+                                                    staticStyle: {
+                                                      "font-size": "10px"
+                                                    },
+                                                    attrs: { type: "button" },
+                                                    on: {
+                                                      click: function($event) {
+                                                        especificacion.edicion = false
+                                                      }
+                                                    }
+                                                  },
+                                                  [_vm._v("Aceptar")]
+                                                ),
+                                                _vm._v(" "),
+                                                _c(
+                                                  "button",
+                                                  {
+                                                    staticClass:
+                                                      "btn btn-secondary",
+                                                    staticStyle: {
+                                                      "font-size": "10px"
+                                                    },
+                                                    attrs: { type: "button" },
+                                                    on: {
+                                                      click: function($event) {
+                                                        especificacion.edicion = false
+                                                      }
+                                                    }
+                                                  },
+                                                  [_vm._v("Cancelar")]
+                                                )
+                                              ])
+                                            : _vm._e()
+                                        ])
+                                      : _vm._e()
+                                  ]
+                                )
+                              }),
+                              _vm._v(" "),
+                              _c(
+                                "button",
+                                {
+                                  staticClass: "btn badge-pill badge-dark",
+                                  attrs: { type: "button" },
+                                  on: {
+                                    click: function($event) {
+                                      return _vm.crearEspecificacion()
+                                    }
+                                  }
+                                },
+                                [
+                                  _c("h1", { staticClass: "text-white" }, [
+                                    _vm._v("+")
+                                  ])
+                                ]
                               )
-                            }
-                          }
-                        })
+                            ],
+                            2
+                          )
+                        ])
                       ])
                     ]),
                     _vm._v(" "),
@@ -51468,22 +51888,22 @@ var render = function() {
                           staticClass: "col-md-3 form-control-label",
                           attrs: { for: "text-input" }
                         },
-                        [_vm._v("Modelo")]
+                        [_vm._v("Notas")]
                       ),
                       _vm._v(" "),
                       _c("div", { staticClass: "col-md-9" }, [
-                        _c("input", {
+                        _c("textarea", {
                           directives: [
                             {
                               name: "model",
                               rawName: "v-model",
-                              value: _vm.oProducto.modelo,
-                              expression: "oProducto.modelo"
+                              value: _vm.oProducto.nota,
+                              expression: "oProducto.nota"
                             }
                           ],
                           staticClass: "form-control",
-                          attrs: { type: "email", placeholder: "Modelo" },
-                          domProps: { value: _vm.oProducto.modelo },
+                          attrs: { rows: "5" },
+                          domProps: { value: _vm.oProducto.nota },
                           on: {
                             input: function($event) {
                               if ($event.target.composing) {
@@ -51491,7 +51911,7 @@ var render = function() {
                               }
                               _vm.$set(
                                 _vm.oProducto,
-                                "modelo",
+                                "nota",
                                 $event.target.value
                               )
                             }
@@ -51557,7 +51977,7 @@ var render = function() {
                         attrs: { type: "button" },
                         on: {
                           click: function($event) {
-                            return _vm.registrarProveedor()
+                            return _vm.registrarProducto()
                           }
                         }
                       },
@@ -51573,7 +51993,7 @@ var render = function() {
                         attrs: { type: "button" },
                         on: {
                           click: function($event) {
-                            return _vm.actualizarProveedor()
+                            return _vm.actualizarProducto()
                           }
                         }
                       },
@@ -51615,7 +52035,7 @@ var staticRenderFns = [
         _vm._v(" "),
         _c("th", [_vm._v("Precios Compra")]),
         _vm._v(" "),
-        _c("th", [_vm._v("Modelo")]),
+        _c("th", [_vm._v("Especificaciones")]),
         _vm._v(" "),
         _c("th", [_vm._v("Estado")])
       ])
