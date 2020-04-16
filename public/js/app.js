@@ -51648,6 +51648,106 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -51673,11 +51773,21 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 },
                 codigoNextVal: 0
             },
+            oDetaProveedorProducto: {
+                selectProveedor: '',
+                listaProveedorProducto: []
+            },
             listaProductos: [],
             modalProducto: {
                 modal: 0,
                 tituloModal: '',
                 tipoAccion: 0,
+                errorProducto: 0,
+                erroresProductoMsjList: []
+            },
+            modalProveedor: {
+                modal: 0,
+                tituloModal: '',
                 errorProducto: 0,
                 erroresProductoMsjList: []
             },
@@ -51694,6 +51804,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             buscar: '',
             isLoading: 0,
             listaCategorias: [],
+            listaProveedores: [],
             atributosProducto: []
         };
     },
@@ -51781,24 +51892,30 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
             });
         },
-        actualizarProveedor: function actualizarProveedor() {
-            if (this.validarProveedor()) {
+        actualizarProducto: function actualizarProducto() {
+            if (this.validarProducto()) {
                 return;
             }
 
             var me = this;
             this.isLoading = 1;
-            axios.put('/zicandi/public/proveedores/actualizar', {
-                'id_proveedor': this.id_proveedor,
-                'nombre_corto': this.nombre_corto,
-                'nombre': this.nombre,
-                'pagina_web': this.pagina_web,
-                'contacto': this.contacto
+            axios.put('/zicandi/public/productos/actualizar', {
+                'id_producto': this.oProducto.id_producto,
+                'id_categoria': this.oProducto.id_categoria,
+                'codigo': this.oProducto.codigo,
+                'nombre': this.oProducto.nombre,
+                'nota': this.oProducto.nota,
+                'url_imagen': this.oProducto.url_imagen,
+                'especificaciones': { especificaciones: this.oProducto.especificacionList },
+                'imagen_local': this.oProducto.imagen.local,
+                'imagen_nombre': this.oProducto.imagen.nombre,
+                'imagen_size': this.oProducto.imagen.size,
+                'imagen_type': this.oProducto.imagen.type
             }).then(function (response) {
                 me.closeModal();
                 me.isLoading = 0;
                 util.AVISO('Actualizacion correcta!', util.tipoOk);
-                me.listarProveedores(me.pagination.current_page, me.buscar, me.criterio);
+                me.listarProductos(me.pagination.current_page, me.buscar, me.criterio);
             }).catch(function (error) {
                 me.isLoading = 0;
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
@@ -51856,7 +51973,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                             case 'registrar':
                                 {
                                     this.seqCodigoProductoNextval();
+                                    this.modalProducto.tituloModal = 'Registrar nuevo producto';
+                                    this.modalProducto.tipoAccion = 1;
                                     this.modalProducto.modal = 1;
+
                                     this.oProducto.id_producto = 0;
                                     this.oProducto.id_categoria = 0;
                                     this.oProducto.codigo_categoria = '';
@@ -51867,8 +51987,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                                     this.oProducto.imagen.nombre = '';
                                     this.oProducto.imagen.size = 0;
                                     this.oProducto.imagen.type = '';
-                                    this.modalProducto.tituloModal = 'Registrar nuevo producto';
-                                    this.modalProducto.tipoAccion = 1;
                                     this.oProducto.especificacionList = [];
 
                                     break;
@@ -51884,17 +52002,47 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                                     this.oProducto.codigo_categoria = data['codigo_categoria'];
                                     this.oProducto.codigo = data['codigo'];
                                     this.oProducto.nombre = data['nombre'];
+                                    this.oProducto.nota = data['nota'];
                                     this.oProducto.url_imagen = data['url_imagen'];
-                                    console.log(data);
+                                    this.oProducto.imagen.local = data['url_imagen'];
+                                    this.oProducto.imagen.nombre = '';
+                                    this.oProducto.imagen.size = 0;
+                                    this.oProducto.imagen.type = '';
+                                    this.oProducto.especificacionList = [];
+
+                                    for (var i = 0; i < data['atributos'].length; i++) {
+                                        var att = data['atributos'][i];
+                                        var especificacion = { llave: att['atributo'], valor: att['valor'], edicion: false, xstatus: true };
+                                        this.oProducto.especificacionList.push(especificacion);
+                                    };
                                 }
                         }
+
+                        break;
+                    }
+
+                case 'proveedor':
+                    {
+                        switch (accion) {
+                            case 'actualizar':
+                                {
+                                    this.modalProveedor.modal = 1;
+                                    this.modalProveedor.tituloModal = 'Proveedores de este producto';
+
+                                    this.oProducto.id_producto = data['id_producto'];
+
+                                    this.getProveedoresByProducto();
+                                    this.selectProveedor();
+                                }
+                        }
+
+                        break;
                     }
             }
-
-            this.selectCategoria();
         },
         closeModal: function closeModal() {
 
+            //~Producto
             this.oProducto.id_producto = 0;
             this.oProducto.id_categoria = 0;
             this.oProducto.codigo_categoria = '';
@@ -51907,6 +52055,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             this.modalProducto.modal = 0;
             this.modalProducto.tituloModal = '';
+
+            //~Detalle de proveedores
+            this.oDetaProveedorProducto.selectProveedor = '';
+            this.oDetaProveedorProducto.listaProveedorProducto = [];
+
+            this.modalProveedor.modal = 0;
+            this.modalProveedor.tituloModal = '';
         },
         validarProducto: function validarProducto() {
             this.modalProducto.errorProducto = 0;
@@ -51936,6 +52091,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 var respuesta = response.data;
 
                 me.listaCategorias = respuesta.categorias;
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        selectProveedor: function selectProveedor() {
+            var me = this;
+            var url = '/zicandi/public/proveedores/selectProveedor';
+            axios.get(url).then(function (response) {
+                var respuesta = response.data;
+
+                me.listaProveedores = respuesta.proveedores;
             }).catch(function (error) {
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
             });
@@ -51984,11 +52150,67 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var especificacion = { llave: "", valor: "", edicion: true, xstatus: true };
 
             this.oProducto.especificacionList.push(especificacion);
+        },
+        getProveedoresByProducto: function getProveedoresByProducto() {
+            var me = this;
+            var url = '/zicandi/public/productos/getProveedoresByProducto';
+
+            this.isLoading = 1;
+            axios.put(url, {
+                'id_producto': this.oProducto.id_producto
+            }).then(function (response) {
+                me.isLoading = 0;
+                var respuesta = response.data;
+
+                me.oDetaProveedorProducto.listaProveedorProducto = respuesta.proveedores;
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        addProveedorProducto: function addProveedorProducto() {
+            var proveedor = { id_proveedor: this.oDetaProveedorProducto.selectProveedor.id_proveedor,
+                nombre: this.oDetaProveedorProducto.selectProveedor.nombre,
+                nombre_corto: this.oDetaProveedorProducto.selectProveedor.nombre_corto,
+                pagina_web: this.oDetaProveedorProducto.selectProveedor.pagina_web,
+                xstatus: 1,
+                codigo: {
+                    id_producto: this.oProducto.id_producto,
+                    codigo_barras: ""
+                }
+            };
+
+            if (!this.oDetaProveedorProducto.selectProveedor.id_proveedor) {
+                this.modalProveedor.errorProducto = 1;
+                this.modalProveedor.erroresProductoMsjList = [];
+
+                this.modalProveedor.erroresProductoMsjList.push("Se requiere elegir un proveedor");
+            } else {
+                this.modalProveedor.errorProducto = 0;
+                this.oDetaProveedorProducto.listaProveedorProducto.push(proveedor);
+            }
+        },
+        storeProveedores: function storeProveedores() {
+
+            var me = this;
+            this.isLoading = 1;
+            axios.put('/zicandi/public/productos/storeProveedoresByProducto', {
+                'id_producto': this.oProducto.id_producto,
+                'proveedores': { proveedores: this.oDetaProveedorProducto.listaProveedorProducto }
+            }).then(function (response) {
+                me.closeModal();
+                me.isLoading = 0;
+                util.AVISO('Actualizacion correcta!', util.tipoOk);
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
         }
     },
     mounted: function mounted() {
         this.listarProductos(1, this.buscar, this.criterio, true);
         this.selectAtributosProducto();
+        this.selectCategoria();
     }
 });
 
@@ -54835,32 +55057,41 @@ var render = function() {
                               },
                               [_c("i", { staticClass: "icon-check" })]
                             )
-                          ]
+                          ],
+                      _vm._v(
+                        "\n\n                             \n                            \n                            "
+                      ),
+                      _c(
+                        "button",
+                        {
+                          staticClass: "btn btn-info btn-sm",
+                          attrs: { type: "button" },
+                          on: {
+                            click: function($event) {
+                              return _vm.showModal(
+                                "proveedor",
+                                "actualizar",
+                                producto
+                              )
+                            }
+                          }
+                        },
+                        [_c("i", { staticClass: "icon-tag" })]
+                      ),
+                      _vm._v("  \n                        ")
                     ],
                     2
                   ),
                   _vm._v(" "),
                   _c("td", [
-                    _c(
-                      "div",
-                      {
-                        staticClass: "contenido",
-                        staticStyle: { width: "30%", float: "left" }
-                      },
-                      [
+                    _c("div", { staticClass: "row" }, [
+                      _c("div", { staticClass: "col-3" }, [
                         _c("img", {
                           attrs: { src: producto.url_imagen, alt: "dog" }
                         })
-                      ]
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      {
-                        staticClass: "contenido",
-                        staticStyle: { width: "70%", float: "left" }
-                      },
-                      [
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-9" }, [
                         _c("h6", {
                           domProps: { textContent: _vm._s(producto.nombre) }
                         }),
@@ -54869,8 +55100,8 @@ var render = function() {
                           staticClass: "text-muted",
                           domProps: { textContent: _vm._s(producto.codigo) }
                         })
-                      ]
-                    )
+                      ])
+                    ])
                   ]),
                   _vm._v(" "),
                   _c("td", [
@@ -54915,35 +55146,23 @@ var render = function() {
                     ])
                   ]),
                   _vm._v(" "),
-                  _c(
-                    "td",
-                    [
-                      _c(
-                        "lu",
-                        _vm._l(producto.atributos, function(atributo) {
-                          return _c(
-                            "li",
-                            { key: atributo.id_define_producto },
-                            [
-                              _c("span", {
-                                domProps: {
-                                  textContent: _vm._s(atributo.atributo)
-                                }
-                              }),
-                              _vm._v(" : "),
-                              _c("span", {
-                                domProps: {
-                                  textContent: _vm._s(atributo.valor)
-                                }
-                              })
-                            ]
-                          )
-                        }),
-                        0
-                      )
-                    ],
-                    1
-                  ),
+                  _c("td", [
+                    _c(
+                      "ul",
+                      _vm._l(producto.atributos, function(atributo) {
+                        return _c("li", { key: atributo.id_define_producto }, [
+                          _c("span", {
+                            domProps: { textContent: _vm._s(atributo.atributo) }
+                          }),
+                          _vm._v(" : "),
+                          _c("span", {
+                            domProps: { textContent: _vm._s(atributo.valor) }
+                          })
+                        ])
+                      }),
+                      0
+                    )
+                  ]),
                   _vm._v(" "),
                   _c("td", [
                     producto.xstatus
@@ -55225,7 +55444,8 @@ var render = function() {
                             {
                               attrs: {
                                 value: _vm.oProducto.codigo,
-                                options: { format: "EAN-13", fontSize: 12 }
+                                options: { format: "EAN-13" },
+                                height: "25"
                               }
                             },
                             [
@@ -55765,6 +55985,380 @@ var render = function() {
           ]
         )
       ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.modalProveedor.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-primary",
+            attrs: { role: "document" }
+          },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c("div", { staticClass: "modal-header" }, [
+                _c("h4", {
+                  staticClass: "modal-title",
+                  domProps: {
+                    textContent: _vm._s(_vm.modalProveedor.tituloModal)
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "close",
+                    attrs: { type: "button", "aria-label": "Close" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeModal()
+                      }
+                    }
+                  },
+                  [
+                    _c("span", { attrs: { "aria-hidden": "true" } }, [
+                      _vm._v("×")
+                    ])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-body" }, [
+                _c(
+                  "div",
+                  { staticClass: "card", staticStyle: { width: "100%" } },
+                  [
+                    _c(
+                      "ul",
+                      { staticClass: "list-group list-group-flush" },
+                      _vm._l(
+                        _vm.oDetaProveedorProducto.listaProveedorProducto,
+                        function(proveedor) {
+                          return _c(
+                            "div",
+                            {
+                              key: proveedor.codigo.id_deta_proveedor_producto
+                            },
+                            [
+                              proveedor.xstatus
+                                ? _c("li", { staticClass: "list-group-item" }, [
+                                    _c("div", { staticClass: "row" }, [
+                                      _c("div", { staticClass: "col-12" }, [
+                                        _c(
+                                          "button",
+                                          {
+                                            staticClass: "close ",
+                                            attrs: {
+                                              type: "button",
+                                              "aria-label": "Close"
+                                            }
+                                          },
+                                          [
+                                            _c(
+                                              "span",
+                                              {
+                                                attrs: {
+                                                  "aria-hidden": "true"
+                                                },
+                                                on: {
+                                                  click: function($event) {
+                                                    proveedor.xstatus = false
+                                                  }
+                                                }
+                                              },
+                                              [_vm._v("×")]
+                                            )
+                                          ]
+                                        )
+                                      ])
+                                    ]),
+                                    _vm._v(" "),
+                                    _c("div", { staticClass: "row" }, [
+                                      _c("div", { staticClass: "col-md-8" }, [
+                                        _c("h5", {
+                                          staticClass: "card-title",
+                                          domProps: {
+                                            textContent: _vm._s(
+                                              proveedor.nombre
+                                            )
+                                          }
+                                        })
+                                      ]),
+                                      _vm._v(" "),
+                                      _c("div", { staticClass: "col-md-4" }, [
+                                        _c("span", [
+                                          _c(
+                                            "a",
+                                            {
+                                              attrs: {
+                                                href:
+                                                  "" +
+                                                  proveedor.pagina_web +
+                                                  "",
+                                                target: "_blank"
+                                              }
+                                            },
+                                            [_vm._v("Visita su pagina")]
+                                          )
+                                        ])
+                                      ])
+                                    ]),
+                                    _vm._v(" "),
+                                    _c("div", { staticClass: "row" }, [
+                                      _c("div", { staticClass: "col-md-4" }, [
+                                        _c(
+                                          "h6",
+                                          {
+                                            staticClass:
+                                              "card-subtitle mb-2 text-muted",
+                                            domProps: {
+                                              textContent: _vm._s(
+                                                proveedor.nombre_corto
+                                              )
+                                            }
+                                          },
+                                          [_vm._v("BETT")]
+                                        )
+                                      ]),
+                                      _vm._v(" "),
+                                      _c("div", { staticClass: "col-md-8" }, [
+                                        _c("input", {
+                                          directives: [
+                                            {
+                                              name: "model",
+                                              rawName: "v-model",
+                                              value:
+                                                proveedor.codigo.codigo_barras,
+                                              expression:
+                                                "proveedor.codigo.codigo_barras"
+                                            }
+                                          ],
+                                          staticClass: "form-control",
+                                          attrs: {
+                                            type: "text",
+                                            placeholder: "Codigo barras",
+                                            maxlength: "30"
+                                          },
+                                          domProps: {
+                                            value:
+                                              proveedor.codigo.codigo_barras
+                                          },
+                                          on: {
+                                            input: function($event) {
+                                              if ($event.target.composing) {
+                                                return
+                                              }
+                                              _vm.$set(
+                                                proveedor.codigo,
+                                                "codigo_barras",
+                                                $event.target.value
+                                              )
+                                            }
+                                          }
+                                        })
+                                      ])
+                                    ])
+                                  ])
+                                : _vm._e()
+                            ]
+                          )
+                        }
+                      ),
+                      0
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "form",
+                  {
+                    staticClass: "form-horizontal",
+                    attrs: {
+                      action: "",
+                      method: "post",
+                      enctype: "multipart/form-data"
+                    }
+                  },
+                  [
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Proveedor")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-6" }, [
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value:
+                                  _vm.oDetaProveedorProducto.selectProveedor,
+                                expression:
+                                  "oDetaProveedorProducto.selectProveedor"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.$set(
+                                  _vm.oDetaProveedorProducto,
+                                  "selectProveedor",
+                                  $event.target.multiple
+                                    ? $$selectedVal
+                                    : $$selectedVal[0]
+                                )
+                              }
+                            }
+                          },
+                          [
+                            _c(
+                              "option",
+                              { attrs: { value: "0", disabled: "" } },
+                              [_vm._v("Seleccione...")]
+                            ),
+                            _vm._v(" "),
+                            _vm._l(_vm.listaProveedores, function(proveedor) {
+                              return _c(
+                                "option",
+                                {
+                                  key: proveedor.id_proveedor,
+                                  domProps: {
+                                    value: {
+                                      id_proveedor: proveedor.id_proveedor,
+                                      nombre: proveedor.nombre,
+                                      nombre_corto: proveedor.nombre_corto,
+                                      pagina_web: proveedor.pagina_web
+                                    }
+                                  }
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                                        " +
+                                      _vm._s(proveedor.nombre) +
+                                      "\n                                    "
+                                  )
+                                ]
+                              )
+                            })
+                          ],
+                          2
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-3" }, [
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn btn-primary",
+                            attrs: { type: "button" },
+                            on: {
+                              click: function($event) {
+                                return _vm.addProveedorProducto()
+                              }
+                            }
+                          },
+                          [_vm._v("Agregar")]
+                        )
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      {
+                        directives: [
+                          {
+                            name: "show",
+                            rawName: "v-show",
+                            value: _vm.modalProveedor.errorProducto,
+                            expression: "modalProveedor.errorProducto"
+                          }
+                        ],
+                        staticClass: "form-group row div-error"
+                      },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "text-center text-error" },
+                          _vm._l(
+                            _vm.modalProveedor.erroresProductoMsjList,
+                            function(error) {
+                              return _c("div", {
+                                key: error,
+                                domProps: { textContent: _vm._s(error) }
+                              })
+                            }
+                          ),
+                          0
+                        )
+                      ]
+                    )
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _vm._m(2),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeModal()
+                      }
+                    }
+                  },
+                  [_vm._v("Cerrar")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-primary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.storeProveedores()
+                      }
+                    }
+                  },
+                  [_vm._v("Guardar")]
+                )
+              ])
+            ])
+          ]
+        )
+      ]
     )
   ])
 }
@@ -55798,6 +56392,18 @@ var staticRenderFns = [
         _c("th", [_vm._v("Especificaciones")]),
         _vm._v(" "),
         _c("th", [_vm._v("Estado")])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "modal-footer" }, [
+      _c("p", { staticClass: "font-weight-light" }, [
+        _vm._v(
+          "Ingresa el codigo unico asignado por cada proveedor para este producto\n                        Puedes tener mas de un codigo por proveedor\n                    "
+        )
       ])
     ])
   }

@@ -108,4 +108,18 @@ class ProveedorController extends Controller
         $proveedor->save();
     }
 
+    /**
+     * Lista todas las proveedores activos
+     */
+    public function selectProveedor(Request $request){
+        if(!$request->ajax())return redirect('/');
+
+        $proveedor = Proveedor::where('xstatus','=','1')
+        ->select('id_proveedor','nombre','nombre_corto','pagina_web')
+        ->orderBy('nombre', 'asc')
+        ->get();
+
+        return ['proveedores' => $proveedor];
+    }
+
 }

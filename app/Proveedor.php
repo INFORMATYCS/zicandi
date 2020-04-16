@@ -14,4 +14,12 @@ class Proveedor extends Model
 
     //~Por seguridad se agrega para evitar ataques. Toda las columnas de la tabla
     protected $fillable = ['nombre_corto','nombre','pagina_web','contacto','xstatus'];
+
+    //~Relacion Many To Many Productos
+    public function productos(){
+        return  $this->belongsToMany('App\Producto', 'deta_proveedor_producto', 'id_proveedor', 'id_producto')
+                ->withTimestamps()
+                ->withPivot('id_deta_proveedor_producto','id_producto','codigo_barras')
+                ->as('codigo');
+    }
 }

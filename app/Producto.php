@@ -25,6 +25,16 @@ class Producto extends Model
     public function atributos(){
         return $this->hasMany('App\DefineProducto', 'id_producto', 'id_producto');
     }
+
+    //~Relacion Many To Many Proveedores
+    public function proveedores(){
+        return  $this->belongsToMany('App\Proveedor', 'deta_proveedor_producto', 'id_producto', 'id_proveedor')
+                ->withTimestamps()
+                ->withPivot('id_deta_proveedor_producto', 'id_proveedor', 'codigo_barras')
+                ->as('codigo');
+    }
+
+
 }
 
 

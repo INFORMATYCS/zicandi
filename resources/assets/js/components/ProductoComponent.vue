@@ -52,6 +52,7 @@
                     <tbody>
                         <tr v-for="producto in listaProductos" :key="producto.id_producto">
                             <td>
+                                
                                 <button type="button" class="btn btn-warning btn-sm" @click="showModal('producto','actualizar', producto)">
                                     <i class="icon-pencil"></i>
                                 </button> &nbsp;
@@ -66,16 +67,23 @@
                                         <i class="icon-check"></i>
                                     </button>
                                 </template>
+
+                                &nbsp;
+                                
+                                <button type="button" class="btn btn-info btn-sm" @click="showModal('proveedor','actualizar', producto)">
+                                    <i class="icon-tag"></i>
+                                </button> &nbsp;
                             </td>
-                            <td>                                
-                                <div class="contenido" style="width:30%; float:left;">
-                                    <img :src="producto.url_imagen" alt="dog"> 
+                            <td>               
+                                <div class="row">                 
+                                    <div class="col-3">
+                                        <img :src="producto.url_imagen" alt="dog"> 
+                                    </div>
+                                    <div class="col-9">
+                                        <h6 v-text="producto.nombre"></h6>
+                                        <small class="text-muted" v-text="producto.codigo"></small>                                    
+                                    </div>          
                                 </div>
-                                <div class="contenido" style="width:70%; float:left;">
-                                    <h6 v-text="producto.nombre"></h6>
-                                    <small class="text-muted" v-text="producto.codigo"></small>
-                                    
-                                </div>                                                                                            
                             </td>                            
                             <td>
                                 <div>
@@ -88,11 +96,11 @@
                                 
                             </td>
                             <td>
-                                <lu>
+                                <ul>
                                     <li  v-for="atributo in producto.atributos" :key="atributo.id_define_producto">
                                         <span v-text="atributo.atributo"></span> : <span v-text="atributo.valor"></span>
-                                    </li>                                    
-                                </lu>
+                                    </li>
+                                </ul>
                             </td>                                
                             <td>
                                 <div v-if="producto.xstatus">
@@ -150,7 +158,7 @@
                                 <label class="col-md-3 form-control-label" for="text-input">Codigo</label>
                                 <div class="col-md-9">
                                     <input type="text" class="form-control" placeholder="Codigo unico o de barras" maxlength="20" v-model="oProducto.codigo">                                                                        
-                                    <barcode :value="oProducto.codigo" :options="{format: 'EAN-13'}">
+                                    <barcode :value="oProducto.codigo" :options="{format: 'EAN-13'}" height=25>
                                         Generando codigo de barras...    
                                     </barcode>
                                 </div>                                
@@ -243,7 +251,99 @@
         </div>
         <!--Fin del modal-->       
 
+        <!--Inicio del modal proveedores-->
+        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true" :class="{'mostrar' : modalProveedor.modal}">
+            <div class="modal-dialog modal-primary" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" v-text="modalProveedor.tituloModal"></h4>
+                        <button type="button" class="close" aria-label="Close" @click="closeModal();">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        
+                        <div class="card" style="width: 100%;">                            
+                            <ul class="list-group list-group-flush">                 
+                                <div v-for="proveedor in oDetaProveedorProducto.listaProveedorProducto" :key="proveedor.codigo.id_deta_proveedor_producto">
+                                    <li class="list-group-item" v-if="proveedor.xstatus">
+                                    
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <button type="button" class="close " aria-label="Close">
+                                                    <span aria-hidden="true" @click="proveedor.xstatus=false;">&times;</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <h5 class="card-title" v-text="proveedor.nombre"></h5>
+                                                
+                                            </div>
+                                            <div class="col-md-4">
+                                                <span>
+                                                    <a v-bind:href="''+proveedor.pagina_web+''" target="_blank">Visita su pagina</a>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <h6 class="card-subtitle mb-2 text-muted" v-text="proveedor.nombre_corto">BETT</h6>
+                                            </div>
+                                            <div class="col-md-8">                                            
+                                                <input type="text" class="form-control" placeholder="Codigo barras" maxlength="30" v-model="proveedor.codigo.codigo_barras">                                                                                                                                        
+                                            </div>
+                                        </div>                                                                                                             
+                                    </li>     
+                                </div>                           
+                                
+                            </ul>
+                        </div>
+                        
+                         
+    
 
+                        <form action="" method="post" enctype="multipart/form-data" class="form-horizontal">
+                            <div class="form-group row">
+                                <label class="col-md-3 form-control-label" for="text-input">Proveedor</label>
+                                <div class="col-md-6">
+                                    <select class="form-control" v-model="oDetaProveedorProducto.selectProveedor">
+                                        <option value="0" disabled>Seleccione...</option>
+                                        <option v-for="proveedor in listaProveedores" :key="proveedor.id_proveedor" v-bind:value="{ id_proveedor: proveedor.id_proveedor, nombre: proveedor.nombre, nombre_corto: proveedor.nombre_corto, pagina_web: proveedor.pagina_web }">
+                                            {{ proveedor.nombre }}
+                                        </option>
+
+
+                                    </select>                                    
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="button" class="btn btn-primary"  @click="addProveedorProducto();">Agregar</button>
+                                </div>
+                            </div>
+
+                   
+                            <div v-show="modalProveedor.errorProducto" class="form-group row div-error">
+                                <div class="text-center text-error">
+                                    <div v-for="error in modalProveedor.erroresProductoMsjList" :key="error" v-text="error"></div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <p class="font-weight-light">Ingresa el codigo unico asignado por cada proveedor para este producto
+                            Puedes tener mas de un codigo por proveedor
+                        </p>                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>
+                        <button type="button" class="btn btn-primary" @click="storeProveedores();">Guardar</button>                        
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!--Fin del modal-->
 
     </main>    
 </template>
@@ -273,7 +373,11 @@
                         type: ''
                     },
                     codigoNextVal: 0
-                },                
+                },     
+                oDetaProveedorProducto:{
+                    selectProveedor:'',
+                    listaProveedorProducto: []                    
+                },
                 listaProductos: [],
                 modalProducto: {
                     modal: 0,
@@ -281,7 +385,13 @@
                     tipoAccion: 0,
                     errorProducto: 0,
                     erroresProductoMsjList: []
-                },                
+                },
+                modalProveedor: {
+                    modal: 0,
+                    tituloModal: '',                    
+                    errorProducto: 0,
+                    erroresProductoMsjList: []                    
+                },   
                 pagination: {
                     total : 0,
                     current_page  : 0,
@@ -295,6 +405,7 @@
                 buscar: '',
                 isLoading: 0,
                 listaCategorias: [],
+                listaProveedores: [],
                 atributosProducto: []
             }
         },
@@ -383,25 +494,31 @@
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
             },
-            actualizarProveedor(){
-                if(this.validarProveedor()){
+            actualizarProducto(){
+                if(this.validarProducto()){
                     return;
                 }
 
                 let me = this;
                 this.isLoading = 1;
-                axios.put('/zicandi/public/proveedores/actualizar',{
-                    'id_proveedor': this.id_proveedor,
-                    'nombre_corto': this.nombre_corto,
-                    'nombre': this.nombre,
-                    'pagina_web': this.pagina_web,
-                    'contacto': this.contacto,
+                axios.put('/zicandi/public/productos/actualizar',{
+                    'id_producto': this.oProducto.id_producto,
+                    'id_categoria': this.oProducto.id_categoria,
+                    'codigo': this.oProducto.codigo,
+                    'nombre': this.oProducto.nombre,                    
+                    'nota': this.oProducto.nota,
+                    'url_imagen': this.oProducto.url_imagen,
+                    'especificaciones': {especificaciones: this.oProducto.especificacionList},
+                    'imagen_local': this.oProducto.imagen.local,
+                    'imagen_nombre': this.oProducto.imagen.nombre,
+                    'imagen_size': this.oProducto.imagen.size,
+                    'imagen_type': this.oProducto.imagen.type
                 })
                 .then(function (response) {                    
                     me.closeModal();
                     me.isLoading = 0;
                     util.AVISO('Actualizacion correcta!', util.tipoOk);                
-                    me.listarProveedores(me.pagination.current_page, me.buscar, me.criterio);
+                    me.listarProductos(me.pagination.current_page, me.buscar, me.criterio);
                 })
                 .catch(function (error) {
                     me.isLoading = 0;
@@ -465,7 +582,10 @@
                             case 'registrar':
                             {
                                 this.seqCodigoProductoNextval();
+                                this.modalProducto.tituloModal = 'Registrar nuevo producto';
+                                this.modalProducto.tipoAccion = 1;
                                 this.modalProducto.modal = 1;
+
                                 this.oProducto.id_producto=0;
                                 this.oProducto.id_categoria=0;
                                 this.oProducto.codigo_categoria='';
@@ -475,9 +595,7 @@
                                 this.oProducto.imagen.local='repositorio/sistema/no_disponible.png';
                                 this.oProducto.imagen.nombre='';
                                 this.oProducto.imagen.size=0;
-                                this.oProducto.imagen.type='';
-                                this.modalProducto.tituloModal = 'Registrar nuevo producto';
-                                this.modalProducto.tipoAccion = 1;
+                                this.oProducto.imagen.type='';                                
                                 this.oProducto.especificacionList = [];
 
                                 break;
@@ -492,18 +610,48 @@
                                 this.oProducto.id_categoria=    data['id_categoria'];
                                 this.oProducto.codigo_categoria=data['codigo_categoria'];
                                 this.oProducto.codigo=          data['codigo'];
-                                this.oProducto.nombre= data['nombre'];
+                                this.oProducto.nombre=          data['nombre'];
+                                this.oProducto.nota=            data['nota']; 
                                 this.oProducto.url_imagen=      data['url_imagen'];  
-                                console.log(data);
+                                this.oProducto.imagen.local=    data['url_imagen'];  
+                                this.oProducto.imagen.nombre='';
+                                this.oProducto.imagen.size=0;
+                                this.oProducto.imagen.type='';                                
+                                this.oProducto.especificacionList = []; 
+                                
+                                for (let i = 0; i < data['atributos'].length; i++) {
+                                    let att = data['atributos'][i];
+                                    let especificacion= {llave:att['atributo'], valor:att['valor'], edicion: false, xstatus: true};
+                                    this.oProducto.especificacionList.push(especificacion);                                    
+                                };
                             }
                         }
-                    }
-                }
 
-                this.selectCategoria();
+                        break;
+                    }
+
+                    case 'proveedor':
+                    {
+                        switch(accion){                            
+                            case 'actualizar':
+                            {
+                                this.modalProveedor.modal = 1;
+                                this.modalProveedor.tituloModal = 'Proveedores de este producto';                                
+
+                                this.oProducto.id_producto=     data['id_producto'];
+                                
+                                this.getProveedoresByProducto();
+                                this.selectProveedor();                                                                
+                            }
+                        }
+
+                        break;
+                    }
+                }                
             },
             closeModal(){
                 
+                //~Producto
                 this.oProducto.id_producto=0;
                 this.oProducto.id_categoria=0;
                 this.oProducto.codigo_categoria='';
@@ -516,6 +664,17 @@
 
                 this.modalProducto.modal = 0;                
                 this.modalProducto.tituloModal = '';
+
+
+                //~Detalle de proveedores
+                this.oDetaProveedorProducto.selectProveedor= '';
+                this.oDetaProveedorProducto.listaProveedorProducto= [];
+
+                this.modalProveedor.modal = 0;                
+                this.modalProveedor.tituloModal = '';
+
+
+                
             },
             validarProducto(){
                 this.modalProducto.errorProducto = 0;
@@ -546,6 +705,19 @@
                     var respuesta = response.data;  
 
                     me.listaCategorias = respuesta.categorias;                    
+                })
+                .catch(function (error) {                                        
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+            selectProveedor(){                
+                let me=this;                
+                var url= '/zicandi/public/proveedores/selectProveedor';
+                axios.get(url)
+                .then(function (response) {                    
+                    var respuesta = response.data;  
+
+                    me.listaProveedores = respuesta.proveedores;                    
                 })
                 .catch(function (error) {                                        
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
@@ -597,12 +769,72 @@
                 let especificacion= {llave:"", valor:"", edicion: true, xstatus: true};
 
                 this.oProducto.especificacionList.push(especificacion);
-            }
+            },
+            getProveedoresByProducto(){                
+                let me=this;                
+                var url= '/zicandi/public/productos/getProveedoresByProducto';
+
+                this.isLoading = 1;
+                axios.put(url,{
+                    'id_producto': this.oProducto.id_producto
+                })
+                .then(function (response) {   
+                    me.isLoading = 0;                 
+                    var respuesta = response.data;  
+
+                    me.oDetaProveedorProducto.listaProveedorProducto = respuesta.proveedores;                                  
+                })
+                .catch(function (error) {  
+                    me.isLoading = 0;                                      
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+            addProveedorProducto(){                
+                let proveedor= {    id_proveedor:this.oDetaProveedorProducto.selectProveedor.id_proveedor, 
+                                    nombre:this.oDetaProveedorProducto.selectProveedor.nombre, 
+                                    nombre_corto: this.oDetaProveedorProducto.selectProveedor.nombre_corto, 
+                                    pagina_web: this.oDetaProveedorProducto.selectProveedor.pagina_web,
+                                    xstatus: 1, 
+                                    codigo: {
+                                        id_producto: this.oProducto.id_producto,
+                                        codigo_barras:""
+                                    }
+                                };
+                
+                if(!this.oDetaProveedorProducto.selectProveedor.id_proveedor){                    
+                    this.modalProveedor.errorProducto = 1;
+                    this.modalProveedor.erroresProductoMsjList = [];
+
+                    this.modalProveedor.erroresProductoMsjList.push("Se requiere elegir un proveedor");                    
+                }else{
+                    this.modalProveedor.errorProducto = 0;
+                    this.oDetaProveedorProducto.listaProveedorProducto.push(proveedor);
+                }                                                
+            },
+            storeProveedores(){
+            
+                let me = this;
+                this.isLoading = 1;
+                axios.put('/zicandi/public/productos/storeProveedoresByProducto',{
+                    'id_producto': this.oProducto.id_producto,                    
+                    'proveedores': {proveedores: this.oDetaProveedorProducto.listaProveedorProducto}
+                })
+                .then(function (response) {                    
+                    me.closeModal();
+                    me.isLoading = 0;
+                    util.AVISO('Actualizacion correcta!', util.tipoOk);                                    
+                })
+                .catch(function (error) {
+                    me.isLoading = 0;
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
 
         },
         mounted() {
             this.listarProductos(1, this.buscar, this.criterio, true);
             this.selectAtributosProducto();
+            this.selectCategoria();            
         }
     }
 </script>

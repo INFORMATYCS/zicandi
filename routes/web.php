@@ -22,6 +22,7 @@ Route::post('/proveedores/registrar', 'ProveedorController@store');
 Route::put('/proveedores/actualizar', 'ProveedorController@update');
 Route::put('/proveedores/desactivar', 'ProveedorController@desactivar');
 Route::put('/proveedores/activar', 'ProveedorController@activar');
+Route::get('/proveedores/selectProveedor', 'ProveedorController@selectProveedor');
 
 // - Rutas para Productos
 Route::get('/productos', 'ProductoController@index');
@@ -30,6 +31,9 @@ Route::put('/productos/actualizar', 'ProductoController@update');
 Route::put('/productos/desactivar', 'ProductoController@desactivar');
 Route::put('/productos/activar', 'ProductoController@activar');
 Route::get('/productos/procesaimg', 'ProductoController@procesaImagen');
+Route::put('/productos/getProveedoresByProducto', 'ProductoController@getProveedoresByProducto');
+Route::put('/productos/storeProveedoresByProducto', 'ProductoController@storeProveedoresByProducto');
+
 
 // - Rutas para Categorias
 Route::get('/categoria/selectCategoria', 'CategoriaController@selectCategoria');

@@ -109,15 +109,51 @@ class ProductoController extends Controller{
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request){
+
         
         $producto = Producto::findOrFail($request->id_producto);//~Se busca en base al ID entrante
         $producto->id_categoria = $request->id_categoria;
-        $producto->codigo = $request->codigo;
-        $producto->url_imagen = $request->url_imagen;
+        $producto->codigo = $request->codigo;        
+        $producto->nombre = $request->nombre;
         $producto->nota = $request->nota;
         $producto->xstatus ='1';
 
+        //~Imagen
+        $imagen = array(    
+            'nombre'=>$request->imagen_nombre,
+            'size'=>$request->imagen_size,
+            'type'=>$request->imagen_type,
+            'b64'=>$request->imagen_local
+        );
+
+        if($imagen['nombre']==null && $imagen['size']==0){
+            $url_imagen = $request->url_imagen;
+        }else{            
+            $procesadorImagenes = new ProcesadorImagenes();
+            $url_imagen = $procesadorImagenes->publicaImagenMini100($imagen); 
+        }
+
+        $producto->url_imagen = $url_imagen;
+
         $producto->save();
+
+        //~Atributos
+        $especificacionList = $request->especificaciones;
+        $producto->atributos()->delete();
+
+        foreach ($especificacionList['especificaciones'] as $atributo) {
+            if($atributo['xstatus']){
+                if($atributo['llave']!=null){
+                    $defineProducto = new DefineProducto();
+                    $defineProducto->atributo = $atributo['llave'];
+                    $defineProducto->valor = $atributo['valor'];
+                    $defineProducto->xstatus = 1;
+
+                    $producto->atributos()->save($defineProducto);
+                }
+            }
+        }
+
     }
 
 
@@ -142,5 +178,44 @@ class ProductoController extends Controller{
 
         $producto->save();
     }    
+
+
+    /**
+     * Lista todos los proveedores por id_producto
+     * 
+     */
+    public function getProveedoresByProducto(Request $request){
+       
+        if(!$request->ajax())return redirect('/');
+
+        $producto = Producto::findOrFail($request->id_producto);
+        $listaProveedores = $producto->proveedores;
+        
+        return ['proveedores' => $listaProveedores];        
+    }
+
+    /**
+     * Guarda los proveedores por producto
+     * 
+     */
+    public function storeProveedoresByProducto(Request $request){
+        $idProducto = $request->id_producto;
+        $proveedoresList = $request->proveedores;
+       
+        $producto = Producto::find($idProducto);
+
+        //~Borra todas las asociaciones actuales
+        $producto->proveedores()->detach();
+
+        foreach ($proveedoresList['proveedores'] as $proveedor) {
+            if($proveedor['xstatus']){
+                $idProveedor = $proveedor['id_proveedor'];
+                $codigoBarras = $proveedor['codigo']['codigo_barras'];
+
+                $producto->proveedores()->attach($idProveedor,['codigo_barras'=>$codigoBarras]);
+
+            }
+        }
+    }
 
 }
