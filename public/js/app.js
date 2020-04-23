@@ -4752,6 +4752,8 @@ Vue.component('proveedor-component', __webpack_require__(55));
 
 Vue.component('producto-component', __webpack_require__(58));
 
+Vue.component('almacen-component', __webpack_require__(97));
+
 var app = new Vue({
   el: '#app',
   data: {
@@ -51745,9 +51747,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
-//
-//
 
 
 
@@ -55274,7 +55273,7 @@ var render = function() {
       {
         staticClass: "modal fade",
         class: { mostrar: _vm.modalProducto.modal },
-        staticStyle: { display: "none" },
+        staticStyle: { display: "none", bottom: "-500px" },
         attrs: {
           tabindex: "-1",
           role: "dialog",
@@ -55992,7 +55991,7 @@ var render = function() {
       {
         staticClass: "modal fade",
         class: { mostrar: _vm.modalProveedor.modal },
-        staticStyle: { display: "none" },
+        staticStyle: { display: "none", bottom: "-500px" },
         attrs: {
           tabindex: "-1",
           role: "dialog",
@@ -56414,6 +56413,947 @@ if (false) {
   module.hot.accept()
   if (module.hot.data) {
     require("vue-hot-reload-api")      .rerender("data-v-ee344054", module.exports)
+  }
+}
+
+/***/ }),
+/* 97 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__(18)
+/* script */
+var __vue_script__ = __webpack_require__(98)
+/* template */
+var __vue_template__ = __webpack_require__(99)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/AlmacenComponent.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-b5adae72", Component.options)
+  } else {
+    hotAPI.reload("data-v-b5adae72", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 98 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    data: function data() {
+        return {
+            oAlmacen: {
+                id_almacen: 0,
+                nombre: '',
+                ubicacion: '',
+                nota: ''
+            },
+            listaAlmacen: [],
+            modalAlmacen: {
+                modal: 0,
+                tituloModal: '',
+                tipoAccion: 0,
+                error: 0,
+                erroresMsjList: []
+            },
+            pagination: {
+                total: 0,
+                current_page: 0,
+                per_page: 0,
+                last_page: 0,
+                from: 0,
+                to: 0
+            },
+            isLoading: 0
+
+        };
+    },
+
+    computed: {
+        isActived: function isActived() {
+            return this.pagination.current_page;
+        },
+        pagesNumber: function pagesNumber() {
+            return paginador.getPagesNumber(this.pagination);
+        }
+    },
+    methods: {
+        listar: function listar(page) {
+            var aplLoading = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+
+            if (aplLoading) {
+                this.isLoading = 1;
+            }
+
+            var me = this;
+            var url = '/zicandi/public/almacenes?page=' + page;
+            axios.get(url).then(function (response) {
+                var respuesta = response.data;
+                me.isLoading = 0;
+                me.listaAlmacen = respuesta.almacen.data;
+                me.pagination = respuesta.pagination;
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        registrar: function registrar() {
+            if (this.validarAlmacen()) {
+                return;
+            }
+
+            var me = this;
+            this.isLoading = 1;
+            axios.post('/zicandi/public/almacenes/registrar', {
+                'nombre': this.oAlmacen.nombre,
+                'ubicacion': this.oAlmacen.ubicacion,
+                'nota': this.oAlmacen.nota
+            }).then(function (response) {
+                me.isLoading = 0;
+                me.closeModal();
+                util.AVISO('Perfecto, registro correcto', util.tipoOk);
+                me.listar(1);
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        actualizar: function actualizar() {
+            if (this.validarAlmacen()) {
+                return;
+            }
+
+            var me = this;
+            this.isLoading = 1;
+            axios.put('/zicandi/public/almacenes/actualizar', {
+                'id_almacen': this.oAlmacen.id_almacen,
+                'nombre': this.oAlmacen.nombre,
+                'ubicacion': this.oAlmacen.ubicacion,
+                'nota': this.oAlmacen.nota
+            }).then(function (response) {
+                me.closeModal();
+                me.isLoading = 0;
+                util.AVISO('Actualizacion correcta!', util.tipoOk);
+                me.listar(me.pagination.current_page);
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        desactivar: function desactivar(id_almacen) {
+            var _this = this;
+
+            util.MSG_SI_NO('Deseas desactivarlo', 'No podras usarlo...', util.tipoPreg).then(function (result) {
+                if (result == util.btnSi) {
+                    _this.isLoading = 1;
+                    var me = _this;
+
+                    axios.put('/zicandi/public/almacenes/desactivar', {
+                        'id_almacen': id_almacen
+                    }).then(function (response) {
+                        me.isLoading = 0;
+                        util.AVISO('Desactivado!!!', util.tipoOk);
+                        me.listar(me.pagination.current_page);
+                    }).catch(function (error) {
+                        me.isLoading = 0;
+                        util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+                    });
+                }
+            });
+        },
+        activar: function activar(id_almacen) {
+            var _this2 = this;
+
+            util.MSG_SI_NO('Deseas activarlo', 'Mientras no lo actives no estara disponible para usarse', util.tipoPreg).then(function (result) {
+                if (result == util.btnSi) {
+                    _this2.isLoading = 1;
+                    var me = _this2;
+
+                    axios.put('/zicandi/public/almacenes/activar', {
+                        'id_almacen': id_almacen
+                    }).then(function (response) {
+                        me.isLoading = 0;
+                        util.AVISO('Activado!!!', util.tipoOk);
+                        me.listar(me.pagination.current_page);
+                    }).catch(function (error) {
+                        me.isLoading = 0;
+                        util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+                    });
+                }
+            });
+        },
+        showModal: function showModal(modelo, accion) {
+            var data = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+            switch (modelo) {
+                case 'almacen':
+                    {
+                        switch (accion) {
+                            case 'registrar':
+                                {
+                                    this.modalAlmacen.modal = 1;
+                                    this.oAlmacen.nombre = '';
+                                    this.oAlmacen.ubicacion = '';
+                                    this.oAlmacen.nota = '';
+                                    this.modalAlmacen.tituloModal = 'Registrar nuevo almacen';
+                                    this.modalAlmacen.tipoAccion = 1;
+
+                                    break;
+                                }
+                            case 'actualizar':
+                                {
+                                    this.modalAlmacen.modal = 1;
+                                    this.modalAlmacen.tituloModal = 'Actualizar almacen';
+                                    this.modalAlmacen.tipoAccion = 2;
+
+                                    this.oAlmacen.nombre = data['nombre'];
+                                    this.oAlmacen.ubicacion = data['ubicacion'];
+                                    this.oAlmacen.nota = data['nota'];
+                                    this.oAlmacen.id_almacen = data['id_almacen'];
+                                }
+                        }
+                    }
+            }
+        },
+        closeModal: function closeModal() {
+            this.modalAlmacen.modal = 0;
+            this.ubicacion = '';
+            this.nota = '';
+            this.modalAlmacen.tituloModal = '';
+        },
+        validarAlmacen: function validarAlmacen() {
+            this.modalAlmacen.error = 0;
+            this.modalAlmacen.erroresMsjList = [];
+
+            if (!this.oAlmacen.nombre) this.modalAlmacen.erroresMsjList.push("Se requiere el nombre del almacen");
+
+            if (this.modalAlmacen.erroresMsjList.length) this.modalAlmacen.error = 1;
+
+            return this.modalAlmacen.error;
+        },
+        cambiarPagina: function cambiarPagina(page) {
+            var me = this;
+
+            me.pagination.current_page = page;
+
+            me.listar(page, true);
+        }
+    },
+    mounted: function mounted() {
+        this.listar(1, true);
+    }
+});
+
+/***/ }),
+/* 99 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("main", { staticClass: "main" }, [
+    _c("div", {
+      staticClass: "sbl-circ-ripple",
+      class: { "abrir-load-sbl": _vm.isLoading },
+      staticStyle: { display: "none" }
+    }),
+    _vm._v(" "),
+    _vm._m(0),
+    _vm._v(" "),
+    _c("div", { staticClass: "container-fluid" }, [
+      _c("div", { staticClass: "card" }, [
+        _c("div", { staticClass: "card-header" }, [
+          _c("i", { staticClass: "fa fa-align-justify" }),
+          _vm._v(" Tareas:\n                "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary",
+              attrs: { type: "button" },
+              on: {
+                click: function($event) {
+                  return _vm.showModal("almacen", "registrar")
+                }
+              }
+            },
+            [
+              _c("i", { staticClass: "icon-plus" }),
+              _vm._v(" Nuevo\n                ")
+            ]
+          )
+        ])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "card-body" }, [
+        _c(
+          "table",
+          { staticClass: "table table-bordered table-striped table-sm" },
+          [
+            _vm._m(1),
+            _vm._v(" "),
+            _c(
+              "tbody",
+              _vm._l(_vm.listaAlmacen, function(almacen) {
+                return _c("tr", { key: almacen.id_almacen }, [
+                  _c(
+                    "td",
+                    [
+                      _c(
+                        "button",
+                        {
+                          staticClass: "btn btn-warning btn-sm",
+                          attrs: { type: "button" },
+                          on: {
+                            click: function($event) {
+                              return _vm.showModal(
+                                "almacen",
+                                "actualizar",
+                                almacen
+                              )
+                            }
+                          }
+                        },
+                        [_c("i", { staticClass: "icon-pencil" })]
+                      ),
+                      _vm._v("  \n                            "),
+                      almacen.xstatus
+                        ? [
+                            _c(
+                              "button",
+                              {
+                                staticClass: "btn btn-danger btn-sm",
+                                attrs: { type: "button" },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.desactivar(almacen.id_almacen)
+                                  }
+                                }
+                              },
+                              [_c("i", { staticClass: "icon-trash" })]
+                            )
+                          ]
+                        : [
+                            _c(
+                              "button",
+                              {
+                                staticClass: "btn btn-info btn-sm",
+                                attrs: { type: "button" },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.activar(almacen.id_almacen)
+                                  }
+                                }
+                              },
+                              [_c("i", { staticClass: "icon-check" })]
+                            )
+                          ]
+                    ],
+                    2
+                  ),
+                  _vm._v(" "),
+                  _c("td", {
+                    domProps: { textContent: _vm._s(almacen.nombre) }
+                  }),
+                  _vm._v(" "),
+                  _c("td", {
+                    domProps: { textContent: _vm._s(almacen.ubicacion) }
+                  }),
+                  _vm._v(" "),
+                  _c("td", { domProps: { textContent: _vm._s(almacen.nota) } }),
+                  _vm._v(" "),
+                  _c("td", [
+                    almacen.xstatus
+                      ? _c("div", [
+                          _c("span", { staticClass: "badge badge-success" }, [
+                            _vm._v("Activo")
+                          ])
+                        ])
+                      : _c("div", [
+                          _c("span", { staticClass: "badge badge-danger" }, [
+                            _vm._v("Desactivado")
+                          ])
+                        ])
+                  ])
+                ])
+              }),
+              0
+            )
+          ]
+        ),
+        _vm._v(" "),
+        _c("nav", [
+          _c(
+            "ul",
+            { staticClass: "pagination" },
+            [
+              _vm.pagination.current_page > 1
+                ? _c("li", { staticClass: "page-item" }, [
+                    _c(
+                      "a",
+                      {
+                        staticClass: "page-link",
+                        attrs: { href: "#" },
+                        on: {
+                          click: function($event) {
+                            $event.preventDefault()
+                            return _vm.cambiarPagina(
+                              _vm.pagination.current_page - 1
+                            )
+                          }
+                        }
+                      },
+                      [_vm._v("Ant")]
+                    )
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm._l(_vm.pagesNumber, function(page) {
+                return _c(
+                  "li",
+                  {
+                    key: page,
+                    staticClass: "page-item",
+                    class: [page == _vm.isActived ? "active" : ""]
+                  },
+                  [
+                    _c("a", {
+                      staticClass: "page-link",
+                      attrs: { href: "#" },
+                      domProps: { textContent: _vm._s(page) },
+                      on: {
+                        click: function($event) {
+                          $event.preventDefault()
+                          return _vm.cambiarPagina(page)
+                        }
+                      }
+                    })
+                  ]
+                )
+              }),
+              _vm._v(" "),
+              _vm.pagination.current_page < _vm.pagination.last_page
+                ? _c("li", { staticClass: "page-item" }, [
+                    _c(
+                      "a",
+                      {
+                        staticClass: "page-link",
+                        attrs: { href: "#" },
+                        on: {
+                          click: function($event) {
+                            $event.preventDefault()
+                            return _vm.cambiarPagina(
+                              _vm.pagination.current_page + 1
+                            )
+                          }
+                        }
+                      },
+                      [_vm._v("Sig")]
+                    )
+                  ])
+                : _vm._e()
+            ],
+            2
+          )
+        ])
+      ])
+    ]),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.modalAlmacen.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-primary modal-lg",
+            attrs: { role: "document" }
+          },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c("div", { staticClass: "modal-header" }, [
+                _c("h4", {
+                  staticClass: "modal-title",
+                  domProps: {
+                    textContent: _vm._s(_vm.modalAlmacen.tituloModal)
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "close",
+                    attrs: { type: "button", "aria-label": "Close" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeModal()
+                      }
+                    }
+                  },
+                  [
+                    _c("span", { attrs: { "aria-hidden": "true" } }, [
+                      _vm._v("×")
+                    ])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-body" }, [
+                _c(
+                  "form",
+                  {
+                    staticClass: "form-horizontal",
+                    attrs: {
+                      action: "",
+                      method: "post",
+                      enctype: "multipart/form-data"
+                    }
+                  },
+                  [
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Nombre")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.oAlmacen.nombre,
+                              expression: "oAlmacen.nombre"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: {
+                            type: "text",
+                            placeholder: "Alias - Nombre"
+                          },
+                          domProps: { value: _vm.oAlmacen.nombre },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.oAlmacen,
+                                "nombre",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Ubicacion")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.oAlmacen.ubicacion,
+                              expression: "oAlmacen.ubicacion"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: {
+                            type: "text",
+                            placeholder: "Lugar de ubicacion"
+                          },
+                          domProps: { value: _vm.oAlmacen.ubicacion },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.oAlmacen,
+                                "ubicacion",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Notas")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c("textarea", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.oAlmacen.nota,
+                              expression: "oAlmacen.nota"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: { rows: "5", maxlength: "300" },
+                          domProps: { value: _vm.oAlmacen.nota },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.oAlmacen,
+                                "nota",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      {
+                        directives: [
+                          {
+                            name: "show",
+                            rawName: "v-show",
+                            value: _vm.modalAlmacen.error,
+                            expression: "modalAlmacen.error"
+                          }
+                        ],
+                        staticClass: "form-group row div-error"
+                      },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "text-center text-error" },
+                          _vm._l(_vm.modalAlmacen.erroresMsjList, function(
+                            error
+                          ) {
+                            return _c("div", {
+                              key: error,
+                              domProps: { textContent: _vm._s(error) }
+                            })
+                          }),
+                          0
+                        )
+                      ]
+                    )
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeModal()
+                      }
+                    }
+                  },
+                  [_vm._v("Cerrar")]
+                ),
+                _vm._v(" "),
+                _vm.modalAlmacen.tipoAccion == 1
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-primary",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.registrar()
+                          }
+                        }
+                      },
+                      [_vm._v("Guardar")]
+                    )
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.modalAlmacen.tipoAccion == 2
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-primary",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.actualizar()
+                          }
+                        }
+                      },
+                      [_vm._v("Actualizar")]
+                    )
+                  : _vm._e()
+              ])
+            ])
+          ]
+        )
+      ]
+    )
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("ol", { staticClass: "breadcrumb" }, [
+      _c("li", { staticClass: "breadcrumb-item" }, [_vm._v("Home")]),
+      _vm._v(" "),
+      _c("li", { staticClass: "breadcrumb-item" }, [_vm._v("Catalogos")]),
+      _vm._v(" "),
+      _c("li", { staticClass: "breadcrumb-item active" }, [_vm._v("Almacenes")])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("thead", [
+      _c("tr", [
+        _c("th", [_vm._v("Opciones")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Nombre")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Ubicacion")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Notas")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Estado")])
+      ])
+    ])
+  }
+]
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-b5adae72", module.exports)
   }
 }
 

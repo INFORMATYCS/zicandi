@@ -19,6 +19,8 @@ Vue.component('proveedor-component', require('./components/ProveedorComponent.vu
 
 Vue.component('producto-component', require('./components/ProductoComponent.vue'));
 
+Vue.component('almacen-component', require('./components/AlmacenComponent.vue'));
+
 const app = new Vue({
     el: '#app',
     data: {

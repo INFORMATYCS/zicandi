@@ -43,3 +43,9 @@ Route::get('/categoria/selectCategoria', 'CategoriaController@selectCategoria');
 Route::post('parametria/getProceso', 'ParametriaController@getParametriaByProceso');
 Route::get('parametria/seqProductoCodigo_nextval', 'ParametriaController@seqProductoCodigo_nextval');
 
+// - Rutas para Almacen
+Route::get('/almacenes', 'AlmacenController@index');
+Route::post('/almacenes/registrar', 'AlmacenController@store');
+Route::put('/almacenes/actualizar', 'AlmacenController@update');
+Route::put('/almacenes/desactivar', 'AlmacenController@desactivar');
+Route::put('/almacenes/activar', 'AlmacenController@activar');

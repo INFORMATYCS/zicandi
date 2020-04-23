@@ -133,7 +133,7 @@
         
 
         <!--Inicio del modal agregar/actualizar-->
-        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true" :class="{'mostrar' : modalProducto.modal}">
+        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none; bottom: -500px;" aria-hidden="true" :class="{'mostrar' : modalProducto.modal}">
             <div class="modal-dialog modal-primary modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -252,7 +252,7 @@
         <!--Fin del modal-->       
 
         <!--Inicio del modal proveedores-->
-        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true" :class="{'mostrar' : modalProveedor.modal}">
+        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none; bottom: -500px;" aria-hidden="true" :class="{'mostrar' : modalProveedor.modal}">
             <div class="modal-dialog modal-primary" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -299,9 +299,6 @@
                                 
                             </ul>
                         </div>
-                        
-                         
-    
 
                         <form action="" method="post" enctype="multipart/form-data" class="form-horizontal">
                             <div class="form-group row">
