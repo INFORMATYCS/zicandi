@@ -34,7 +34,7 @@ class ProductoController extends Controller{
             ->select('producto.id_producto','producto.id_categoria','producto.codigo','producto.nombre as nombre','producto.url_imagen','producto.nota','categoria.codigo as codigo_categoria','.producto.promedio_precio_compra','producto.ultimo_precio_compra','producto.xstatus')
             ->where('producto.'.$criterio, 'like', '%' . $buscar . '%')
             ->orderBy('producto.id_producto', 'desc')
-            ->paginate(10);            
+            ->paginate(10);
         }
         
 
