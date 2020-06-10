@@ -108,4 +108,38 @@ class ProcesadorImagenes{
 
         return $nombreArchivoSalida;
     }
+
+
+    public function publicaDocumento($prefijo, $file){
+        $c = new Constantes();
+        $repositorio = $c->repositorio_entrada_adjuntos;
+        
+        //File Name
+        $nombre = $file->getClientOriginalName();
+
+        //Display File Extension
+        $extension = $file->getClientOriginalExtension();
+
+        //Display File Real Path
+        //$file->getRealPath();
+
+        //Display File Size
+        //$file->getSize();
+
+        //Display File Mime Type
+        //$file->getMimeType();
+
+        //~Crear el nuevo directorio
+        $carpeta = $repositorio.$prefijo;
+        if (!file_exists($carpeta)) {
+            mkdir($carpeta, 0777, true);
+        }
+
+        //Move Uploaded File
+        $destinationPath = $carpeta;
+        $nombreSalida = $prefijo."_".uniqid().".".$extension;
+        $file->move($destinationPath,$nombreSalida);
+
+        return $destinationPath."/".$nombreSalida;
+    }
 }

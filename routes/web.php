@@ -49,3 +49,16 @@ Route::post('/almacenes/registrar', 'AlmacenController@store');
 Route::put('/almacenes/actualizar', 'AlmacenController@update');
 Route::put('/almacenes/desactivar', 'AlmacenController@desactivar');
 Route::put('/almacenes/activar', 'AlmacenController@activar');
+
+
+// - Rutas para Compras
+Route::get('/compras', 'ComprasController@index');
+Route::post('/compras/registrar', 'ComprasController@store');
+Route::put('/compras/actualizar', 'ComprasController@update');
+Route::put('/compras/desactivar', 'ComprasController@desactivar');
+Route::put('/compras/activar', 'ComprasController@activar');
+
+// - Rutas para Compras
+Route::post('/uploadfile', 'UploadFileController@index');
+Route::post('/uploadfile/getAdjuntosByCarpeta', 'UploadFileController@getAdjuntosByCarpeta');
+Route::put('/uploadfile/delete', 'UploadFileController@delete');

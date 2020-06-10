@@ -21,6 +21,12 @@ Vue.component('producto-component', require('./components/ProductoComponent.vue'
 
 Vue.component('almacen-component', require('./components/AlmacenComponent.vue'));
 
+Vue.component('compra-component', require('./components/CompraComponent.vue'));
+
+Vue.component('upload-component', require('./components/UploadFileComponent.vue'));
+
+
+
 const app = new Vue({
     el: '#app',
     data: {

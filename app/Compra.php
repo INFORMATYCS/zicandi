@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+Use Carbon\Carbon;
 
 class Compra extends Model
 {
@@ -15,10 +16,9 @@ class Compra extends Model
     //~Por seguridad se agrega para evitar ataques. Toda las columnas de la tabla
     protected $fillable = ['id_proveedor','folio','referencia_proveedor','id_carpeta_adjuntos','xstatus'];
 
-
-    //~Relacion inversa One To Many
-    public function categoria(){
-        return $this->belongsTo('App\Categoria');
+    //~Mutadores
+    public function getUpdatedAtAttribute($date){
+        return Carbon::createFromFormat('Y-m-d H:i:s', $date)->format('d/m/Y');
     }
 
     //~Relacion One To Many
@@ -29,6 +29,6 @@ class Compra extends Model
     //~Relacion One To One
     public function carpeta(){
         return $this->hasOne('App\CarpetaAdjuntos','id_carpeta_adjuntos','id_carpeta_adjuntos');
-    }
+    }    
     
 }

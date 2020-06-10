@@ -15,5 +15,9 @@
     <template v-if="oppMenuSeleccion==3">
         <almacen-component></almacen-component>
     </template>
+
+    <template v-if="oppMenuSeleccion==11">
+        <compra-component></compra-component>
+    </template>
     
 @endsection
