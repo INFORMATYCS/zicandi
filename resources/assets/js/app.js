@@ -25,6 +25,8 @@ Vue.component('compra-component', require('./components/CompraComponent.vue'));
 
 Vue.component('upload-component', require('./components/UploadFileComponent.vue'));
 
+Vue.component('buscador-producto-component', require('./components/BuscadorProductoComponent.vue'));
+
 
 
 const app = new Vue({

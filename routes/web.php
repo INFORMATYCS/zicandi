@@ -42,6 +42,7 @@ Route::get('/categoria/selectCategoria', 'CategoriaController@selectCategoria');
 // - Rutas para Parametria
 Route::post('parametria/getProceso', 'ParametriaController@getParametriaByProceso');
 Route::get('parametria/seqProductoCodigo_nextval', 'ParametriaController@seqProductoCodigo_nextval');
+Route::get('parametria/seqFolioCompra_nextval', 'ParametriaController@seqFolioCompra_nextval');
 
 // - Rutas para Almacen
 Route::get('/almacenes', 'AlmacenController@index');
@@ -62,3 +63,4 @@ Route::put('/compras/activar', 'ComprasController@activar');
 Route::post('/uploadfile', 'UploadFileController@index');
 Route::post('/uploadfile/getAdjuntosByCarpeta', 'UploadFileController@getAdjuntosByCarpeta');
 Route::put('/uploadfile/delete', 'UploadFileController@delete');
+Route::put('/uploadfile/nuevaCarpeta', 'UploadFileController@nuevaCarpeta');

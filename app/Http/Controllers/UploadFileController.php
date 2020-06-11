@@ -71,4 +71,14 @@ class UploadFileController extends Controller{
 
         $archivo->delete();
     }
+
+
+    public function nuevaCarpeta(Request $request){
+        $carpeta = new CarpetaAdjuntos();        
+        $carpeta->nombre = $request->nombre;        
+
+        $carpeta->save();
+
+        return $carpeta->id_carpeta_adjuntos;
+    }
 }

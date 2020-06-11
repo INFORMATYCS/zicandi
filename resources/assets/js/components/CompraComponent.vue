@@ -112,18 +112,30 @@
                         <form action="" method="post" enctype="multipart/form-data" class="form-horizontal">
                         
                             <div class="form-group row">
-                                <label class="col-md-3 form-control-label" for="text-input">Ubicacion</label>
-                                <div class="col-md-9">
-                                    <input type="text" class="form-control" placeholder="Lugar de ubicacion" v-model="oCompra.ubicacion">                                    
+                                <label class="col-md-3 form-control-label" for="text-input">Folio</label>
+                                <div class="col-md-5">
+                                    <input type="text" class="form-control" placeholder="Folio de la compra" v-model="oCompra.folio">                                    
+                                </div>
+                                <div class="col-md-4">
+                                    <span class="badge badge-success">PROCESANDO</span>
                                 </div>
                             </div>
 
                             <div class="form-group row">
-                                <label class="col-md-3 form-control-label" for="text-input">Notas</label>
-                                <div class="col-md-9">                                    
-                                    <textarea class="form-control" rows="5" maxlength="300" v-model="oCompra.nota"></textarea>
+                                <label class="col-md-3 form-control-label" for="text-input">Proveedor</label>
+                                <div class="col-md-5">                                    
+                                    <select class="form-control" v-model="oProveedor.selectProveedor">
+                                        <option value="0" disabled>Seleccione...</option>
+                                        <option v-for="proveedor in oProveedor.listaProveedor" :key="proveedor.id_proveedor" v-bind:value="{ id_proveedor: proveedor.id_proveedor, nombre: proveedor.nombre, nombre_corto: proveedor.nombre_corto, pagina_web: proveedor.pagina_web }">
+                                            {{ proveedor.nombre }}
+                                        </option>
+                                    </select>          
+                                </div>
+                                <div class="col-md-4">                                    
+                                    <input type="text" class="form-control" placeholder="Referencia proveedor" v-model="oCompra.ubicacion">                                    
                                 </div>
                             </div>
+
                     
 
                             <div v-show="modalCompras.error" class="form-group row div-error">
@@ -131,6 +143,36 @@
                                     <div v-for="error in modalCompras.erroresMsjList" :key="error" v-text="error"></div>
                                 </div>
                             </div>
+
+
+
+                            <div class="col-md-12">
+                                <buscador-producto-component @setProducto="getProduccionSeleccion" ></buscador-producto-component> 
+                            </div>
+                            <div class="form-group row">                                
+                                
+
+                                <div class="col-md-12">
+                                    <div class="card">
+                                                                                        
+                                                  
+                                                                               
+                                    </div>
+
+                                    <div class="card">
+
+                                    </div>
+                                </div>
+                            </div>
+                            
+                                                                                 
+                            
+
+
+
+
+
+
                         </form>
                     </div>
                     <div class="modal-footer">
@@ -159,9 +201,14 @@
                     id_proveedor: '',
                     folio: '',
                     referencia_proveedor: '',
-                    id_carpeta_adjuntos: 1
+                    id_carpeta_adjuntos: 0,
+                    estatus : ''
                 },                        
                 listaCompras: [],
+                oProveedor:{
+                    selectProveedor:'',                    
+                    listaProveedor: []                    
+                },
                 modalCompras: {
                     modal: 0,
                     tituloModal: '',
@@ -210,9 +257,112 @@
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
             },
+            //~Aber modal
+            showModal(modelo, accion, data=[]){
+                switch(modelo){
+                    case 'compra':
+                    {
+                        switch(accion){
+                            case 'registrar':
+                            {
+                                this.modalCompras.modal = 1;                                 
+                                //~Carga documentos adjuntos
+                                this.onCargaComponenteUpload();
+                                this.selectProveedor();
+                                this.seqFolioCompraNextval();
 
+                                this.oCompra.id_compra = 0;
+                                this.oCompra.id_proveedor = 0;
+                                this.oCompra.folio = '';
+                                this.oCompra.referencia_proveedor = '';
+                                this.oCompra.id_carpeta_adjuntos = 0;
+                                this.oCompra.estatus = 'REGISTRANDO';
+                                this.modalCompras.tituloModal = 'Registrar nueva Compra';
+                                this.modalCompras.tipoAccion = 1;
 
+                                break;
+                            }
+                            case 'actualizar':
+                            {
+                                this.modalCompras.modal = 1;
+                                //~Carga documentos adjuntos
+                                this.onCargaComponenteUpload();
 
+                                this.modalCompras.tituloModal = 'Actualizar compra'
+                                this.modalCompras.tipoAccion = 2;
+                                
+                                this.oCompra.id_compra = data['id_compra'];
+                                this.oCompra.id_proveedor = data['id_proveedor'];
+                                this.oCompra.folio = data['folio'];
+                                this.oCompra.referencia_proveedor = data['referencia_proveedor'];
+                                this.oCompra.id_carpeta_adjuntos = data['id_carpeta_adjuntos'];
+                                this.oCompra.estatus = data['estatus'];
+                            }
+                        }
+                    }
+                }
+            },
+            closeModal(){
+                this.modalCompras.modal = 0;                
+                this.ubicacion = '';
+                this.nota = '';                
+                this.modalCompras.tituloModal = '';
+            },
+            onCargaComponenteUpload(){
+                if(this.oCompra.id_carpeta_adjuntos==0 || this.oCompra.id_carpeta_adjuntos==null){
+                    let me = this;                    
+                    axios.put('/zicandi/public/uploadfile/nuevaCarpeta',{
+                        'nombre': 'carpeta_compra'                   
+                    })
+                    .then(function (response) {                                                                
+                        console.log(response);
+
+                        me.oCompra.id_carpeta_adjuntos=response.data;
+                        me.$refs.adjuntos.onLoadAdjuntos(me.oCompra.id_carpeta_adjuntos);
+                    })
+                    .catch(function (error) {                               
+                        util.MSG('Algo salio Mal','Error al crear la carpeta: '.util.getErrorMensaje(error), util.tipoErr);
+                    });
+                }else{
+                    this.$refs.adjuntos.onLoadAdjuntos(this.oCompra.id_carpeta_adjuntos);
+                }
+                
+            },
+            selectProveedor(){                
+                let me=this;                
+                var url= '/zicandi/public/proveedores/selectProveedor';
+                axios.get(url)
+                .then(function (response) {                    
+                    var respuesta = response.data;  
+
+                    me.oProveedor.listaProveedor = respuesta.proveedores;                    
+                })
+                .catch(function (error) {                                        
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+            seqFolioCompraNextval(){                
+                let me=this;                
+                var url= '/zicandi/public/parametria/seqFolioCompra_nextval';
+                axios.get(url)
+                .then(function (response) {                    
+                    var respuesta = response.data;  
+
+                    me.oCompra.folio = respuesta;                    
+                })
+                .catch(function (error) {                                        
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+            getProduccionSeleccion(producto){
+                console.log('Llego');
+                console.log(producto);
+            },
+
+            
+            
+            
+            
             registrar(){
                 if(this.validarAlmacen()){
                     return;
@@ -309,46 +459,7 @@
 
                 });               
             },
-            showModal(modelo, accion, data=[]){
-                switch(modelo){
-                    case 'compra':
-                    {
-                        switch(accion){
-                            case 'registrar':
-                            {
-                                this.modalCompras.modal = 1;                                 
-                                this.$refs.adjuntos.onLoadAdjuntos(this.oCompra.id_carpeta_adjuntos);
-
-                                this.oCompra.id_proveedor = 0;
-                                this.oCompra.folio = '';
-                                this.oCompra.referencia_proveedor = '';
-                                //this.oCompra.id_carpeta_adjuntos = '';
-                                this.modalCompras.tituloModal = 'Registrar nueva Compra';
-                                this.modalCompras.tipoAccion = 1;
-                                 
-                                break;
-                            }
-                            case 'actualizar':
-                            {
-                                this.modalCompras.modal = 1;
-                                this.modalCompras.tituloModal = 'Actualizar almacen'
-                                this.modalCompras.tipoAccion = 2;
-                                
-                                this.oCompra.nombre = data['nombre'];
-                                this.oCompra.ubicacion = data['ubicacion'];
-                                this.oCompra.nota = data['nota'];
-                                this.oCompra.id_almacen = data['id_almacen'];
-                            }
-                        }
-                    }
-                }
-            },
-            closeModal(){
-                this.modalCompras.modal = 0;                
-                this.ubicacion = '';
-                this.nota = '';                
-                this.modalCompras.tituloModal = '';
-            },
+            
             validarAlmacen(){
                 this.modalCompras.error = 0;
                 this.modalCompras.erroresMsjList = [];
