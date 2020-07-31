@@ -19,6 +19,7 @@ class CreateCompraTable extends Migration
             $table->string('folio',50);
             $table->string('referencia_proveedor',80)->nullable();
             $table->integer('id_carpeta_adjuntos')->unsigned();
+            $table->string('estatus',20);
             $table->boolean('xstatus')->default(1);
             $table->timestamps();
 

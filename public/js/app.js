@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 26);
+/******/ 	return __webpack_require__(__webpack_require__.s = 28);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -71,7 +71,7 @@
 
 
 var bind = __webpack_require__(13);
-var isBuffer = __webpack_require__(35);
+var isBuffer = __webpack_require__(37);
 
 /*global toString:true*/
 
@@ -400,33 +400,6 @@ exports.default = Barcode;
 /* 2 */
 /***/ (function(module, exports) {
 
-var g;
-
-// This works in non-strict mode
-g = (function() {
-	return this;
-})();
-
-try {
-	// This works if eval is allowed (see CSP)
-	g = g || Function("return this")() || (1,eval)("this");
-} catch(e) {
-	// This works if the window reference is available
-	if(typeof window === "object")
-		g = window;
-}
-
-// g can still be undefined, but nothing to do about it...
-// We return undefined, instead of nothing here, so it's
-// easier to handle this case. if(!global) { ...}
-
-module.exports = g;
-
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports) {
-
 /* globals __VUE_SSR_CONTEXT__ */
 
 // IMPORTANT: Do NOT use ES2015 features in this file.
@@ -530,6 +503,33 @@ module.exports = function normalizeComponent (
     options: options
   }
 }
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || Function("return this")() || (1,eval)("this");
+} catch(e) {
+	// This works if the window reference is available
+	if(typeof window === "object")
+		g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
 
 
 /***/ }),
@@ -974,7 +974,7 @@ exports.default = function (old, replaceObj) {
 /* WEBPACK VAR INJECTION */(function(process) {
 
 var utils = __webpack_require__(0);
-var normalizeHeaderName = __webpack_require__(37);
+var normalizeHeaderName = __webpack_require__(39);
 
 var DEFAULT_CONTENT_TYPE = {
   'Content-Type': 'application/x-www-form-urlencoded'
@@ -3693,7 +3693,7 @@ Popper.Defaults = Defaults;
 /* harmony default export */ __webpack_exports__["default"] = (Popper);
 //# sourceMappingURL=popper.js.map
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(3)))
 
 /***/ }),
 /* 13 */
@@ -3911,10 +3911,10 @@ process.umask = function() { return 0; };
 
 
 var utils = __webpack_require__(0);
-var settle = __webpack_require__(38);
-var buildURL = __webpack_require__(40);
-var parseHeaders = __webpack_require__(41);
-var isURLSameOrigin = __webpack_require__(42);
+var settle = __webpack_require__(40);
+var buildURL = __webpack_require__(42);
+var parseHeaders = __webpack_require__(43);
+var isURLSameOrigin = __webpack_require__(44);
 var createError = __webpack_require__(16);
 
 module.exports = function xhrAdapter(config) {
@@ -3995,7 +3995,7 @@ module.exports = function xhrAdapter(config) {
     // This is only done if running in a standard browser environment.
     // Specifically not if we're in a web worker, or react-native.
     if (utils.isStandardBrowserEnv()) {
-      var cookies = __webpack_require__(43);
+      var cookies = __webpack_require__(45);
 
       // Add xsrf header
       var xsrfValue = (config.withCredentials || isURLSameOrigin(config.url)) && config.xsrfCookieName ?
@@ -4079,7 +4079,7 @@ module.exports = function xhrAdapter(config) {
 "use strict";
 
 
-var enhanceError = __webpack_require__(39);
+var enhanceError = __webpack_require__(41);
 
 /**
  * Create an Error with the specified message, config, error code, request and response.
@@ -4417,7 +4417,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _constants = __webpack_require__(77);
+var _constants = __webpack_require__(79);
 
 var _Barcode2 = __webpack_require__(1);
 
@@ -4722,13 +4722,323 @@ exports.NoElementException = NoElementException;
 
 /***/ }),
 /* 26 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-module.exports = __webpack_require__(27);
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+// css base code, injected by the css-loader
+module.exports = function(useSourceMap) {
+	var list = [];
+
+	// return the list of modules as css string
+	list.toString = function toString() {
+		return this.map(function (item) {
+			var content = cssWithMappingToString(item, useSourceMap);
+			if(item[2]) {
+				return "@media " + item[2] + "{" + content + "}";
+			} else {
+				return content;
+			}
+		}).join("");
+	};
+
+	// import a list of modules into the list
+	list.i = function(modules, mediaQuery) {
+		if(typeof modules === "string")
+			modules = [[null, modules, ""]];
+		var alreadyImportedModules = {};
+		for(var i = 0; i < this.length; i++) {
+			var id = this[i][0];
+			if(typeof id === "number")
+				alreadyImportedModules[id] = true;
+		}
+		for(i = 0; i < modules.length; i++) {
+			var item = modules[i];
+			// skip already imported module
+			// this implementation is not 100% perfect for weird media query combinations
+			//  when a module is imported multiple times with different media queries.
+			//  I hope this will never occur (Hey this way we have smaller bundles)
+			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+				if(mediaQuery && !item[2]) {
+					item[2] = mediaQuery;
+				} else if(mediaQuery) {
+					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+				}
+				list.push(item);
+			}
+		}
+	};
+	return list;
+};
+
+function cssWithMappingToString(item, useSourceMap) {
+	var content = item[1] || '';
+	var cssMapping = item[3];
+	if (!cssMapping) {
+		return content;
+	}
+
+	if (useSourceMap && typeof btoa === 'function') {
+		var sourceMapping = toComment(cssMapping);
+		var sourceURLs = cssMapping.sources.map(function (source) {
+			return '/*# sourceURL=' + cssMapping.sourceRoot + source + ' */'
+		});
+
+		return [content].concat(sourceURLs).concat([sourceMapping]).join('\n');
+	}
+
+	return [content].join('\n');
+}
+
+// Adapted from convert-source-map (MIT)
+function toComment(sourceMap) {
+	// eslint-disable-next-line no-undef
+	var base64 = btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap))));
+	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
+
+	return '/*# ' + data + ' */';
+}
 
 
 /***/ }),
 /* 27 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra
+  Modified by Evan You @yyx990803
+*/
+
+var hasDocument = typeof document !== 'undefined'
+
+if (typeof DEBUG !== 'undefined' && DEBUG) {
+  if (!hasDocument) {
+    throw new Error(
+    'vue-style-loader cannot be used in a non-browser environment. ' +
+    "Use { target: 'node' } in your Webpack config to indicate a server-rendering environment."
+  ) }
+}
+
+var listToStyles = __webpack_require__(108)
+
+/*
+type StyleObject = {
+  id: number;
+  parts: Array<StyleObjectPart>
+}
+
+type StyleObjectPart = {
+  css: string;
+  media: string;
+  sourceMap: ?string
+}
+*/
+
+var stylesInDom = {/*
+  [id: number]: {
+    id: number,
+    refs: number,
+    parts: Array<(obj?: StyleObjectPart) => void>
+  }
+*/}
+
+var head = hasDocument && (document.head || document.getElementsByTagName('head')[0])
+var singletonElement = null
+var singletonCounter = 0
+var isProduction = false
+var noop = function () {}
+var options = null
+var ssrIdKey = 'data-vue-ssr-id'
+
+// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+// tags it will allow on a page
+var isOldIE = typeof navigator !== 'undefined' && /msie [6-9]\b/.test(navigator.userAgent.toLowerCase())
+
+module.exports = function (parentId, list, _isProduction, _options) {
+  isProduction = _isProduction
+
+  options = _options || {}
+
+  var styles = listToStyles(parentId, list)
+  addStylesToDom(styles)
+
+  return function update (newList) {
+    var mayRemove = []
+    for (var i = 0; i < styles.length; i++) {
+      var item = styles[i]
+      var domStyle = stylesInDom[item.id]
+      domStyle.refs--
+      mayRemove.push(domStyle)
+    }
+    if (newList) {
+      styles = listToStyles(parentId, newList)
+      addStylesToDom(styles)
+    } else {
+      styles = []
+    }
+    for (var i = 0; i < mayRemove.length; i++) {
+      var domStyle = mayRemove[i]
+      if (domStyle.refs === 0) {
+        for (var j = 0; j < domStyle.parts.length; j++) {
+          domStyle.parts[j]()
+        }
+        delete stylesInDom[domStyle.id]
+      }
+    }
+  }
+}
+
+function addStylesToDom (styles /* Array<StyleObject> */) {
+  for (var i = 0; i < styles.length; i++) {
+    var item = styles[i]
+    var domStyle = stylesInDom[item.id]
+    if (domStyle) {
+      domStyle.refs++
+      for (var j = 0; j < domStyle.parts.length; j++) {
+        domStyle.parts[j](item.parts[j])
+      }
+      for (; j < item.parts.length; j++) {
+        domStyle.parts.push(addStyle(item.parts[j]))
+      }
+      if (domStyle.parts.length > item.parts.length) {
+        domStyle.parts.length = item.parts.length
+      }
+    } else {
+      var parts = []
+      for (var j = 0; j < item.parts.length; j++) {
+        parts.push(addStyle(item.parts[j]))
+      }
+      stylesInDom[item.id] = { id: item.id, refs: 1, parts: parts }
+    }
+  }
+}
+
+function createStyleElement () {
+  var styleElement = document.createElement('style')
+  styleElement.type = 'text/css'
+  head.appendChild(styleElement)
+  return styleElement
+}
+
+function addStyle (obj /* StyleObjectPart */) {
+  var update, remove
+  var styleElement = document.querySelector('style[' + ssrIdKey + '~="' + obj.id + '"]')
+
+  if (styleElement) {
+    if (isProduction) {
+      // has SSR styles and in production mode.
+      // simply do nothing.
+      return noop
+    } else {
+      // has SSR styles but in dev mode.
+      // for some reason Chrome can't handle source map in server-rendered
+      // style tags - source maps in <style> only works if the style tag is
+      // created and inserted dynamically. So we remove the server rendered
+      // styles and inject new ones.
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  if (isOldIE) {
+    // use singleton mode for IE9.
+    var styleIndex = singletonCounter++
+    styleElement = singletonElement || (singletonElement = createStyleElement())
+    update = applyToSingletonTag.bind(null, styleElement, styleIndex, false)
+    remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true)
+  } else {
+    // use multi-style-tag mode in all other cases
+    styleElement = createStyleElement()
+    update = applyToTag.bind(null, styleElement)
+    remove = function () {
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  update(obj)
+
+  return function updateStyle (newObj /* StyleObjectPart */) {
+    if (newObj) {
+      if (newObj.css === obj.css &&
+          newObj.media === obj.media &&
+          newObj.sourceMap === obj.sourceMap) {
+        return
+      }
+      update(obj = newObj)
+    } else {
+      remove()
+    }
+  }
+}
+
+var replaceText = (function () {
+  var textStore = []
+
+  return function (index, replacement) {
+    textStore[index] = replacement
+    return textStore.filter(Boolean).join('\n')
+  }
+})()
+
+function applyToSingletonTag (styleElement, index, remove, obj) {
+  var css = remove ? '' : obj.css
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = replaceText(index, css)
+  } else {
+    var cssNode = document.createTextNode(css)
+    var childNodes = styleElement.childNodes
+    if (childNodes[index]) styleElement.removeChild(childNodes[index])
+    if (childNodes.length) {
+      styleElement.insertBefore(cssNode, childNodes[index])
+    } else {
+      styleElement.appendChild(cssNode)
+    }
+  }
+}
+
+function applyToTag (styleElement, obj) {
+  var css = obj.css
+  var media = obj.media
+  var sourceMap = obj.sourceMap
+
+  if (media) {
+    styleElement.setAttribute('media', media)
+  }
+  if (options.ssrId) {
+    styleElement.setAttribute(ssrIdKey, obj.id)
+  }
+
+  if (sourceMap) {
+    // https://developer.chrome.com/devtools/docs/javascript-debugging
+    // this makes source maps inside style tags work properly in Chrome
+    css += '\n/*# sourceURL=' + sourceMap.sources[0] + ' */'
+    // http://stackoverflow.com/a/26603875
+    css += '\n/*# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + ' */'
+  }
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = css
+  } else {
+    while (styleElement.firstChild) {
+      styleElement.removeChild(styleElement.firstChild)
+    }
+    styleElement.appendChild(document.createTextNode(css))
+  }
+}
+
+
+/***/ }),
+/* 28 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(29);
+
+
+/***/ }),
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -4738,9 +5048,9 @@ module.exports = __webpack_require__(27);
  * building robust, powerful web applications using Vue and Laravel.
  */
 
-__webpack_require__(28);
+__webpack_require__(30);
 
-window.Vue = __webpack_require__(51);
+window.Vue = __webpack_require__(53);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -4748,17 +5058,20 @@ window.Vue = __webpack_require__(51);
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('proveedor-component', __webpack_require__(55));
+Vue.component('proveedor-component', __webpack_require__(57));
 
-Vue.component('producto-component', __webpack_require__(58));
+Vue.component('producto-component', __webpack_require__(60));
 
-Vue.component('almacen-component', __webpack_require__(97));
+Vue.component('almacen-component', __webpack_require__(99));
 
-Vue.component('compra-component', __webpack_require__(100));
+Vue.component('compra-component', __webpack_require__(102));
 
-Vue.component('upload-component', __webpack_require__(103));
+Vue.component('upload-component', __webpack_require__(105));
 
 Vue.component('buscador-producto-component', __webpack_require__(111));
+
+Vue.component('mercadolibre-component', __webpack_require__(116));
+Vue.component('herramientas-component', __webpack_require__(119));
 
 var app = new Vue({
   el: '#app',
@@ -4768,11 +5081,11 @@ var app = new Vue({
 });
 
 /***/ }),
-/* 28 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-window._ = __webpack_require__(29);
+window._ = __webpack_require__(31);
 window.Popper = __webpack_require__(12).default;
 
 /**
@@ -4784,7 +5097,7 @@ window.Popper = __webpack_require__(12).default;
 try {
   //window.$ = window.jQuery = require('jquery');
 
-  __webpack_require__(31);
+  __webpack_require__(33);
 } catch (e) {}
 
 /**
@@ -4793,7 +5106,7 @@ try {
  * CSRF token as a header based on the value of the "XSRF" token cookie.
  */
 
-window.axios = __webpack_require__(33);
+window.axios = __webpack_require__(35);
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
@@ -4829,7 +5142,7 @@ if (token) {
 // });
 
 /***/ }),
-/* 29 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, module) {var __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -21946,10 +22259,10 @@ if (token) {
   }
 }.call(this));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2), __webpack_require__(30)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3), __webpack_require__(32)(module)))
 
 /***/ }),
-/* 30 */
+/* 32 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -21977,7 +22290,7 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 31 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*!
@@ -21986,7 +22299,7 @@ module.exports = function(module) {
   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
   */
 (function (global, factory) {
-   true ? factory(exports, __webpack_require__(32), __webpack_require__(12)) :
+   true ? factory(exports, __webpack_require__(34), __webpack_require__(12)) :
   typeof define === 'function' && define.amd ? define(['exports', 'jquery', 'popper.js'], factory) :
   (global = global || self, factory(global.bootstrap = {}, global.jQuery, global.Popper));
 }(this, (function (exports, $, Popper) { 'use strict';
@@ -26504,7 +26817,7 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 32 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -37109,13 +37422,13 @@ return jQuery;
 
 
 /***/ }),
-/* 33 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(34);
+module.exports = __webpack_require__(36);
 
 /***/ }),
-/* 34 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37123,7 +37436,7 @@ module.exports = __webpack_require__(34);
 
 var utils = __webpack_require__(0);
 var bind = __webpack_require__(13);
-var Axios = __webpack_require__(36);
+var Axios = __webpack_require__(38);
 var defaults = __webpack_require__(11);
 
 /**
@@ -37158,14 +37471,14 @@ axios.create = function create(instanceConfig) {
 
 // Expose Cancel & CancelToken
 axios.Cancel = __webpack_require__(18);
-axios.CancelToken = __webpack_require__(49);
+axios.CancelToken = __webpack_require__(51);
 axios.isCancel = __webpack_require__(17);
 
 // Expose all/spread
 axios.all = function all(promises) {
   return Promise.all(promises);
 };
-axios.spread = __webpack_require__(50);
+axios.spread = __webpack_require__(52);
 
 module.exports = axios;
 
@@ -37174,7 +37487,7 @@ module.exports.default = axios;
 
 
 /***/ }),
-/* 35 */
+/* 37 */
 /***/ (function(module, exports) {
 
 /*!
@@ -37191,7 +37504,7 @@ module.exports = function isBuffer (obj) {
 
 
 /***/ }),
-/* 36 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37199,8 +37512,8 @@ module.exports = function isBuffer (obj) {
 
 var defaults = __webpack_require__(11);
 var utils = __webpack_require__(0);
-var InterceptorManager = __webpack_require__(44);
-var dispatchRequest = __webpack_require__(45);
+var InterceptorManager = __webpack_require__(46);
+var dispatchRequest = __webpack_require__(47);
 
 /**
  * Create a new instance of Axios
@@ -37277,7 +37590,7 @@ module.exports = Axios;
 
 
 /***/ }),
-/* 37 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37296,7 +37609,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
 
 
 /***/ }),
-/* 38 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37329,7 +37642,7 @@ module.exports = function settle(resolve, reject, response) {
 
 
 /***/ }),
-/* 39 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37357,7 +37670,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
 
 
 /***/ }),
-/* 40 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37430,7 +37743,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
 
 
 /***/ }),
-/* 41 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37490,7 +37803,7 @@ module.exports = function parseHeaders(headers) {
 
 
 /***/ }),
-/* 42 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37565,7 +37878,7 @@ module.exports = (
 
 
 /***/ }),
-/* 43 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37625,7 +37938,7 @@ module.exports = (
 
 
 /***/ }),
-/* 44 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37684,18 +37997,18 @@ module.exports = InterceptorManager;
 
 
 /***/ }),
-/* 45 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var utils = __webpack_require__(0);
-var transformData = __webpack_require__(46);
+var transformData = __webpack_require__(48);
 var isCancel = __webpack_require__(17);
 var defaults = __webpack_require__(11);
-var isAbsoluteURL = __webpack_require__(47);
-var combineURLs = __webpack_require__(48);
+var isAbsoluteURL = __webpack_require__(49);
+var combineURLs = __webpack_require__(50);
 
 /**
  * Throws a `Cancel` if cancellation has been requested.
@@ -37777,7 +38090,7 @@ module.exports = function dispatchRequest(config) {
 
 
 /***/ }),
-/* 46 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37804,7 +38117,7 @@ module.exports = function transformData(data, headers, fns) {
 
 
 /***/ }),
-/* 47 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37825,7 +38138,7 @@ module.exports = function isAbsoluteURL(url) {
 
 
 /***/ }),
-/* 48 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37846,7 +38159,7 @@ module.exports = function combineURLs(baseURL, relativeURL) {
 
 
 /***/ }),
-/* 49 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37910,7 +38223,7 @@ module.exports = CancelToken;
 
 
 /***/ }),
-/* 50 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37944,18 +38257,18 @@ module.exports = function spread(callback) {
 
 
 /***/ }),
-/* 51 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 if (false) {
   module.exports = require('./vue.common.prod.js')
 } else {
-  module.exports = __webpack_require__(52)
+  module.exports = __webpack_require__(54)
 }
 
 
 /***/ }),
-/* 52 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -49919,10 +50232,10 @@ Vue.compile = compileToFunctions;
 
 module.exports = Vue;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2), __webpack_require__(53).setImmediate))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3), __webpack_require__(55).setImmediate))
 
 /***/ }),
-/* 53 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {var scope = (typeof global !== "undefined" && global) ||
@@ -49978,7 +50291,7 @@ exports._unrefActive = exports.active = function(item) {
 };
 
 // setimmediate attaches itself to the global object
-__webpack_require__(54);
+__webpack_require__(56);
 // On some exotic environments, it's not clear which object `setimmediate` was
 // able to install onto.  Search each possibility in the same order as the
 // `setimmediate` library.
@@ -49989,10 +50302,10 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
                          (typeof global !== "undefined" && global.clearImmediate) ||
                          (this && this.clearImmediate);
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ }),
-/* 54 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, process) {(function (global, undefined) {
@@ -50182,18 +50495,18 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
     attachTo.clearImmediate = clearImmediate;
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2), __webpack_require__(14)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3), __webpack_require__(14)))
 
 /***/ }),
-/* 55 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
-var normalizeComponent = __webpack_require__(3)
+var normalizeComponent = __webpack_require__(2)
 /* script */
-var __vue_script__ = __webpack_require__(56)
+var __vue_script__ = __webpack_require__(58)
 /* template */
-var __vue_template__ = __webpack_require__(57)
+var __vue_template__ = __webpack_require__(59)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -50232,7 +50545,7 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 56 */
+/* 58 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -50640,7 +50953,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 57 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -51351,15 +51664,15 @@ if (false) {
 }
 
 /***/ }),
-/* 58 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
-var normalizeComponent = __webpack_require__(3)
+var normalizeComponent = __webpack_require__(2)
 /* script */
-var __vue_script__ = __webpack_require__(59)
+var __vue_script__ = __webpack_require__(61)
 /* template */
-var __vue_template__ = __webpack_require__(96)
+var __vue_template__ = __webpack_require__(98)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -51398,12 +51711,12 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 59 */
+/* 61 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue_barcode__ = __webpack_require__(60);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue_barcode__ = __webpack_require__(62);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue_barcode___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_vue_barcode__);
 //
 //
@@ -52220,10 +52533,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 60 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var JsBarcode = __webpack_require__(61);
+var JsBarcode = __webpack_require__(63);
 
 var VueBarcode = {
    render: function (createElement) {
@@ -52322,13 +52635,13 @@ module.exports = VueBarcode;
 
 
 /***/ }),
-/* 61 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _barcodes = __webpack_require__(62);
+var _barcodes = __webpack_require__(64);
 
 var _barcodes2 = _interopRequireDefault(_barcodes);
 
@@ -52336,15 +52649,15 @@ var _merge = __webpack_require__(10);
 
 var _merge2 = _interopRequireDefault(_merge);
 
-var _linearizeEncodings = __webpack_require__(87);
+var _linearizeEncodings = __webpack_require__(89);
 
 var _linearizeEncodings2 = _interopRequireDefault(_linearizeEncodings);
 
-var _fixOptions = __webpack_require__(88);
+var _fixOptions = __webpack_require__(90);
 
 var _fixOptions2 = _interopRequireDefault(_fixOptions);
 
-var _getRenderProperties = __webpack_require__(89);
+var _getRenderProperties = __webpack_require__(91);
 
 var _getRenderProperties2 = _interopRequireDefault(_getRenderProperties);
 
@@ -52352,7 +52665,7 @@ var _optionsFromStrings = __webpack_require__(22);
 
 var _optionsFromStrings2 = _interopRequireDefault(_optionsFromStrings);
 
-var _ErrorHandler = __webpack_require__(95);
+var _ErrorHandler = __webpack_require__(97);
 
 var _ErrorHandler2 = _interopRequireDefault(_ErrorHandler);
 
@@ -52580,7 +52893,7 @@ if (typeof jQuery !== 'undefined') {
 module.exports = JsBarcode;
 
 /***/ }),
-/* 62 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52590,21 +52903,21 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-var _CODE = __webpack_require__(63);
+var _CODE = __webpack_require__(65);
 
-var _CODE2 = __webpack_require__(64);
+var _CODE2 = __webpack_require__(66);
 
-var _EAN_UPC = __webpack_require__(70);
+var _EAN_UPC = __webpack_require__(72);
 
-var _ITF = __webpack_require__(76);
+var _ITF = __webpack_require__(78);
 
-var _MSI = __webpack_require__(79);
+var _MSI = __webpack_require__(81);
 
-var _pharmacode = __webpack_require__(84);
+var _pharmacode = __webpack_require__(86);
 
-var _codabar = __webpack_require__(85);
+var _codabar = __webpack_require__(87);
 
-var _GenericBarcode = __webpack_require__(86);
+var _GenericBarcode = __webpack_require__(88);
 
 exports.default = {
 	CODE39: _CODE.CODE39,
@@ -52619,7 +52932,7 @@ exports.default = {
 };
 
 /***/ }),
-/* 63 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52730,7 +53043,7 @@ function mod43checksum(data) {
 exports.CODE39 = CODE39;
 
 /***/ }),
-/* 64 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52741,19 +53054,19 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.CODE128C = exports.CODE128B = exports.CODE128A = exports.CODE128 = undefined;
 
-var _CODE128_AUTO = __webpack_require__(65);
+var _CODE128_AUTO = __webpack_require__(67);
 
 var _CODE128_AUTO2 = _interopRequireDefault(_CODE128_AUTO);
 
-var _CODE128A = __webpack_require__(67);
+var _CODE128A = __webpack_require__(69);
 
 var _CODE128A2 = _interopRequireDefault(_CODE128A);
 
-var _CODE128B = __webpack_require__(68);
+var _CODE128B = __webpack_require__(70);
 
 var _CODE128B2 = _interopRequireDefault(_CODE128B);
 
-var _CODE128C = __webpack_require__(69);
+var _CODE128C = __webpack_require__(71);
 
 var _CODE128C2 = _interopRequireDefault(_CODE128C);
 
@@ -52765,7 +53078,7 @@ exports.CODE128B = _CODE128B2.default;
 exports.CODE128C = _CODE128C2.default;
 
 /***/ }),
-/* 65 */
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52779,7 +53092,7 @@ var _CODE2 = __webpack_require__(8);
 
 var _CODE3 = _interopRequireDefault(_CODE2);
 
-var _auto = __webpack_require__(66);
+var _auto = __webpack_require__(68);
 
 var _auto2 = _interopRequireDefault(_auto);
 
@@ -52812,7 +53125,7 @@ var CODE128AUTO = function (_CODE) {
 exports.default = CODE128AUTO;
 
 /***/ }),
-/* 66 */
+/* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52891,7 +53204,7 @@ exports.default = function (string) {
 };
 
 /***/ }),
-/* 67 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52939,7 +53252,7 @@ var CODE128A = function (_CODE) {
 exports.default = CODE128A;
 
 /***/ }),
-/* 68 */
+/* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52987,7 +53300,7 @@ var CODE128B = function (_CODE) {
 exports.default = CODE128B;
 
 /***/ }),
-/* 69 */
+/* 71 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53035,7 +53348,7 @@ var CODE128C = function (_CODE) {
 exports.default = CODE128C;
 
 /***/ }),
-/* 70 */
+/* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53046,19 +53359,19 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.UPCE = exports.UPC = exports.EAN2 = exports.EAN5 = exports.EAN8 = exports.EAN13 = undefined;
 
-var _EAN = __webpack_require__(71);
+var _EAN = __webpack_require__(73);
 
 var _EAN2 = _interopRequireDefault(_EAN);
 
-var _EAN3 = __webpack_require__(72);
+var _EAN3 = __webpack_require__(74);
 
 var _EAN4 = _interopRequireDefault(_EAN3);
 
-var _EAN5 = __webpack_require__(73);
+var _EAN5 = __webpack_require__(75);
 
 var _EAN6 = _interopRequireDefault(_EAN5);
 
-var _EAN7 = __webpack_require__(74);
+var _EAN7 = __webpack_require__(76);
 
 var _EAN8 = _interopRequireDefault(_EAN7);
 
@@ -53066,7 +53379,7 @@ var _UPC = __webpack_require__(20);
 
 var _UPC2 = _interopRequireDefault(_UPC);
 
-var _UPCE = __webpack_require__(75);
+var _UPCE = __webpack_require__(77);
 
 var _UPCE2 = _interopRequireDefault(_UPCE);
 
@@ -53080,7 +53393,7 @@ exports.UPC = _UPC2.default;
 exports.UPCE = _UPCE2.default;
 
 /***/ }),
-/* 71 */
+/* 73 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53205,7 +53518,7 @@ var EAN13 = function (_EAN) {
 exports.default = EAN13;
 
 /***/ }),
-/* 72 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53292,7 +53605,7 @@ var EAN8 = function (_EAN) {
 exports.default = EAN8;
 
 /***/ }),
-/* 73 */
+/* 75 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53363,7 +53676,7 @@ var EAN5 = function (_Barcode) {
 exports.default = EAN5;
 
 /***/ }),
-/* 74 */
+/* 76 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53427,7 +53740,7 @@ var EAN2 = function (_Barcode) {
 exports.default = EAN2;
 
 /***/ }),
-/* 75 */
+/* 77 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53618,7 +53931,7 @@ function expandToUPCA(middleDigits, numberSystem) {
 exports.default = UPCE;
 
 /***/ }),
-/* 76 */
+/* 78 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53633,7 +53946,7 @@ var _ITF = __webpack_require__(21);
 
 var _ITF2 = _interopRequireDefault(_ITF);
 
-var _ITF3 = __webpack_require__(78);
+var _ITF3 = __webpack_require__(80);
 
 var _ITF4 = _interopRequireDefault(_ITF3);
 
@@ -53643,7 +53956,7 @@ exports.ITF = _ITF2.default;
 exports.ITF14 = _ITF4.default;
 
 /***/ }),
-/* 77 */
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53658,7 +53971,7 @@ var END_BIN = exports.END_BIN = '11101';
 var BINARIES = exports.BINARIES = ['00110', '10001', '01001', '11000', '00101', '10100', '01100', '00011', '10010', '01010'];
 
 /***/ }),
-/* 78 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53719,7 +54032,7 @@ var ITF14 = function (_ITF) {
 exports.default = ITF14;
 
 /***/ }),
-/* 79 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53734,19 +54047,19 @@ var _MSI = __webpack_require__(7);
 
 var _MSI2 = _interopRequireDefault(_MSI);
 
-var _MSI3 = __webpack_require__(80);
+var _MSI3 = __webpack_require__(82);
 
 var _MSI4 = _interopRequireDefault(_MSI3);
 
-var _MSI5 = __webpack_require__(81);
+var _MSI5 = __webpack_require__(83);
 
 var _MSI6 = _interopRequireDefault(_MSI5);
 
-var _MSI7 = __webpack_require__(82);
+var _MSI7 = __webpack_require__(84);
 
 var _MSI8 = _interopRequireDefault(_MSI7);
 
-var _MSI9 = __webpack_require__(83);
+var _MSI9 = __webpack_require__(85);
 
 var _MSI10 = _interopRequireDefault(_MSI9);
 
@@ -53759,7 +54072,7 @@ exports.MSI1010 = _MSI8.default;
 exports.MSI1110 = _MSI10.default;
 
 /***/ }),
-/* 80 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53798,7 +54111,7 @@ var MSI10 = function (_MSI) {
 exports.default = MSI10;
 
 /***/ }),
-/* 81 */
+/* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53837,7 +54150,7 @@ var MSI11 = function (_MSI) {
 exports.default = MSI11;
 
 /***/ }),
-/* 82 */
+/* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53878,7 +54191,7 @@ var MSI1010 = function (_MSI) {
 exports.default = MSI1010;
 
 /***/ }),
-/* 83 */
+/* 85 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53919,7 +54232,7 @@ var MSI1110 = function (_MSI) {
 exports.default = MSI1110;
 
 /***/ }),
-/* 84 */
+/* 86 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53998,7 +54311,7 @@ var pharmacode = function (_Barcode) {
 exports.pharmacode = pharmacode;
 
 /***/ }),
-/* 85 */
+/* 87 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54096,7 +54409,7 @@ var codabar = function (_Barcode) {
 exports.codabar = codabar;
 
 /***/ }),
-/* 86 */
+/* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54157,7 +54470,7 @@ var GenericBarcode = function (_Barcode) {
 exports.GenericBarcode = GenericBarcode;
 
 /***/ }),
-/* 87 */
+/* 89 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54190,7 +54503,7 @@ function linearizeEncodings(encodings) {
 }
 
 /***/ }),
-/* 88 */
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54213,7 +54526,7 @@ function fixOptions(options) {
 }
 
 /***/ }),
-/* 89 */
+/* 91 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54227,11 +54540,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 /* global HTMLCanvasElement */
 /* global SVGElement */
 
-var _getOptionsFromElement = __webpack_require__(90);
+var _getOptionsFromElement = __webpack_require__(92);
 
 var _getOptionsFromElement2 = _interopRequireDefault(_getOptionsFromElement);
 
-var _renderers = __webpack_require__(91);
+var _renderers = __webpack_require__(93);
 
 var _renderers2 = _interopRequireDefault(_renderers);
 
@@ -54327,7 +54640,7 @@ function newCanvasRenderProperties(imgElement) {
 exports.default = getRenderProperties;
 
 /***/ }),
-/* 90 */
+/* 92 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54374,7 +54687,7 @@ function getOptionsFromElement(element) {
 exports.default = getOptionsFromElement;
 
 /***/ }),
-/* 91 */
+/* 93 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54384,15 +54697,15 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _canvas = __webpack_require__(92);
+var _canvas = __webpack_require__(94);
 
 var _canvas2 = _interopRequireDefault(_canvas);
 
-var _svg = __webpack_require__(93);
+var _svg = __webpack_require__(95);
 
 var _svg2 = _interopRequireDefault(_svg);
 
-var _object = __webpack_require__(94);
+var _object = __webpack_require__(96);
 
 var _object2 = _interopRequireDefault(_object);
 
@@ -54401,7 +54714,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 exports.default = { CanvasRenderer: _canvas2.default, SVGRenderer: _svg2.default, ObjectRenderer: _object2.default };
 
 /***/ }),
-/* 92 */
+/* 94 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54565,7 +54878,7 @@ var CanvasRenderer = function () {
 exports.default = CanvasRenderer;
 
 /***/ }),
-/* 93 */
+/* 95 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54760,7 +55073,7 @@ var SVGRenderer = function () {
 exports.default = SVGRenderer;
 
 /***/ }),
-/* 94 */
+/* 96 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54796,7 +55109,7 @@ var ObjectRenderer = function () {
 exports.default = ObjectRenderer;
 
 /***/ }),
-/* 95 */
+/* 97 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54856,7 +55169,7 @@ var ErrorHandler = function () {
 exports.default = ErrorHandler;
 
 /***/ }),
-/* 96 */
+/* 98 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -56423,15 +56736,15 @@ if (false) {
 }
 
 /***/ }),
-/* 97 */
+/* 99 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
-var normalizeComponent = __webpack_require__(3)
+var normalizeComponent = __webpack_require__(2)
 /* script */
-var __vue_script__ = __webpack_require__(98)
+var __vue_script__ = __webpack_require__(100)
 /* template */
-var __vue_template__ = __webpack_require__(99)
+var __vue_template__ = __webpack_require__(101)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -56470,7 +56783,7 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 98 */
+/* 100 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -56837,7 +57150,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 99 */
+/* 101 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -57364,15 +57677,15 @@ if (false) {
 }
 
 /***/ }),
-/* 100 */
+/* 102 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
-var normalizeComponent = __webpack_require__(3)
+var normalizeComponent = __webpack_require__(2)
 /* script */
-var __vue_script__ = __webpack_require__(101)
+var __vue_script__ = __webpack_require__(103)
 /* template */
-var __vue_template__ = __webpack_require__(102)
+var __vue_template__ = __webpack_require__(104)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -57411,11 +57724,61 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 101 */
+/* 103 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -57620,8 +57983,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 folio: '',
                 referencia_proveedor: '',
                 id_carpeta_adjuntos: 0,
-                estatus: ''
+                xstatus: 0
             },
+            resumenCompra: {
+                cantidad: 0,
+                total: 0
+            },
+            listaDetalleCompra: [],
             listaCompras: [],
             oProveedor: {
                 selectProveedor: '',
@@ -57631,6 +57999,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 modal: 0,
                 tituloModal: '',
                 tipoAccion: 0,
+                activaAplicar: 0,
                 error: 0,
                 erroresMsjList: []
             },
@@ -57643,7 +58012,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 to: 0
             },
             isLoading: 0
-
         };
     },
 
@@ -57688,37 +58056,44 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                             case 'registrar':
                                 {
                                     this.modalCompras.modal = 1;
-                                    //~Carga documentos adjuntos
-                                    this.onCargaComponenteUpload();
-                                    this.selectProveedor();
-                                    this.seqFolioCompraNextval();
+
+                                    this.listaDetalleCompra = [];
+                                    this.oProveedor.selectProveedor = '';
+                                    this.oProveedor.listaProveedor = [];
+                                    this.resumenCompra.cantidad = 0;
+                                    this.resumenCompra.total = 0;
 
                                     this.oCompra.id_compra = 0;
                                     this.oCompra.id_proveedor = 0;
                                     this.oCompra.folio = '';
                                     this.oCompra.referencia_proveedor = '';
                                     this.oCompra.id_carpeta_adjuntos = 0;
-                                    this.oCompra.estatus = 'REGISTRANDO';
+                                    this.oCompra.estatus = 'REGISTRADO';
                                     this.modalCompras.tituloModal = 'Registrar nueva Compra';
                                     this.modalCompras.tipoAccion = 1;
+
+                                    //~Carga documentos adjuntos
+                                    this.onCargaComponenteUpload();
+                                    this.selectProveedor(null);
+                                    this.seqFolioCompraNextval();
 
                                     break;
                                 }
                             case 'actualizar':
                                 {
                                     this.modalCompras.modal = 1;
-                                    //~Carga documentos adjuntos
-                                    this.onCargaComponenteUpload();
-
-                                    this.modalCompras.tituloModal = 'Actualizar compra';
-                                    this.modalCompras.tipoAccion = 2;
-
                                     this.oCompra.id_compra = data['id_compra'];
-                                    this.oCompra.id_proveedor = data['id_proveedor'];
-                                    this.oCompra.folio = data['folio'];
-                                    this.oCompra.referencia_proveedor = data['referencia_proveedor'];
-                                    this.oCompra.id_carpeta_adjuntos = data['id_carpeta_adjuntos'];
                                     this.oCompra.estatus = data['estatus'];
+                                    this.modalCompras.tituloModal = 'Actualizar compra';
+
+                                    if (this.oCompra.estatus != "REGISTRADO") {
+                                        this.modalCompras.tipoAccion = 0;
+                                    } else {
+                                        this.modalCompras.tipoAccion = 2;
+                                    }
+
+                                    //~Obtiene el detalle de la compra
+                                    this.getDetalleCompra();
                                 }
                         }
                     }
@@ -57747,13 +58122,21 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 this.$refs.adjuntos.onLoadAdjuntos(this.oCompra.id_carpeta_adjuntos);
             }
         },
-        selectProveedor: function selectProveedor() {
+        selectProveedor: function selectProveedor(id_proveedor) {
             var me = this;
             var url = '/zicandi/public/proveedores/selectProveedor';
             axios.get(url).then(function (response) {
                 var respuesta = response.data;
 
                 me.oProveedor.listaProveedor = respuesta.proveedores;
+
+                if (id_proveedor != null) {
+                    for (var i = 0; i < respuesta.proveedores.length; i++) {
+                        if (id_proveedor == respuesta.proveedores[i].id_proveedor) {
+                            me.oProveedor.selectProveedor = respuesta.proveedores[i];
+                        }
+                    }
+                }
             }).catch(function (error) {
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
             });
@@ -57770,8 +58153,85 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             });
         },
         getProduccionSeleccion: function getProduccionSeleccion(producto) {
-            console.log('Llego');
-            console.log(producto);
+
+            var detalleCompra = {
+                id_deta_compra: 0,
+                id_compra: 0,
+                id_producto: 0,
+                producto: producto,
+                cantidad: 0,
+                precio: 0,
+                id_movimiento_producto: 0,
+                xstatus: 1,
+                subtotal: 0,
+                strSubtotal: '0.00'
+            };
+
+            this.listaDetalleCompra.push(detalleCompra);
+        },
+        toMoneda: function toMoneda(valor) {
+            var val = (valor / 1).toFixed(2).replace(',', '.');
+            return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        },
+        onCalculaSubtotalDetaCom: function onCalculaSubtotalDetaCom(detaCompra) {
+            detaCompra.subtotal = detaCompra.cantidad * detaCompra.precio;
+            detaCompra.strSubtotal = this.toMoneda(detaCompra.subtotal);
+
+            var cantidadTotal = 0;
+            var total = 0;
+
+            for (var i = 0; i < this.listaDetalleCompra.length; i++) {
+                var compra = this.listaDetalleCompra[i];
+
+                if (compra.xstatus != 0) {
+                    var cantidad = compra.cantidad;
+                    var subtotal = compra.subtotal;
+
+                    cantidadTotal += parseFloat(cantidad);
+                    total += parseFloat(subtotal);
+                }
+            }
+
+            this.resumenCompra.cantidad = cantidadTotal;
+            this.resumenCompra.total = this.toMoneda(total);
+
+            this.modalCompras.activaAplicar = 0;
+        },
+        getDetalleCompra: function getDetalleCompra() {
+            var me = this;
+            var url = '/zicandi/public/compras/detalle';
+            me.isLoading = 1;
+            axios.post(url, {
+                'id_compra': this.oCompra.id_compra
+            }).then(function (response) {
+                var resp = response.data;
+
+                me.oCompra.id_proveedor = resp.compra.id_proveedor;
+                me.oCompra.folio = resp.compra.folio;
+                me.oCompra.referencia_proveedor = resp.compra.referencia_proveedor;
+                me.oCompra.id_carpeta_adjuntos = resp.compra.id_carpeta_adjuntos;
+                me.oCompra.estatus = resp.compra.estatus;
+
+                //~Carga documentos adjuntos
+                me.onCargaComponenteUpload();
+
+                //~Selecciona proveedor
+                me.selectProveedor(resp.compra.id_proveedor);
+
+                //~Detalle de la compra
+                me.listaDetalleCompra = resp.detalle;
+
+                //~Calculos
+                for (var i = 0; i < me.listaDetalleCompra.length; i++) {
+                    me.onCalculaSubtotalDetaCom(me.listaDetalleCompra[i]);
+                }
+
+                me.modalCompras.activaAplicar = 1;
+                me.isLoading = 0;
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
         },
         registrar: function registrar() {
             if (this.validarAlmacen()) {
@@ -57780,19 +58240,60 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             var me = this;
             this.isLoading = 1;
-            axios.post('/zicandi/public/almacenes/registrar', {
-                'nombre': this.oCompra.nombre,
-                'ubicacion': this.oCompra.ubicacion,
-                'nota': this.oCompra.nota
+            axios.post('/zicandi/public/compras/registrar', {
+                'folio': this.oCompra.folio,
+                'id_proveedor': this.oProveedor.selectProveedor.id_proveedor,
+                'referencia_proveedor': this.oCompra.referencia_proveedor,
+                'id_carpeta_adjuntos': this.oCompra.id_carpeta_adjuntos,
+                'listaDetalleCompra': this.listaDetalleCompra
             }).then(function (response) {
+                var resp = response.data;
+
                 me.isLoading = 0;
-                me.closeModal();
                 util.AVISO('Perfecto, registro correcto', util.tipoOk);
+
+                me.modalCompras.activaAplicar = 1;
+                me.oCompra.id_compra = resp.compra.id_compra;
+                me.oCompra.estatus = resp.compra.estatus;
+                me.modalCompras.tituloModal = 'Actualizar compra';
+                me.modalCompras.tipoAccion = 2;
+
                 me.listar(1);
             }).catch(function (error) {
                 me.isLoading = 0;
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
             });
+        },
+        onAplicar: function onAplicar() {
+            var _this = this;
+
+            var total = this.resumenCompra.total;
+
+            util.MSG_SI_NO('Deseas aplicar la compra?', 'Monto de la transaccion: ' + total, util.tipoPreg).then(function (result) {
+                if (result == util.btnSi) {
+                    _this.isLoading = 1;
+                    var me = _this;
+
+                    axios.post('/zicandi/public/mf2/liquidarCompra', {
+                        'id_compra': _this.oCompra.id_compra
+                    }).then(function (response) {
+                        me.isLoading = 0;
+                        console.log(response);
+                        me.oCompra.estatus = 'APLICADO';
+                        me.modalCompras.activaAplicar = 0;
+                        me.modalCompras.tipoAccion = 0;
+                        util.AVISO('La compra se aplico correctamente!!!', util.tipoOk);
+                        me.listar(1);
+                    }).catch(function (error) {
+                        me.isLoading = 0;
+                        util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+                    });
+                }
+            });
+        },
+        onEliminaDetaProd: function onEliminaDetaProd(detaCompra) {
+            detaCompra.xstatus = 0;
+            this.onCalculaSubtotalDetaCom(detaCompra);
         },
         actualizar: function actualizar() {
             if (this.validarAlmacen()) {
@@ -57801,28 +58302,70 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             var me = this;
             this.isLoading = 1;
-            axios.put('/zicandi/public/almacenes/actualizar', {
-                'id_almacen': this.oCompra.id_almacen,
-                'nombre': this.oCompra.nombre,
-                'ubicacion': this.oCompra.ubicacion,
-                'nota': this.oCompra.nota
+            axios.put('/zicandi/public/compras/actualizar', {
+                'id_compra': this.oCompra.id_compra,
+                'folio': this.oCompra.folio,
+                'id_proveedor': this.oProveedor.selectProveedor.id_proveedor,
+                'referencia_proveedor': this.oCompra.referencia_proveedor,
+                'listaDetalleCompra': this.listaDetalleCompra
             }).then(function (response) {
-                me.closeModal();
                 me.isLoading = 0;
                 util.AVISO('Actualizacion correcta!', util.tipoOk);
+                me.modalCompras.activaAplicar = 1;
+
                 me.listar(me.pagination.current_page);
             }).catch(function (error) {
                 me.isLoading = 0;
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
             });
         },
+        validarAlmacen: function validarAlmacen() {
+            this.modalCompras.error = 0;
+            this.modalCompras.erroresMsjList = [];
+
+            if (!this.oCompra.folio) this.modalCompras.erroresMsjList.push("Se requiere el folio de la compra");
+            if (!this.oProveedor.selectProveedor.id_proveedor) this.modalCompras.erroresMsjList.push("Se requiere elegir el proveedor");
+
+            var totalDetalleReg = 0;
+            var bandCantidad = false;
+            var bandPrecio = false;
+            for (var i = 0; i < this.listaDetalleCompra.length; i++) {
+                var compra = this.listaDetalleCompra[i];
+
+                if (compra.xstatus != 0) {
+                    totalDetalleReg++;
+
+                    if (compra.cantidad == null || compra.cantidad <= 0) {
+                        bandCantidad = true;
+                    }
+                    if (compra.precio == null || compra.precio <= 0) {
+                        bandPrecio = true;
+                    }
+                }
+            }
+
+            if (totalDetalleReg == 0) this.modalCompras.erroresMsjList.push("No hay detalle de la compra");
+            if (bandCantidad) this.modalCompras.erroresMsjList.push("Hay productos sin cantidad, no puede ser cero o negativo");
+            if (bandPrecio) this.modalCompras.erroresMsjList.push("Hay productos sin precio, no puede ser cero o negativo");
+
+            if (this.modalCompras.erroresMsjList.length) this.modalCompras.error = 1;
+
+            return this.modalCompras.error;
+        },
+        cambiarPagina: function cambiarPagina(page) {
+            var me = this;
+
+            me.pagination.current_page = page;
+
+            me.listar(page, true);
+        },
         desactivar: function desactivar(id_almacen) {
-            var _this = this;
+            var _this2 = this;
 
             util.MSG_SI_NO('Deseas desactivarlo', 'No podras usarlo...', util.tipoPreg).then(function (result) {
                 if (result == util.btnSi) {
-                    _this.isLoading = 1;
-                    var me = _this;
+                    _this2.isLoading = 1;
+                    var me = _this2;
 
                     axios.put('/zicandi/public/almacenes/desactivar', {
                         'id_almacen': id_almacen
@@ -57838,12 +58381,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             });
         },
         activar: function activar(id_almacen) {
-            var _this2 = this;
+            var _this3 = this;
 
             util.MSG_SI_NO('Deseas activarlo', 'Mientras no lo actives no estara disponible para usarse', util.tipoPreg).then(function (result) {
                 if (result == util.btnSi) {
-                    _this2.isLoading = 1;
-                    var me = _this2;
+                    _this3.isLoading = 1;
+                    var me = _this3;
 
                     axios.put('/zicandi/public/almacenes/activar', {
                         'id_almacen': id_almacen
@@ -57857,23 +58400,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     });
                 }
             });
-        },
-        validarAlmacen: function validarAlmacen() {
-            this.modalCompras.error = 0;
-            this.modalCompras.erroresMsjList = [];
-
-            if (!this.oCompra.nombre) this.modalCompras.erroresMsjList.push("Se requiere el nombre del almacen");
-
-            if (this.modalCompras.erroresMsjList.length) this.modalCompras.error = 1;
-
-            return this.modalCompras.error;
-        },
-        cambiarPagina: function cambiarPagina(page) {
-            var me = this;
-
-            me.pagination.current_page = page;
-
-            me.listar(page, true);
         }
     },
     mounted: function mounted() {
@@ -57882,7 +58408,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 102 */
+/* 104 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -58004,15 +58530,21 @@ var render = function() {
                   }),
                   _vm._v(" "),
                   _c("td", [
-                    compra.xstatus
+                    compra.estatus == "REGISTRADO"
+                      ? _c("div", [
+                          _c("span", { staticClass: "badge badge-warning" }, [
+                            _vm._v("Registrado")
+                          ])
+                        ])
+                      : compra.estatus == "APLICADO"
                       ? _c("div", [
                           _c("span", { staticClass: "badge badge-success" }, [
-                            _vm._v("Activo")
+                            _vm._v("Aplicado")
                           ])
                         ])
                       : _c("div", [
                           _c("span", { staticClass: "badge badge-danger" }, [
-                            _vm._v("Desactivado")
+                            _vm._v("Cancelado")
                           ])
                         ])
                   ])
@@ -58207,7 +58739,31 @@ var render = function() {
                           })
                         ]),
                         _vm._v(" "),
-                        _vm._m(2)
+                        _c("div", { staticClass: "col-md-4" }, [
+                          _vm.oCompra.estatus == "REGISTRADO"
+                            ? _c("div", [
+                                _c(
+                                  "span",
+                                  { staticClass: "badge badge-warning" },
+                                  [_vm._v("Registrado")]
+                                )
+                              ])
+                            : _vm.oCompra.estatus == "APLICADO"
+                            ? _c("div", [
+                                _c(
+                                  "span",
+                                  { staticClass: "badge badge-success" },
+                                  [_vm._v("Aplicado")]
+                                )
+                              ])
+                            : _c("div", [
+                                _c(
+                                  "span",
+                                  { staticClass: "badge badge-danger" },
+                                  [_vm._v("Cancelado")]
+                                )
+                              ])
+                        ])
                       ]),
                       _vm._v(" "),
                       _c("div", { staticClass: "form-group row" }, [
@@ -58297,8 +58853,8 @@ var render = function() {
                               {
                                 name: "model",
                                 rawName: "v-model",
-                                value: _vm.oCompra.ubicacion,
-                                expression: "oCompra.ubicacion"
+                                value: _vm.oCompra.referencia_proveedor,
+                                expression: "oCompra.referencia_proveedor"
                               }
                             ],
                             staticClass: "form-control",
@@ -58306,7 +58862,9 @@ var render = function() {
                               type: "text",
                               placeholder: "Referencia proveedor"
                             },
-                            domProps: { value: _vm.oCompra.ubicacion },
+                            domProps: {
+                              value: _vm.oCompra.referencia_proveedor
+                            },
                             on: {
                               input: function($event) {
                                 if ($event.target.composing) {
@@ -58314,7 +58872,7 @@ var render = function() {
                                 }
                                 _vm.$set(
                                   _vm.oCompra,
-                                  "ubicacion",
+                                  "referencia_proveedor",
                                   $event.target.value
                                 )
                               }
@@ -58353,18 +58911,282 @@ var render = function() {
                         ]
                       ),
                       _vm._v(" "),
-                      _c(
-                        "div",
-                        { staticClass: "col-md-12" },
-                        [
-                          _c("buscador-producto-component", {
-                            on: { setProducto: _vm.getProduccionSeleccion }
-                          })
-                        ],
-                        1
-                      ),
+                      _vm.oCompra.estatus == "REGISTRADO"
+                        ? _c(
+                            "div",
+                            { staticClass: "col-md-12" },
+                            [
+                              _c("buscador-producto-component", {
+                                on: { setProducto: _vm.getProduccionSeleccion }
+                              })
+                            ],
+                            1
+                          )
+                        : _vm._e(),
                       _vm._v(" "),
-                      _vm._m(3)
+                      _c("div", { staticClass: "form-group row" }, [
+                        _c("div", { staticClass: "col-md-12" }, [
+                          _c("div", { staticClass: "card" }, [
+                            _c(
+                              "ul",
+                              {
+                                staticClass:
+                                  "list-group list-group-flush pre-scrollable"
+                              },
+                              [
+                                _vm._m(2),
+                                _vm._v(" "),
+                                _vm._l(_vm.listaDetalleCompra, function(
+                                  detaCompra
+                                ) {
+                                  return _c(
+                                    "div",
+                                    { key: detaCompra.producto.id_producto },
+                                    [
+                                      detaCompra.xstatus != 0
+                                        ? _c(
+                                            "li",
+                                            { staticClass: "list-group-item" },
+                                            [
+                                              _c(
+                                                "div",
+                                                { staticClass: "row" },
+                                                [
+                                                  _c(
+                                                    "div",
+                                                    { staticClass: "col-1" },
+                                                    [
+                                                      _c(
+                                                        "button",
+                                                        {
+                                                          staticClass:
+                                                            "btn btn-danger btn-sm",
+                                                          attrs: {
+                                                            type: "button"
+                                                          },
+                                                          on: {
+                                                            click: function(
+                                                              $event
+                                                            ) {
+                                                              return _vm.onEliminaDetaProd(
+                                                                detaCompra
+                                                              )
+                                                            }
+                                                          }
+                                                        },
+                                                        [
+                                                          _c("i", {
+                                                            staticClass:
+                                                              "icon-trash"
+                                                          })
+                                                        ]
+                                                      )
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "div",
+                                                    { staticClass: "col-1" },
+                                                    [
+                                                      _c("img", {
+                                                        attrs: {
+                                                          src:
+                                                            detaCompra.producto
+                                                              .url_imagen,
+                                                          alt: "dog",
+                                                          width: "50",
+                                                          height: "50"
+                                                        }
+                                                      })
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "div",
+                                                    { staticClass: "col-4" },
+                                                    [
+                                                      _c("small", {
+                                                        domProps: {
+                                                          textContent: _vm._s(
+                                                            detaCompra.producto
+                                                              .nombre
+                                                          )
+                                                        }
+                                                      }),
+                                                      _vm._v(" "),
+                                                      _c("small", {
+                                                        staticClass:
+                                                          "text-muted",
+                                                        domProps: {
+                                                          textContent: _vm._s(
+                                                            detaCompra.producto
+                                                              .codigo
+                                                          )
+                                                        }
+                                                      })
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "div",
+                                                    { staticClass: "col-2" },
+                                                    [
+                                                      _c("input", {
+                                                        directives: [
+                                                          {
+                                                            name: "model",
+                                                            rawName: "v-model",
+                                                            value:
+                                                              detaCompra.cantidad,
+                                                            expression:
+                                                              "detaCompra.cantidad"
+                                                          }
+                                                        ],
+                                                        staticClass:
+                                                          "form-control",
+                                                        attrs: { type: "text" },
+                                                        domProps: {
+                                                          value:
+                                                            detaCompra.cantidad
+                                                        },
+                                                        on: {
+                                                          keyup: function(
+                                                            $event
+                                                          ) {
+                                                            return _vm.onCalculaSubtotalDetaCom(
+                                                              detaCompra
+                                                            )
+                                                          },
+                                                          input: function(
+                                                            $event
+                                                          ) {
+                                                            if (
+                                                              $event.target
+                                                                .composing
+                                                            ) {
+                                                              return
+                                                            }
+                                                            _vm.$set(
+                                                              detaCompra,
+                                                              "cantidad",
+                                                              $event.target
+                                                                .value
+                                                            )
+                                                          }
+                                                        }
+                                                      })
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "div",
+                                                    { staticClass: "col-2" },
+                                                    [
+                                                      _c("input", {
+                                                        directives: [
+                                                          {
+                                                            name: "model",
+                                                            rawName: "v-model",
+                                                            value:
+                                                              detaCompra.precio,
+                                                            expression:
+                                                              "detaCompra.precio"
+                                                          }
+                                                        ],
+                                                        staticClass:
+                                                          "form-control",
+                                                        attrs: { type: "text" },
+                                                        domProps: {
+                                                          value:
+                                                            detaCompra.precio
+                                                        },
+                                                        on: {
+                                                          keyup: function(
+                                                            $event
+                                                          ) {
+                                                            return _vm.onCalculaSubtotalDetaCom(
+                                                              detaCompra
+                                                            )
+                                                          },
+                                                          input: function(
+                                                            $event
+                                                          ) {
+                                                            if (
+                                                              $event.target
+                                                                .composing
+                                                            ) {
+                                                              return
+                                                            }
+                                                            _vm.$set(
+                                                              detaCompra,
+                                                              "precio",
+                                                              $event.target
+                                                                .value
+                                                            )
+                                                          }
+                                                        }
+                                                      })
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "div",
+                                                    { staticClass: "col-2" },
+                                                    [
+                                                      _c("h5", {
+                                                        attrs: {
+                                                          align: "right"
+                                                        },
+                                                        domProps: {
+                                                          textContent: _vm._s(
+                                                            detaCompra.strSubtotal
+                                                          )
+                                                        }
+                                                      })
+                                                    ]
+                                                  )
+                                                ]
+                                              )
+                                            ]
+                                          )
+                                        : _vm._e()
+                                    ]
+                                  )
+                                }),
+                                _vm._v(" "),
+                                _c("li", { staticClass: "list-group-item" }, [
+                                  _c("div", { staticClass: "row" }, [
+                                    _c("div", { staticClass: "col-6" }),
+                                    _vm._v(" "),
+                                    _c("div", { staticClass: "col-2" }, [
+                                      _c("h3", {
+                                        attrs: { align: "center" },
+                                        domProps: {
+                                          textContent: _vm._s(
+                                            _vm.resumenCompra.cantidad
+                                          )
+                                        }
+                                      })
+                                    ]),
+                                    _vm._v(" "),
+                                    _c("div", { staticClass: "col-4" }, [
+                                      _c("h3", {
+                                        attrs: { align: "right" },
+                                        domProps: {
+                                          textContent: _vm._s(
+                                            _vm.resumenCompra.total
+                                          )
+                                        }
+                                      })
+                                    ])
+                                  ])
+                                ])
+                              ],
+                              2
+                            )
+                          ])
+                        ])
+                      ])
                     ]
                   )
                 ],
@@ -58372,6 +59194,22 @@ var render = function() {
               ),
               _vm._v(" "),
               _c("div", { staticClass: "modal-footer" }, [
+                _vm.modalCompras.activaAplicar == 1
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-warning",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.onAplicar()
+                          }
+                        }
+                      },
+                      [_vm._v("Aplicar")]
+                    )
+                  : _vm._e(),
+                _vm._v(" "),
                 _c(
                   "button",
                   {
@@ -58462,19 +59300,31 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "col-md-4" }, [
-      _c("span", { staticClass: "badge badge-success" }, [_vm._v("PROCESANDO")])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "form-group row" }, [
-      _c("div", { staticClass: "col-md-12" }, [
-        _c("div", { staticClass: "card" }),
+    return _c("li", { staticClass: "list-group-item" }, [
+      _c("div", { staticClass: "row" }, [
+        _c("div", { staticClass: "col-6" }, [
+          _vm._v(
+            "\n                                                    Producto                                                    \n                                                "
+          )
+        ]),
         _vm._v(" "),
-        _c("div", { staticClass: "card" })
+        _c("div", { staticClass: "col-2" }, [
+          _vm._v(
+            "\n                                                    Cantidad\n                                                "
+          )
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "col-2" }, [
+          _vm._v(
+            "\n                                                    Precio\n                                                "
+          )
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "col-2" }, [
+          _vm._v(
+            "\n                                                    Sub Total\n                                                "
+          )
+        ])
       ])
     ])
   }
@@ -58489,15 +59339,15 @@ if (false) {
 }
 
 /***/ }),
-/* 103 */
+/* 105 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(104)
+  __webpack_require__(106)
 }
-var normalizeComponent = __webpack_require__(3)
+var normalizeComponent = __webpack_require__(2)
 /* script */
 var __vue_script__ = __webpack_require__(109)
 /* template */
@@ -58540,17 +59390,17 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 104 */
+/* 106 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(105);
+var content = __webpack_require__(107);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(107)("2e81f96e", content, false, {});
+var update = __webpack_require__(27)("2e81f96e", content, false, {});
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
@@ -58566,10 +59416,10 @@ if(false) {
 }
 
 /***/ }),
-/* 105 */
+/* 107 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(106)(false);
+exports = module.exports = __webpack_require__(26)(false);
 // imports
 
 
@@ -58577,316 +59427,6 @@ exports = module.exports = __webpack_require__(106)(false);
 exports.push([module.i, "\n.mostrarProgreso{\n    display: block !important;\n}\n.mostrarFrame{\n    display: block !important;\n}\n", ""]);
 
 // exports
-
-
-/***/ }),
-/* 106 */
-/***/ (function(module, exports) {
-
-/*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra
-*/
-// css base code, injected by the css-loader
-module.exports = function(useSourceMap) {
-	var list = [];
-
-	// return the list of modules as css string
-	list.toString = function toString() {
-		return this.map(function (item) {
-			var content = cssWithMappingToString(item, useSourceMap);
-			if(item[2]) {
-				return "@media " + item[2] + "{" + content + "}";
-			} else {
-				return content;
-			}
-		}).join("");
-	};
-
-	// import a list of modules into the list
-	list.i = function(modules, mediaQuery) {
-		if(typeof modules === "string")
-			modules = [[null, modules, ""]];
-		var alreadyImportedModules = {};
-		for(var i = 0; i < this.length; i++) {
-			var id = this[i][0];
-			if(typeof id === "number")
-				alreadyImportedModules[id] = true;
-		}
-		for(i = 0; i < modules.length; i++) {
-			var item = modules[i];
-			// skip already imported module
-			// this implementation is not 100% perfect for weird media query combinations
-			//  when a module is imported multiple times with different media queries.
-			//  I hope this will never occur (Hey this way we have smaller bundles)
-			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
-				if(mediaQuery && !item[2]) {
-					item[2] = mediaQuery;
-				} else if(mediaQuery) {
-					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
-				}
-				list.push(item);
-			}
-		}
-	};
-	return list;
-};
-
-function cssWithMappingToString(item, useSourceMap) {
-	var content = item[1] || '';
-	var cssMapping = item[3];
-	if (!cssMapping) {
-		return content;
-	}
-
-	if (useSourceMap && typeof btoa === 'function') {
-		var sourceMapping = toComment(cssMapping);
-		var sourceURLs = cssMapping.sources.map(function (source) {
-			return '/*# sourceURL=' + cssMapping.sourceRoot + source + ' */'
-		});
-
-		return [content].concat(sourceURLs).concat([sourceMapping]).join('\n');
-	}
-
-	return [content].join('\n');
-}
-
-// Adapted from convert-source-map (MIT)
-function toComment(sourceMap) {
-	// eslint-disable-next-line no-undef
-	var base64 = btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap))));
-	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
-
-	return '/*# ' + data + ' */';
-}
-
-
-/***/ }),
-/* 107 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/*
-  MIT License http://www.opensource.org/licenses/mit-license.php
-  Author Tobias Koppers @sokra
-  Modified by Evan You @yyx990803
-*/
-
-var hasDocument = typeof document !== 'undefined'
-
-if (typeof DEBUG !== 'undefined' && DEBUG) {
-  if (!hasDocument) {
-    throw new Error(
-    'vue-style-loader cannot be used in a non-browser environment. ' +
-    "Use { target: 'node' } in your Webpack config to indicate a server-rendering environment."
-  ) }
-}
-
-var listToStyles = __webpack_require__(108)
-
-/*
-type StyleObject = {
-  id: number;
-  parts: Array<StyleObjectPart>
-}
-
-type StyleObjectPart = {
-  css: string;
-  media: string;
-  sourceMap: ?string
-}
-*/
-
-var stylesInDom = {/*
-  [id: number]: {
-    id: number,
-    refs: number,
-    parts: Array<(obj?: StyleObjectPart) => void>
-  }
-*/}
-
-var head = hasDocument && (document.head || document.getElementsByTagName('head')[0])
-var singletonElement = null
-var singletonCounter = 0
-var isProduction = false
-var noop = function () {}
-var options = null
-var ssrIdKey = 'data-vue-ssr-id'
-
-// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
-// tags it will allow on a page
-var isOldIE = typeof navigator !== 'undefined' && /msie [6-9]\b/.test(navigator.userAgent.toLowerCase())
-
-module.exports = function (parentId, list, _isProduction, _options) {
-  isProduction = _isProduction
-
-  options = _options || {}
-
-  var styles = listToStyles(parentId, list)
-  addStylesToDom(styles)
-
-  return function update (newList) {
-    var mayRemove = []
-    for (var i = 0; i < styles.length; i++) {
-      var item = styles[i]
-      var domStyle = stylesInDom[item.id]
-      domStyle.refs--
-      mayRemove.push(domStyle)
-    }
-    if (newList) {
-      styles = listToStyles(parentId, newList)
-      addStylesToDom(styles)
-    } else {
-      styles = []
-    }
-    for (var i = 0; i < mayRemove.length; i++) {
-      var domStyle = mayRemove[i]
-      if (domStyle.refs === 0) {
-        for (var j = 0; j < domStyle.parts.length; j++) {
-          domStyle.parts[j]()
-        }
-        delete stylesInDom[domStyle.id]
-      }
-    }
-  }
-}
-
-function addStylesToDom (styles /* Array<StyleObject> */) {
-  for (var i = 0; i < styles.length; i++) {
-    var item = styles[i]
-    var domStyle = stylesInDom[item.id]
-    if (domStyle) {
-      domStyle.refs++
-      for (var j = 0; j < domStyle.parts.length; j++) {
-        domStyle.parts[j](item.parts[j])
-      }
-      for (; j < item.parts.length; j++) {
-        domStyle.parts.push(addStyle(item.parts[j]))
-      }
-      if (domStyle.parts.length > item.parts.length) {
-        domStyle.parts.length = item.parts.length
-      }
-    } else {
-      var parts = []
-      for (var j = 0; j < item.parts.length; j++) {
-        parts.push(addStyle(item.parts[j]))
-      }
-      stylesInDom[item.id] = { id: item.id, refs: 1, parts: parts }
-    }
-  }
-}
-
-function createStyleElement () {
-  var styleElement = document.createElement('style')
-  styleElement.type = 'text/css'
-  head.appendChild(styleElement)
-  return styleElement
-}
-
-function addStyle (obj /* StyleObjectPart */) {
-  var update, remove
-  var styleElement = document.querySelector('style[' + ssrIdKey + '~="' + obj.id + '"]')
-
-  if (styleElement) {
-    if (isProduction) {
-      // has SSR styles and in production mode.
-      // simply do nothing.
-      return noop
-    } else {
-      // has SSR styles but in dev mode.
-      // for some reason Chrome can't handle source map in server-rendered
-      // style tags - source maps in <style> only works if the style tag is
-      // created and inserted dynamically. So we remove the server rendered
-      // styles and inject new ones.
-      styleElement.parentNode.removeChild(styleElement)
-    }
-  }
-
-  if (isOldIE) {
-    // use singleton mode for IE9.
-    var styleIndex = singletonCounter++
-    styleElement = singletonElement || (singletonElement = createStyleElement())
-    update = applyToSingletonTag.bind(null, styleElement, styleIndex, false)
-    remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true)
-  } else {
-    // use multi-style-tag mode in all other cases
-    styleElement = createStyleElement()
-    update = applyToTag.bind(null, styleElement)
-    remove = function () {
-      styleElement.parentNode.removeChild(styleElement)
-    }
-  }
-
-  update(obj)
-
-  return function updateStyle (newObj /* StyleObjectPart */) {
-    if (newObj) {
-      if (newObj.css === obj.css &&
-          newObj.media === obj.media &&
-          newObj.sourceMap === obj.sourceMap) {
-        return
-      }
-      update(obj = newObj)
-    } else {
-      remove()
-    }
-  }
-}
-
-var replaceText = (function () {
-  var textStore = []
-
-  return function (index, replacement) {
-    textStore[index] = replacement
-    return textStore.filter(Boolean).join('\n')
-  }
-})()
-
-function applyToSingletonTag (styleElement, index, remove, obj) {
-  var css = remove ? '' : obj.css
-
-  if (styleElement.styleSheet) {
-    styleElement.styleSheet.cssText = replaceText(index, css)
-  } else {
-    var cssNode = document.createTextNode(css)
-    var childNodes = styleElement.childNodes
-    if (childNodes[index]) styleElement.removeChild(childNodes[index])
-    if (childNodes.length) {
-      styleElement.insertBefore(cssNode, childNodes[index])
-    } else {
-      styleElement.appendChild(cssNode)
-    }
-  }
-}
-
-function applyToTag (styleElement, obj) {
-  var css = obj.css
-  var media = obj.media
-  var sourceMap = obj.sourceMap
-
-  if (media) {
-    styleElement.setAttribute('media', media)
-  }
-  if (options.ssrId) {
-    styleElement.setAttribute(ssrIdKey, obj.id)
-  }
-
-  if (sourceMap) {
-    // https://developer.chrome.com/devtools/docs/javascript-debugging
-    // this makes source maps inside style tags work properly in Chrome
-    css += '\n/*# sourceURL=' + sourceMap.sources[0] + ' */'
-    // http://stackoverflow.com/a/26603875
-    css += '\n/*# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + ' */'
-  }
-
-  if (styleElement.styleSheet) {
-    styleElement.styleSheet.cssText = css
-  } else {
-    while (styleElement.firstChild) {
-      styleElement.removeChild(styleElement.firstChild)
-    }
-    styleElement.appendChild(document.createTextNode(css))
-  }
-}
 
 
 /***/ }),
@@ -59314,7 +59854,7 @@ function injectStyle (ssrContext) {
   if (disposed) return
   __webpack_require__(112)
 }
-var normalizeComponent = __webpack_require__(3)
+var normalizeComponent = __webpack_require__(2)
 /* script */
 var __vue_script__ = __webpack_require__(114)
 /* template */
@@ -59367,7 +59907,7 @@ var content = __webpack_require__(113);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(107)("f2e068de", content, false, {});
+var update = __webpack_require__(27)("f2e068de", content, false, {});
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
@@ -59386,7 +59926,7 @@ if(false) {
 /* 113 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(106)(false);
+exports = module.exports = __webpack_require__(26)(false);
 // imports
 
 
@@ -59510,7 +60050,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
                 me.listaProductos = respuesta.producto.data;
 
-                if (me.listaProductos.length == 1) {} else if (me.listaProductos.length > 1) {
+                if (me.listaProductos.length == 1) {
+                    me.setProducto(me.listaProductos[0]);
+                } else if (me.listaProductos.length > 1) {
                     me.isBuscadorProductoDiv = 1;
                 }
 
@@ -59758,6 +60300,573 @@ if (false) {
   module.hot.accept()
   if (module.hot.data) {
     require("vue-hot-reload-api")      .rerender("data-v-0fb66cad", module.exports)
+  }
+}
+
+/***/ }),
+/* 116 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__(2)
+/* script */
+var __vue_script__ = __webpack_require__(117)
+/* template */
+var __vue_template__ = __webpack_require__(118)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/MercadolibreComponent.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-28cd63c1", Component.options)
+  } else {
+    hotAPI.reload("data-v-28cd63c1", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 117 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    data: function data() {
+        return {
+            oMeli: {
+                id_proveedor: 0,
+                nombre_corto: '',
+                nombre: '',
+                pagina_web: '',
+                contacto: ''
+            },
+            isLoading: 0
+
+        };
+    },
+
+    computed: {},
+    methods: {
+        onLoginMercadoLibre: function onLoginMercadoLibre() {
+
+            var me = this;
+            this.isLoading = 1;
+            axios.get('/zicandi/public/meli/login').then(function (response) {
+                me.isLoading = 0;
+                var urlLogin = response.data.urlLogin;
+                var msg = response.data.msg;
+                console.log(response);
+                if (urlLogin != null) {
+                    var altura = 675;
+                    var anchura = 990;
+
+                    var y = parseInt(window.screen.height / 2 - altura / 2);
+                    var x = parseInt(window.screen.width / 2 - anchura / 2);
+
+                    window.open(urlLogin, "Login mercadolibre", 'width=' + anchura + ',height=' + altura + ',top=' + y + ',left=' + x + ',toolbar=no,location=no,status=no,menubar=no,scrollbars=no,directories=no,resizable=no');
+                } else {
+                    util.AVISO(msg, util.tipoOk);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        }
+    },
+    mounted: function mounted() {}
+});
+
+/***/ }),
+/* 118 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("main", { staticClass: "main" }, [
+    _c("div", {
+      staticClass: "sbl-circ-ripple",
+      class: { "abrir-load-sbl": _vm.isLoading },
+      staticStyle: { display: "none" }
+    }),
+    _vm._v(" "),
+    _vm._m(0),
+    _vm._v(" "),
+    _c("div", { staticClass: "container-fluid" }, [
+      _c("div", { staticClass: "card" }, [
+        _c("div", { staticClass: "card-header" }, [
+          _c("i", { staticClass: "fa fa-align-justify" }),
+          _vm._v(" Tareas:\n                "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary",
+              attrs: { type: "button" },
+              on: {
+                click: function($event) {
+                  return _vm.onLoginMercadoLibre()
+                }
+              }
+            },
+            [
+              _c("i", { staticClass: "icon-login" }),
+              _vm._v(" Conectar\n                ")
+            ]
+          )
+        ])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "card-body" })
+    ])
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("ol", { staticClass: "breadcrumb" }, [
+      _c("li", { staticClass: "breadcrumb-item" }, [_vm._v("Home")]),
+      _vm._v(" "),
+      _c("li", { staticClass: "breadcrumb-item" }, [_vm._v("Mercadolibre API")])
+    ])
+  }
+]
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-28cd63c1", module.exports)
+  }
+}
+
+/***/ }),
+/* 119 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__(2)
+/* script */
+var __vue_script__ = __webpack_require__(120)
+/* template */
+var __vue_template__ = __webpack_require__(121)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/HerramientasComponent.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-3a88ca19", Component.options)
+  } else {
+    hotAPI.reload("data-v-3a88ca19", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 120 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    data: function data() {
+        return {
+            activeItem: 'nota_remision',
+
+            isLoading: 0,
+
+            oUploadFile: {
+                selectedFile: null,
+                id_carpeta_adjuntos: 0
+            }
+
+        };
+    },
+
+    computed: {},
+    methods: {
+        isActive: function isActive(menuItem) {
+            return this.activeItem === menuItem;
+        },
+        setActive: function setActive(menuItem) {
+            this.activeItem = menuItem;
+        },
+        onFileSelected: function onFileSelected(event) {
+            //console.log(event.target.files)
+            for (var i = 0; i < event.target.files.length; i++) {
+                this.oUploadFile.selectedFile = event.target.files[i];
+
+                //~Sube inmediatamente el archivo
+                this.onUploadFile();
+            }
+        },
+        onUploadFile: function onUploadFile() {
+            this.oUploadFile.progreso = 0;
+
+            var fd = new FormData();
+
+            var size = this.oUploadFile.selectedFile.size / 1024 / 1024;
+            if (size > 20) {
+                util.MSG('Algo salio Mal!', 'No se permiten archivos mayores a 20M', util.tipoErr);
+                this.oUploadFile.bandProgress = 0;
+            } else {
+                this.oUploadFile.bandProgress = 1;
+
+                fd.append('file', this.oUploadFile.selectedFile, this.oUploadFile.selectedFile.name);
+                fd.append('id_carpeta_adjuntos', this.oUploadFile.id_carpeta_adjuntos);
+                fd.append('nombre', this.oUploadFile.selectedFile.name);
+
+                var me = this;
+                axios.post('/zicandi/public/uploadfile', fd, {
+                    onUploadProgress: function onUploadProgress(uploadEvent) {
+                        me.oUploadFile.progreso = Math.round(uploadEvent.loaded / uploadEvent.total * 100);
+                    }
+                }).then(function (response) {
+                    me.oUploadFile.bandProgress = 0;
+
+                    me.onLoadAdjuntos(me.oUploadFile.id_carpeta_adjuntos);
+                }).catch(function (error) {
+                    util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+                });
+            }
+        }
+    },
+    mounted: function mounted() {}
+});
+
+/***/ }),
+/* 121 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("main", { staticClass: "main" }, [
+    _c("div", {
+      staticClass: "sbl-circ-ripple",
+      class: { "abrir-load-sbl": _vm.isLoading },
+      staticStyle: { display: "none" }
+    }),
+    _vm._v(" "),
+    _vm._m(0),
+    _vm._v(" "),
+    _c("div", { staticClass: "container-fluid" }, [
+      _c("div", { staticClass: "card-body" }, [
+        _c("ul", { staticClass: "nav nav-tabs nav-justified" }, [
+          _c("li", { staticClass: "nav-item" }, [
+            _c(
+              "a",
+              {
+                staticClass: "nav-link",
+                class: { active: _vm.isActive("nota_remision") },
+                attrs: { href: "#nota_remision" },
+                on: {
+                  click: function($event) {
+                    return _vm.setActive("nota_remision")
+                  }
+                }
+              },
+              [_vm._v("Remision Betterware")]
+            )
+          ]),
+          _vm._v(" "),
+          _c("li", { staticClass: "nav-item" }, [
+            _c(
+              "a",
+              {
+                staticClass: "nav-link",
+                class: { active: _vm.isActive("profile") },
+                attrs: { href: "#profile" },
+                on: {
+                  click: function($event) {
+                    return _vm.setActive("profile")
+                  }
+                }
+              },
+              [_vm._v("Crea BAT")]
+            )
+          ]),
+          _vm._v(" "),
+          _c("li", { staticClass: "nav-item" }, [
+            _c(
+              "a",
+              {
+                staticClass: "nav-link",
+                class: { active: _vm.isActive("contact") },
+                attrs: { href: "#contact" },
+                on: {
+                  click: function($event) {
+                    return _vm.setActive("contact")
+                  }
+                }
+              },
+              [_vm._v("Contact")]
+            )
+          ])
+        ]),
+        _vm._v(" "),
+        _c(
+          "div",
+          { staticClass: "tab-content py-3", attrs: { id: "myTabContent" } },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "tab-pane fade",
+                class: { "active show": _vm.isActive("nota_remision") },
+                attrs: { id: "nota_remision" }
+              },
+              [
+                _c(
+                  "form",
+                  {
+                    staticClass: "form-horizontal",
+                    attrs: {
+                      action: "",
+                      method: "post",
+                      enctype: "multipart/form-data"
+                    }
+                  },
+                  [
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c("div", { staticClass: "col-md-12" }, [
+                        _c("div", { staticClass: "card" }, [
+                          _c("div", { staticClass: "custom-file" }, [
+                            _c("input", {
+                              staticClass: "custom-file-input",
+                              attrs: {
+                                type: "file",
+                                id: "customFileLang",
+                                lang: "es",
+                                multiple: ""
+                              },
+                              on: { change: _vm.onFileSelected }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c(
+                            "label",
+                            {
+                              staticClass: "btn btn-primary",
+                              attrs: { for: "customFileLang" }
+                            },
+                            [_vm._v("Subir archivo")]
+                          )
+                        ])
+                      ])
+                    ])
+                  ]
+                )
+              ]
+            ),
+            _vm._v(" "),
+            _c(
+              "div",
+              {
+                staticClass: "tab-pane fade",
+                class: { "active show": _vm.isActive("profile") },
+                attrs: { id: "profile" }
+              },
+              [_vm._v("Profile content")]
+            ),
+            _vm._v(" "),
+            _c(
+              "div",
+              {
+                staticClass: "tab-pane fade",
+                class: { "active show": _vm.isActive("contact") },
+                attrs: { id: "contact" }
+              },
+              [_vm._v("Contact content")]
+            )
+          ]
+        )
+      ])
+    ])
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("ol", { staticClass: "breadcrumb" }, [
+      _c("li", { staticClass: "breadcrumb-item" }, [_vm._v("Home")]),
+      _vm._v(" "),
+      _c("li", { staticClass: "breadcrumb-item" }, [_vm._v("Herramientas")])
+    ])
+  }
+]
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-3a88ca19", module.exports)
   }
 }
 

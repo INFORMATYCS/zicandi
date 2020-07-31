@@ -19,5 +19,13 @@
     <template v-if="oppMenuSeleccion==11">
         <compra-component></compra-component>
     </template>
+
+    <template v-if="oppMenuSeleccion==12">
+        <herramientas-component></herramientas-component>
+    </template>
+
+    <template v-if="oppMenuSeleccion==90">
+        <mercadolibre-component></mercadolibre-component>
+    </template>
     
 @endsection

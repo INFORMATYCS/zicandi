@@ -27,6 +27,9 @@ Vue.component('upload-component', require('./components/UploadFileComponent.vue'
 
 Vue.component('buscador-producto-component', require('./components/BuscadorProductoComponent.vue'));
 
+Vue.component('mercadolibre-component', require('./components/MercadolibreComponent.vue'));
+Vue.component('herramientas-component', require('./components/HerramientasComponent.vue'));
+
 
 
 const app = new Vue({

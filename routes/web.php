@@ -15,6 +15,10 @@ Route::get('/', function () {
     return view('frames/contenido_main');
 });
 
+Route::get('/loginmeli', function () {
+    return view('loginMELI');
+});
+
 
 // - Rutas para Proveedores
 Route::get('/proveedores', 'ProveedorController@index');
@@ -54,13 +58,22 @@ Route::put('/almacenes/activar', 'AlmacenController@activar');
 
 // - Rutas para Compras
 Route::get('/compras', 'ComprasController@index');
+Route::post('/compras/detalle', 'ComprasController@getDetalleCompra');
 Route::post('/compras/registrar', 'ComprasController@store');
+
+
 Route::put('/compras/actualizar', 'ComprasController@update');
 Route::put('/compras/desactivar', 'ComprasController@desactivar');
 Route::put('/compras/activar', 'ComprasController@activar');
 
-// - Rutas para Compras
+// - Rutas para UpLoad de archivos
 Route::post('/uploadfile', 'UploadFileController@index');
 Route::post('/uploadfile/getAdjuntosByCarpeta', 'UploadFileController@getAdjuntosByCarpeta');
 Route::put('/uploadfile/delete', 'UploadFileController@delete');
 Route::put('/uploadfile/nuevaCarpeta', 'UploadFileController@nuevaCarpeta');
+
+// - Rutas multifondos
+Route::post('/mf2/liquidarCompra', 'MultiFondosController@liquidarCompra');
+
+// - Rutas API mercadolibre
+Route::get('/meli/login', 'MercadoLibreController@login');

@@ -34,6 +34,11 @@ class Producto extends Model
                 ->as('codigo');
     }
 
+    //~Relacion inversa One To Many
+    public function stock(){
+        return $this->belongsTo('App\StockProducto', 'id_producto', 'id_producto');
+    }
+
 
 }
 

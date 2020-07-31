@@ -108,7 +108,7 @@
 
 
                     if(me.listaProductos.length==1){
-
+                        me.setProducto(me.listaProductos[0]);
                     }else if(me.listaProductos.length>1){
                         me.isBuscadorProductoDiv = 1;
                     }

@@ -414,6 +414,24 @@ var util = {
                 timer: 1000
               })
         },
+
+        POPUP: function(url){            
+            Swal.fire({
+                title: '<strong>HTML <u>example</u></strong>',
+                icon: 'info',
+                html:
+                  '<iframe src="'+url+'" title="Login Mercadolibre"></iframe>',
+                showCloseButton: true,
+                showCancelButton: true,
+                focusConfirm: false,
+                confirmButtonText:
+                  '<i class="fa fa-thumbs-up"></i> Great!',
+                confirmButtonAriaLabel: 'Thumbs up, great!',
+                cancelButtonText:
+                  '<i class="fa fa-thumbs-down"></i>',
+                cancelButtonAriaLabel: 'Thumbs down'
+              });
+        },
     
         /**
          * Recupera el mensaje de error del objecto

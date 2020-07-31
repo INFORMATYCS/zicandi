@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Producto;
 use App\DefineProducto;
 use App\Http\Lib\ProcesadorImagenes;
+use App\StockProducto;
 
 class ProductoController extends Controller{
     
@@ -100,6 +101,14 @@ class ProductoController extends Controller{
             }
         }
 
+        //~Registra stock
+        $stock = new StockProducto();
+        $stock->id_producto = $producto->id_producto;
+        $stock->stock = 0;
+        $stock->disponible = 0;
+        $stock->retenido = 0;
+        $stock->save();
+
     }
 
     /**
@@ -152,7 +161,7 @@ class ProductoController extends Controller{
                     $producto->atributos()->save($defineProducto);
                 }
             }
-        }
+        }        
 
     }
 
