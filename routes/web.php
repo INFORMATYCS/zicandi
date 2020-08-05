@@ -77,3 +77,9 @@ Route::post('/mf2/liquidarCompra', 'MultiFondosController@liquidarCompra');
 
 // - Rutas API mercadolibre
 Route::get('/meli/login', 'MercadoLibreController@login');
+
+// - Rutas API betterware
+Route::get('/bett/get', 'BetterwareController@getPage');
+Route::get('/bett/resumen', 'BetterwareController@resumenMigracion');
+Route::get('/bett/limpia', 'BetterwareController@limpiaTablaTemporal');
+Route::get('/bett/migracion', 'BetterwareController@migracionProductos');

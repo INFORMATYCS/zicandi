@@ -60630,19 +60630,35 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
         return {
             activeItem: 'nota_remision',
+            catBett: {
+                totalRegResumen: 0,
+                updateRegResumen: 0,
+                nuevoRegResumen: 0
+            },
 
-            isLoading: 0,
-
-            oUploadFile: {
-                selectedFile: null,
-                id_carpeta_adjuntos: 0
-            }
-
+            isLoading: 0
         };
     },
 
@@ -60653,45 +60669,46 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         },
         setActive: function setActive(menuItem) {
             this.activeItem = menuItem;
-        },
-        onFileSelected: function onFileSelected(event) {
-            //console.log(event.target.files)
-            for (var i = 0; i < event.target.files.length; i++) {
-                this.oUploadFile.selectedFile = event.target.files[i];
 
-                //~Sube inmediatamente el archivo
-                this.onUploadFile();
+            if (menuItem == "cat_bett") {
+                this.onResumenMigracionBett();
             }
         },
-        onUploadFile: function onUploadFile() {
-            this.oUploadFile.progreso = 0;
+        onResumenMigracionBett: function onResumenMigracionBett() {
+            this.isLoading = 1;
 
-            var fd = new FormData();
+            var me = this;
+            var url = '/zicandi/public/bett/resumen';
+            axios.get(url).then(function (response) {
+                var respuesta = response.data;
+                me.isLoading = 0;
+                console.log(respuesta);
 
-            var size = this.oUploadFile.selectedFile.size / 1024 / 1024;
-            if (size > 20) {
-                util.MSG('Algo salio Mal!', 'No se permiten archivos mayores a 20M', util.tipoErr);
-                this.oUploadFile.bandProgress = 0;
-            } else {
-                this.oUploadFile.bandProgress = 1;
+                me.catBett.totalRegResumen = respuesta.total;
+                me.catBett.updateRegResumen = respuesta.update;
+                me.catBett.nuevoRegResumen = respuesta.nuevo;
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onMigracionCatProductos: function onMigracionCatProductos() {
+            this.isLoading = 1;
 
-                fd.append('file', this.oUploadFile.selectedFile, this.oUploadFile.selectedFile.name);
-                fd.append('id_carpeta_adjuntos', this.oUploadFile.id_carpeta_adjuntos);
-                fd.append('nombre', this.oUploadFile.selectedFile.name);
+            var me = this;
+            var url = '/zicandi/public/bett/migracion';
+            axios.get(url).then(function (response) {
+                var respuesta = response.data;
+                me.isLoading = 0;
+                console.log(respuesta);
 
-                var me = this;
-                axios.post('/zicandi/public/uploadfile', fd, {
-                    onUploadProgress: function onUploadProgress(uploadEvent) {
-                        me.oUploadFile.progreso = Math.round(uploadEvent.loaded / uploadEvent.total * 100);
-                    }
-                }).then(function (response) {
-                    me.oUploadFile.bandProgress = 0;
-
-                    me.onLoadAdjuntos(me.oUploadFile.id_carpeta_adjuntos);
-                }).catch(function (error) {
-                    util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
-                });
-            }
+                if (respuesta == 1) {
+                    util.AVISO('Perfecto, migracion de productos terminada', util.tipoOk);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
         }
     },
     mounted: function mounted() {}
@@ -60739,15 +60756,15 @@ var render = function() {
               "a",
               {
                 staticClass: "nav-link",
-                class: { active: _vm.isActive("profile") },
-                attrs: { href: "#profile" },
+                class: { active: _vm.isActive("cat_bett") },
+                attrs: { href: "#cat_bett" },
                 on: {
                   click: function($event) {
-                    return _vm.setActive("profile")
+                    return _vm.setActive("cat_bett")
                   }
                 }
               },
-              [_vm._v("Crea BAT")]
+              [_vm._v("Catalogo Betterware")]
             )
           ]),
           _vm._v(" "),
@@ -60780,58 +60797,102 @@ var render = function() {
                 class: { "active show": _vm.isActive("nota_remision") },
                 attrs: { id: "nota_remision" }
               },
-              [
-                _c(
-                  "form",
-                  {
-                    staticClass: "form-horizontal",
-                    attrs: {
-                      action: "",
-                      method: "post",
-                      enctype: "multipart/form-data"
-                    }
-                  },
-                  [
-                    _c("div", { staticClass: "form-group row" }, [
-                      _c("div", { staticClass: "col-md-12" }, [
-                        _c("div", { staticClass: "card" }, [
-                          _c("div", { staticClass: "custom-file" }, [
-                            _c("input", {
-                              staticClass: "custom-file-input",
-                              attrs: {
-                                type: "file",
-                                id: "customFileLang",
-                                lang: "es",
-                                multiple: ""
-                              },
-                              on: { change: _vm.onFileSelected }
-                            })
-                          ]),
-                          _vm._v(" "),
-                          _c(
-                            "label",
-                            {
-                              staticClass: "btn btn-primary",
-                              attrs: { for: "customFileLang" }
-                            },
-                            [_vm._v("Subir archivo")]
-                          )
-                        ])
-                      ])
-                    ])
-                  ]
-                )
-              ]
+              [_vm._m(1)]
             ),
             _vm._v(" "),
             _c(
               "div",
               {
                 staticClass: "tab-pane fade",
-                class: { "active show": _vm.isActive("profile") },
-                attrs: { id: "profile" }
+                class: { "active show": _vm.isActive("cat_bett") },
+                attrs: { id: "cat_bett" }
               },
-              [_vm._v("Profile content")]
+              [
+                _c("div", { staticClass: "card-body" }, [
+                  _c(
+                    "form",
+                    {
+                      staticClass: "form-horizontal",
+                      attrs: {
+                        action: "",
+                        method: "post",
+                        enctype: "multipart/form-data"
+                      }
+                    },
+                    [
+                      _c("div", { staticClass: "form-group row" }, [
+                        _c(
+                          "label",
+                          {
+                            staticClass: "col-md-5 form-control-label",
+                            attrs: { for: "text-input" }
+                          },
+                          [_vm._v("Total de productos")]
+                        ),
+                        _vm._v(" "),
+                        _c("div", {
+                          staticClass: "col-md-7",
+                          domProps: {
+                            textContent: _vm._s(_vm.catBett.totalRegResumen)
+                          }
+                        })
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "form-group row" }, [
+                        _c(
+                          "label",
+                          {
+                            staticClass: "col-md-5 form-control-label",
+                            attrs: { for: "text-input" }
+                          },
+                          [_vm._v("Existentes (Update)")]
+                        ),
+                        _vm._v(" "),
+                        _c("div", {
+                          staticClass: "col-md-7",
+                          domProps: {
+                            textContent: _vm._s(_vm.catBett.updateRegResumen)
+                          }
+                        })
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "form-group row" }, [
+                        _c(
+                          "label",
+                          {
+                            staticClass: "col-md-5 form-control-label",
+                            attrs: { for: "text-input" }
+                          },
+                          [_vm._v("Nuevos")]
+                        ),
+                        _vm._v(" "),
+                        _c("div", {
+                          staticClass: "col-md-7",
+                          domProps: {
+                            textContent: _vm._s(_vm.catBett.nuevoRegResumen)
+                          }
+                        })
+                      ])
+                    ]
+                  )
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "card-footer" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-primary",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.onMigracionCatProductos()
+                        }
+                      }
+                    },
+                    [_vm._v("Aplicar")]
+                  )
+                ])
+              ]
             ),
             _vm._v(" "),
             _c(
@@ -60859,6 +60920,34 @@ var staticRenderFns = [
       _vm._v(" "),
       _c("li", { staticClass: "breadcrumb-item" }, [_vm._v("Herramientas")])
     ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "form",
+      {
+        staticClass: "form-horizontal",
+        attrs: { action: "", method: "post", enctype: "multipart/form-data" }
+      },
+      [
+        _c("div", { staticClass: "form-group row" }, [
+          _c("div", { staticClass: "col-md-12" }, [
+            _c("div", { staticClass: "card" }, [
+              _c(
+                "label",
+                {
+                  staticClass: "btn btn-primary",
+                  attrs: { for: "customFileLang" }
+                },
+                [_vm._v("Subir archivo")]
+              )
+            ])
+          ])
+        ])
+      ]
+    )
   }
 ]
 render._withStripped = true

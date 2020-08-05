@@ -17,7 +17,7 @@ mix.styles([
    'resources/assets/plantilla/css/style.css',
    'resources/assets/plantilla/css/pages-style.css',
 ], 'public/css/zicandi.css')
-.scripts([
+.babel([
    'resources/assets/plantilla/js/jquery.min.js',
    'resources/assets/plantilla/js/popper.min.js',
    'resources/assets/plantilla/js/bootstrap.min.js',

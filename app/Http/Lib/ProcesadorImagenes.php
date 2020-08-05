@@ -23,6 +23,22 @@ class ProcesadorImagenes{
         
     }
 
+    /**
+     * 
+     * 
+     * 
+     */
+    public function publicaImagenMini100C($configImagen){   
+        $c = new Constantes();
+        $repositorio = $c->repositorio_entrada_productos_mini;        
+        
+        $base64_string = $configImagen['b64'];
+        $nombre_archivo = $configImagen['nombre'];
+
+        return $this->creaImagen("mini_prod_c_", $nombre_archivo, $base64_string, $repositorio, 100, 100);
+        
+    }
+
     public function publicaImagen250($configImagen){   
         $c = new Constantes();
         $repositorio = $c->repositorio_entrada_productos_mini;        
@@ -48,7 +64,11 @@ class ProcesadorImagenes{
 
         $data = explode(',', $base64_string);
 
-        fwrite($file, base64_decode($data[1]));
+        if(count($data)>1){
+            fwrite($file, base64_decode($data[1]));
+        }else{
+            fwrite($file, base64_decode($base64_string));
+        }
 
         fclose($file);
     
