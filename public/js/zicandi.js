@@ -8681,11 +8681,11 @@ var util = {
     });
   },
 
-  POPUP: function POPUP(url) {
+  POPUP: function POPUP(url, styleFrame) {
     Swal.fire({
       title: '<strong>HTML <u>example</u></strong>',
       icon: 'info',
-      html: '<iframe src="' + url + '" title="Login Mercadolibre"></iframe>',
+      html: '<iframe src="' + url + '" title="Login Mercadolibre" style="display: none;"></iframe>',
       showCloseButton: true,
       showCancelButton: true,
       focusConfirm: false,

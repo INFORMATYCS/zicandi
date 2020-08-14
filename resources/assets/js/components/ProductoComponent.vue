@@ -291,7 +291,7 @@
                                                 <h6 class="card-subtitle mb-2 text-muted" v-text="proveedor.nombre_corto">BETT</h6>
                                             </div>
                                             <div class="col-md-8">                                            
-                                                <input type="text" class="form-control" placeholder="Codigo barras" maxlength="30" v-model="proveedor.codigo.codigo_barras">                                                                                                                                        
+                                                <input type="text" class="form-control" placeholder="Codigo barras" maxlength="30" v-model="proveedor.codigo.codigo_barras">
                                             </div>
                                         </div>                                                                                                             
                                     </li>     

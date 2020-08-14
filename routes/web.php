@@ -77,9 +77,21 @@ Route::post('/mf2/liquidarCompra', 'MultiFondosController@liquidarCompra');
 
 // - Rutas API mercadolibre
 Route::get('/meli/login', 'MercadoLibreController@login');
+Route::get('/meli/logout', 'MercadoLibreController@logout');
+Route::get('/meli/me', 'MercadoLibreController@me');
 
 // - Rutas API betterware
 Route::get('/bett/get', 'BetterwareController@getPage');
 Route::get('/bett/resumen', 'BetterwareController@resumenMigracion');
 Route::get('/bett/limpia', 'BetterwareController@limpiaTablaTemporal');
 Route::get('/bett/migracion', 'BetterwareController@migracionProductos');
+
+// ~  Rutas Tiendas
+Route::get('/tienda/getcuentas', 'TiendasController@index');
+Route::get('/tienda/getSelectTiendas', 'TiendasController@selectTienda');
+Route::post('/tienda/storeCuentaTienda', 'TiendasController@storeCuentaTienda');
+Route::put('/tienda/eliminarCuenta', 'TiendasController@eliminarCuentaTienda');
+Route::get('/tienda/registraCuentaActiva', 'TiendasController@registraCuentaActiva');
+
+
+

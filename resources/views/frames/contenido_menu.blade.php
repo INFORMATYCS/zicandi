@@ -32,6 +32,17 @@
             </li>
 
             <li class="nav-item nav-dropdown">
+                <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-wallet"></i> Tiendas</a>
+                <ul class="nav-dropdown-items">
+                    <li class="nav-item">
+                        <a @click="oppMenuSeleccion=13" class="nav-link" href="#"><i class="icon-bag"></i> Cuentas</a>
+                    </li>
+                    
+                    
+                </ul>
+            </li>
+
+            <li class="nav-item nav-dropdown">
                 <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-wallet"></i> Generales</a>
                 <ul class="nav-dropdown-items">
                     <li class="nav-item">

@@ -90,4 +90,30 @@ class MercadoLibreController extends Controller
         return View::make("loginmeli");
     }
 
+    public function me(Request $request){
+        $c = new Constantes();
+        $appId = $c->meli_appId;       
+        $secretKey = $c->meli_secretKey;
+        $redirectURI = $c->meli_redirectURI;
+        $siteId = $c->meli_siteId;
+
+        if(Session::get('access_token')!=null){
+            $meli = new Meli($appId, $secretKey);
+
+            $params = array('access_token' => Session::get('access_token'));
+            $result = $meli->get('/users/me', $params);
+        }else{
+            $result = array('httpCode'=>'NO_SESSION');
+        }
+        
+        return $result;
+    }
+
+    public function logout(Request $request){
+        Session::put('access_token', null);
+        Session::put('expires_in', null);
+        Session::put('refresh_token', null);        
+    }
+
+
 }

@@ -24,8 +24,15 @@
         <herramientas-component></herramientas-component>
     </template>
 
+    <template v-if="oppMenuSeleccion==13">
+        <cuentatienda-component></cuentatienda-component>
+    </template>    
+
     <template v-if="oppMenuSeleccion==90">
         <mercadolibre-component></mercadolibre-component>
     </template>
+
+
+    
     
 @endsection

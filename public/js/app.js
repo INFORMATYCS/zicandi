@@ -5071,7 +5071,10 @@ Vue.component('upload-component', __webpack_require__(105));
 Vue.component('buscador-producto-component', __webpack_require__(111));
 
 Vue.component('mercadolibre-component', __webpack_require__(116));
+
 Vue.component('herramientas-component', __webpack_require__(119));
+
+Vue.component('cuentatienda-component', __webpack_require__(122));
 
 var app = new Vue({
   el: '#app',
@@ -60956,6 +60959,762 @@ if (false) {
   module.hot.accept()
   if (module.hot.data) {
     require("vue-hot-reload-api")      .rerender("data-v-3a88ca19", module.exports)
+  }
+}
+
+/***/ }),
+/* 122 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__(2)
+/* script */
+var __vue_script__ = __webpack_require__(123)
+/* template */
+var __vue_template__ = __webpack_require__(124)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/CuentaTiendaComponent.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-4a87775a", Component.options)
+  } else {
+    hotAPI.reload("data-v-4a87775a", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 123 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    data: function data() {
+        return {
+            isLoading: 0,
+            listaCuentasTienda: [],
+            selectTiendas: [],
+            formRegistrarCuenta: {
+                id_tienda: 0,
+                usuario: ''
+
+            }
+        };
+    },
+
+    computed: {},
+    methods: {
+        onGetCuentasTiendas: function onGetCuentasTiendas() {
+            this.isLoading = 1;
+
+            var me = this;
+            var url = '/zicandi/public/tienda/getcuentas';
+            axios.get(url).then(function (response) {
+                var respuesta = response.data.resultado;
+                me.isLoading = 0;
+                me.listaCuentasTienda = respuesta;
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onSelectTiendas: function onSelectTiendas() {
+            var me = this;
+            var url = '/zicandi/public/tienda/getSelectTiendas';
+            axios.get(url).then(function (response) {
+                var respuesta = response.data.tiendas;
+                me.selectTiendas = respuesta;
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onNuevaCuentaTienda: function onNuevaCuentaTienda() {
+            var me = this;
+            this.isLoading = 1;
+            axios.post('/zicandi/public/tienda/storeCuentaTienda', {
+                'id_tienda': this.formRegistrarCuenta.id_tienda,
+                'usuario': this.formRegistrarCuenta.usuario
+            }).then(function (response) {
+                util.AVISO('Perfecto, registro correcto', util.tipoOk);
+                me.onGetCuentasTiendas();
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onEliminarCuentaTienda: function onEliminarCuentaTienda(idCuentaTienda) {
+            var _this = this;
+
+            util.MSG_SI_NO('Deseas eliminar', 'No podras usarlo...', util.tipoPreg).then(function (result) {
+                if (result == util.btnSi) {
+                    _this.isLoading = 1;
+                    var me = _this;
+
+                    axios.put('/zicandi/public/tienda/eliminarCuenta', {
+                        'id_cuenta_tienda': idCuentaTienda
+                    }).then(function (response) {
+                        me.isLoading = 0;
+                        util.AVISO('Cuenta eliminada!!!', util.tipoOk);
+                        me.onGetCuentasTiendas();
+                    }).catch(function (error) {
+                        me.isLoading = 0;
+                        util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+                    });
+                }
+            });
+        },
+        onCuentaActivaMercadolibre: function onCuentaActivaMercadolibre() {
+            var me = this;
+            var url = '/zicandi/public/tienda/registraCuentaActiva';
+            axios.get(url).then(function (response) {
+                console.log(response);
+                me.onGetCuentasTiendas();
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onConectarTienda: function onConectarTienda(codigoTienda) {
+            console.log(codigoTienda);
+            //MercadoLibre
+            if (codigoTienda == "MLM") {
+                this.onLoginMercadoLibre();
+            } else if (codigoTienda == "AMZ") {//Amazon
+
+            }
+        },
+        onLogoutMercadoLibre: function onLogoutMercadoLibre() {
+
+            var me = this;
+            this.isLoading = 1;
+            axios.get('/zicandi/public/meli/logout').then(function (response) {
+                me.isLoading = 0;
+                //util.POPUP('https://www.mercadolibre.com/jms/mlm/lgz/logout','display: none;'); 
+
+                var url = 'https://www.mercadolibre.com';
+                /*Swal.fire({
+                    title: '<strong>Saliendo de mercadolibre</strong>',
+                    icon: 'info',
+                    html:
+                    '<iframe src="'+url+'" title="Login Mercadolibre" style="display: none;"></iframe>',
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    focusConfirm: false,
+                    confirmButtonText:
+                    '<i class="fa fa-thumbs-up"></i> Great!',
+                    confirmButtonAriaLabel: 'Thumbs up, great!',
+                    cancelButtonText:
+                    '<i class="fa fa-thumbs-down"></i>',
+                    cancelButtonAriaLabel: 'Thumbs down'
+                });*/
+
+                Swal.fire({
+                    title: 'Saliendo de mercadolibre',
+                    html: '<iframe src="' + url + '" title="Login Mercadolibre"></iframe>',
+                    icon: 'success',
+                    showCancelButton: false,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Listo!'
+                }).then(function (result) {
+                    if (result.value) {
+                        me.onGetCuentasTiendas();
+                    }
+                });
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onLoginMercadoLibre: function onLoginMercadoLibre() {
+
+            var me = this;
+            this.isLoading = 1;
+            axios.get('/zicandi/public/meli/login').then(function (response) {
+                me.isLoading = 0;
+                var urlLogin = response.data.urlLogin;
+                var msg = response.data.msg;
+                console.log(response);
+                if (urlLogin != null) {
+                    var altura = 675;
+                    var anchura = 990;
+
+                    var y = parseInt(window.screen.height / 2 - altura / 2);
+                    var x = parseInt(window.screen.width / 2 - anchura / 2);
+
+                    window.open(urlLogin, "Login mercadolibre", 'width=' + anchura + ',height=' + altura + ',top=' + y + ',left=' + x + ',toolbar=no,location=no,status=no,menubar=no,scrollbars=no,directories=no,resizable=no');
+                } else {
+                    util.AVISO(msg, util.tipoOk);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onLoginAmazon: function onLoginAmazon() {
+
+            //P e n d i e n t e
+        }
+    },
+    mounted: function mounted() {
+        this.onCuentaActivaMercadolibre();
+
+        this.onSelectTiendas();
+    }
+});
+
+/***/ }),
+/* 124 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("main", { staticClass: "main" }, [
+    _c("div", {
+      staticClass: "sbl-circ-ripple",
+      class: { "abrir-load-sbl": _vm.isLoading },
+      staticStyle: { display: "none" }
+    }),
+    _vm._v(" "),
+    _vm._m(0),
+    _vm._v(" "),
+    _c("div", { staticClass: "container-fluid" }, [
+      _c("div", { staticClass: "card-body" }, [
+        _c("div", { staticClass: "row" }, [
+          _c("div", { staticClass: "col-sm-8" }, [
+            _c(
+              "div",
+              { staticClass: "card", staticStyle: { width: "60rem" } },
+              [
+                _c(
+                  "ul",
+                  { staticClass: "list-group list-group-flush" },
+                  _vm._l(_vm.listaCuentasTienda, function(cuenta) {
+                    return _c(
+                      "li",
+                      {
+                        key: cuenta.id_cuenta_tienda,
+                        staticClass: "list-group-item"
+                      },
+                      [
+                        _c("div", { staticClass: "container" }, [
+                          _c("div", { staticClass: "row" }, [
+                            _c("div", { staticClass: "col-10" }, [
+                              _c("div", { staticClass: "form-group row" }, [
+                                _c("div", { staticClass: "col-md-3" }, [
+                                  _c("h6", {
+                                    domProps: {
+                                      textContent: _vm._s(cuenta.nombre)
+                                    }
+                                  })
+                                ]),
+                                _vm._v(" "),
+                                _c("div", { staticClass: "col-md-3" }, [
+                                  _c("h6", {
+                                    domProps: {
+                                      textContent: _vm._s(cuenta.usuario)
+                                    }
+                                  })
+                                ]),
+                                _vm._v(" "),
+                                _c("div", { staticClass: "col-md-4" }, [
+                                  _c("h6", {
+                                    domProps: {
+                                      textContent: _vm._s(cuenta.correo)
+                                    }
+                                  })
+                                ]),
+                                _vm._v(" "),
+                                _c("div", { staticClass: "col-md-2" }, [
+                                  cuenta.estatus == "CONECTADO"
+                                    ? _c(
+                                        "span",
+                                        {
+                                          staticClass:
+                                            "badge badge-pill badge-success"
+                                        },
+                                        [_vm._v("Conectado")]
+                                      )
+                                    : _c("span", [_vm._v("No Conectado")])
+                                ])
+                              ]),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "form-group row" }, [
+                                _c("div", { staticClass: "col-md-3" }, [
+                                  _vm._v(
+                                    "\n                                                ID usuario\n                                            "
+                                  )
+                                ]),
+                                _vm._v(" "),
+                                _c("div", {
+                                  staticClass: "col-md-9",
+                                  domProps: {
+                                    textContent: _vm._s(cuenta.att_user_id)
+                                  }
+                                })
+                              ]),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "form-group row" }, [
+                                _c("div", { staticClass: "col-md-3" }, [
+                                  _vm._v(
+                                    "\n                                                ID\n                                            "
+                                  )
+                                ]),
+                                _vm._v(" "),
+                                _c("div", {
+                                  staticClass: "col-md-9",
+                                  domProps: {
+                                    textContent: _vm._s(cuenta.att_id)
+                                  }
+                                })
+                              ]),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "form-group row" }, [
+                                _c("div", { staticClass: "col-md-3" }, [
+                                  _vm._v(
+                                    "\n                                                Token\n                                            "
+                                  )
+                                ]),
+                                _vm._v(" "),
+                                _c("div", {
+                                  staticClass: "col-md-9",
+                                  domProps: {
+                                    textContent: _vm._s(cuenta.att_access_token)
+                                  }
+                                })
+                              ]),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "form-group row" }, [
+                                _c("div", { staticClass: "col-md-3" }, [
+                                  _vm._v(
+                                    "\n                                                Expira Token\n                                            "
+                                  )
+                                ]),
+                                _vm._v(" "),
+                                _c("div", { staticClass: "col-md-9" }, [
+                                  _c("span", {
+                                    staticClass: "badge badge-info",
+                                    domProps: {
+                                      textContent: _vm._s(
+                                        cuenta.att_expira_token
+                                      )
+                                    }
+                                  })
+                                ])
+                              ]),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "form-group row" }, [
+                                _c("div", { staticClass: "col-md-3" }, [
+                                  _vm._v(
+                                    "\n                                                Telefono\n                                            "
+                                  )
+                                ]),
+                                _vm._v(" "),
+                                _c("div", {
+                                  staticClass: "col-md-9",
+                                  domProps: {
+                                    textContent: _vm._s(cuenta.telefono)
+                                  }
+                                })
+                              ])
+                            ]),
+                            _vm._v(" "),
+                            _c("div", { staticClass: "col-2" }, [
+                              _c("div", { staticClass: "card text-center" }, [
+                                _c("div", { staticClass: "card-header" }, [
+                                  _vm._v(
+                                    "\n                                                        Opciones\n                                                "
+                                  )
+                                ]),
+                                _vm._v(" "),
+                                _c("div", { staticClass: "card-body" }, [
+                                  cuenta.estatus == "CONECTADO"
+                                    ? _c(
+                                        "a",
+                                        {
+                                          staticClass: "btn btn-primary",
+                                          attrs: { href: "#" },
+                                          on: {
+                                            click: function($event) {
+                                              return _vm.onLogoutMercadoLibre()
+                                            }
+                                          }
+                                        },
+                                        [_vm._v("Salir")]
+                                      )
+                                    : _c(
+                                        "a",
+                                        {
+                                          staticClass: "btn btn-primary",
+                                          attrs: { href: "#" },
+                                          on: {
+                                            click: function($event) {
+                                              return _vm.onConectarTienda(
+                                                cuenta.codigo
+                                              )
+                                            }
+                                          }
+                                        },
+                                        [_vm._v("Conectar")]
+                                      ),
+                                  _vm._v(" "),
+                                  _c("p"),
+                                  _vm._v(" "),
+                                  _c(
+                                    "a",
+                                    {
+                                      staticClass: "btn btn-warning",
+                                      attrs: { href: "#" },
+                                      on: {
+                                        click: function($event) {
+                                          return _vm.onEliminarCuentaTienda(
+                                            cuenta.id_cuenta_tienda
+                                          )
+                                        }
+                                      }
+                                    },
+                                    [_vm._v("Eliminar")]
+                                  )
+                                ])
+                              ])
+                            ])
+                          ])
+                        ])
+                      ]
+                    )
+                  }),
+                  0
+                )
+              ]
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-sm-4" }, [
+            _c("div", { staticClass: "card" }, [
+              _c("div", { staticClass: "card-body" }, [
+                _c("h5", { staticClass: "card-title" }, [
+                  _vm._v("Nueva cuenta")
+                ]),
+                _vm._v(" "),
+                _c("p", { staticClass: "card-text" }, [
+                  _vm._v("La cuenta debe estar registrada en la tienda")
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "row" }, [
+                  _c("div", { staticClass: "col-4" }, [
+                    _vm._v(
+                      "\n                                Tienda\n                            "
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-8" }, [
+                    _c(
+                      "select",
+                      {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.formRegistrarCuenta.id_tienda,
+                            expression: "formRegistrarCuenta.id_tienda"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        on: {
+                          change: function($event) {
+                            var $$selectedVal = Array.prototype.filter
+                              .call($event.target.options, function(o) {
+                                return o.selected
+                              })
+                              .map(function(o) {
+                                var val = "_value" in o ? o._value : o.value
+                                return val
+                              })
+                            _vm.$set(
+                              _vm.formRegistrarCuenta,
+                              "id_tienda",
+                              $event.target.multiple
+                                ? $$selectedVal
+                                : $$selectedVal[0]
+                            )
+                          }
+                        }
+                      },
+                      [
+                        _c(
+                          "option",
+                          { attrs: { value: "0", disabled: "", selected: "" } },
+                          [_vm._v("Seleccione...")]
+                        ),
+                        _vm._v(" "),
+                        _vm._l(_vm.selectTiendas, function(tienda) {
+                          return _c("option", {
+                            key: tienda.id_tienda,
+                            domProps: {
+                              value: tienda.id_tienda,
+                              textContent: _vm._s(tienda.nombre)
+                            }
+                          })
+                        })
+                      ],
+                      2
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "row" }, [
+                  _c("div", { staticClass: "col-4" }, [
+                    _vm._v(
+                      "\n                                Usuario\n                            "
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-8" }, [
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.formRegistrarCuenta.usuario,
+                          expression: "formRegistrarCuenta.usuario"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: {
+                        type: "text",
+                        placeholder: "Codigo Usuario",
+                        maxlength: "30"
+                      },
+                      domProps: { value: _vm.formRegistrarCuenta.usuario },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.formRegistrarCuenta,
+                            "usuario",
+                            $event.target.value
+                          )
+                        }
+                      }
+                    })
+                  ])
+                ]),
+                _vm._v(" "),
+                _c(
+                  "a",
+                  {
+                    staticClass: "btn btn-primary",
+                    attrs: { href: "#" },
+                    on: {
+                      click: function($event) {
+                        return _vm.onNuevaCuentaTienda()
+                      }
+                    }
+                  },
+                  [_vm._v("Guardar")]
+                )
+              ])
+            ])
+          ])
+        ])
+      ])
+    ])
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("ol", { staticClass: "breadcrumb" }, [
+      _c("li", { staticClass: "breadcrumb-item" }, [_vm._v("Home")]),
+      _vm._v(" "),
+      _c("li", { staticClass: "breadcrumb-item" }, [_vm._v("Tienda")]),
+      _vm._v(" "),
+      _c("li", { staticClass: "breadcrumb-item" }, [_vm._v("Cuentas")])
+    ])
+  }
+]
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-4a87775a", module.exports)
   }
 }
 

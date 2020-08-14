@@ -82,12 +82,12 @@ var util = {
               })
         },
 
-        POPUP: function(url){            
+        POPUP: function(url, styleFrame){            
             Swal.fire({
                 title: '<strong>HTML <u>example</u></strong>',
                 icon: 'info',
                 html:
-                  '<iframe src="'+url+'" title="Login Mercadolibre"></iframe>',
+                  '<iframe src="'+url+'" title="Login Mercadolibre" style="display: none;"></iframe>',
                 showCloseButton: true,
                 showCancelButton: true,
                 focusConfirm: false,
