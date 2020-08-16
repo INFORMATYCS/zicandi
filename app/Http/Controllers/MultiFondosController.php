@@ -73,12 +73,12 @@ class MultiFondosController extends Controller
      */
     private function calculaPrecioPromedio($idProducto, $precio){
         
-        $sql= " SELECT AVG(PRECIO) AS promedio FROM (
-                SELECT DC.PRECIO
-                FROM COMPRA C, DETA_COMPRA DC
-                WHERE C.ID_COMPRA = DC.ID_COMPRA
-                AND DC.ID_PRODUCTO = $idProducto
-                AND C.ESTATUS = 'APLICADO'
+        $sql= " SELECT AVG(precio) AS promedio FROM (
+                SELECT DC.precio
+                FROM compra C, deta_compra DC
+                WHERE C.id_compra = DC.id_compra
+                AND DC.id_producto = $idProducto
+                AND C.estatus = 'APLICADO'
                 UNION ALL
                 SELECT $precio FROM DUAL 
                 ) X";

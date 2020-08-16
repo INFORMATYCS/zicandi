@@ -23,20 +23,20 @@ Route::get('/loginmeli', function () {
 // - Rutas para Proveedores
 Route::get('/proveedores', 'ProveedorController@index');
 Route::post('/proveedores/registrar', 'ProveedorController@store');
-Route::put('/proveedores/actualizar', 'ProveedorController@update');
-Route::put('/proveedores/desactivar', 'ProveedorController@desactivar');
-Route::put('/proveedores/activar', 'ProveedorController@activar');
+Route::post('/proveedores/actualizar', 'ProveedorController@update');
+Route::post('/proveedores/desactivar', 'ProveedorController@desactivar');
+Route::post('/proveedores/activar', 'ProveedorController@activar');
 Route::get('/proveedores/selectProveedor', 'ProveedorController@selectProveedor');
 
 // - Rutas para Productos
 Route::get('/productos', 'ProductoController@index');
 Route::post('/productos/registrar', 'ProductoController@store');
-Route::put('/productos/actualizar', 'ProductoController@update');
-Route::put('/productos/desactivar', 'ProductoController@desactivar');
-Route::put('/productos/activar', 'ProductoController@activar');
+Route::post('/productos/actualizar', 'ProductoController@update');
+Route::post('/productos/desactivar', 'ProductoController@desactivar');
+Route::post('/productos/activar', 'ProductoController@activar');
 Route::get('/productos/procesaimg', 'ProductoController@procesaImagen');
-Route::put('/productos/getProveedoresByProducto', 'ProductoController@getProveedoresByProducto');
-Route::put('/productos/storeProveedoresByProducto', 'ProductoController@storeProveedoresByProducto');
+Route::post('/productos/getProveedoresByProducto', 'ProductoController@getProveedoresByProducto');
+Route::post('/productos/storeProveedoresByProducto', 'ProductoController@storeProveedoresByProducto');
 
 
 // - Rutas para Categorias
@@ -51,9 +51,9 @@ Route::get('parametria/seqFolioCompra_nextval', 'ParametriaController@seqFolioCo
 // - Rutas para Almacen
 Route::get('/almacenes', 'AlmacenController@index');
 Route::post('/almacenes/registrar', 'AlmacenController@store');
-Route::put('/almacenes/actualizar', 'AlmacenController@update');
-Route::put('/almacenes/desactivar', 'AlmacenController@desactivar');
-Route::put('/almacenes/activar', 'AlmacenController@activar');
+Route::post('/almacenes/actualizar', 'AlmacenController@update');
+Route::post('/almacenes/desactivar', 'AlmacenController@desactivar');
+Route::post('/almacenes/activar', 'AlmacenController@activar');
 
 
 // - Rutas para Compras
@@ -62,15 +62,15 @@ Route::post('/compras/detalle', 'ComprasController@getDetalleCompra');
 Route::post('/compras/registrar', 'ComprasController@store');
 
 
-Route::put('/compras/actualizar', 'ComprasController@update');
-Route::put('/compras/desactivar', 'ComprasController@desactivar');
-Route::put('/compras/activar', 'ComprasController@activar');
+Route::post('/compras/actualizar', 'ComprasController@update');
+Route::post('/compras/desactivar', 'ComprasController@desactivar');
+Route::post('/compras/activar', 'ComprasController@activar');
 
 // - Rutas para UpLoad de archivos
 Route::post('/uploadfile', 'UploadFileController@index');
 Route::post('/uploadfile/getAdjuntosByCarpeta', 'UploadFileController@getAdjuntosByCarpeta');
-Route::put('/uploadfile/delete', 'UploadFileController@delete');
-Route::put('/uploadfile/nuevaCarpeta', 'UploadFileController@nuevaCarpeta');
+Route::post('/uploadfile/delete', 'UploadFileController@delete');
+Route::post('/uploadfile/nuevaCarpeta', 'UploadFileController@nuevaCarpeta');
 
 // - Rutas multifondos
 Route::post('/mf2/liquidarCompra', 'MultiFondosController@liquidarCompra');
@@ -90,7 +90,7 @@ Route::get('/bett/migracion', 'BetterwareController@migracionProductos');
 Route::get('/tienda/getcuentas', 'TiendasController@index');
 Route::get('/tienda/getSelectTiendas', 'TiendasController@selectTienda');
 Route::post('/tienda/storeCuentaTienda', 'TiendasController@storeCuentaTienda');
-Route::put('/tienda/eliminarCuenta', 'TiendasController@eliminarCuentaTienda');
+Route::post('/tienda/eliminarCuenta', 'TiendasController@eliminarCuentaTienda');
 Route::get('/tienda/registraCuentaActiva', 'TiendasController@registraCuentaActiva');
 
 

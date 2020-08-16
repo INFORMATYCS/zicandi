@@ -150,7 +150,7 @@
 
                                 let me = this;
 
-                                axios.put('/zicandi/public/uploadfile/delete',{
+                                axios.post('/zicandi/public/uploadfile/delete',{
                                     'id_archivo_adjunto': adjunto.id_archivo_adjunto
                                 })
                                 .then(function (response) {                                    

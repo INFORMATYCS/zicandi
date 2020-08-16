@@ -241,7 +241,7 @@
 
                 let me = this;
                 this.isLoading = 1;
-                axios.put('/zicandi/public/almacenes/actualizar',{
+                axios.p('/zicandi/public/almacenes/actualizar',{
                     'id_almacen': this.oAlmacen.id_almacen,
                     'nombre': this.oAlmacen.nombre,
                     'ubicacion': this.oAlmacen.ubicacion,
@@ -265,7 +265,7 @@
                         this.isLoading = 1;
                         let me = this;
 
-                        axios.put('/zicandi/public/almacenes/desactivar',{
+                        axios.p('/zicandi/public/almacenes/desactivar',{
                             'id_almacen': id_almacen
                         })
                         .then(function (response) {
@@ -290,7 +290,7 @@
                         this.isLoading = 1;
                         let me = this;
 
-                        axios.put('/zicandi/public/almacenes/activar',{
+                        axios.p('/zicandi/public/almacenes/activar',{
                             'id_almacen': id_almacen
                         })
                         .then(function (response) {

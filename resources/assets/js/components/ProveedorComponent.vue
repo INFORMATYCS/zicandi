@@ -273,7 +273,7 @@
 
                 let me = this;
                 this.isLoading = 1;
-                axios.put('/zicandi/public/proveedores/actualizar',{
+                axios.post('/zicandi/public/proveedores/actualizar',{
                     'id_proveedor': this.oProveedor.id_proveedor,
                     'nombre_corto': this.oProveedor.nombre_corto,
                     'nombre':       this.oProveedor.nombre,
@@ -298,7 +298,7 @@
                         this.isLoading = 1;
                         let me = this;
 
-                        axios.put('/zicandi/public/proveedores/desactivar',{
+                        axios.post('/zicandi/public/proveedores/desactivar',{
                             'id_proveedor': id_proveedor
                         })
                         .then(function (response) {
@@ -323,7 +323,7 @@
                         this.isLoading = 1;
                         let me = this;
 
-                        axios.put('/zicandi/public/proveedores/activar',{
+                        axios.post('/zicandi/public/proveedores/activar',{
                             'id_proveedor': id_proveedor
                         })
                         .then(function (response) {

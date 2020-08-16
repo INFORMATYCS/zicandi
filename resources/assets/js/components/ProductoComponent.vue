@@ -498,7 +498,7 @@
 
                 let me = this;
                 this.isLoading = 1;
-                axios.put('/zicandi/public/productos/actualizar',{
+                axios.post('/zicandi/public/productos/actualizar',{
                     'id_producto': this.oProducto.id_producto,
                     'id_categoria': this.oProducto.id_categoria,
                     'codigo': this.oProducto.codigo,
@@ -529,7 +529,7 @@
                         this.isLoading = 1;
                         let me = this;
 
-                        axios.put('/zicandi/public/proveedores/desactivar',{
+                        axios.post('/zicandi/public/proveedores/desactivar',{
                             'id_proveedor': id_proveedor
                         })
                         .then(function (response) {
@@ -554,7 +554,7 @@
                         this.isLoading = 1;
                         let me = this;
 
-                        axios.put('/zicandi/public/proveedores/activar',{
+                        axios.post('/zicandi/public/proveedores/activar',{
                             'id_proveedor': id_proveedor
                         })
                         .then(function (response) {
@@ -772,7 +772,7 @@
                 var url= '/zicandi/public/productos/getProveedoresByProducto';
 
                 this.isLoading = 1;
-                axios.put(url,{
+                axios.post(url,{
                     'id_producto': this.oProducto.id_producto
                 })
                 .then(function (response) {   
@@ -812,7 +812,7 @@
             
                 let me = this;
                 this.isLoading = 1;
-                axios.put('/zicandi/public/productos/storeProveedoresByProducto',{
+                axios.post('/zicandi/public/productos/storeProveedoresByProducto',{
                     'id_producto': this.oProducto.id_producto,                    
                     'proveedores': {proveedores: this.oDetaProveedorProducto.listaProveedorProducto}
                 })

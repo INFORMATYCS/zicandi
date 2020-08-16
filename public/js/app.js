@@ -50827,7 +50827,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             var me = this;
             this.isLoading = 1;
-            axios.put('/zicandi/public/proveedores/actualizar', {
+            axios.post('/zicandi/public/proveedores/actualizar', {
                 'id_proveedor': this.oProveedor.id_proveedor,
                 'nombre_corto': this.oProveedor.nombre_corto,
                 'nombre': this.oProveedor.nombre,
@@ -50851,7 +50851,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     _this.isLoading = 1;
                     var me = _this;
 
-                    axios.put('/zicandi/public/proveedores/desactivar', {
+                    axios.post('/zicandi/public/proveedores/desactivar', {
                         'id_proveedor': id_proveedor
                     }).then(function (response) {
                         me.isLoading = 0;
@@ -50872,7 +50872,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     _this2.isLoading = 1;
                     var me = _this2;
 
-                    axios.put('/zicandi/public/proveedores/activar', {
+                    axios.post('/zicandi/public/proveedores/activar', {
                         'id_proveedor': id_proveedor
                     }).then(function (response) {
                         me.isLoading = 0;
@@ -52220,7 +52220,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             var me = this;
             this.isLoading = 1;
-            axios.put('/zicandi/public/productos/actualizar', {
+            axios.post('/zicandi/public/productos/actualizar', {
                 'id_producto': this.oProducto.id_producto,
                 'id_categoria': this.oProducto.id_categoria,
                 'codigo': this.oProducto.codigo,
@@ -52250,7 +52250,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     _this.isLoading = 1;
                     var me = _this;
 
-                    axios.put('/zicandi/public/proveedores/desactivar', {
+                    axios.post('/zicandi/public/proveedores/desactivar', {
                         'id_proveedor': id_proveedor
                     }).then(function (response) {
                         me.isLoading = 0;
@@ -52271,7 +52271,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     _this2.isLoading = 1;
                     var me = _this2;
 
-                    axios.put('/zicandi/public/proveedores/activar', {
+                    axios.post('/zicandi/public/proveedores/activar', {
                         'id_proveedor': id_proveedor
                     }).then(function (response) {
                         me.isLoading = 0;
@@ -52477,7 +52477,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var url = '/zicandi/public/productos/getProveedoresByProducto';
 
             this.isLoading = 1;
-            axios.put(url, {
+            axios.post(url, {
                 'id_producto': this.oProducto.id_producto
             }).then(function (response) {
                 me.isLoading = 0;
@@ -52515,7 +52515,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             var me = this;
             this.isLoading = 1;
-            axios.put('/zicandi/public/productos/storeProveedoresByProducto', {
+            axios.post('/zicandi/public/productos/storeProveedoresByProducto', {
                 'id_producto': this.oProducto.id_producto,
                 'proveedores': { proveedores: this.oDetaProveedorProducto.listaProveedorProducto }
             }).then(function (response) {
@@ -57033,7 +57033,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             var me = this;
             this.isLoading = 1;
-            axios.put('/zicandi/public/almacenes/actualizar', {
+            axios.p('/zicandi/public/almacenes/actualizar', {
                 'id_almacen': this.oAlmacen.id_almacen,
                 'nombre': this.oAlmacen.nombre,
                 'ubicacion': this.oAlmacen.ubicacion,
@@ -57056,7 +57056,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     _this.isLoading = 1;
                     var me = _this;
 
-                    axios.put('/zicandi/public/almacenes/desactivar', {
+                    axios.p('/zicandi/public/almacenes/desactivar', {
                         'id_almacen': id_almacen
                     }).then(function (response) {
                         me.isLoading = 0;
@@ -57077,7 +57077,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     _this2.isLoading = 1;
                     var me = _this2;
 
-                    axios.put('/zicandi/public/almacenes/activar', {
+                    axios.p('/zicandi/public/almacenes/activar', {
                         'id_almacen': id_almacen
                     }).then(function (response) {
                         me.isLoading = 0;
@@ -58111,7 +58111,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         onCargaComponenteUpload: function onCargaComponenteUpload() {
             if (this.oCompra.id_carpeta_adjuntos == 0 || this.oCompra.id_carpeta_adjuntos == null) {
                 var me = this;
-                axios.put('/zicandi/public/uploadfile/nuevaCarpeta', {
+                axios.post('/zicandi/public/uploadfile/nuevaCarpeta', {
                     'nombre': 'carpeta_compra'
                 }).then(function (response) {
                     console.log(response);
@@ -58305,7 +58305,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             var me = this;
             this.isLoading = 1;
-            axios.put('/zicandi/public/compras/actualizar', {
+            axios.post('/zicandi/public/compras/actualizar', {
                 'id_compra': this.oCompra.id_compra,
                 'folio': this.oCompra.folio,
                 'id_proveedor': this.oProveedor.selectProveedor.id_proveedor,
@@ -58370,7 +58370,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     _this2.isLoading = 1;
                     var me = _this2;
 
-                    axios.put('/zicandi/public/almacenes/desactivar', {
+                    axios.post('/zicandi/public/almacenes/desactivar', {
                         'id_almacen': id_almacen
                     }).then(function (response) {
                         me.isLoading = 0;
@@ -58391,7 +58391,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     _this3.isLoading = 1;
                     var me = _this3;
 
-                    axios.put('/zicandi/public/almacenes/activar', {
+                    axios.post('/zicandi/public/almacenes/activar', {
                         'id_almacen': id_almacen
                     }).then(function (response) {
                         me.isLoading = 0;
@@ -59614,7 +59614,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
                             var me = _this;
 
-                            axios.put('/zicandi/public/uploadfile/delete', {
+                            axios.post('/zicandi/public/uploadfile/delete', {
                                 'id_archivo_adjunto': adjunto.id_archivo_adjunto
                             }).then(function (response) {}).catch(function (error) {
                                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
@@ -61221,7 +61221,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     _this.isLoading = 1;
                     var me = _this;
 
-                    axios.put('/zicandi/public/tienda/eliminarCuenta', {
+                    axios.post('/zicandi/public/tienda/eliminarCuenta', {
                         'id_cuenta_tienda': idCuentaTienda
                     }).then(function (response) {
                         me.isLoading = 0;

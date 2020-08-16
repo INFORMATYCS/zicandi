@@ -213,7 +213,7 @@
                         this.isLoading = 1;
                         let me = this;
 
-                        axios.put('/zicandi/public/tienda/eliminarCuenta',{
+                        axios.post('/zicandi/public/tienda/eliminarCuenta',{
                             'id_cuenta_tienda': idCuentaTienda
                         })
                         .then(function (response) {

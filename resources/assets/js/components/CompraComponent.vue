@@ -1,4 +1,4 @@
-<template>
+/<template>
 
 
 
@@ -373,7 +373,7 @@
             onCargaComponenteUpload(){
                 if(this.oCompra.id_carpeta_adjuntos==0 || this.oCompra.id_carpeta_adjuntos==null){
                     let me = this;                    
-                    axios.put('/zicandi/public/uploadfile/nuevaCarpeta',{
+                    axios.post('/zicandi/public/uploadfile/nuevaCarpeta',{
                         'nombre': 'carpeta_compra'                   
                     })
                     .then(function (response) {                                                                
@@ -582,7 +582,7 @@
 
                 let me = this;
                 this.isLoading = 1;
-                axios.put('/zicandi/public/compras/actualizar',{
+                axios.post('/zicandi/public/compras/actualizar',{
                     'id_compra': this.oCompra.id_compra,
                     'folio': this.oCompra.folio,
                     'id_proveedor': this.oProveedor.selectProveedor.id_proveedor,
@@ -661,7 +661,7 @@
                         this.isLoading = 1;
                         let me = this;
 
-                        axios.put('/zicandi/public/almacenes/desactivar',{
+                        axios.post('/zicandi/public/almacenes/desactivar',{
                             'id_almacen': id_almacen
                         })
                         .then(function (response) {
@@ -686,7 +686,7 @@
                         this.isLoading = 1;
                         let me = this;
 
-                        axios.put('/zicandi/public/almacenes/activar',{
+                        axios.post('/zicandi/public/almacenes/activar',{
                             'id_almacen': id_almacen
                         })
                         .then(function (response) {
