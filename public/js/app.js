@@ -5076,6 +5076,8 @@ Vue.component('herramientas-component', __webpack_require__(119));
 
 Vue.component('cuentatienda-component', __webpack_require__(122));
 
+Vue.component('headerzicandi-component', __webpack_require__(125));
+
 var app = new Vue({
   el: '#app',
   data: {
@@ -61158,6 +61160,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -61253,34 +61263,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             }
         },
-        onLogoutMercadoLibre: function onLogoutMercadoLibre() {
+        onLogoutMercadoLibre: function onLogoutMercadoLibre(cuenta) {
 
             var me = this;
             this.isLoading = 1;
             axios.get('/zicandi/public/meli/logout').then(function (response) {
                 me.isLoading = 0;
-                //util.POPUP('https://www.mercadolibre.com/jms/mlm/lgz/logout','display: none;'); 
-
-                var url = 'https://www.mercadolibre.com';
-                /*Swal.fire({
-                    title: '<strong>Saliendo de mercadolibre</strong>',
-                    icon: 'info',
-                    html:
-                    '<iframe src="'+url+'" title="Login Mercadolibre" style="display: none;"></iframe>',
-                    showCloseButton: true,
-                    showCancelButton: true,
-                    focusConfirm: false,
-                    confirmButtonText:
-                    '<i class="fa fa-thumbs-up"></i> Great!',
-                    confirmButtonAriaLabel: 'Thumbs up, great!',
-                    cancelButtonText:
-                    '<i class="fa fa-thumbs-down"></i>',
-                    cancelButtonAriaLabel: 'Thumbs down'
-                });*/
+                var url = 'https://www.mercadolibre.com/jms/mlm/lgz/logout?go=http://developers.mercadolibre.com.mx/';
 
                 Swal.fire({
                     title: 'Saliendo de mercadolibre',
-                    html: '<iframe src="' + url + '" title="Login Mercadolibre"></iframe>',
+                    html: '<iframe src="' + url + '" title="Login Mercadolibre" style="display: none;"></iframe>',
                     icon: 'success',
                     showCancelButton: false,
                     confirmButtonColor: '#3085d6',
@@ -61288,7 +61281,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     confirmButtonText: 'Listo!'
                 }).then(function (result) {
                     if (result.value) {
-                        me.onGetCuentasTiendas();
+                        cuenta.estatus = 'NO_CONECTADO';
+                        me.onCuentaActivaMercadolibre();
                     }
                 });
             }).catch(function (error) {
@@ -61508,7 +61502,9 @@ var render = function() {
                                           attrs: { href: "#" },
                                           on: {
                                             click: function($event) {
-                                              return _vm.onLogoutMercadoLibre()
+                                              return _vm.onLogoutMercadoLibre(
+                                                cuenta
+                                              )
                                             }
                                           }
                                         },
@@ -61575,7 +61571,7 @@ var render = function() {
                 _c("div", { staticClass: "row" }, [
                   _c("div", { staticClass: "col-4" }, [
                     _vm._v(
-                      "\n                                Tienda\n                            "
+                      "\n                                    Tienda\n                                "
                     )
                   ]),
                   _vm._v(" "),
@@ -61637,7 +61633,7 @@ var render = function() {
                 _c("div", { staticClass: "row" }, [
                   _c("div", { staticClass: "col-4" }, [
                     _vm._v(
-                      "\n                                Usuario\n                            "
+                      "\n                                    Usuario\n                                "
                     )
                   ]),
                   _vm._v(" "),
@@ -61688,6 +61684,24 @@ var render = function() {
                   [_vm._v("Guardar")]
                 )
               ])
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "card text-center" }, [
+              _c("div", { staticClass: "card-body" }, [
+                _c(
+                  "a",
+                  {
+                    staticClass: "btn btn-primary",
+                    attrs: { href: "#" },
+                    on: {
+                      click: function($event) {
+                        return _vm.onCuentaActivaMercadolibre()
+                      }
+                    }
+                  },
+                  [_vm._v("Refresh")]
+                )
+              ])
             ])
           ])
         ])
@@ -61715,6 +61729,123 @@ if (false) {
   module.hot.accept()
   if (module.hot.data) {
     require("vue-hot-reload-api")      .rerender("data-v-4a87775a", module.exports)
+  }
+}
+
+/***/ }),
+/* 125 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__(2)
+/* script */
+var __vue_script__ = __webpack_require__(126)
+/* template */
+var __vue_template__ = __webpack_require__(127)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/HeaderZicandiComponent.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-30a726bb", Component.options)
+  } else {
+    hotAPI.reload("data-v-30a726bb", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 126 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    data: function data() {
+        return {
+            isLoading: 0,
+            cuentaActivalMeli: ''
+        };
+    },
+
+    methods: {
+        onCuentaActivaMercadolibre: function onCuentaActivaMercadolibre() {
+            var me = this;
+            var url = '/zicandi/public/tienda/registraCuentaActiva';
+            axios.get(url).then(function (response) {
+                var cuenta = response.data.cuenta;
+                me.cuentaActivalMeli = cuenta;
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        }
+    },
+    mounted: function mounted() {
+        this.onCuentaActivaMercadolibre();
+    }
+});
+
+/***/ }),
+/* 127 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("main", { staticClass: "main" }, [
+    _c("li", { staticClass: "nav-item" }, [
+      _c("span", {
+        staticClass: "badge badge-pill badge-warning",
+        domProps: { textContent: _vm._s(_vm.cuentaActivalMeli) }
+      })
+    ])
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-30a726bb", module.exports)
   }
 }
 

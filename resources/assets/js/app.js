@@ -33,6 +33,8 @@ Vue.component('herramientas-component', require('./components/HerramientasCompon
 
 Vue.component('cuentatienda-component', require('./components/CuentaTiendaComponent.vue'));
 
+Vue.component('headerzicandi-component', require('./components/HeaderZicandiComponent.vue'));
+
 
 const app = new Vue({
     el: '#app',

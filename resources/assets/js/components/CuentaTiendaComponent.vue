@@ -82,7 +82,7 @@
                                                             Opciones
                                                     </div>
                                                     <div class="card-body"> 
-                                                            <a href="#" class="btn btn-primary" v-if="cuenta.estatus=='CONECTADO'" @click="onLogoutMercadoLibre()">Salir</a>
+                                                            <a href="#" class="btn btn-primary" v-if="cuenta.estatus=='CONECTADO'" @click="onLogoutMercadoLibre(cuenta)">Salir</a>
                                                             <a href="#" class="btn btn-primary" v-else @click="onConectarTienda(cuenta.codigo)">Conectar</a>
                                                             <p></p>
                                                             <a href="#" class="btn btn-warning" @click="onEliminarCuentaTienda(cuenta.id_cuenta_tienda)">Eliminar</a>
@@ -101,31 +101,39 @@
 
                     <div class="col-sm-4">
                         <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Nueva cuenta</h5>
-                            <p class="card-text">La cuenta debe estar registrada en la tienda</p>
-                            <div class="row">
-                                <div class="col-4">
-                                    Tienda
+                            <div class="card-body">
+                                <h5 class="card-title">Nueva cuenta</h5>
+                                <p class="card-text">La cuenta debe estar registrada en la tienda</p>
+                                <div class="row">
+                                    <div class="col-4">
+                                        Tienda
+                                    </div>
+                                    <div class="col-8">
+                                        <select class="form-control" v-model="formRegistrarCuenta.id_tienda">
+                                            <option value="0" disabled selected>Seleccione...</option>
+                                            <option v-for="tienda in selectTiendas" :key="tienda.id_tienda" :value="tienda.id_tienda" v-text="tienda.nombre"></option>
+                                        </select>                                                                     
+                                    </div>
                                 </div>
-                                <div class="col-8">
-                                    <select class="form-control" v-model="formRegistrarCuenta.id_tienda">
-                                        <option value="0" disabled selected>Seleccione...</option>
-                                        <option v-for="tienda in selectTiendas" :key="tienda.id_tienda" :value="tienda.id_tienda" v-text="tienda.nombre"></option>
-                                    </select>                                                                     
+                                <div class="row">
+                                    <div class="col-4">
+                                        Usuario
+                                    </div>
+                                    <div class="col-8">
+                                        <input type="text" class="form-control" placeholder="Codigo Usuario" maxlength="30" v-model="formRegistrarCuenta.usuario">
+                                    </div>
                                 </div>
+                                
+                                <a href="#" class="btn btn-primary" @click="onNuevaCuentaTienda();">Guardar</a>
                             </div>
-                            <div class="row">
-                                <div class="col-4">
-                                    Usuario
-                                </div>
-                                <div class="col-8">
-                                    <input type="text" class="form-control" placeholder="Codigo Usuario" maxlength="30" v-model="formRegistrarCuenta.usuario">
-                                </div>
-                            </div>
-                            
-                            <a href="#" class="btn btn-primary" @click="onNuevaCuentaTienda();">Guardar</a>
                         </div>
+
+
+
+                        <div class="card text-center">
+                            <div class="card-body">                                                                
+                                <a href="#" class="btn btn-primary" @click="onCuentaActivaMercadolibre();">Refresh</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -254,44 +262,28 @@
                 }
             },
 
-            onLogoutMercadoLibre(){
+            onLogoutMercadoLibre(cuenta){
                 
 
                 let me = this;
                 this.isLoading = 1;
                 axios.get('/zicandi/public/meli/logout')
                 .then(function (response) {                                        
-                    me.isLoading = 0;  
-                    //util.POPUP('https://www.mercadolibre.com/jms/mlm/lgz/logout','display: none;'); 
-                    
-                    let url = 'https://www.mercadolibre.com';
-                    /*Swal.fire({
-                        title: '<strong>Saliendo de mercadolibre</strong>',
-                        icon: 'info',
-                        html:
-                        '<iframe src="'+url+'" title="Login Mercadolibre" style="display: none;"></iframe>',
-                        showCloseButton: true,
-                        showCancelButton: true,
-                        focusConfirm: false,
-                        confirmButtonText:
-                        '<i class="fa fa-thumbs-up"></i> Great!',
-                        confirmButtonAriaLabel: 'Thumbs up, great!',
-                        cancelButtonText:
-                        '<i class="fa fa-thumbs-down"></i>',
-                        cancelButtonAriaLabel: 'Thumbs down'
-                    });*/
+                    me.isLoading = 0;                    
+                    let url = 'https://www.mercadolibre.com/jms/mlm/lgz/logout?go=http://developers.mercadolibre.com.mx/';       
 
                     Swal.fire({
                         title: 'Saliendo de mercadolibre',
-                        html:'<iframe src="'+url+'" title="Login Mercadolibre"></iframe>',
+                        html:'<iframe src="'+url+'" title="Login Mercadolibre" style="display: none;"></iframe>',
                         icon: 'success',
                         showCancelButton: false,
                         confirmButtonColor: '#3085d6',
                         cancelButtonColor: '#d33',
                         confirmButtonText: 'Listo!'
                         }).then((result) => {
-                        if (result.value) {
-                            me.onGetCuentasTiendas();
+                        if (result.value) {                            
+                            cuenta.estatus = 'NO_CONECTADO';
+                            me.onCuentaActivaMercadolibre();
                         }
                         })
                     

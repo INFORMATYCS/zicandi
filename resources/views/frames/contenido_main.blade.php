@@ -36,3 +36,8 @@
     
     
 @endsection
+
+
+@section('header_conecta_tienda')    
+    <headerzicandi-component></headerzicandi-component>
+@endsection

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\CuentaTienda;
 use App\Tienda;
+use Session;
 
 
 class TiendasController extends Controller
@@ -79,12 +80,21 @@ class TiendasController extends Controller
         }else if($sesion['httpCode']=="200"){               
             //~Conecta la cuenta activa
             $nickname = $sesion['body']->nickname;
+            $fechaExpira = date("Y-m-d H:i:s", Session::get('expires_in'));
             CuentaTienda::where('usuario','=',$nickname)
-            ->update(['estatus' => 'CONECTADO']);
+            ->update([  'estatus' => 'CONECTADO',
+                        'att_id' => $sesion['body']->id,
+                        'correo' => $sesion['body']->email,
+                        'telefono' => $sesion['body']->phone->area_code.$sesion['body']->phone->number,
+                        'att_access_token' => Session::get('access_token'),
+                        'att_expira_token' => $fechaExpira ]);
+
+
+            return ['cuenta' => $nickname];
         }
         
 
-
+        
     }
 
 }

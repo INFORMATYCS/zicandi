@@ -34,9 +34,8 @@
                 </li>
             </ul>
             <ul class="nav navbar-nav ml-auto">
-                <li class="nav-item">
-                    <span class="badge badge-pill badge-warning" @click="oppMenuSeleccion=90">Conectado MELI</span>                    
-                </li>
+                @yield('header_conecta_tienda')
+                
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle nav-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
                         <img src="img/avatars/6.jpg" class="img-avatar" alt="admin@bootstrapmaster.com">
