@@ -68,16 +68,12 @@ class MercadoLibreController extends Controller
     public function getAsynCODE(Request $request){
         $code = $request->code;
 
-        /* Your Application Id */
-        $appId = '3145687774408719';
-
-        /* Your Secret Key */
-        $secretKey = 'sQcT6u43C7J6UQtjVCJmYjEYG3ve77d3';
-
-        /* The Redirect url */
-        $redirectURI = 'http://localhost/zicandi/public/meli/code';
-
-        $siteId = 'MLM';
+        $c = new Constantes();
+        $appId = $c->meli_appId;       
+        $secretKey = $c->meli_secretKey;
+        $redirectURI = $c->meli_redirectURI;
+        $siteId = $c->meli_siteId;
+        
 
         $meli = new Meli($appId, $secretKey);
         $user = $meli->authorize($code, $redirectURI);
