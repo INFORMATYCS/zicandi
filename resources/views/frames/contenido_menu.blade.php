@@ -37,6 +37,9 @@
                     <li class="nav-item">
                         <a @click="oppMenuSeleccion=13" class="nav-link" href="#"><i class="icon-bag"></i> Cuentas</a>
                     </li>
+                    <li class="nav-item">
+                        <a @click="oppMenuSeleccion=14" class="nav-link" href="#"><i class="icon-bag"></i> Publicaciones</a>
+                    </li>
                     
                     
                 </ul>

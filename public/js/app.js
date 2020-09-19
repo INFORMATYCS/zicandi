@@ -5078,6 +5078,8 @@ Vue.component('cuentatienda-component', __webpack_require__(122));
 
 Vue.component('headerzicandi-component', __webpack_require__(125));
 
+Vue.component('publicacionestienda-component', __webpack_require__(128));
+
 var app = new Vue({
   el: '#app',
   data: {
@@ -61801,7 +61803,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     data: function data() {
         return {
             isLoading: 0,
-            cuentaActivalMeli: ''
+            cuentaActivalMeli: '',
+            idVendedor: 0
         };
     },
 
@@ -61812,6 +61815,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             axios.get(url).then(function (response) {
                 var cuenta = response.data.cuenta;
                 me.cuentaActivalMeli = cuenta;
+                me.idVendedor = response.data.id;
+
+                me.onGetPublicaciones();
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onGetPublicaciones: function onGetPublicaciones() {
+            var me = this;
+            var url = '/zicandi/public/tienda/getPublicaciones';
+            axios.post(url, {
+                'id': this.idVendedor
+            }).then(function (response) {
+                console.log(response);
             }).catch(function (error) {
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
             });
@@ -61846,6 +61863,1679 @@ if (false) {
   module.hot.accept()
   if (module.hot.data) {
     require("vue-hot-reload-api")      .rerender("data-v-30a726bb", module.exports)
+  }
+}
+
+/***/ }),
+/* 128 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__(2)
+/* script */
+var __vue_script__ = __webpack_require__(129)
+/* template */
+var __vue_template__ = __webpack_require__(130)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/PublicacionesTiendaComponent.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-7e7adbce", Component.options)
+  } else {
+    hotAPI.reload("data-v-7e7adbce", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 129 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    data: function data() {
+        return {
+            listaCuentaTiendas: [],
+            objPublicacion: {
+                idPublicacion: 0,
+                idCuentaTienda: 0,
+                idPublicacionTienda: 0,
+                idVariantePublicacion: 0,
+                titulo: '',
+                nombreVariante: '',
+                precioVenta: 0,
+                stock: 0,
+                ventas: 0,
+                envioGratis: 0,
+                full: 0,
+                link: '',
+                fotoMini: '',
+                fechaConsulta: '',
+                estatus: ''
+            },
+            listaPublicaciones: [],
+
+            pagination: {
+                total: 0,
+                current_page: 0,
+                per_page: 0,
+                last_page: 0,
+                from: 0,
+                to: 0
+            },
+            offset: 3,
+            chkEstatusActivas: true,
+            chkEstatusPausadas: false,
+            criterio: 'titulo',
+            buscar: '',
+            isLoading: 0,
+            modalProductosLigados: {
+                modal: 0,
+                tituloModal: '',
+                errorProducto: 0,
+                erroresProductoMsjList: [],
+                productosligados: [],
+                publicacionSeleccion: {}
+            },
+            modalGrafico: {
+                modal: 0,
+                tituloModal: '',
+                varVentas: null,
+                charVentas: null,
+                ventas: [],
+                varTotalVentas: [],
+                varDiaVentas: []
+            }
+
+        };
+    },
+
+    components: {},
+    computed: {
+        isActived: function isActived() {
+            return this.pagination.current_page;
+        },
+        pagesNumber: function pagesNumber() {
+            if (!this.pagination.to) {
+                return [];
+            }
+
+            var from = this.pagination.current_page - this.offset;
+            if (from < 1) {
+                from = 1;
+            }
+
+            var to = from + this.offset * 2;
+            if (to >= this.pagination.last_page) {
+                to = this.pagination.last_page;
+            }
+
+            var pageArray = [];
+            while (from <= to) {
+                pageArray.push(from);
+                from++;
+            }
+
+            return pageArray;
+        }
+    },
+    methods: {
+        listarPublicaciones: function listarPublicaciones(page, buscar, criterio) {
+            var aplLoading = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+
+            if (this.objPublicacion.idCuentaTienda == 0) {
+                util.MSG('Algo salio Mal!', 'Seleccione la cuenta de la tienda', util.tipoErr);
+                return;
+            }
+
+            if (aplLoading) {
+                this.isLoading = 1;
+            }
+
+            var me = this;
+
+            axios.get('/zicandi/public/publicaciones', {
+                params: {
+                    'page': page,
+                    'buscar': buscar,
+                    'criterio': criterio,
+                    'idCuentaTienda': this.objPublicacion.idCuentaTienda,
+                    filtros: {
+                        'activas': this.chkEstatusActivas,
+                        'pausadas': this.chkEstatusPausadas
+                    }
+                }
+            }).then(function (response) {
+                var respuesta = response.data;
+                me.isLoading = 0;
+                console.log(respuesta);
+                me.listaPublicaciones = respuesta.publicaciones.data;
+                me.pagination = respuesta.pagination;
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        selectTienda: function selectTienda() {
+            var me = this;
+            var url = '/zicandi/public/tienda/getSelectCuentaTiendas';
+            axios.get(url).then(function (response) {
+                var respuesta = response.data;
+
+                me.listaCuentaTiendas = respuesta.tiendas;
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        abrirPublicacion: function abrirPublicacion(url, tipo) {
+            if (tipo == 'popup') {
+                var altura = 675;
+                var anchura = 990;
+
+                var y = parseInt(window.screen.height / 2 - altura / 2);
+                var x = parseInt(window.screen.width / 2 - anchura / 2);
+
+                window.open(url, "Login mercadolibre", 'width=' + anchura + ',height=' + altura + ',top=' + y + ',left=' + x + ',toolbar=no,location=no,status=no,menubar=no,scrollbars=no,directories=no,resizable=no');
+            } else {
+                Swal.fire({
+                    html: '<iframe src="' + url + '" title="Login Mercadolibre" width="100%" height="500px"></iframe>',
+                    showCancelButton: false,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Listo!',
+                    width: '90%',
+                    height: '80%'
+                });
+            }
+        },
+        redondear: function redondear(numero, decimales) {
+            return parseFloat(numero).toFixed(decimales);
+        },
+        cambiarPagina: function cambiarPagina(page, buscar, criterio) {
+            var me = this;
+
+            me.pagination.current_page = page;
+
+            me.listarPublicaciones(page, buscar, criterio, true);
+        },
+        onCuentaActivaMercadolibre: function onCuentaActivaMercadolibre() {
+            var me = this;
+            var url = '/zicandi/public/tienda/registraCuentaActiva';
+            axios.get(url).then(function (response) {
+                var cuenta = response.data.cuenta;
+                me.cuentaActivalMeli = cuenta;
+                me.idVendedor = response.data.id;
+
+                me.onGetPublicaciones();
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onGetPublicaciones: function onGetPublicaciones() {
+            var me = this;
+            var url = '/zicandi/public/tienda/getPublicaciones';
+            axios.post(url, {
+                'id': this.idVendedor
+            }).then(function (response) {
+                console.log(response);
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        showModal: function showModal(modelo, accion) {
+            var data = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+            console.log(modelo);
+            console.log(accion);
+            switch (modelo) {
+                case 'producto':
+                    {
+                        switch (accion) {
+                            case 'ligar':
+                                {
+                                    this.modalProductosLigados.tituloModal = 'Ligar productos';
+                                    this.modalProductosLigados.tipoAccion = 1;
+                                    this.modalProductosLigados.modal = 1;
+                                    this.modalProductosLigados.publicacionSeleccion = data;
+                                    this.onGetProductosLigados(data);
+
+                                    window.scrollTo(0, 0);
+                                    break;
+                                }
+                        }
+
+                        break;
+                    }
+                case 'grafico':
+                    {
+                        switch (accion) {
+                            case 'crear':
+                                {
+                                    this.modalGrafico.tituloModal = 'Estadisticas';
+                                    this.modalGrafico.modal = 1;
+                                    this.onCargaEstadisticas();
+                                    break;
+                                }
+                        }
+
+                        break;
+                    }
+            }
+        },
+        closeModal: function closeModal() {
+
+            this.modalProductosLigados.modal = 0;
+            this.modalProductosLigados.tituloModal = '';
+
+            this.modalGrafico.modal = 0;
+            this.modalGrafico.tituloModal = '';
+        },
+        getProduccionSeleccion: function getProduccionSeleccion(producto) {
+            producto.temporal = true;
+            this.modalProductosLigados.productosligados.push(producto);
+        },
+        onGetProductosLigados: function onGetProductosLigados(publicacion) {
+            this.modalProductosLigados.productosligados = publicacion.config;
+        },
+        onGuardarProductosLigados: function onGuardarProductosLigados() {
+            var _this = this;
+
+            util.MSG_SI_NO('Deseas guardar los cambios', 'Productos ligados', util.tipoPreg).then(function (result) {
+                if (result == util.btnSi) {
+                    _this.isLoading = 1;
+                    var me = _this;
+
+                    axios.post('/zicandi/public/publicaciones/guardarProductos', {
+                        'idPublicacion': _this.modalProductosLigados.publicacionSeleccion.id_publicacion,
+                        'config': _this.modalProductosLigados.productosligados
+                    }).then(function (response) {
+                        me.isLoading = 0;
+                        var total = response.data.total;
+
+                        me.modalProductosLigados.productosligados.forEach(function (producto, index) {
+                            producto.temporal = false;
+                        });
+                    }).catch(function (error) {
+                        me.isLoading = 0;
+                        util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+                    });
+                }
+            });
+        },
+        onCargaEstadisticas: function onCargaEstadisticas() {
+            this.modalGrafico.varTotalVentas.push(25);
+            this.modalGrafico.varTotalVentas.push(30);
+            this.modalGrafico.varTotalVentas.push(40);
+            this.modalGrafico.varTotalVentas.push(25);
+            this.modalGrafico.varTotalVentas.push(19);
+
+            this.modalGrafico.varDiaVentas.push('Lunes');
+            this.modalGrafico.varDiaVentas.push('Martes');
+            this.modalGrafico.varDiaVentas.push('Miercoles');
+            this.modalGrafico.varDiaVentas.push('Jueves');
+            this.modalGrafico.varDiaVentas.push('Viernes');
+
+            this.modalGrafico.varVentas = document.getElementById('canVentas').getContext('2d');
+
+            this.modalGrafico.charVentas = new Chart(this.modalGrafico.varVentas, {
+                type: 'bar',
+                data: {
+                    labels: this.modalGrafico.varDiaVentas,
+                    datasets: [{
+                        label: 'Ventas',
+                        data: this.modalGrafico.varTotalVentas,
+                        backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(75, 192, 192, 0.2)', 'rgba(153, 102, 255, 0.2)'],
+                        borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+    },
+    mounted: function mounted() {
+        this.selectTienda();
+    }
+});
+
+/***/ }),
+/* 130 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("main", { staticClass: "main" }, [
+    _c("div", {
+      staticClass: "sbl-circ-ripple",
+      class: { "abrir-load-sbl": _vm.isLoading },
+      staticStyle: { display: "none" }
+    }),
+    _vm._v(" "),
+    _vm._m(0),
+    _vm._v(" "),
+    _c("div", { staticClass: "container-fluid" }, [
+      _c("div", { staticClass: "card" }, [
+        _c("div", { staticClass: "card-header" }, [
+          _c("i", { staticClass: "fa fa-align-justify" }),
+          _vm._v(" Tareas:\n                "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary",
+              attrs: { type: "button" },
+              on: {
+                click: function($event) {
+                  return _vm.onCuentaActivaMercadolibre()
+                }
+              }
+            },
+            [
+              _c("i", { staticClass: "icon-plus" }),
+              _vm._v(" Actualizar publicaciones\n                ")
+            ]
+          )
+        ])
+      ]),
+      _vm._v(" "),
+      _c(
+        "div",
+        {
+          staticClass: "card small",
+          staticStyle: { width: "15rem", display: "inline-block" }
+        },
+        [
+          _c("div", { staticClass: "card-body" }, [
+            _c("h5", { staticClass: "card-title" }, [
+              _vm._v("Estatus publicacion")
+            ]),
+            _vm._v(" "),
+            _c("p", { staticClass: "card-text" }, [
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.chkEstatusActivas,
+                    expression: "chkEstatusActivas"
+                  }
+                ],
+                attrs: { type: "checkbox" },
+                domProps: {
+                  checked: Array.isArray(_vm.chkEstatusActivas)
+                    ? _vm._i(_vm.chkEstatusActivas, null) > -1
+                    : _vm.chkEstatusActivas
+                },
+                on: {
+                  change: function($event) {
+                    var $$a = _vm.chkEstatusActivas,
+                      $$el = $event.target,
+                      $$c = $$el.checked ? true : false
+                    if (Array.isArray($$a)) {
+                      var $$v = null,
+                        $$i = _vm._i($$a, $$v)
+                      if ($$el.checked) {
+                        $$i < 0 && (_vm.chkEstatusActivas = $$a.concat([$$v]))
+                      } else {
+                        $$i > -1 &&
+                          (_vm.chkEstatusActivas = $$a
+                            .slice(0, $$i)
+                            .concat($$a.slice($$i + 1)))
+                      }
+                    } else {
+                      _vm.chkEstatusActivas = $$c
+                    }
+                  }
+                }
+              }),
+              _vm._v(" Activas                            \n                ")
+            ]),
+            _vm._v(" "),
+            _c("p", { staticClass: "card-text" }, [
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.chkEstatusPausadas,
+                    expression: "chkEstatusPausadas"
+                  }
+                ],
+                attrs: { type: "checkbox" },
+                domProps: {
+                  checked: Array.isArray(_vm.chkEstatusPausadas)
+                    ? _vm._i(_vm.chkEstatusPausadas, null) > -1
+                    : _vm.chkEstatusPausadas
+                },
+                on: {
+                  change: function($event) {
+                    var $$a = _vm.chkEstatusPausadas,
+                      $$el = $event.target,
+                      $$c = $$el.checked ? true : false
+                    if (Array.isArray($$a)) {
+                      var $$v = null,
+                        $$i = _vm._i($$a, $$v)
+                      if ($$el.checked) {
+                        $$i < 0 && (_vm.chkEstatusPausadas = $$a.concat([$$v]))
+                      } else {
+                        $$i > -1 &&
+                          (_vm.chkEstatusPausadas = $$a
+                            .slice(0, $$i)
+                            .concat($$a.slice($$i + 1)))
+                      }
+                    } else {
+                      _vm.chkEstatusPausadas = $$c
+                    }
+                  }
+                }
+              }),
+              _vm._v(" Pausadas                        \n                ")
+            ])
+          ])
+        ]
+      ),
+      _vm._v(" "),
+      _c("div", { staticClass: "form-group row" }, [
+        _c("div", { staticClass: "col-md-5" }, [
+          _c("div", { staticClass: "input-group" }, [
+            _c(
+              "select",
+              {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.criterio,
+                    expression: "criterio"
+                  }
+                ],
+                staticClass: "form-control col-md-3",
+                on: {
+                  change: function($event) {
+                    var $$selectedVal = Array.prototype.filter
+                      .call($event.target.options, function(o) {
+                        return o.selected
+                      })
+                      .map(function(o) {
+                        var val = "_value" in o ? o._value : o.value
+                        return val
+                      })
+                    _vm.criterio = $event.target.multiple
+                      ? $$selectedVal
+                      : $$selectedVal[0]
+                  }
+                }
+              },
+              [_c("option", { attrs: { value: "titulo" } }, [_vm._v("Titulo")])]
+            ),
+            _vm._v(" "),
+            _c("input", {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.buscar,
+                  expression: "buscar"
+                }
+              ],
+              staticClass: "form-control",
+              attrs: { type: "text", placeholder: "Texto a buscar" },
+              domProps: { value: _vm.buscar },
+              on: {
+                keyup: function($event) {
+                  if (
+                    !$event.type.indexOf("key") &&
+                    _vm._k($event.keyCode, "enter", 13, $event.key, "Enter")
+                  ) {
+                    return null
+                  }
+                  return _vm.listarPublicaciones(
+                    1,
+                    _vm.buscar,
+                    _vm.criterio,
+                    true
+                  )
+                },
+                input: function($event) {
+                  if ($event.target.composing) {
+                    return
+                  }
+                  _vm.buscar = $event.target.value
+                }
+              }
+            })
+          ])
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "col-md-5" }, [
+          _c("div", { staticClass: "input-group" }, [
+            _c(
+              "select",
+              {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.objPublicacion.idCuentaTienda,
+                    expression: "objPublicacion.idCuentaTienda"
+                  }
+                ],
+                staticClass: "form-control",
+                on: {
+                  change: function($event) {
+                    var $$selectedVal = Array.prototype.filter
+                      .call($event.target.options, function(o) {
+                        return o.selected
+                      })
+                      .map(function(o) {
+                        var val = "_value" in o ? o._value : o.value
+                        return val
+                      })
+                    _vm.$set(
+                      _vm.objPublicacion,
+                      "idCuentaTienda",
+                      $event.target.multiple ? $$selectedVal : $$selectedVal[0]
+                    )
+                  }
+                }
+              },
+              [
+                _c("option", { attrs: { value: "0", disabled: "" } }, [
+                  _vm._v("Seleccione...")
+                ]),
+                _vm._v(" "),
+                _vm._l(_vm.listaCuentaTiendas, function(cuenta) {
+                  return _c("option", {
+                    key: cuenta.id_cuenta_tienda,
+                    domProps: {
+                      value: cuenta.id_cuenta_tienda,
+                      textContent: _vm._s(cuenta.usuario)
+                    }
+                  })
+                })
+              ],
+              2
+            )
+          ])
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "col-md-2" }, [
+          _c("div", { staticClass: "input-group" }, [
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-primary",
+                attrs: { type: "submit" },
+                on: {
+                  click: function($event) {
+                    return _vm.listarPublicaciones(
+                      1,
+                      _vm.buscar,
+                      _vm.criterio,
+                      true
+                    )
+                  }
+                }
+              },
+              [_c("i", { staticClass: "fa fa-search" }), _vm._v(" Buscar")]
+            )
+          ])
+        ])
+      ]),
+      _vm._v(" "),
+      _c(
+        "table",
+        { staticClass: "table table-bordered table-striped table-sm" },
+        [
+          _vm._m(1),
+          _vm._v(" "),
+          _c(
+            "tbody",
+            _vm._l(_vm.listaPublicaciones, function(publicacion) {
+              return _c("tr", { key: publicacion.id_publicacion }, [
+                _c("td", [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-info btn-sm",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.abrirPublicacion(publicacion.link, "popup")
+                        }
+                      }
+                    },
+                    [_c("i", { staticClass: "icon-screen-desktop" })]
+                  ),
+                  _vm._v("  \n\n                            "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-warning btn-sm",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.showModal("producto", "ligar", publicacion)
+                        }
+                      }
+                    },
+                    [_c("i", { staticClass: "icon-screen-tablet" })]
+                  ),
+                  _vm._v("  \n\n                            "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-info btn-sm",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.showModal("grafico", "crear", publicacion)
+                        }
+                      }
+                    },
+                    [_c("i", { staticClass: "icon-graph" })]
+                  ),
+                  _vm._v(
+                    "  \n\n                            \n                            \n                        "
+                  )
+                ]),
+                _vm._v(" "),
+                _c("td", [
+                  _c(
+                    "a",
+                    {
+                      attrs: { href: "#" },
+                      on: {
+                        click: function($event) {
+                          return _vm.abrirPublicacion(publicacion.link, "swal")
+                        }
+                      }
+                    },
+                    [
+                      _c("img", {
+                        attrs: { src: publicacion.foto_mini, alt: "dog" }
+                      })
+                    ]
+                  )
+                ]),
+                _vm._v(" "),
+                _c("td", [
+                  _c("h6", {
+                    domProps: { textContent: _vm._s(publicacion.titulo) }
+                  }),
+                  _vm._v(" "),
+                  _vm._m(2, true),
+                  _vm._v(" "),
+                  _c("small", {
+                    staticClass: "text-muted",
+                    domProps: {
+                      textContent: _vm._s(publicacion.id_publicacion_tienda)
+                    }
+                  }),
+                  _vm._v(" "),
+                  publicacion.id_variante_publicacion > 0
+                    ? _c("small", { staticClass: "text-muted" }, [
+                        _c("strong", [_vm._v("Variante ")])
+                      ])
+                    : _vm._e(),
+                  _vm._v(" "),
+                  publicacion.id_variante_publicacion > 0
+                    ? _c("small", {
+                        staticClass: "text-muted",
+                        domProps: {
+                          textContent: _vm._s(
+                            publicacion.id_variante_publicacion
+                          )
+                        }
+                      })
+                    : _vm._e(),
+                  _vm._v(" "),
+                  publicacion.id_variante_publicacion > 0
+                    ? _c("small", { staticClass: "text-muted" }, [_vm._v("|")])
+                    : _vm._e(),
+                  _vm._v(" "),
+                  publicacion.id_variante_publicacion > 0
+                    ? _c("small", {
+                        staticClass: "text-muted",
+                        domProps: {
+                          textContent: _vm._s(publicacion.nombre_variante)
+                        }
+                      })
+                    : _vm._e()
+                ]),
+                _vm._v(" "),
+                _c("td", [
+                  _c("span", {
+                    domProps: { textContent: _vm._s(publicacion.precio) }
+                  })
+                ]),
+                _vm._v(" "),
+                _c("td", [
+                  _c("div", [
+                    _c("small", { staticClass: "text-muted" }, [
+                      _vm._v("Stock:")
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "badge badge-pill badge-primary" },
+                      [
+                        _c("span", {
+                          domProps: {
+                            textContent: _vm._s(
+                              _vm.redondear(publicacion.stock, 0)
+                            )
+                          }
+                        })
+                      ]
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("div", [
+                    _c("small", { staticClass: "text-muted" }, [
+                      _vm._v("Ventas:")
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "badge badge-pill badge-secondary" },
+                      [
+                        _c("span", {
+                          domProps: {
+                            textContent: _vm._s(
+                              _vm.redondear(publicacion.ventas, 0)
+                            )
+                          }
+                        })
+                      ]
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("div", [
+                    _c("small", { staticClass: "text-muted" }, [
+                      _vm._v("Visitas:")
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "badge badge-pill badge-secondary" },
+                      [
+                        _c("span", {
+                          domProps: {
+                            textContent: _vm._s(
+                              _vm.redondear(publicacion.visitas, 0)
+                            )
+                          }
+                        })
+                      ]
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("td", [
+                  publicacion.envio_gratis
+                    ? _c(
+                        "div",
+                        { staticClass: "badge badge-pill badge-success" },
+                        [_c("span", [_vm._v("Envio gratis")])]
+                      )
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _c("div", [
+                    publicacion.full
+                      ? _c(
+                          "div",
+                          { staticClass: "badge badge-pill badge-warning" },
+                          [_c("span", [_vm._v("Full")])]
+                        )
+                      : _vm._e()
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("td", [
+                  publicacion.config.length <= 0
+                    ? _c(
+                        "div",
+                        { staticClass: "badge badge-pill badge-danger" },
+                        [_c("span", [_vm._v("Falta ligar")])]
+                      )
+                    : _vm._e(),
+                  _vm._v(" "),
+                  publicacion.config.length > 0
+                    ? _c(
+                        "ul",
+                        _vm._l(publicacion.config, function(producto) {
+                          return _c("li", { key: producto.id_producto }, [
+                            producto.xstatus && !producto.temporal
+                              ? _c("span", {
+                                  domProps: {
+                                    textContent: _vm._s(producto.codigo)
+                                  }
+                                })
+                              : _vm._e()
+                          ])
+                        }),
+                        0
+                      )
+                    : _vm._e()
+                ]),
+                _vm._v(" "),
+                _c("td", [
+                  publicacion.estatus == "active"
+                    ? _c("div", [
+                        _c("span", { staticClass: "badge badge-success" }, [
+                          _vm._v("Activo")
+                        ])
+                      ])
+                    : _c("div", [
+                        _c("span", { staticClass: "badge badge-danger" }, [
+                          _vm._v("Pausada")
+                        ])
+                      ]),
+                  _vm._v(" "),
+                  _c("small", {
+                    staticClass: "text-muted",
+                    domProps: {
+                      textContent: _vm._s(publicacion.fecha_consulta)
+                    }
+                  })
+                ])
+              ])
+            }),
+            0
+          )
+        ]
+      ),
+      _vm._v(" "),
+      _c("nav", [
+        _c(
+          "ul",
+          { staticClass: "pagination" },
+          [
+            _vm.pagination.current_page > 1
+              ? _c("li", { staticClass: "page-item" }, [
+                  _c(
+                    "a",
+                    {
+                      staticClass: "page-link",
+                      attrs: { href: "#" },
+                      on: {
+                        click: function($event) {
+                          $event.preventDefault()
+                          return _vm.cambiarPagina(
+                            _vm.pagination.current_page - 1,
+                            _vm.buscar,
+                            _vm.criterio
+                          )
+                        }
+                      }
+                    },
+                    [_vm._v("Ant")]
+                  )
+                ])
+              : _vm._e(),
+            _vm._v(" "),
+            _vm._l(_vm.pagesNumber, function(page) {
+              return _c(
+                "li",
+                {
+                  key: page,
+                  staticClass: "page-item",
+                  class: [page == _vm.isActived ? "active" : ""]
+                },
+                [
+                  _c("a", {
+                    staticClass: "page-link",
+                    attrs: { href: "#" },
+                    domProps: { textContent: _vm._s(page) },
+                    on: {
+                      click: function($event) {
+                        $event.preventDefault()
+                        return _vm.cambiarPagina(page, _vm.buscar, _vm.criterio)
+                      }
+                    }
+                  })
+                ]
+              )
+            }),
+            _vm._v(" "),
+            _vm.pagination.current_page < _vm.pagination.last_page
+              ? _c("li", { staticClass: "page-item" }, [
+                  _c(
+                    "a",
+                    {
+                      staticClass: "page-link",
+                      attrs: { href: "#" },
+                      on: {
+                        click: function($event) {
+                          $event.preventDefault()
+                          return _vm.cambiarPagina(
+                            _vm.pagination.current_page + 1,
+                            _vm.buscar,
+                            _vm.criterio
+                          )
+                        }
+                      }
+                    },
+                    [_vm._v("Sig")]
+                  )
+                ])
+              : _vm._e()
+          ],
+          2
+        )
+      ])
+    ]),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.modalProductosLigados.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-primary",
+            attrs: { role: "document" }
+          },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c("div", { staticClass: "modal-header" }, [
+                _c(
+                  "div",
+                  { staticClass: "row", staticStyle: { width: "100%" } },
+                  [
+                    _c("div", { staticClass: "col-7" }, [
+                      _c("h4", {
+                        staticClass: "modal-title",
+                        domProps: {
+                          textContent: _vm._s(
+                            _vm.modalProductosLigados.tituloModal
+                          )
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("h6", {
+                        staticClass: "text-muted",
+                        domProps: {
+                          textContent: _vm._s(
+                            _vm.modalProductosLigados.publicacionSeleccion
+                              .titulo
+                          )
+                        }
+                      })
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-4" }, [
+                      _c("img", {
+                        attrs: {
+                          src:
+                            _vm.modalProductosLigados.publicacionSeleccion
+                              .foto_mini,
+                          alt: "dog"
+                        }
+                      })
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-1" }, [
+                      _c(
+                        "button",
+                        {
+                          staticClass: "close",
+                          attrs: { type: "button", "aria-label": "Close" },
+                          on: {
+                            click: function($event) {
+                              return _vm.closeModal()
+                            }
+                          }
+                        },
+                        [
+                          _c("span", { attrs: { "aria-hidden": "true" } }, [
+                            _vm._v("×")
+                          ])
+                        ]
+                      )
+                    ])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-body" }, [
+                _c(
+                  "div",
+                  { staticClass: "card", staticStyle: { width: "100%" } },
+                  [
+                    _c(
+                      "ul",
+                      { staticClass: "list-group list-group-flush" },
+                      [
+                        _c("buscador-producto-component", {
+                          on: { setProducto: _vm.getProduccionSeleccion }
+                        }),
+                        _vm._v(" "),
+                        _vm._l(
+                          _vm.modalProductosLigados.productosligados,
+                          function(producto) {
+                            return _c("div", { key: producto.id_producto }, [
+                              producto.xstatus
+                                ? _c("li", { staticClass: "list-group-item" }, [
+                                    _c("div", { staticClass: "row" }, [
+                                      _c("div", { staticClass: "col-12" }, [
+                                        _c(
+                                          "button",
+                                          {
+                                            staticClass: "close ",
+                                            attrs: {
+                                              type: "button",
+                                              "aria-label": "Close"
+                                            }
+                                          },
+                                          [
+                                            _c(
+                                              "span",
+                                              {
+                                                attrs: {
+                                                  "aria-hidden": "true"
+                                                },
+                                                on: {
+                                                  click: function($event) {
+                                                    producto.xstatus = false
+                                                  }
+                                                }
+                                              },
+                                              [_vm._v("×")]
+                                            )
+                                          ]
+                                        )
+                                      ])
+                                    ]),
+                                    _vm._v(" "),
+                                    _c("div", { staticClass: "row" }, [
+                                      _c("div", { staticClass: "col-md-4" }, [
+                                        _c("img", {
+                                          attrs: {
+                                            src: producto.url_imagen,
+                                            alt: "dog",
+                                            width: "50%"
+                                          }
+                                        })
+                                      ]),
+                                      _vm._v(" "),
+                                      _c("div", { staticClass: "col-md-8" }, [
+                                        _c("p", [
+                                          _c("span", {
+                                            staticClass: "font-weight-bold",
+                                            domProps: {
+                                              textContent: _vm._s(
+                                                producto.codigo
+                                              )
+                                            }
+                                          }),
+                                          _vm._v(" "),
+                                          producto.temporal
+                                            ? _c(
+                                                "span",
+                                                {
+                                                  staticClass:
+                                                    "text-right text-muted"
+                                                },
+                                                [_vm._v("Sin guardar")]
+                                              )
+                                            : _vm._e()
+                                        ]),
+                                        _vm._v(" "),
+                                        _c("span", {
+                                          domProps: {
+                                            textContent: _vm._s(producto.nombre)
+                                          }
+                                        })
+                                      ])
+                                    ])
+                                  ])
+                                : _vm._e()
+                            ])
+                          }
+                        )
+                      ],
+                      2
+                    )
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _vm._m(3),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeModal()
+                      }
+                    }
+                  },
+                  [_vm._v("Cerrar")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-primary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.onGuardarProductosLigados()
+                      }
+                    }
+                  },
+                  [_vm._v("Guardar")]
+                )
+              ])
+            ])
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.modalGrafico.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c("div", { staticClass: "modal-dialog modal-lg modal-primary" }, [
+          _c("div", { staticClass: "modal-content" }, [
+            _c("div", { staticClass: "modal-header" }, [
+              _c("h4", {
+                staticClass: "modal-title",
+                domProps: { textContent: _vm._s(_vm.modalGrafico.tituloModal) }
+              }),
+              _vm._v(" "),
+              _c(
+                "button",
+                {
+                  staticClass: "close",
+                  attrs: { type: "button", "aria-label": "Close" },
+                  on: {
+                    click: function($event) {
+                      return _vm.closeModal()
+                    }
+                  }
+                },
+                [
+                  _c("span", { attrs: { "aria-hidden": "true" } }, [
+                    _vm._v("×")
+                  ])
+                ]
+              )
+            ]),
+            _vm._v(" "),
+            _vm._m(4)
+          ])
+        ])
+      ]
+    )
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("ol", { staticClass: "breadcrumb" }, [
+      _c("li", { staticClass: "breadcrumb-item" }, [
+        _c("a", { attrs: { href: "/" } }, [_vm._v("Escritorio")])
+      ]),
+      _vm._v(" "),
+      _c("li", { staticClass: "breadcrumb-item" }, [_vm._v("Catalogos")]),
+      _vm._v(" "),
+      _c("li", { staticClass: "breadcrumb-item active" }, [_vm._v("Productos")])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("thead", [
+      _c("tr", [
+        _c("th", { attrs: { width: "10%;" } }, [_vm._v("Opciones")]),
+        _vm._v(" "),
+        _c("th", { attrs: { width: "100px" } }, [_vm._v("Imagen")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Publicacion")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Precio venta")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Estadistica")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Envio")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Productos")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Estado")])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("small", { staticClass: "text-muted" }, [
+      _c("strong", [_vm._v("ID ")])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "modal-footer" }, [
+      _c("p", { staticClass: "font-weight-light" }, [
+        _vm._v("Puedes ligar mas de un producto a la publicacion")
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "modal-body" }, [
+      _c("div", { staticClass: "card", staticStyle: { width: "100%" } }, [
+        _c("div", { staticClass: "row" }, [
+          _c("div", { staticClass: "col-md-12" }, [
+            _c("div", { staticClass: "card card-chart" }, [
+              _c("div", { staticClass: "card-header" }, [
+                _vm._v(
+                  "\n                                        Ventas\n                                    "
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "card-content" }, [
+                _c("div", { staticClass: "ct-chart" }, [
+                  _c("canvas", { attrs: { id: "canVentas" } })
+                ])
+              ])
+            ])
+          ])
+        ])
+      ])
+    ])
+  }
+]
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-7e7adbce", module.exports)
   }
 }
 

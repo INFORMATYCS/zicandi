@@ -28,6 +28,10 @@
         <cuentatienda-component></cuentatienda-component>
     </template>    
 
+    <template v-if="oppMenuSeleccion==14">
+        <publicacionestienda-component></publicacionestienda-component>
+    </template>        
+
     <template v-if="oppMenuSeleccion==90">
         <mercadolibre-component></mercadolibre-component>
     </template>

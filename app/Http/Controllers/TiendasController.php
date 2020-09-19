@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\CuentaTienda;
 use App\Tienda;
+use App\Publicacion;
 use Session;
+use App\EstadisticaPublicacion;
 
 
 class TiendasController extends Controller
@@ -90,11 +92,106 @@ class TiendasController extends Controller
                         'att_expira_token' => $fechaExpira ]);
 
 
-            return ['cuenta' => $nickname];
+            return ['cuenta' => $nickname, 'id' => $sesion['body']->id];
         }
         
 
         
     }
+
+
+    public function getPublicaciones(Request $request){        
+        $publicaciones = app(MercadoLibreController::class)->Ipublicaciones($request->id);
+
+        $cuenta = new CuentaTienda();
+        $cuentaLogin = $cuenta->getCuentaLogeadaMELI();
+
+        if($cuentaLogin!=null){
+            $idCuentaTienda = $cuentaLogin->id_cuenta_tienda;
+            $idTienda = $cuentaLogin->id_tienda;
+            
+            foreach ($publicaciones as $pub) {
+                $idPublicacion = $pub['id'];
+
+                if(isset($pub['idVariante'])){
+                    $publicacion = Publicacion::where('id_publicacion_tienda','=',$pub['id'])
+                    ->where('id_variante_publicacion','=',$pub['idVariante'])
+                    ->get()->first();
+                }else{
+                    $publicacion = Publicacion::where('id_publicacion_tienda','=',$pub['id'])                    
+                    ->get()->first();
+                }
+
+                //~Inserta
+                if($publicacion==null){
+                    $publicacion = new Publicacion();
+
+                    $publicacion->id_tienda = $idTienda;
+                    $publicacion->id_cuenta_tienda = $idCuentaTienda;
+                    $publicacion->id_publicacion_tienda = $pub['id'];
+                    $publicacion->id_variante_publicacion = (isset($pub['idVariante']) ? $pub['idVariante'] : null);
+                    $publicacion->titulo = (isset($pub['titulo']) ? $pub['titulo'] : null);
+                    $publicacion->nombre_variante = (isset($pub['nombreVariante']) ? $pub['nombreVariante'] : null);
+                    $publicacion->precio = (isset($pub['precio']) ? $pub['precio'] : null);
+                    $publicacion->stock = (isset($pub['stock']) ? $pub['stock'] : null);
+                    $publicacion->ventas = (isset($pub['ventas']) ? $pub['ventas'] : null);
+                    $publicacion->visitas = (isset($pub['visitas']) ? $pub['visitas'] : null);                    
+                    $publicacion->envio_gratis = (isset($pub['envioGratis']) ? $pub['envioGratis'] : null);
+                    $publicacion->full = ($pub['tipoEnvio'] == 'fulfillment' ? true : false);
+                    $publicacion->link = (isset($pub['link']) ? $pub['link'] : null);
+                    $publicacion->foto_mini = (isset($pub['fotoMini']) ? $pub['fotoMini'] : null);
+                    $publicacion->fecha_consulta = new \DateTime();
+                    $publicacion->estatus = (isset($pub['estatus']) ? $pub['estatus'] : null);
+
+                    $publicacion->save();                    
+                }else{                    
+                    $publicacion->titulo = (isset($pub['titulo']) ? $pub['titulo'] : null);
+                    $publicacion->nombre_variante = (isset($pub['nombreVariante']) ? $pub['nombreVariante'] : null);
+                    $publicacion->precio = (isset($pub['precio']) ? $pub['precio'] : null);
+                    $publicacion->stock = (isset($pub['stock']) ? $pub['stock'] : null);
+                    $publicacion->ventas = (isset($pub['ventas']) ? $pub['ventas'] : null);
+                    $publicacion->envio_gratis = (isset($pub['envioGratis']) ? $pub['envioGratis'] : null);
+                    $publicacion->full = ($pub['tipoEnvio'] == 'fulfillment' ? true : false);
+                    $publicacion->link = (isset($pub['link']) ? $pub['link'] : null);
+                    $publicacion->foto_mini = (isset($pub['fotoMini']) ? $pub['fotoMini'] : null);
+                    $publicacion->fecha_consulta = new \DateTime();
+                    $publicacion->estatus = (isset($pub['estatus']) ? $pub['estatus'] : null);
+
+                    $publicacion->update();
+                }
+
+                //~Agrega estadisticas
+                $estadisticaPublicacion = new EstadisticaPublicacion();
+                $estadisticaPublicacion->id_publicacion = $publicacion->id_publicacion;
+                $estadisticaPublicacion->stock = (isset($pub['stock']) ? $pub['stock'] : null);
+                $estadisticaPublicacion->ventas = (isset($pub['ventas']) ? $pub['ventas'] : null);
+                $estadisticaPublicacion->visitas = (isset($pub['visitas']) ? $pub['visitas'] : null); 
+                $estadisticaPublicacion->fecha_consulta = new \DateTime();
+
+                $estadisticaPublicacion->save();
+                
+
+
+            }
+            
+
+
+
+        }
+        
+        return $publicaciones;
+        
+    }
+
+    public function selectCuentaTienda(Request $request){
+        if(!$request->ajax())return redirect('/');
+
+        $tiendas = CuentaTienda::select('id_cuenta_tienda','usuario')
+        ->orderBy('usuario', 'asc')
+        ->get();
+
+        return ['tiendas' => $tiendas];
+    }
+    
 
 }

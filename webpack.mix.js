@@ -15,7 +15,7 @@ mix.styles([
    'resources/assets/plantilla/css/font-awesome.min.css',
    'resources/assets/plantilla/css/simple-line-icons.min.css',
    'resources/assets/plantilla/css/style.css',
-   'resources/assets/plantilla/css/pages-style.css',
+   'resources/assets/plantilla/css/pages-style.css',   
 ], 'public/css/zicandi.css')
 .babel([
    'resources/assets/plantilla/js/jquery.min.js',
@@ -26,6 +26,6 @@ mix.styles([
    'resources/assets/plantilla/js/template.js',
    'resources/assets/plantilla/js/sweetalert2.all.min.js',   
    'resources/assets/plantilla/js/util.js',
-   'resources/assets/plantilla/js/paginador.js',
+   'resources/assets/plantilla/js/paginador.js',   
 ], 'public/js/zicandi.js')
 .js('resources/assets/js/app.js', 'public/js/app.js');

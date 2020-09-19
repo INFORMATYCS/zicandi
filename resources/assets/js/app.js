@@ -35,6 +35,8 @@ Vue.component('cuentatienda-component', require('./components/CuentaTiendaCompon
 
 Vue.component('headerzicandi-component', require('./components/HeaderZicandiComponent.vue'));
 
+Vue.component('publicacionestienda-component', require('./components/PublicacionesTiendaComponent.vue'));
+
 
 const app = new Vue({
     el: '#app',

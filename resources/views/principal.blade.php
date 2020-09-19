@@ -12,7 +12,7 @@
     <link rel="shortcut icon" href="img/favicon.png">
     <title>ZICANDI</title>
     <!-- Hoja de estilo -->
-    <link href="css/zicandi.css" rel="stylesheet">    
+    <link href="css/zicandi.css" rel="stylesheet">       
 </head>
 
 <body class="app header-fixed sidebar-fixed aside-menu-fixed aside-menu-hidden">
@@ -69,10 +69,12 @@
         <span class="ml-auto">Desarrollado por Nunduva IT</span>
     </footer>
 
+
+    
+
     <!-- JS -->
     <script src="js/app.js"></script>    
     <script src="js/zicandi.js"></script>    
-
 </body>
 
 </html>

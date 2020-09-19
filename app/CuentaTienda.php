@@ -19,4 +19,15 @@ class CuentaTienda extends Model
     public function tienda(){
         return $this->belongsTo('App\Tienda');
     }
+
+    //~Evalua cual tienda se encuentra aun logeada en mercadolibre
+    public function getCuentaLogeadaMELI(){
+        $cuenta = $this->where('estatus','=','CONECTADO')->get();        
+
+        if(count($cuenta)>0){
+            return $cuenta[0];
+        }else{
+            return null;
+        }                
+    }
 }

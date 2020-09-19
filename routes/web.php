@@ -89,9 +89,14 @@ Route::get('/bett/migracion', 'BetterwareController@migracionProductos');
 // ~  Rutas Tiendas
 Route::get('/tienda/getcuentas', 'TiendasController@index');
 Route::get('/tienda/getSelectTiendas', 'TiendasController@selectTienda');
+Route::get('/tienda/getSelectCuentaTiendas', 'TiendasController@selectCuentaTienda');
 Route::post('/tienda/storeCuentaTienda', 'TiendasController@storeCuentaTienda');
 Route::post('/tienda/eliminarCuenta', 'TiendasController@eliminarCuentaTienda');
 Route::get('/tienda/registraCuentaActiva', 'TiendasController@registraCuentaActiva');
+Route::post('/tienda/getPublicaciones', 'TiendasController@getPublicaciones');
 
+// - Rutas para Publicaciones
+Route::get('/publicaciones', 'PublicacionesController@index');
+Route::post('/publicaciones/guardarProductos', 'PublicacionesController@saveProductosLigados');
 
 

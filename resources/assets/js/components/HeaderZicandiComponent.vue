@@ -14,7 +14,8 @@
         data(){
             return{                               
                 isLoading: 0,
-                cuentaActivalMeli: ''
+                cuentaActivalMeli: '',
+                idVendedor: 0
             }
         },
         methods:{
@@ -25,6 +26,23 @@
                 .then(function (response) { 
                     let cuenta = response.data.cuenta;
                     me.cuentaActivalMeli = cuenta;
+                    me.idVendedor = response.data.id;
+
+                    me.onGetPublicaciones();
+                })
+                .catch(function (error) {                                        
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+
+            onGetPublicaciones(){                                
+                let me=this;                
+                let url= '/zicandi/public/tienda/getPublicaciones';
+                axios.post(url,{
+                    'id': this.idVendedor
+                })
+                .then(function (response) { 
+                    console.log(response);
                 })
                 .catch(function (error) {                                        
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
@@ -32,8 +50,7 @@
             }
         },
         mounted() {
-           this.onCuentaActivaMercadolibre();
-            
+            this.onCuentaActivaMercadolibre();            
         }
     }
 </script>
