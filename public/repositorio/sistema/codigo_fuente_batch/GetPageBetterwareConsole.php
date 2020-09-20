@@ -18,6 +18,8 @@ getCatalogoByCategoria("productos-bano");
 getCatalogoByCategoria("productos-ultima-llamada");
 
 
+$respServidor = Restfull::sendGet(Param::$_BASE_PATH_API.'zicandi/public/batch/termino?archivo=GetPageBetterwareConsole.php');
+
 function getCatalogoByCategoria($cat){
     Console::log('', 'green', true, 'black');
     Console::log('Inicia carga '.$cat, 'green', true, 'black');

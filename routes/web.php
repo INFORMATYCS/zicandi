@@ -99,4 +99,10 @@ Route::post('/tienda/getPublicaciones', 'TiendasController@getPublicaciones');
 Route::get('/publicaciones', 'PublicacionesController@index');
 Route::post('/publicaciones/guardarProductos', 'PublicacionesController@saveProductosLigados');
 
+// - Rutas para Publicaciones
+Route::get('/batch/tareas', 'BatchController@getTareas');
+Route::get('/batch/descarga', 'BatchController@descargaFuente');
+Route::get('/batch/test', 'BatchController@test');
+Route::get('/batch/termino', 'BatchController@setTermino');
+
 

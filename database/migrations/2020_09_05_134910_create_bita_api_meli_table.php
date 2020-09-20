@@ -20,6 +20,8 @@ class CreateBitaApiMeliTable extends Migration
             $table->string('url',250);
             $table->date('fecha_consulta',1)->nullable();
             $table->string('resultado',15);
+
+            $table->timestamps();
         });
     }
 
