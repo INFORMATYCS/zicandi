@@ -1,0 +1,30 @@
+Como funciona?
+
+El archivo Zicandi Batch.bat detona todas las operacion en el siguiente orden:
+	1.- Invoca el codigo ZicandiBatchExecutorCliente.php el cual realiza las siguientes tareas:
+		1.- Descarga el codigo fuente vigente en el servidor, la descarga la realiza en el directorio bin
+		2.- Contruye un nuevo archivo run.bat 
+	2.- Ejecuta el archivo run.bat
+	
+Requerimientos:
+	lib/Console.php
+	lib/Param.php
+	lib/Restfull.php
+
+	Debe existir un directorio llamada 
+	bin/
+	
+Consideraciones:
+	Validar la parametria del archivo Param.php
+
+Instalacion:
+
+	1.- Crear un directorio dentro htdocs del servidor web	
+	2.- Descargar los siguientes archivos y directorios
+		+ lib/Console.php
+		+ lib/Param.php
+		+ lib/Restfull.php
+		+ Zicandi Batch.bat
+		+ ZicandiBatchExecutorCliente.php
+	3.- Crear directorio bin
+	4.- Ejecutar desde linea de comandos Zicandi Batch.bat

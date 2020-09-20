@@ -15,8 +15,32 @@ window.Vue = require('vue');
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('example-component', require('./components/ExampleComponent.vue'));
+Vue.component('proveedor-component', require('./components/ProveedorComponent.vue'));
+
+Vue.component('producto-component', require('./components/ProductoComponent.vue'));
+
+Vue.component('almacen-component', require('./components/AlmacenComponent.vue'));
+
+Vue.component('compra-component', require('./components/CompraComponent.vue'));
+
+Vue.component('upload-component', require('./components/UploadFileComponent.vue'));
+
+Vue.component('buscador-producto-component', require('./components/BuscadorProductoComponent.vue'));
+
+Vue.component('mercadolibre-component', require('./components/MercadolibreComponent.vue'));
+
+Vue.component('herramientas-component', require('./components/HerramientasComponent.vue'));
+
+Vue.component('cuentatienda-component', require('./components/CuentaTiendaComponent.vue'));
+
+Vue.component('headerzicandi-component', require('./components/HeaderZicandiComponent.vue'));
+
+Vue.component('publicacionestienda-component', require('./components/PublicacionesTiendaComponent.vue'));
+
 
 const app = new Vue({
-    el: '#app'
+    el: '#app',
+    data: {
+        oppMenuSeleccion: 0
+    }
 });
