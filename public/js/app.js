@@ -60654,6 +60654,130 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -60663,6 +60787,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 totalRegResumen: 0,
                 updateRegResumen: 0,
                 nuevoRegResumen: 0
+            },
+            catProcesosBatch: {
+                listaProcesosBatch: [],
+                modalBatch: {
+                    modal: 0,
+                    tituloModal: '',
+                    tipoAccion: 0,
+                    error: 0,
+                    erroresMsjList: []
+                },
+                id_batch_proceso: 0,
+                archivo_php: '',
+                descripcion: '',
+                estatus: ''
             },
 
             isLoading: 0
@@ -60679,6 +60817,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             if (menuItem == "cat_bett") {
                 this.onResumenMigracionBett();
+            }
+
+            if (menuItem == "batch") {
+                this.onGetProcesosBatch();
             }
         },
         onResumenMigracionBett: function onResumenMigracionBett() {
@@ -60712,6 +60854,97 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 if (respuesta == 1) {
                     util.AVISO('Perfecto, migracion de productos terminada', util.tipoOk);
                 }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onGetProcesosBatch: function onGetProcesosBatch() {
+
+            this.isLoading = 1;
+
+            var me = this;
+            var url = '/zicandi/public/batch/procesos';
+            axios.get(url).then(function (response) {
+                var respuesta = response.data;
+                me.isLoading = 0;
+                me.catProcesosBatch.listaProcesosBatch = respuesta.listaProcesos;
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        showModal: function showModal(modelo, accion) {
+            var data = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+            switch (modelo) {
+                case 'batch':
+                    {
+                        switch (accion) {
+                            case 'registrar':
+                                {
+                                    this.catProcesosBatch.modalBatch.modal = 1;
+                                    this.catProcesosBatch.archivo_php = '';
+                                    this.catProcesosBatch.descripcion = '';
+                                    this.catProcesosBatch.estatus = 'P';
+                                    this.catProcesosBatch.modalBatch.tituloModal = 'Registrar nuevo proceso';
+                                    this.catProcesosBatch.modalBatch.tipoAccion = 1;
+
+                                    break;
+                                }
+                            case 'actualizar':
+                                {
+                                    this.catProcesosBatch.modalBatch.modal = 1;
+                                    this.catProcesosBatch.modalBatch.tituloModal = 'Actualizar proceso';
+                                    this.catProcesosBatch.modalBatch.tipoAccion = 2;
+
+                                    this.catProcesosBatch.id_batch_proceso = data['id_batch_proceso'];
+                                    this.catProcesosBatch.archivo_php = data['archivo_php'];
+                                    this.catProcesosBatch.descripcion = data['descripcion'];
+                                    this.catProcesosBatch.estatus = data['estatus'];
+                                }
+                        }
+                    }
+            }
+        },
+        closeModal: function closeModal() {
+            this.catProcesosBatch.modalBatch.modal = 0;
+            this.catProcesosBatch.archivo_php = '';
+            this.catProcesosBatch.descripcion = '';
+            this.catProcesosBatch.estatus = '';
+            this.catProcesosBatch.modalBatch.tituloModal = '';
+        },
+        registrarProcesoBatch: function registrarProcesoBatch() {
+
+            var me = this;
+            this.isLoading = 1;
+            axios.post('/zicandi/public/batch/store', {
+                'archivo_php': this.catProcesosBatch.archivo_php,
+                'descripcion': this.catProcesosBatch.descripcion,
+                'estatus': this.catProcesosBatch.estatus
+            }).then(function (response) {
+                me.isLoading = 0;
+                me.closeModal();
+                util.AVISO('Perfecto, registro correcto', util.tipoOk);
+                me.onGetProcesosBatch();
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        actualizarProcesoBatch: function actualizarProcesoBatch() {
+            var me = this;
+            this.isLoading = 1;
+            axios.post('/zicandi/public/batch/update', {
+                'id_batch_proceso': this.catProcesosBatch.id_batch_proceso,
+                'archivo_php': this.catProcesosBatch.archivo_php,
+                'descripcion': this.catProcesosBatch.descripcion,
+                'estatus': this.catProcesosBatch.estatus
+            }).then(function (response) {
+                me.closeModal();
+                me.isLoading = 0;
+                util.AVISO('Actualizacion correcta!', util.tipoOk);
+                me.onGetProcesosBatch();
             }).catch(function (error) {
                 me.isLoading = 0;
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
@@ -60780,15 +61013,15 @@ var render = function() {
               "a",
               {
                 staticClass: "nav-link",
-                class: { active: _vm.isActive("contact") },
+                class: { active: _vm.isActive("batch") },
                 attrs: { href: "#contact" },
                 on: {
                   click: function($event) {
-                    return _vm.setActive("contact")
+                    return _vm.setActive("batch")
                   }
                 }
               },
-              [_vm._v("Contact")]
+              [_vm._v("BATCH")]
             )
           ])
         ]),
@@ -60906,15 +61139,447 @@ var render = function() {
               "div",
               {
                 staticClass: "tab-pane fade",
-                class: { "active show": _vm.isActive("contact") },
-                attrs: { id: "contact" }
+                class: { "active show": _vm.isActive("batch") },
+                attrs: { id: "batch" }
               },
-              [_vm._v("Contact content")]
+              [
+                _c(
+                  "form",
+                  {
+                    staticClass: "form-horizontal",
+                    attrs: {
+                      action: "",
+                      method: "post",
+                      enctype: "multipart/form-data"
+                    }
+                  },
+                  [
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c("div", { staticClass: "col-md-12" }, [
+                        _c("div", { staticClass: "card" }, [
+                          _c("div", { staticClass: "card-body" }, [
+                            _c("h5", { staticClass: "card-title" }, [
+                              _vm._v("Catalogo Procesos BATCH")
+                            ]),
+                            _vm._v(" "),
+                            _c(
+                              "table",
+                              {
+                                staticClass:
+                                  "table table-bordered table-striped table-sm"
+                              },
+                              [
+                                _vm._m(2),
+                                _vm._v(" "),
+                                _c(
+                                  "tbody",
+                                  _vm._l(
+                                    _vm.catProcesosBatch.listaProcesosBatch,
+                                    function(proceso) {
+                                      return _c(
+                                        "tr",
+                                        { key: proceso.id_batch_proceso },
+                                        [
+                                          _c("td", [
+                                            _c(
+                                              "button",
+                                              {
+                                                staticClass:
+                                                  "btn btn-warning btn-sm",
+                                                attrs: { type: "button" },
+                                                on: {
+                                                  click: function($event) {
+                                                    return _vm.showModal(
+                                                      "batch",
+                                                      "actualizar",
+                                                      proceso
+                                                    )
+                                                  }
+                                                }
+                                              },
+                                              [
+                                                _c("i", {
+                                                  staticClass: "icon-pencil"
+                                                })
+                                              ]
+                                            ),
+                                            _vm._v(
+                                              "                                                              \n                                                    "
+                                            )
+                                          ]),
+                                          _vm._v(" "),
+                                          _c("td", {
+                                            domProps: {
+                                              textContent: _vm._s(
+                                                proceso.archivo_php
+                                              )
+                                            }
+                                          }),
+                                          _vm._v(" "),
+                                          _c("td", {
+                                            domProps: {
+                                              textContent: _vm._s(
+                                                proceso.descripcion
+                                              )
+                                            }
+                                          }),
+                                          _vm._v(" "),
+                                          _c("td", {
+                                            domProps: {
+                                              textContent: _vm._s(
+                                                proceso.fecha_ultima_exec
+                                              )
+                                            }
+                                          }),
+                                          _vm._v(" "),
+                                          _c("td", [
+                                            proceso.estatus == "A"
+                                              ? _c("div", [
+                                                  _c(
+                                                    "span",
+                                                    {
+                                                      staticClass:
+                                                        "badge badge-success"
+                                                    },
+                                                    [_vm._v("Activo")]
+                                                  )
+                                                ])
+                                              : _c("div", [
+                                                  _c(
+                                                    "span",
+                                                    {
+                                                      staticClass:
+                                                        "badge badge-danger"
+                                                    },
+                                                    [_vm._v("Desactivado")]
+                                                  )
+                                                ])
+                                          ])
+                                        ]
+                                      )
+                                    }
+                                  ),
+                                  0
+                                )
+                              ]
+                            )
+                          ])
+                        ]),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "card-footer" }, [
+                          _c(
+                            "button",
+                            {
+                              staticClass: "btn btn-secondary",
+                              attrs: { type: "button" },
+                              on: {
+                                click: function($event) {
+                                  return _vm.showModal("batch", "registrar")
+                                }
+                              }
+                            },
+                            [
+                              _c("i", { staticClass: "icon-plus" }),
+                              _vm._v(
+                                " Nuevo\n                                    "
+                              )
+                            ]
+                          )
+                        ])
+                      ])
+                    ])
+                  ]
+                )
+              ]
             )
           ]
         )
       ])
-    ])
+    ]),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.catProcesosBatch.modalBatch.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-primary modal-lg",
+            attrs: { role: "document" }
+          },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c("div", { staticClass: "modal-header" }, [
+                _c("h4", {
+                  staticClass: "modal-title",
+                  domProps: {
+                    textContent: _vm._s(
+                      _vm.catProcesosBatch.modalBatch.tituloModal
+                    )
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "close",
+                    attrs: { type: "button", "aria-label": "Close" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeModal()
+                      }
+                    }
+                  },
+                  [
+                    _c("span", { attrs: { "aria-hidden": "true" } }, [
+                      _vm._v("×")
+                    ])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-body" }, [
+                _c(
+                  "form",
+                  {
+                    staticClass: "form-horizontal",
+                    attrs: {
+                      action: "",
+                      method: "post",
+                      enctype: "multipart/form-data"
+                    }
+                  },
+                  [
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Nombre archivo PHP")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.catProcesosBatch.archivo_php,
+                              expression: "catProcesosBatch.archivo_php"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: { type: "text", placeholder: "Archivo Php" },
+                          domProps: { value: _vm.catProcesosBatch.archivo_php },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.catProcesosBatch,
+                                "archivo_php",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Descripcion")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.catProcesosBatch.descripcion,
+                              expression: "catProcesosBatch.descripcion"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: {
+                            type: "text",
+                            placeholder:
+                              "Descripcion del proceso (Funcionalidad)"
+                          },
+                          domProps: { value: _vm.catProcesosBatch.descripcion },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.catProcesosBatch,
+                                "descripcion",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Estatus")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.catProcesosBatch.estatus,
+                                expression: "catProcesosBatch.estatus"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.$set(
+                                  _vm.catProcesosBatch,
+                                  "estatus",
+                                  $event.target.multiple
+                                    ? $$selectedVal
+                                    : $$selectedVal[0]
+                                )
+                              }
+                            }
+                          },
+                          [
+                            _c("option", [_vm._v("A")]),
+                            _vm._v(" "),
+                            _c("option", [_vm._v("P")])
+                          ]
+                        )
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      {
+                        directives: [
+                          {
+                            name: "show",
+                            rawName: "v-show",
+                            value: _vm.catProcesosBatch.modalBatch.error,
+                            expression: "catProcesosBatch.modalBatch.error"
+                          }
+                        ],
+                        staticClass: "form-group row div-error"
+                      },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "text-center text-error" },
+                          _vm._l(
+                            _vm.catProcesosBatch.modalBatch.erroresMsjList,
+                            function(error) {
+                              return _c("div", {
+                                key: error,
+                                domProps: { textContent: _vm._s(error) }
+                              })
+                            }
+                          ),
+                          0
+                        )
+                      ]
+                    )
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeModal()
+                      }
+                    }
+                  },
+                  [_vm._v("Cerrar")]
+                ),
+                _vm._v(" "),
+                _vm.catProcesosBatch.modalBatch.tipoAccion == 1
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-primary",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.registrarProcesoBatch()
+                          }
+                        }
+                      },
+                      [_vm._v("Guardar")]
+                    )
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.catProcesosBatch.modalBatch.tipoAccion == 2
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-primary",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.actualizarProcesoBatch()
+                          }
+                        }
+                      },
+                      [_vm._v("Actualizar")]
+                    )
+                  : _vm._e()
+              ])
+            ])
+          ]
+        )
+      ]
+    )
   ])
 }
 var staticRenderFns = [
@@ -60955,6 +61620,24 @@ var staticRenderFns = [
         ])
       ]
     )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("thead", [
+      _c("tr", [
+        _c("th", [_vm._v("Opciones")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Archivo Php")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Descripcion")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Fecha ultima ejecucion")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Estatus")])
+      ])
+    ])
   }
 ]
 render._withStripped = true

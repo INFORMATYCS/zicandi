@@ -46,4 +46,52 @@ class BatchController extends Controller{
         
         ->update( ['fecha_ultima_exec' => \DB::raw('SYSDATE()')] );
     }
+
+    /**
+     * Recupera todos los procesos sin importar el estatus
+     * 
+     * 
+     */
+    public function getProcesosAll(Request $request){
+        if(!$request->ajax())return redirect('/');
+
+        $batchProceso = BatchProceso::orderBy('id_batch_proceso','desc')->get();
+       
+
+        return [
+            'listaProcesos'=> $batchProceso
+        ];
+    }
+
+    /**
+     * Almacen nuevo proceso
+     * 
+     */
+    public function storeProceso(Request $request){        
+        $batchProceso = new BatchProceso();
+        $batchProceso->archivo_php = $request->archivo_php;
+        $batchProceso->descripcion = $request->descripcion;
+        $batchProceso->estatus = $request->estatus;        
+
+        $batchProceso->save();
+    }
+
+
+    /**
+     * Actualiza proceso
+     * 
+     */
+    public function updateProceso(Request $request){                
+        $batchProceso = BatchProceso::findOrFail($request->id_batch_proceso);//~Se busca en base al ID entrante
+        $batchProceso->archivo_php = $request->archivo_php;
+        $batchProceso->descripcion = $request->descripcion;
+        $batchProceso->estatus = $request->estatus;    
+
+        $batchProceso->save();
+    }
+
+
+
+    
+
 }

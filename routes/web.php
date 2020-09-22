@@ -61,7 +61,6 @@ Route::get('/compras', 'ComprasController@index');
 Route::post('/compras/detalle', 'ComprasController@getDetalleCompra');
 Route::post('/compras/registrar', 'ComprasController@store');
 
-
 Route::post('/compras/actualizar', 'ComprasController@update');
 Route::post('/compras/desactivar', 'ComprasController@desactivar');
 Route::post('/compras/activar', 'ComprasController@activar');
@@ -99,10 +98,14 @@ Route::post('/tienda/getPublicaciones', 'TiendasController@getPublicaciones');
 Route::get('/publicaciones', 'PublicacionesController@index');
 Route::post('/publicaciones/guardarProductos', 'PublicacionesController@saveProductosLigados');
 
-// - Rutas para Publicaciones
+// - Rutas para procesos BATCH
 Route::get('/batch/tareas', 'BatchController@getTareas');
 Route::get('/batch/descarga', 'BatchController@descargaFuente');
 Route::get('/batch/test', 'BatchController@test');
 Route::get('/batch/termino', 'BatchController@setTermino');
+Route::get('/batch/procesos', 'BatchController@getProcesosAll');
+Route::post('/batch/store', 'BatchController@storeProceso');
+Route::post('/batch/update', 'BatchController@updateProceso');
+
 
 
