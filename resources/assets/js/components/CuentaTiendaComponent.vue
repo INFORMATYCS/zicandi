@@ -81,11 +81,10 @@
                                                     <div class="card-header">
                                                             Opciones
                                                     </div>
-                                                    <div class="card-body"> 
-                                                            <a href="#" class="btn btn-primary" v-if="cuenta.estatus=='CONECTADO'" @click="onLogoutMercadoLibre(cuenta)">Salir</a>
-                                                            <a href="#" class="btn btn-primary" v-else @click="onConectarTienda(cuenta.codigo)">Conectar</a>
-                                                            <p></p>
-                                                            <a href="#" class="btn btn-warning" @click="onEliminarCuentaTienda(cuenta.id_cuenta_tienda)">Eliminar</a>
+                                                    <div class="card-body">                                                             
+                                                        <a href="#" class="btn btn-primary" v-if="cuenta.att_access_token" @click="refreshTokenMercadolibre(cuenta)">New Token</a>
+                                                        
+                                                        <a href="#" class="btn btn-warning" @click="onEliminarCuentaTienda(cuenta.id_cuenta_tienda)">Eliminar</a>
                                                     </div>
                                                     
                                             </div>
@@ -133,6 +132,12 @@
                         <div class="card text-center">
                             <div class="card-body">                                                                
                                 <a href="#" class="btn btn-primary" @click="onCuentaActivaMercadolibre();">Refresh</a>
+                            </div>
+                        </div>
+                        <div class="card text-center">                            
+                            <div class="card-body">                                                                
+                                <a href="#" class="btn btn-primary" @click="onLoginMercadoLibre();">Logeo Mercadolibre</a>
+                                <a href="#" class="btn btn-primary" @click="onLogoutMercadoLibre();">Salir Mercadolibre</a>
                             </div>
                         </div>
                     </div>
@@ -252,17 +257,9 @@
                 });
             },
 
-            onConectarTienda(codigoTienda){
-                console.log(codigoTienda);
-                //MercadoLibre
-                if(codigoTienda=="MLM"){
-                    this.onLoginMercadoLibre();
-                }else if(codigoTienda=="AMZ"){//Amazon
+  
 
-                }
-            },
-
-            onLogoutMercadoLibre(cuenta){
+            onLogoutMercadoLibre(){
                 
 
                 let me = this;
@@ -281,10 +278,9 @@
                         cancelButtonColor: '#d33',
                         confirmButtonText: 'Listo!'
                         }).then((result) => {
-                        if (result.value) {                            
-                            cuenta.estatus = 'NO_CONECTADO';
-                            me.onCuentaActivaMercadolibre();
-                        }
+                            if (result.value) {                            
+                                console.log('Ok');
+                            }
                         })
                     
 
@@ -322,6 +318,25 @@
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
             },
+
+
+            refreshTokenMercadolibre(cuenta){
+                
+
+                let me = this;
+                this.isLoading = 1;
+                axios.get('/zicandi/public/tienda/refreshMeli?usuario='+cuenta.usuario)
+                .then(function (response) {                                        
+                    me.isLoading = 0;                    
+                    cuenta.estatus='CONECTADO';
+                    console.log(response);
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+
             onLoginAmazon(){
                 
                 //P e n d i e n t e

@@ -6,6 +6,7 @@ use Session;
 use Illuminate\Http\Request;
 use App\Http\Lib\Meli;
 use App\Http\Lib\Constantes;
+use App\CuentaTienda;
 
 class MercadoLibreController extends Controller
 {
@@ -34,6 +35,13 @@ class MercadoLibreController extends Controller
                     Session::put('access_token', $user['body']->access_token);
                     Session::put('expires_in', time() + $user['body']->expires_in);
                     Session::put('refresh_token', $user['body']->refresh_token);
+                    
+                    //~Actualiza tabla cuentas
+                    CuentaTienda::where('att_id','=',$user['body']->user_id)
+                    ->update([  'estatus' => 'CONECTADO',                        
+                        'att_access_token' => $user['body']->access_token,
+                        'att_refresh_token' =>  $user['body']->refresh_token,
+                        'att_expira_token' =>  date("Y-m-d H:i:s", Session::get('expires_in')) ]);
 
                     return View::make("loginmeli");
                 }catch(Exception $e){
@@ -49,6 +57,13 @@ class MercadoLibreController extends Controller
                         Session::put('access_token', $refresh['body']->access_token);
                         Session::put('expires_in', time() + $refresh['body']->expires_in);
                         Session::put('refresh_token', $refresh['body']->refresh_token);
+
+                        //~Actualiza tabla cuentas
+                        CuentaTienda::where('att_id','=',$user['body']->user_id)
+                        ->update([  'estatus' => 'CONECTADO',                        
+                            'att_access_token' => $user['body']->access_token,
+                            'att_refresh_token' =>  $user['body']->refresh_token,
+                            'att_expira_token' =>  date("Y-m-d H:i:s", Session::get('expires_in')) ]);
                     } catch (Exception $e) {
                           echo "Exception: ",  $e->getMessage(), "\n";
                     }                    
@@ -62,6 +77,32 @@ class MercadoLibreController extends Controller
         }
 
         return $salida;        
+    }
+
+    public function refreshToken($refreshToken){        
+        $c = new Constantes();
+        $appId = $c->meli_appId;       
+        $secretKey = $c->meli_secretKey;
+        $redirectURI = $c->meli_redirectURI;
+        $siteId = $c->meli_siteId;
+
+       
+        $meli = new Meli($appId, $secretKey, null, $refreshToken);
+        $refresh = null;
+
+        try{
+            $refresh = $meli->refreshAccessToken();
+
+            Session::put('access_token', $refresh['body']->access_token);
+            Session::put('expires_in', time() + $refresh['body']->expires_in);
+            Session::put('refresh_token', $refresh['body']->refresh_token);
+        }catch(Exception $e){
+            echo "Exception: ",  $e->getMessage(), "\n";
+        }
+            
+       
+
+        return $refresh;        
     }
 
 

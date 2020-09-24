@@ -130,9 +130,9 @@
                                         
                                     </div>
                                     <div class="card-footer">
-                                         <button type="button" class="btn btn-secondary" @click="showModal('batch','registrar')">
+                                        <button type="button" class="btn btn-secondary" @click="showModal('batch','registrar')">
                                             <i class="icon-plus"></i>&nbsp;Nuevo
-                                        </button> 
+                                        </button>                                          
                                     </div>
                                 </div>
                             </div>
@@ -398,8 +398,7 @@
                     me.isLoading = 0;
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
-            },
-
+            }
 
             
         },

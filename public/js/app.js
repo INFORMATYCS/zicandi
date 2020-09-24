@@ -61853,6 +61853,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -61939,16 +61944,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
             });
         },
-        onConectarTienda: function onConectarTienda(codigoTienda) {
-            console.log(codigoTienda);
-            //MercadoLibre
-            if (codigoTienda == "MLM") {
-                this.onLoginMercadoLibre();
-            } else if (codigoTienda == "AMZ") {//Amazon
-
-            }
-        },
-        onLogoutMercadoLibre: function onLogoutMercadoLibre(cuenta) {
+        onLogoutMercadoLibre: function onLogoutMercadoLibre() {
 
             var me = this;
             this.isLoading = 1;
@@ -61966,8 +61962,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     confirmButtonText: 'Listo!'
                 }).then(function (result) {
                     if (result.value) {
-                        cuenta.estatus = 'NO_CONECTADO';
-                        me.onCuentaActivaMercadolibre();
+                        console.log('Ok');
                     }
                 });
             }).catch(function (error) {
@@ -61995,6 +61990,19 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 } else {
                     util.AVISO(msg, util.tipoOk);
                 }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        refreshTokenMercadolibre: function refreshTokenMercadolibre(cuenta) {
+
+            var me = this;
+            this.isLoading = 1;
+            axios.get('/zicandi/public/tienda/refreshMeli?usuario=' + cuenta.usuario).then(function (response) {
+                me.isLoading = 0;
+                cuenta.estatus = 'CONECTADO';
+                console.log(response);
             }).catch(function (error) {
                 me.isLoading = 0;
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
@@ -62179,7 +62187,7 @@ var render = function() {
                                 ]),
                                 _vm._v(" "),
                                 _c("div", { staticClass: "card-body" }, [
-                                  cuenta.estatus == "CONECTADO"
+                                  cuenta.att_access_token
                                     ? _c(
                                         "a",
                                         {
@@ -62187,31 +62195,15 @@ var render = function() {
                                           attrs: { href: "#" },
                                           on: {
                                             click: function($event) {
-                                              return _vm.onLogoutMercadoLibre(
+                                              return _vm.refreshTokenMercadolibre(
                                                 cuenta
                                               )
                                             }
                                           }
                                         },
-                                        [_vm._v("Salir")]
+                                        [_vm._v("New Token")]
                                       )
-                                    : _c(
-                                        "a",
-                                        {
-                                          staticClass: "btn btn-primary",
-                                          attrs: { href: "#" },
-                                          on: {
-                                            click: function($event) {
-                                              return _vm.onConectarTienda(
-                                                cuenta.codigo
-                                              )
-                                            }
-                                          }
-                                        },
-                                        [_vm._v("Conectar")]
-                                      ),
-                                  _vm._v(" "),
-                                  _c("p"),
+                                    : _vm._e(),
                                   _vm._v(" "),
                                   _c(
                                     "a",
@@ -62387,6 +62379,38 @@ var render = function() {
                   [_vm._v("Refresh")]
                 )
               ])
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "card text-center" }, [
+              _c("div", { staticClass: "card-body" }, [
+                _c(
+                  "a",
+                  {
+                    staticClass: "btn btn-primary",
+                    attrs: { href: "#" },
+                    on: {
+                      click: function($event) {
+                        return _vm.onLoginMercadoLibre()
+                      }
+                    }
+                  },
+                  [_vm._v("Logeo Mercadolibre")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "a",
+                  {
+                    staticClass: "btn btn-primary",
+                    attrs: { href: "#" },
+                    on: {
+                      click: function($event) {
+                        return _vm.onLogoutMercadoLibre()
+                      }
+                    }
+                  },
+                  [_vm._v("Salir Mercadolibre")]
+                )
+              ])
             ])
           ])
         ])
@@ -62500,7 +62524,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 me.cuentaActivalMeli = cuenta;
                 me.idVendedor = response.data.id;
 
-                me.onGetPublicaciones();
+                //me.onGetPublicaciones();
             }).catch(function (error) {
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
             });

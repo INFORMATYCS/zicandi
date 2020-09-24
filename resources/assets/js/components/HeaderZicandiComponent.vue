@@ -4,7 +4,7 @@
 
     <main class="main">
        <li class="nav-item">
-            <span class="badge badge-pill badge-warning" v-text="cuentaActivalMeli"></span>                                       
+            <span class="badge badge-pill badge-warning" v-text="cuentaActivalMeli"></span>                                          
         </li>         
     </main>    
 </template>
@@ -28,7 +28,7 @@
                     me.cuentaActivalMeli = cuenta;
                     me.idVendedor = response.data.id;
 
-                    me.onGetPublicaciones();
+                    //me.onGetPublicaciones();
                 })
                 .catch(function (error) {                                        
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);

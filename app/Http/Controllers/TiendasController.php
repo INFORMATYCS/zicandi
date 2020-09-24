@@ -88,7 +88,7 @@ class TiendasController extends Controller
                         'att_id' => $sesion['body']->id,
                         'correo' => $sesion['body']->email,
                         'telefono' => $sesion['body']->phone->area_code.$sesion['body']->phone->number,
-                        'att_access_token' => Session::get('access_token'),
+                        'att_access_token' => Session::get('access_token'),                        
                         'att_expira_token' => $fechaExpira ]);
 
 
@@ -191,6 +191,32 @@ class TiendasController extends Controller
         ->get();
 
         return ['tiendas' => $tiendas];
+    }
+
+
+    public function refreshTokenMeli(Request $request){  
+        //~Busca la cuenta
+        $cuenta = CuentaTienda::where('usuario','=',$request->usuario)->get();
+        $refreshToken = $cuenta[0]->att_refresh_token;
+                
+        $sesion = app(MercadoLibreController::class)->refreshToken($refreshToken);                     
+
+        if($sesion['httpCode']=="NO_SESSION"){
+            $salida = 0;
+        }else if($sesion['httpCode']=="200"){               
+            //~Conecta la cuenta activa            
+            $fechaExpira = date("Y-m-d H:i:s", Session::get('expires_in'));
+            CuentaTienda::where('usuario','=',$cuenta[0]->usuario)
+            ->update([  'estatus' => 'CONECTADO',                        
+                        'att_access_token' => Session::get('access_token'),
+                        'att_expira_token' => $fechaExpira ]);
+
+
+            return ['cuenta' => $cuenta[0]->usuario, 'id' => $cuenta[0]->att_id];
+        }
+        
+
+        
     }
     
 
