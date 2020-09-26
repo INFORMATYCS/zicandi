@@ -61936,9 +61936,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         },
         onCuentaActivaMercadolibre: function onCuentaActivaMercadolibre() {
             var me = this;
-            var url = '/zicandi/public/tienda/registraCuentaActiva';
+            var url = '/zicandi/public/tienda/cuentasActivasMeli';
             axios.get(url).then(function (response) {
-                console.log(response);
                 me.onGetCuentasTiendas();
             }).catch(function (error) {
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
@@ -62542,7 +62541,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         }
     },
     mounted: function mounted() {
-        this.onCuentaActivaMercadolibre();
+        //this.onCuentaActivaMercadolibre();            
     }
 });
 

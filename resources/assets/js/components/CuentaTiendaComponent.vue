@@ -246,10 +246,9 @@
 
             onCuentaActivaMercadolibre(){                                
                 let me=this;                
-                var url= '/zicandi/public/tienda/registraCuentaActiva';
+                var url= '/zicandi/public/tienda/cuentasActivasMeli';
                 axios.get(url)
-                .then(function (response) {                        
-                    console.log(response);
+                .then(function (response) {                                            
                     me.onGetCuentasTiendas();
                 })
                 .catch(function (error) {                                        

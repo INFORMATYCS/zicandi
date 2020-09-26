@@ -86,18 +86,23 @@ class MercadoLibreController extends Controller
         $redirectURI = $c->meli_redirectURI;
         $siteId = $c->meli_siteId;
 
-       
         $meli = new Meli($appId, $secretKey, null, $refreshToken);
         $refresh = null;
 
         try{
             $refresh = $meli->refreshAccessToken();
-
-            Session::put('access_token', $refresh['body']->access_token);
-            Session::put('expires_in', time() + $refresh['body']->expires_in);
-            Session::put('refresh_token', $refresh['body']->refresh_token);
+            if( $refresh == null ){
+                $refresh = array('httpCode'=>'NO_SESSION');
+            }elseif( $refresh['httpCode']!="200" ){
+                $refresh = array('httpCode'=>'NO_SESSION');
+            }else{
+                Session::put('access_token', $refresh['body']->access_token);
+                Session::put('expires_in', time() + $refresh['body']->expires_in);
+                Session::put('refresh_token', $refresh['body']->refresh_token);
+            }
+            
         }catch(Exception $e){
-            echo "Exception: ",  $e->getMessage(), "\n";
+            $refresh = array('httpCode'=>'NO_SESSION');
         }
             
        
@@ -134,11 +139,22 @@ class MercadoLibreController extends Controller
         $redirectURI = $c->meli_redirectURI;
         $siteId = $c->meli_siteId;
 
-        if(Session::get('access_token')!=null){
-            $meli = new Meli($appId, $secretKey);
+        $accessToken = Session::get('access_token');
+        if(isset($request->accessToken)){
+            $accessToken = $request->accessToken;
+        }
+        
 
-            $params = array('access_token' => Session::get('access_token'));
-            $result = $meli->get('/users/me', $params);
+        if( $accessToken !=null){                        
+                $meli = new Meli($appId, $secretKey);
+
+                $params = array('access_token' => $accessToken);
+                $result = $meli->get('/users/me', $params);
+
+                if($result ==null || $result['httpCode']!="200"){
+                    $result = array('httpCode'=>'NO_SESSION');
+                }
+            
         }else{
             $result = array('httpCode'=>'NO_SESSION');
         }
@@ -152,7 +168,7 @@ class MercadoLibreController extends Controller
         Session::put('refresh_token', null);        
     }
 
-    public function publicaciones($id, $offset, $limit){
+    public function publicaciones($id, $token){
         $c = new Constantes();
         $appId = $c->meli_appId;       
         $secretKey = $c->meli_secretKey;
@@ -162,13 +178,13 @@ class MercadoLibreController extends Controller
         $publicaciones = array();
         $result = array('httpCode'=>'NO_SESSION');
 
-        if(Session::get('access_token')!=null){
+        if( $token!=null ){
             $meli = new Meli($appId, $secretKey);
             $offset = 0;
             $limit = 100;
 
             do{
-                $params = array('access_token' => Session::get('access_token'),
+                $params = array('access_token' => $token,
                                 'offset' => $offset,
                                 'limit' => $limit);
                 $result = $meli->get('/users/'.$id.'/items/search', $params);
@@ -199,130 +215,20 @@ class MercadoLibreController extends Controller
         return $result;
     }
 
-    public function Ipublicaciones($idUsuario){
-        $offset = 0;
-        $limit = 100;
-        $listaPublicacionesDeta = array();
-
-        $publicaciones = app(MercadoLibreController::class)->publicaciones($idUsuario, $offset, $limit);
-        if($publicaciones['httpCode']=="200"){            
-            $lista = $publicaciones['lista'];            
-
-            $fragmentos = array_chunk($lista, 20);
-            
-            for($i=0; $i<count($fragmentos); $i++){
-            //for($i=0; $i<1; $i++){
-                $procesa = $fragmentos[$i];
-
-                //$procesa = array('MLM663467907','MLM649661298','MLM723780404','MLM598745299','MLM657472310');
-                
-                
-                $cadenaProcesa = implode (",", $procesa);
-
-                //********* Consulta detalle de la publicacion **********
-                $p = app(MercadoLibreController::class)->items($cadenaProcesa);
-                if($p['httpCode']=="200"){
-                    $listaPublicaciones = $p['body'];
-
-                    for($b=0; $b<count($listaPublicaciones); $b++){
-                        $publicacion = $listaPublicaciones[$b]->body;
-                        $id             = $publicacion->id;
-                        $titulo         = $publicacion->title;
-                        $precio         = $publicacion->price;
-                        $stock          = $publicacion->available_quantity;
-                        $ventas         = $publicacion->sold_quantity;
-                        $estatus        = $publicacion->status;
-                        $link           = $publicacion->permalink;
-                        $fotoMini       = $publicacion->thumbnail;
-                        
-                        $shipping       = $publicacion->shipping;
-                        $envioGratis    = $shipping->free_shipping;
-                        $tipoEnvio      = $shipping->logistic_type;
-
-                        $variations     = $publicacion->variations;
-                        if(count($variations)>0){
-                            for($v=0; $v<count($variations); $v++){
-                                $variante = $variations[$v];
-                                $idVariante     = $variante->id;
-                                $stockVariante  = $variante->available_quantity;
-                                $ventasVariante = $variante->sold_quantity;
-                                $atributos      = $variante->attribute_combinations;
-                                $nombreVariante = $atributos[0]->name.':'.$atributos[0]->value_name;
-
-                                $publicacionSalida = array(
-                                    'id'=>$id,
-                                    'titulo'=>$titulo,
-                                    'precio'=>$precio,
-                                    'stock'=>$stockVariante,
-                                    'ventas'=>$ventasVariante,
-                                    'estatus'=>$estatus,
-                                    'link'=>$link,
-                                    'fotoMini'=>$fotoMini,
-                                    'envioGratis'=>$envioGratis,
-                                    'tipoEnvio'=>$tipoEnvio,
-                                    'idVariante'=>$idVariante,
-                                    'nombreVariante'=>$nombreVariante
-                                );
-
-                                array_push($listaPublicacionesDeta, $publicacionSalida);
-                            }
-                        }else{
-                            $publicacionSalida = array(
-                                'id'=>$id,
-                                'titulo'=>$titulo,
-                                'precio'=>$precio,
-                                'stock'=>$stock,
-                                'ventas'=>$ventas,
-                                'estatus'=>$estatus,
-                                'link'=>$link,
-                                'fotoMini'=>$fotoMini,
-                                'envioGratis'=>$envioGratis,
-                                'tipoEnvio'=>$tipoEnvio
-                            );
-
-                            array_push($listaPublicacionesDeta, $publicacionSalida);
-                        }
-
-                    }
-                }
-
-                //********* Consulta VISITAS de la publicacion **********
-                $v = app(MercadoLibreController::class)->visitas($cadenaProcesa);
-                if($v['httpCode']=="200"){                
-                    
-    
-                    foreach ($v['body'] as $id => $visitas) {
-                        for($g=0; $g<count($listaPublicacionesDeta); $g++){
-                            if($listaPublicacionesDeta[$g]['id'] == $id){
-                                $listaPublicacionesDeta[$g]['visitas'] = $visitas;
-                            }
-                        }
-
-                    }
+   
 
 
-                }
-
-                
-            }
-
-        }   
-        
-        return $listaPublicacionesDeta;
-    }
-
-
-    public function items($its){
+    public function items($its, $token){
         $c = new Constantes();
         $appId = $c->meli_appId;       
         $secretKey = $c->meli_secretKey;
         $redirectURI = $c->meli_redirectURI;
         $siteId = $c->meli_siteId;
 
-        if(Session::get('access_token')!=null){
+        if($token!=null){
             $meli = new Meli($appId, $secretKey);
 
-            $params = array('access_token' => Session::get('access_token'),
+            $params = array('access_token' => $token,
                             'ids' => $its);
             $result = $meli->get('/items', $params);
         }else{
@@ -332,17 +238,17 @@ class MercadoLibreController extends Controller
         return $result;
     }
 
-    public function visitas($its){
+    public function visitas($its, $token){
         $c = new Constantes();
         $appId = $c->meli_appId;       
         $secretKey = $c->meli_secretKey;
         $redirectURI = $c->meli_redirectURI;
         $siteId = $c->meli_siteId;
 
-        if(Session::get('access_token')!=null){
+        if($token!=null){
             $meli = new Meli($appId, $secretKey);
 
-            $params = array('access_token' => Session::get('access_token'),
+            $params = array('access_token' => $token,
                             'ids' => $its);
             $result = $meli->get('/visits/items', $params);
         }else{

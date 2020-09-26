@@ -80,6 +80,7 @@ Route::get('/meli/logout', 'MercadoLibreController@logout');
 Route::get('/meli/me', 'MercadoLibreController@me');
 Route::get('/meli/refresh', 'MercadoLibreController@refreshToken');
 
+
 // - Rutas API betterware
 Route::get('/bett/get', 'BetterwareController@getPage');
 Route::get('/bett/resumen', 'BetterwareController@resumenMigracion');
@@ -93,8 +94,10 @@ Route::get('/tienda/getSelectCuentaTiendas', 'TiendasController@selectCuentaTien
 Route::post('/tienda/storeCuentaTienda', 'TiendasController@storeCuentaTienda');
 Route::post('/tienda/eliminarCuenta', 'TiendasController@eliminarCuentaTienda');
 Route::get('/tienda/registraCuentaActiva', 'TiendasController@registraCuentaActiva');
-Route::post('/tienda/getPublicaciones', 'TiendasController@getPublicaciones');
+Route::get('/tienda/getPublicaciones', 'TiendasController@getPublicaciones');
+Route::get('/tienda/getDetallePublicacion', 'TiendasController@getDetallePublicacion');
 Route::get('/tienda/refreshMeli', 'TiendasController@refreshTokenMeli');
+Route::get('/tienda/cuentasActivasMeli', 'TiendasController@getCuentasActivasMELI');
 
 // - Rutas para Publicaciones
 Route::get('/publicaciones', 'PublicacionesController@index');

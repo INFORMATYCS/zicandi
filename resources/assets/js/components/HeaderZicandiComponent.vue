@@ -50,7 +50,7 @@
             }
         },
         mounted() {
-            this.onCuentaActivaMercadolibre();            
+            //this.onCuentaActivaMercadolibre();            
         }
     }
 </script>
