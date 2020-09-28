@@ -214,11 +214,18 @@ class BetterwareController extends Controller
                 $producto = Producto::find($producto[0]->id_producto);
                 $producto->nombre = substr($t->nombre, 0, 30);
                 $producto->url_imagen = 'http://localhost/zicandi/public/'.$t->imagen_mini;
-                $producto->nota = $t->descripcion;
-                if($producto->ultimo_precio_compra<=0){
+                $producto->nota = $t->descripcion;                
+                $ultimoPrecioCompras = $producto->calcularUltimoPrecioCompra();
+
+                if( $ultimoPrecioCompras<=0 ){
                     $producto->ultimo_precio_compra = $t->precio_oferta;
                     $producto->promedio_precio_compra = $t->precio_oferta;
+                    $producto->precio_referenciado = $t->precio_oferta;
+                }else{
+                    $producto->precio_referenciado = $t->precio_oferta;
                 }
+
+
                 $producto->save();
             }
 
