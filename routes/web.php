@@ -19,6 +19,9 @@ Route::get('/loginmeli', function () {
     return view('loginMELI');
 });
 
+// - Rutas para MAIN
+Route::get('/main/entorno', 'MainController@getEntorno');
+Route::get('/main/version', 'MainController@getVersionApp');
 
 // - Rutas para Proveedores
 Route::get('/proveedores', 'ProveedorController@index');
@@ -102,6 +105,7 @@ Route::get('/tienda/cuentasActivasMeli', 'TiendasController@getCuentasActivasMEL
 // - Rutas para Publicaciones
 Route::get('/publicaciones', 'PublicacionesController@index');
 Route::post('/publicaciones/guardarProductos', 'PublicacionesController@saveProductosLigados');
+Route::get('/publicaciones/exportar', 'PublicacionesController@exportar');
 
 // - Rutas para procesos BATCH
 Route::get('/batch/tareas', 'BatchController@getTareas');

@@ -24,8 +24,13 @@ function getCatalogoByCategoria($cat){
     Console::log('', 'green', true, 'black');
     Console::log('Inicia carga '.$cat, 'green', true, 'black');
     for($pag=1; $pag<=10; $pag++){    
-        Restfull::sendGet(Param::$_BASE_PATH_API.'zicandi/public/bett/get', array("url" => "https://betterware.com.mx/".$cat."?pagina=".$pag));
-        Console::log('.', 'yellow', false, 'black');
+        $resp = Restfull::sendGet(Param::$_BASE_PATH_API.'zicandi/public/bett/get', array("url" => "https://betterware.com.mx/".$cat."?pagina=".$pag));
+        if($resp=="OK"){
+            Console::log('.', 'yellow', false, 'black');
+        }else{
+            Console::log($resp, 'red', false, 'black');
+        }
+        
     }
 }
 

@@ -5,7 +5,6 @@ use View;
 use Session;
 use Illuminate\Http\Request;
 use App\Http\Lib\Meli;
-use App\Http\Lib\Constantes;
 use App\CuentaTienda;
 
 class MercadoLibreController extends Controller
@@ -15,12 +14,11 @@ class MercadoLibreController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function login(Request $request){        
-        $c = new Constantes();
-        $appId = $c->meli_appId;       
-        $secretKey = $c->meli_secretKey;
-        $redirectURI = $c->meli_redirectURI;
-        $siteId = $c->meli_siteId;
+    public function login(Request $request){                
+        $appId = Config::get('zicandi.meli.appId');
+        $secretKey = Config::get('zicandi.meli.secretKey');
+        $redirectURI = Config::get('zicandi.meli.redirectURI');
+        $siteId = Config::get('zicandi.meli.siteId');
 
         //Session::put('access_token', null);
         $salida = array();
@@ -35,15 +33,20 @@ class MercadoLibreController extends Controller
                     Session::put('access_token', $user['body']->access_token);
                     Session::put('expires_in', time() + $user['body']->expires_in);
                     Session::put('refresh_token', $user['body']->refresh_token);
+
+                    $request->accessToken = $user['body']->access_token;
+                    $me = $this->me($request);
                     
                     //~Actualiza tabla cuentas
-                    CuentaTienda::where('att_id','=',$user['body']->user_id)
-                    ->update([  'estatus' => 'CONECTADO',                        
-                        'att_access_token' => $user['body']->access_token,
-                        'att_refresh_token' =>  $user['body']->refresh_token,
-                        'att_expira_token' =>  date("Y-m-d H:i:s", Session::get('expires_in')) ]);
+                    if( $me['httpCode']=="200" ){
+                        CuentaTienda::where('usuario','=',$me['body']->nickname)
+                        ->update([  'estatus' => 'CONECTADO',                        
+                            'att_access_token' => $user['body']->access_token,
+                            'att_refresh_token' =>  $user['body']->refresh_token,
+                            'att_expira_token' =>  date("Y-m-d H:i:s", Session::get('expires_in')) ]);
+                    }
 
-                    return View::make("loginmeli");
+                    return View::make("loginMELI");
                 }catch(Exception $e){
                     echo "Exception: ",  $e->getMessage(), "\n";
                 }
@@ -80,11 +83,10 @@ class MercadoLibreController extends Controller
     }
 
     public function refreshToken($refreshToken){        
-        $c = new Constantes();
-        $appId = $c->meli_appId;       
-        $secretKey = $c->meli_secretKey;
-        $redirectURI = $c->meli_redirectURI;
-        $siteId = $c->meli_siteId;
+        $appId = Config::get('zicandi.meli.appId');
+        $secretKey = Config::get('zicandi.meli.secretKey');
+        $redirectURI = Config::get('zicandi.meli.redirectURI');
+        $siteId = Config::get('zicandi.meli.siteId');
 
         $meli = new Meli($appId, $secretKey, null, $refreshToken);
         $refresh = null;
@@ -114,11 +116,10 @@ class MercadoLibreController extends Controller
     public function getAsynCODE(Request $request){
         $code = $request->code;
 
-        $c = new Constantes();
-        $appId = $c->meli_appId;       
-        $secretKey = $c->meli_secretKey;
-        $redirectURI = $c->meli_redirectURI;
-        $siteId = $c->meli_siteId;
+        $appId = Config::get('zicandi.meli.appId');
+        $secretKey = Config::get('zicandi.meli.secretKey');
+        $redirectURI = Config::get('zicandi.meli.redirectURI');
+        $siteId = Config::get('zicandi.meli.siteId');
         
 
         $meli = new Meli($appId, $secretKey);
@@ -133,11 +134,10 @@ class MercadoLibreController extends Controller
     }
 
     public function me(Request $request){
-        $c = new Constantes();
-        $appId = $c->meli_appId;       
-        $secretKey = $c->meli_secretKey;
-        $redirectURI = $c->meli_redirectURI;
-        $siteId = $c->meli_siteId;
+        $appId = Config::get('zicandi.meli.appId');
+        $secretKey = Config::get('zicandi.meli.secretKey');
+        $redirectURI = Config::get('zicandi.meli.redirectURI');
+        $siteId = Config::get('zicandi.meli.siteId');
 
         $accessToken = Session::get('access_token');
         if(isset($request->accessToken)){
@@ -169,11 +169,10 @@ class MercadoLibreController extends Controller
     }
 
     public function publicaciones($id, $token){
-        $c = new Constantes();
-        $appId = $c->meli_appId;       
-        $secretKey = $c->meli_secretKey;
-        $redirectURI = $c->meli_redirectURI;
-        $siteId = $c->meli_siteId;
+        $appId = Config::get('zicandi.meli.appId');
+        $secretKey = Config::get('zicandi.meli.secretKey');
+        $redirectURI = Config::get('zicandi.meli.redirectURI');
+        $siteId = Config::get('zicandi.meli.siteId');
 
         $publicaciones = array();
         $result = array('httpCode'=>'NO_SESSION');
@@ -219,11 +218,10 @@ class MercadoLibreController extends Controller
 
 
     public function items($its, $token){
-        $c = new Constantes();
-        $appId = $c->meli_appId;       
-        $secretKey = $c->meli_secretKey;
-        $redirectURI = $c->meli_redirectURI;
-        $siteId = $c->meli_siteId;
+        $appId = Config::get('zicandi.meli.appId');
+        $secretKey = Config::get('zicandi.meli.secretKey');
+        $redirectURI = Config::get('zicandi.meli.redirectURI');
+        $siteId = Config::get('zicandi.meli.siteId');
 
         if($token!=null){
             $meli = new Meli($appId, $secretKey);
@@ -239,11 +237,10 @@ class MercadoLibreController extends Controller
     }
 
     public function visitas($its, $token){
-        $c = new Constantes();
-        $appId = $c->meli_appId;       
-        $secretKey = $c->meli_secretKey;
-        $redirectURI = $c->meli_redirectURI;
-        $siteId = $c->meli_siteId;
+        $appId = Config::get('zicandi.meli.appId');
+        $secretKey = Config::get('zicandi.meli.secretKey');
+        $redirectURI = Config::get('zicandi.meli.redirectURI');
+        $siteId = Config::get('zicandi.meli.siteId');
 
         if($token!=null){
             $meli = new Meli($appId, $secretKey);

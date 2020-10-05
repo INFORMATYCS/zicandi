@@ -62504,13 +62504,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
         return {
             isLoading: 0,
             cuentaActivalMeli: '',
-            idVendedor: 0
+            idVendedor: 0,
+            entorno: '',
+            version: ''
         };
     },
 
@@ -62538,10 +62541,48 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }).catch(function (error) {
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
             });
+        },
+
+
+        /**
+         * Funcion: Entorno ejecucion App (pruebas | produccion)
+         * In: -
+         * Out: (String entorno)
+         */
+        onGetEntorno: function onGetEntorno() {
+            var me = this;
+            axios.get('/zicandi/public/main/entorno').then(function (response) {
+                if (response.data.xstatus) {
+                    me.onGetVersion();
+                    me.entorno = response.data.entorno;
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+
+        /**
+         * Funcion: Pide al servidor la version actual de la App
+         * In: -
+         * Out: (String version)
+         */
+        onGetVersion: function onGetVersion() {
+            var me = this;
+            axios.get('/zicandi/public/main/version').then(function (response) {
+                if (response.data.xstatus) {
+                    me.version = response.data.version;
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
         }
     },
     mounted: function mounted() {
-        //this.onCuentaActivaMercadolibre();            
+        this.onGetEntorno();
     }
 });
 
@@ -62557,8 +62598,10 @@ var render = function() {
     _c("li", { staticClass: "nav-item" }, [
       _c("span", {
         staticClass: "badge badge-pill badge-warning",
-        domProps: { textContent: _vm._s(_vm.cuentaActivalMeli) }
-      })
+        domProps: { textContent: _vm._s(_vm.entorno) }
+      }),
+      _vm._v(" "),
+      _c("span", { domProps: { textContent: _vm._s(_vm.version) } })
     ])
   ])
 }
@@ -62936,6 +62979,28 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -62971,6 +63036,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             offset: 3,
             chkEstatusActivas: true,
             chkEstatusPausadas: false,
+            orden: 'publicacion.id_publicacion|desc',
             criterio: 'titulo',
             buscar: '',
             isLoading: 0,
@@ -63048,7 +63114,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     'idCuentaTienda': this.objPublicacion.idCuentaTienda,
                     filtros: {
                         'activas': this.chkEstatusActivas,
-                        'pausadas': this.chkEstatusPausadas
+                        'pausadas': this.chkEstatusPausadas,
+                        'orden': this.orden
                     }
                 }
             }).then(function (response) {
@@ -63061,6 +63128,68 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 me.isLoading = 0;
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
             });
+        },
+        exportarPublicaciones: function exportarPublicaciones(buscar, criterio) {
+            var aplLoading = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+
+            if (this.objPublicacion.idCuentaTienda == 0) {
+                util.MSG('Algo salio Mal!', 'Seleccione la cuenta de la tienda', util.tipoErr);
+                return;
+            }
+
+            var params = {
+                'buscar': buscar,
+                'criterio': criterio,
+                'idCuentaTienda': this.objPublicacion.idCuentaTienda,
+                filtros: {
+                    'activas': this.chkEstatusActivas,
+                    'pausadas': this.chkEstatusPausadas,
+                    'orden': this.orden
+                }
+            };
+            var paramString = new URLSearchParams(params);
+
+            console.log(paramString.toString());
+
+            var json = JSON.stringify(params);
+
+            console.log(encodeURIComponent(json));
+
+            window.open('/zicandi/public/publicaciones/exportar?param=' + encodeURIComponent(json));
+
+            /*
+                     if(aplLoading){
+                         this.isLoading = 1;
+                     }
+                      let me=this;                
+                     
+                     axios.get('/zicandi/public/publicaciones/exportar',{
+                         params: {                       
+                             'buscar': buscar,
+                             'criterio': criterio,
+                             'idCuentaTienda': this.objPublicacion.idCuentaTienda,
+                             filtros: {
+                                 'activas': this.chkEstatusActivas,
+                                 'pausadas': this.chkEstatusPausadas,
+                                 'orden': this.orden
+                             }
+                         }
+                     })
+                     .then(function (response) {        
+                          me.isLoading = 0;
+                          const url = window.URL.createObjectURL(new Blob([response.data]));
+                         const link = document.createElement('a');
+                         link.href = url;
+                         link.setAttribute('download', 'invoices.xlsx'); //or any other extension
+                         document.body.appendChild(link);
+                         link.click();
+                     })
+                     .catch(function (error) {                    
+                         me.isLoading = 0;
+                         util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                     });
+                      */
         },
         selectTienda: function selectTienda() {
             var me = this;
@@ -63390,6 +63519,82 @@ var render = function() {
         ]
       ),
       _vm._v(" "),
+      _vm._m(1),
+      _vm._v(" "),
+      _c(
+        "div",
+        {
+          staticClass: "card small",
+          staticStyle: { width: "15rem", display: "inline-block" }
+        },
+        [
+          _c("div", { staticClass: "card-body" }, [
+            _c("h5", { staticClass: "card-title" }, [_vm._v("Orden")]),
+            _vm._v(" "),
+            _c("div", { staticClass: "card-text" }, [
+              _c(
+                "select",
+                {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.orden,
+                      expression: "orden"
+                    }
+                  ],
+                  staticClass: "form-control",
+                  on: {
+                    change: function($event) {
+                      var $$selectedVal = Array.prototype.filter
+                        .call($event.target.options, function(o) {
+                          return o.selected
+                        })
+                        .map(function(o) {
+                          var val = "_value" in o ? o._value : o.value
+                          return val
+                        })
+                      _vm.orden = $event.target.multiple
+                        ? $$selectedVal
+                        : $$selectedVal[0]
+                    }
+                  }
+                },
+                [
+                  _c(
+                    "option",
+                    { attrs: { value: "publicacion.id_publicacion|desc" } },
+                    [_vm._v("Ultimos registros")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "option",
+                    { attrs: { value: "publicacion.ventas|desc" } },
+                    [_vm._v("Mas ventas")]
+                  ),
+                  _vm._v(" "),
+                  _c("option", { attrs: { value: "publicacion.ventas|asc" } }, [
+                    _vm._v("Menos ventas")
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "option",
+                    { attrs: { value: "publicacion.visitas|desc" } },
+                    [_vm._v("Mas visitados")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "option",
+                    { attrs: { value: "publicacion.visitas|asc" } },
+                    [_vm._v("Menos visitados")]
+                  )
+                ]
+              )
+            ])
+          ])
+        ]
+      ),
+      _vm._v(" "),
       _c("div", { staticClass: "form-group row" }, [
         _c("div", { staticClass: "col-md-5" }, [
           _c("div", { staticClass: "input-group" }, [
@@ -63462,7 +63667,7 @@ var render = function() {
           ])
         ]),
         _vm._v(" "),
-        _c("div", { staticClass: "col-md-5" }, [
+        _c("div", { staticClass: "col-md-3" }, [
           _c("div", { staticClass: "input-group" }, [
             _c(
               "select",
@@ -63533,6 +63738,24 @@ var render = function() {
                 }
               },
               [_c("i", { staticClass: "fa fa-search" }), _vm._v(" Buscar")]
+            ),
+            _vm._v("  \n                         \n                        "),
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-primary",
+                attrs: { type: "submit" },
+                on: {
+                  click: function($event) {
+                    return _vm.exportarPublicaciones(
+                      _vm.buscar,
+                      _vm.criterio,
+                      true
+                    )
+                  }
+                }
+              },
+              [_c("i", { staticClass: "fa fa-search" }), _vm._v(" Excel")]
             )
           ])
         ])
@@ -63542,7 +63765,7 @@ var render = function() {
         "table",
         { staticClass: "table table-bordered table-striped table-sm" },
         [
-          _vm._m(1),
+          _vm._m(2),
           _vm._v(" "),
           _c(
             "tbody",
@@ -63619,7 +63842,7 @@ var render = function() {
                     domProps: { textContent: _vm._s(publicacion.titulo) }
                   }),
                   _vm._v(" "),
-                  _vm._m(2, true),
+                  _vm._m(3, true),
                   _vm._v(" "),
                   _c("small", {
                     staticClass: "text-muted",
@@ -63751,8 +63974,23 @@ var render = function() {
                   publicacion.config.length <= 0
                     ? _c(
                         "div",
-                        { staticClass: "badge badge-pill badge-danger" },
-                        [_c("span", [_vm._v("Falta ligar")])]
+                        {
+                          staticClass: "badge badge-pill badge-danger",
+                          on: {
+                            click: function($event) {
+                              return _vm.showModal(
+                                "producto",
+                                "ligar",
+                                publicacion
+                              )
+                            }
+                          }
+                        },
+                        [
+                          _c("span", { staticStyle: { cursor: "pointer" } }, [
+                            _vm._v("Falta ligar")
+                          ])
+                        ]
                       )
                     : _vm._e(),
                   _vm._v(" "),
@@ -64067,7 +64305,7 @@ var render = function() {
                 )
               ]),
               _vm._v(" "),
-              _vm._m(3),
+              _vm._m(4),
               _vm._v(" "),
               _c("div", { staticClass: "modal-footer" }, [
                 _c(
@@ -64145,7 +64383,7 @@ var render = function() {
               )
             ]),
             _vm._v(" "),
-            _vm._m(4)
+            _vm._m(5)
           ])
         ])
       ]
@@ -64166,6 +64404,33 @@ var staticRenderFns = [
       _vm._v(" "),
       _c("li", { staticClass: "breadcrumb-item active" }, [_vm._v("Productos")])
     ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      {
+        staticClass: "card small bg-dark text-white",
+        staticStyle: { width: "15rem", display: "inline-block" }
+      },
+      [
+        _c("div", { staticClass: "card-body" }, [
+          _c("h5", { staticClass: "card-title" }, [_vm._v("Ventas")]),
+          _vm._v(" "),
+          _c("p", { staticClass: "card-text" }, [
+            _c("input", { attrs: { type: "radio", checked: "" } }),
+            _vm._v(" Mas vendido en los ultimos 7 dias\n                ")
+          ]),
+          _vm._v(" "),
+          _c("p", { staticClass: "card-text" }, [
+            _c("input", { attrs: { type: "radio" } }),
+            _vm._v(" Sin ventas en los ultimos 7 dias\n                ")
+          ])
+        ])
+      ]
+    )
   },
   function() {
     var _vm = this

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Config;
 
 use Illuminate\Http\Request;
 use App\CuentaTienda;
@@ -28,13 +29,18 @@ class TiendasController extends Controller
     }
 
     public function selectTienda(Request $request){
-        if(!$request->ajax())return redirect('/');
+        try{
+            if(!$request->ajax())return redirect('/');
 
-        $tiendas = Tienda::select('id_tienda','nombre')
-        ->orderBy('nombre', 'asc')
-        ->get();
+            $tiendas = Tienda::select('id_tienda','nombre')
+            ->orderBy('nombre', 'asc')
+            ->get();
 
-        return ['tiendas' => $tiendas];
+            return ['tiendas' => $tiendas];
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());            
+            return ['exception' => $e->getMessage()];
+        }   
     }
 
     public function storeCuentaTienda(Request $request){
@@ -49,6 +55,7 @@ class TiendasController extends Controller
         $cuenta = new CuentaTienda();
         $cuenta->id_tienda = $request->id_tienda;
         $cuenta->usuario = $request->usuario;
+        $cuenta->att_refresh_token = $request->usuario;        
         $cuenta->estatus = 'NO_CONECTADO';
         $cuenta->save();
 
@@ -64,41 +71,6 @@ class TiendasController extends Controller
 
         return 'OK';
     }
-
-    /*
-    public function registraCuentaActiva(Request $request){
-        $salida = 0;
-
-        $sesion = app(MercadoLibreController::class)->me($request);             
-
-        //~Tienda mercadolibre
-        $ml = Tienda::where('codigo','=','MLM')->get();
-
-        //~Desconecta todas las cuentas
-        CuentaTienda::where('id_tienda','=',$ml[0]->id_tienda)
-        ->update(['estatus' => 'NO_CONECTADO']);
-
-        if($sesion['httpCode']=="NO_SESSION"){
-            $salida = 0;
-        }else if($sesion['httpCode']=="200"){               
-            //~Conecta la cuenta activa
-            $nickname = $sesion['body']->nickname;
-            $fechaExpira = date("Y-m-d H:i:s", Session::get('expires_in'));
-            CuentaTienda::where('usuario','=',$nickname)
-            ->update([  'estatus' => 'CONECTADO',
-                        'att_id' => $sesion['body']->id,
-                        'correo' => $sesion['body']->email,
-                        'telefono' => $sesion['body']->phone->area_code.$sesion['body']->phone->number,
-                        'att_access_token' => Session::get('access_token'),                        
-                        'att_expira_token' => $fechaExpira ]);
-
-
-            return ['cuenta' => $nickname, 'id' => $sesion['body']->id];
-        }
-        
-
-        
-    }*/
 
     public function getDetallePublicacion(Request $request){ 
     try{           
