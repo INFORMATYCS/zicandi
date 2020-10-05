@@ -33,18 +33,35 @@
                 </div>
             </div>
 
-            <!--<div class="card small bg-dark text-white" style="width: 15rem; display: inline-block;">
+            <div class="card small bg-dark text-white" style="width: 15rem; display: inline-block;">
                 <div class="card-body">
                     <h5 class="card-title">Ventas</h5>                            
                     <p class="card-text">
-                        <input type="radio" checked> Mayor ventas arriba
+                        <input type="radio" checked> Mas vendido en los ultimos 7 dias
                     </p>
                     <p class="card-text">
-                        <input type="radio" > Menor ventas arriba
+                        <input type="radio" > Sin ventas en los ultimos 7 dias
                     </p>
                 </div>
             </div>
 
+            <div class="card small" style="width: 15rem; display: inline-block;">
+                <div class="card-body">
+                    <h5 class="card-title">Orden</h5>                            
+                    <div class="card-text">                                    
+                        <select class="form-control" v-model="orden">
+                            <option value="publicacion.id_publicacion|desc">Ultimos registros</option>
+                            <option value="publicacion.ventas|desc">Mas ventas</option>
+                            <option value="publicacion.ventas|asc">Menos ventas</option>
+                            <option value="publicacion.visitas|desc">Mas visitados</option>
+                            <option value="publicacion.visitas|asc">Menos visitados</option>
+                        </select>
+                    </div>
+                   
+                </div>
+            </div>
+
+            <!--
             <div class="card small bg-dark text-white" style="width: 15rem; display: inline-block;">
                 <div class="card-body">
                     <h5 class="card-title">Visitas</h5>                            
@@ -69,10 +86,11 @@
                             </select>
                           
                             <input type="text" v-model="buscar" @keyup.enter="listarPublicaciones(1, buscar, criterio, true)" class="form-control" placeholder="Texto a buscar">
+                            
                         </div>
                     </div>
 
-                    <div class="col-md-5">
+                    <div class="col-md-3">
                         <div class="input-group">
                             
                             <select class="form-control" v-model="objPublicacion.idCuentaTienda">
@@ -85,8 +103,10 @@
                     <div class="col-md-2">
                         <div class="input-group">                            
                             <button type="submit" class="btn btn-primary" @click="listarPublicaciones(1, buscar, criterio, true)"><i class="fa fa-search"></i> Buscar</button>  
+                            &nbsp;
+                            <button type="submit" class="btn btn-primary" @click="exportarPublicaciones(buscar, criterio, true)"><i class="fa fa-search"></i> Excel</button>  
                         </div>
-                    </div>
+                    </div>                    
                 </div>
 
                 <!-- Grid -->
@@ -154,7 +174,9 @@
                                 </div>
                             </td>
                             <td>
-                                <div class="badge badge-pill badge-danger" v-if="publicacion.config.length <= 0"><span>Falta ligar</span></div>
+                                <div class="badge badge-pill badge-danger" v-if="publicacion.config.length <= 0" @click="showModal('producto','ligar', publicacion)">                                    
+                                    <span style="cursor: pointer;">Falta ligar</span>
+                                </div>                                                                
 
                                 <ul v-if="publicacion.config.length > 0">                                    
                                     <li  v-for="producto in publicacion.config" :key="producto.id_producto">
@@ -344,6 +366,7 @@
                 offset : 3,
                 chkEstatusActivas: true,
                 chkEstatusPausadas: false,
+                orden: 'publicacion.id_publicacion|desc',
                 criterio: 'titulo',
                 buscar: '',
                 isLoading: 0,
@@ -421,7 +444,8 @@
                         'idCuentaTienda': this.objPublicacion.idCuentaTienda,
                         filtros: {
                             'activas': this.chkEstatusActivas,
-                            'pausadas': this.chkEstatusPausadas
+                            'pausadas': this.chkEstatusPausadas,
+                            'orden': this.orden
                         }
                     }
                 })
@@ -437,6 +461,72 @@
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
             },
+
+            exportarPublicaciones(buscar, criterio, aplLoading=false){                
+
+                if(this.objPublicacion.idCuentaTienda == 0){
+                    util.MSG('Algo salio Mal!', 'Seleccione la cuenta de la tienda', util.tipoErr);
+                    return;
+                }
+
+                let params= {                       
+                        'buscar': buscar,
+                        'criterio': criterio,
+                        'idCuentaTienda': this.objPublicacion.idCuentaTienda,
+                        filtros: {
+                            'activas': this.chkEstatusActivas,
+                            'pausadas': this.chkEstatusPausadas,
+                            'orden': this.orden
+                        }
+                    };
+                let paramString = new URLSearchParams(params);
+
+                console.log(paramString.toString());
+
+                let json = JSON.stringify(params);
+
+                console.log(encodeURIComponent(json));
+
+
+                window.open('/zicandi/public/publicaciones/exportar?param='+encodeURIComponent(json));
+
+
+       /*
+                if(aplLoading){
+                    this.isLoading = 1;
+                }
+
+                let me=this;                
+                
+                axios.get('/zicandi/public/publicaciones/exportar',{
+                    params: {                       
+                        'buscar': buscar,
+                        'criterio': criterio,
+                        'idCuentaTienda': this.objPublicacion.idCuentaTienda,
+                        filtros: {
+                            'activas': this.chkEstatusActivas,
+                            'pausadas': this.chkEstatusPausadas,
+                            'orden': this.orden
+                        }
+                    }
+                })
+                .then(function (response) {        
+                     me.isLoading = 0;
+
+                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', 'invoices.xlsx'); //or any other extension
+                    document.body.appendChild(link);
+                    link.click();
+                })
+                .catch(function (error) {                    
+                    me.isLoading = 0;
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+
+                */
+            },
             selectTienda(){                
                 let me=this;                
                 var url= '/zicandi/public/tienda/getSelectCuentaTiendas';
@@ -449,6 +539,10 @@
                 .catch(function (error) {                                        
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
+
+
+
+                
             },
             abrirPublicacion(url, tipo){
                 if(tipo=='popup'){

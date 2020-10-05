@@ -19,6 +19,9 @@ Route::get('/loginmeli', function () {
     return view('loginMELI');
 });
 
+// - Rutas para MAIN
+Route::get('/main/entorno', 'MainController@getEntorno');
+Route::get('/main/version', 'MainController@getVersionApp');
 
 // - Rutas para Proveedores
 Route::get('/proveedores', 'ProveedorController@index');
@@ -61,7 +64,6 @@ Route::get('/compras', 'ComprasController@index');
 Route::post('/compras/detalle', 'ComprasController@getDetalleCompra');
 Route::post('/compras/registrar', 'ComprasController@store');
 
-
 Route::post('/compras/actualizar', 'ComprasController@update');
 Route::post('/compras/desactivar', 'ComprasController@desactivar');
 Route::post('/compras/activar', 'ComprasController@activar');
@@ -79,6 +81,8 @@ Route::post('/mf2/liquidarCompra', 'MultiFondosController@liquidarCompra');
 Route::get('/meli/login', 'MercadoLibreController@login');
 Route::get('/meli/logout', 'MercadoLibreController@logout');
 Route::get('/meli/me', 'MercadoLibreController@me');
+Route::get('/meli/refresh', 'MercadoLibreController@refreshToken');
+
 
 // - Rutas API betterware
 Route::get('/bett/get', 'BetterwareController@getPage');
@@ -93,16 +97,24 @@ Route::get('/tienda/getSelectCuentaTiendas', 'TiendasController@selectCuentaTien
 Route::post('/tienda/storeCuentaTienda', 'TiendasController@storeCuentaTienda');
 Route::post('/tienda/eliminarCuenta', 'TiendasController@eliminarCuentaTienda');
 Route::get('/tienda/registraCuentaActiva', 'TiendasController@registraCuentaActiva');
-Route::post('/tienda/getPublicaciones', 'TiendasController@getPublicaciones');
+Route::get('/tienda/getPublicaciones', 'TiendasController@getPublicaciones');
+Route::get('/tienda/getDetallePublicacion', 'TiendasController@getDetallePublicacion');
+Route::get('/tienda/refreshMeli', 'TiendasController@refreshTokenMeli');
+Route::get('/tienda/cuentasActivasMeli', 'TiendasController@getCuentasActivasMELI');
 
 // - Rutas para Publicaciones
 Route::get('/publicaciones', 'PublicacionesController@index');
 Route::post('/publicaciones/guardarProductos', 'PublicacionesController@saveProductosLigados');
+Route::get('/publicaciones/exportar', 'PublicacionesController@exportar');
 
-// - Rutas para Publicaciones
+// - Rutas para procesos BATCH
 Route::get('/batch/tareas', 'BatchController@getTareas');
 Route::get('/batch/descarga', 'BatchController@descargaFuente');
 Route::get('/batch/test', 'BatchController@test');
 Route::get('/batch/termino', 'BatchController@setTermino');
+Route::get('/batch/procesos', 'BatchController@getProcesosAll');
+Route::post('/batch/store', 'BatchController@storeProceso');
+Route::post('/batch/update', 'BatchController@updateProceso');
+
 
 

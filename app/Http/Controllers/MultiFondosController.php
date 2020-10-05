@@ -53,8 +53,9 @@ class MultiFondosController extends Controller
 
             //~Actualiza precio de compra
             $precioPromedio = $this->calculaPrecioPromedio($producto->id_producto, $deta['precio']);
+            $producto->precio_referenciado = $producto->ultimo_precio_compra;
             $producto->ultimo_precio_compra = $deta['precio'];
-            $producto->promedio_precio_compra = $precioPromedio;
+            $producto->promedio_precio_compra = $precioPromedio;                        
             $producto->update();            
 
         }

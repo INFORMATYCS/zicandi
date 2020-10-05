@@ -2,20 +2,22 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Config;
 use App\Http\Lib\ProcesadorImagenes;
 use App\TempCatBett;
 use App\Categoria;
 use App\Producto;
+use App\StockProducto;
 use App\Proveedor;
 
-class BetterwareController extends Controller
-{
+class BetterwareController extends Controller{
     /**
      * Lee pagina betterware e inserta en temporales
      *
      * @return \Illuminate\Http\Response
      */
     public function getPage(Request $request){
+    try{
         $url = $request->url;
 
         $cliente = curl_init();
@@ -26,8 +28,10 @@ class BetterwareController extends Controller
 		$contenido = curl_exec($cliente);
 		$puntero = 1;
 		
-		$productos = array();
+        $productos = array();
+        $msgErrorSalida ="";
 		while(true){
+            try{
             $puntero = strpos($contenido, '<div class="productThumbs"', $puntero);
             if($puntero<=0){
                 break;
@@ -87,7 +91,7 @@ class BetterwareController extends Controller
             $puntero = $finalPrecio;      
             
             //Procesa imagen
-            $fichero = "https://betterware.com.mx".$urlImagen;
+            $fichero = Config::get('zicandi.betterware.path').$urlImagen;
             $ext = substr($urlImagen, -3);
     
             $actual = file_get_contents($fichero);
@@ -105,7 +109,7 @@ class BetterwareController extends Controller
 
             //~Busca la descripcion del producto
             $clienteDetalle = curl_init();
-            curl_setopt($clienteDetalle, CURLOPT_URL, "https://betterware.com.mx".$urlDetalle);	
+            curl_setopt($clienteDetalle, CURLOPT_URL, Config::get('zicandi.betterware.path').$urlDetalle);	
             curl_setopt($clienteDetalle, CURLOPT_HEADER, 0);
             curl_setopt($clienteDetalle, CURLOPT_RETURNTRANSFER, true); 
 
@@ -123,24 +127,33 @@ class BetterwareController extends Controller
             curl_close($clienteDetalle);
 
             $temp = new TempCatBett();
-            $temp->codigo = $codigo;
-            $temp->nombre = $nombre;
+            $temp->codigo = substr($codigo,0,15);
+            $temp->nombre = substr($nombre,0,50);
             $temp->precio = trim($precio);
             $temp->precio_oferta = trim($precioGrande);
-            $temp->url ="https://betterware.com.mx".$urlDetalle;
-            $temp->descripcion =$descripcion;            
-            $temp->imagen ="https://betterware.com.mx".$urlImagen;
+            $temp->url =Config::get('zicandi.betterware.path').$urlDetalle;
+            $temp->descripcion =substr($descripcion,0,250);           
+            $temp->imagen =Config::get('zicandi.betterware.path').$urlImagen;
             $temp->imagen_mini =$url_imagen;
             
-            $temp->save();                                        
+            $temp->save();     
+            }catch (\Exception $e) {
+                $msgErrorSalida = "Error en ".$codigo." ".$e->getMessage();
+            }                                    
 		}	
 		
         curl_close($cliente);   
         
+        if($msgErrorSalida==""){
+            return "OK";    
+        }else{
+            return $msgErrorSalida;
+        }
         
-        
-                
-        return "OK";
+    }catch (\Exception $e) {
+        $ERROR = $e->getMessage();
+        echo $ERROR;
+    }    
     }
 
     public function limpiaTablaTemporal(Request $request){
@@ -201,25 +214,54 @@ class BetterwareController extends Controller
                 $producto->id_categoria = $idCategoria;
                 $producto->codigo = $t->codigo;
                 $producto->nombre = substr($t->nombre, 0, 30);
-                $producto->url_imagen = 'http://localhost/zicandi/public/'.$t->imagen_mini;
+                $producto->url_imagen = Config::get('zicandi.url_public').$t->imagen_mini;
                 $producto->nota = $t->descripcion;
                 $producto->ultimo_precio_compra = $t->precio_oferta;
                 $producto->promedio_precio_compra = $t->precio_oferta;
+                $producto->precio_referenciado = $t->precio_oferta;
                 $producto->xstatus ='1';
                 $producto->save();
 
                 $producto->proveedores()->attach($idProveedor,['codigo_barras'=>$t->codigo]);
 
+
+                //~Registra stock
+                $stock = new StockProducto();
+                $stock->id_producto = $producto->id_producto;
+                $stock->stock = 0;
+                $stock->disponible = 0;
+                $stock->retenido = 0;
+                $stock->save();
+
             }else{
                 $producto = Producto::find($producto[0]->id_producto);
                 $producto->nombre = substr($t->nombre, 0, 30);
-                $producto->url_imagen = 'http://localhost/zicandi/public/'.$t->imagen_mini;
-                $producto->nota = $t->descripcion;
-                if($producto->ultimo_precio_compra<=0){
+                $producto->url_imagen = Config::get('zicandi.url_public').$t->imagen_mini;
+                $producto->nota = $t->descripcion;                
+                $ultimoPrecioCompras = $producto->calcularUltimoPrecioCompra();
+
+                if( $ultimoPrecioCompras<=0 ){
                     $producto->ultimo_precio_compra = $t->precio_oferta;
                     $producto->promedio_precio_compra = $t->precio_oferta;
+                    $producto->precio_referenciado = $t->precio_oferta;
+                }else{
+                    $producto->precio_referenciado = $t->precio_oferta;
                 }
+
+
                 $producto->save();
+
+
+                //~Registra stock
+                $productoStock = StockProducto::where('id_producto','=',$producto->id_producto)->get();
+                if($productoStock!=null){
+                    $stock = new StockProducto();
+                    $stock->id_producto = $producto->id_producto;
+                    $stock->stock = 0;
+                    $stock->disponible = 0;
+                    $stock->retenido = 0;
+                    $stock->save();
+                }
             }
 
         }

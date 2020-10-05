@@ -1,8 +1,7 @@
 <?php
 
 namespace App\Http\Lib;
-
-use App\Http\Lib\Constantes;
+use Config;
 
 class ProcesadorImagenes{
 
@@ -12,9 +11,10 @@ class ProcesadorImagenes{
      * 
      * 
      */
-    public function publicaImagenMini100($configImagen){   
-        $c = new Constantes();
-        $repositorio = $c->repositorio_entrada_productos_mini;        
+    public function publicaImagenMini100($configImagen){           
+        $repositorio = Config::get('zicandi.repositorio.entrada.producto_mini');
+
+        
         
         $base64_string = $configImagen['b64'];
         $nombre_archivo = $configImagen['nombre'];
@@ -28,9 +28,8 @@ class ProcesadorImagenes{
      * 
      * 
      */
-    public function publicaImagenMini100C($configImagen){   
-        $c = new Constantes();
-        $repositorio = $c->repositorio_entrada_productos_mini;        
+    public function publicaImagenMini100C($configImagen){           
+        $repositorio = Config::get('zicandi.repositorio.entrada.producto_mini');
         
         $base64_string = $configImagen['b64'];
         $nombre_archivo = $configImagen['nombre'];
@@ -39,9 +38,8 @@ class ProcesadorImagenes{
         
     }
 
-    public function publicaImagen250($configImagen){   
-        $c = new Constantes();
-        $repositorio = $c->repositorio_entrada_productos_mini;        
+    public function publicaImagen250($configImagen){           
+        $repositorio = Config::get('zicandi.repositorio.entrada.producto_mini');
         
         $base64_string = $configImagen['b64'];
         $nombre_archivo = $configImagen['nombre'];
@@ -55,8 +53,7 @@ class ProcesadorImagenes{
      * 
      */
     private function creaImagen($prefijo, $nombre_archivo, $base64_string, $destino, $ancho, $alto){
-        $c = new Constantes();        
-        $tmp = $c->repositorio_tmp_imagenes;
+        $tmp = Config::get('zicandi.repositorio.img.tmp');
 
         $nombreDestino = $this->calcNombreImage($prefijo, $nombre_archivo);
 
@@ -130,9 +127,8 @@ class ProcesadorImagenes{
     }
 
 
-    public function publicaDocumento($prefijo, $file){
-        $c = new Constantes();
-        $repositorio = $c->repositorio_entrada_adjuntos;
+    public function publicaDocumento($prefijo, $file){        
+        $repositorio = Config::get('zicandi.repositorio.entrada.adjuntos');
         
         //File Name
         $nombre = $file->getClientOriginalName();
