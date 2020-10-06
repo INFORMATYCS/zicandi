@@ -340,6 +340,9 @@ class TiendasController extends Controller
 
                     array_push($detalleCuentas, array('idCuentaTienda'=>$idCuentaTienda, 'usuario'=>$usuario, 'estatus'=>'Cuenta activa, Se refresco la sesion', 'httpCode' => '200'));    
                 }else{
+                    CuentaTienda::where('usuario','=', $usuario)
+                    ->update([  'estatus' => 'NO_CONECTADO'  ]);
+                    
                     array_push($detalleCuentas, array('idCuentaTienda'=>$idCuentaTienda, 'usuario'=>$usuario, 'estatus'=>'No fue posible refrescar la sesion', 'httpCode' => 'NO_SESSION'));
                 }
 
