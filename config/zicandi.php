@@ -43,7 +43,8 @@ return [
         'entrada'   => [
             'producto_mini'     => 'repositorio/entrada/productos/mini/',
             'productos'         => 'repositorio/entrada/productos/',
-            'adjuntos'          => 'repositorio/entrada/adjuntos/'
+            'adjuntos'          => 'repositorio/entrada/adjuntos/',
+            'log_batch'          => 'repositorio/entrada/log_batch/'
         ],
         'salida'    => [
 

@@ -117,4 +117,8 @@ Route::post('/batch/store', 'BatchController@storeProceso');
 Route::post('/batch/update', 'BatchController@updateProceso');
 
 
+// - Notificador
+Route::get('/notificador/batch_termino', 'NotificadorController@mailTerminoBatch');
+
+
 
