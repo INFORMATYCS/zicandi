@@ -65,7 +65,8 @@ return [
     |
     */
     'betterware'  => [
-        'path'                  => 'https://betterware.com.mx'
+        'path'                  => 'https://betterware.com.mx',
+        'factorConversion'     => .8135
     ],
 
 ];
