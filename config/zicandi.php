@@ -24,10 +24,11 @@ return [
     |
     */
     'meli'  => [
-        'appId'                 => '3145687774408719',
-        'secretKey'             => 'sQcT6u43C7J6UQtjVCJmYjEYG3ve77d3',
-        'redirectURI'           => 'http://localhost/zicandi/public/meli/login',
-        'siteId'                => 'MLM'        
+        'appId'                         => '3145687774408719',
+        'secretKey'                     => 'sQcT6u43C7J6UQtjVCJmYjEYG3ve77d3',
+        'redirectURI'                   => 'http://localhost/zicandi/public/meli/login',
+        'siteId'                        => 'MLM',
+        'fechaInicialConsultaVentas'    => '2020-10-01'       
     ],
 
     /*
@@ -68,5 +69,6 @@ return [
         'path'                  => 'https://betterware.com.mx',
         'factorConversion'     => .8135
     ],
+ 
 
 ];

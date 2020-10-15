@@ -101,6 +101,10 @@ Route::get('/tienda/getPublicaciones', 'TiendasController@getPublicaciones');
 Route::get('/tienda/getDetallePublicacion', 'TiendasController@getDetallePublicacion');
 Route::get('/tienda/refreshMeli', 'TiendasController@refreshTokenMeli');
 Route::get('/tienda/cuentasActivasMeli', 'TiendasController@getCuentasActivasMELI');
+Route::get('/tienda/ultimaventameli', 'TiendasController@getUltimaVentaMeli');
+Route::get('/tienda/registraControlVenta', 'TiendasController@registraControlVenta');
+Route::get('/tienda/ventas', 'TiendasController@consultaVentasMeli');
+Route::get('/tienda/calculaEstadistica', 'TiendasController@calculaVentaEstadistica');
 
 // - Rutas para Publicaciones
 Route::get('/publicaciones', 'PublicacionesController@index');

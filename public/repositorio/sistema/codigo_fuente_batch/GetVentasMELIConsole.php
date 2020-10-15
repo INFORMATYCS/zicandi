@@ -38,7 +38,11 @@ foreach ($cuentas as $cuenta){
         Console::log('Continuando con el calculo de estadisticas', 'yellow', true, 'black', $logFisico);
         $resulConsultaVentas = json_decode(Restfull::sendGet(Param::$_BASE_PATH_API.'zicandi/public/tienda/calculaEstadistica?idControlVenta='.$idControlVenta));
 
-
+        if($resulConsultaVentas->xstatus){
+            Console::log('Se calcularon '.$resulConsultaVentas->totalProcesados.' ventas correctamente', 'green', true, 'black', $logFisico);        
+        }else{
+            Console::log('[SE DETIENE PROCESO] '.$resulConsultaVentas->error, 'red', true, 'black', $logFisico);        
+        }
     }
 
 
