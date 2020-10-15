@@ -10,7 +10,10 @@
                         <div class="card-header">
                             <div class="row">
                             <div class="col-9">
-                                Archivos adjuntos
+                                Archivos adjuntos 
+                                <p>
+                                <small class="text-muted">Control+V para pegar de portapapeles</small>
+                                </p>
                             </div>
                             <div class="col-3" >
                                 <label class="btn btn-primary" @click="onBorrarSeleccion"><i class="icon-trash"></i></label>
@@ -66,7 +69,10 @@
 
                 listaAdjuntos: [],
 
-                bandFrameView: 0
+                bandFrameView: 0,
+
+                b64ImagenPP: '',
+                bandPortapapeles: false
             }
         },        
         computed:{
@@ -95,10 +101,17 @@
                     this.oUploadFile.bandProgress=0;
                 }else{
                     this.oUploadFile.bandProgress=1;
+                    
+                    let nombreArchivo = this.oUploadFile.selectedFile.name;
 
-                    fd.append('file', this.oUploadFile.selectedFile, this.oUploadFile.selectedFile.name);
+                    //~Si la imagen es de portapapeles se reasigna el nombre al azar
+                    if(nombreArchivo=="image.png" && this.bandPortapapeles){
+                        nombreArchivo = "portapapeles.png";
+                    }
+
+                    fd.append('file', this.oUploadFile.selectedFile, nombreArchivo);
                     fd.append('id_carpeta_adjuntos', this.oUploadFile.id_carpeta_adjuntos);
-                    fd.append('nombre', this.oUploadFile.selectedFile.name);
+                    fd.append('nombre', nombreArchivo);
 
                     let me = this;
                     axios.post('/zicandi/public/uploadfile', fd, {
@@ -119,7 +132,9 @@
 
             onLoadAdjuntos(id){
                 this.oUploadFile.id_carpeta_adjuntos = id;
+                console.log(id);
 
+                this.onPegarPortapapeles(); 
                 let me=this;                
                 let url= '/zicandi/public/uploadfile/getAdjuntosByCarpeta';
                 
@@ -181,6 +196,64 @@
                 }else{
                     this.bandFrameView = 1;
                 }
+            },
+
+            onPegarPortapapeles(event){
+                let me=this;  
+                this.bandPortapapeles = false;               
+
+                document.addEventListener('paste', function (event) {
+                    let clipboardData = event.clipboardData || event.originalEvent.clipboardData || window.clipboardData;
+
+                   for (let i = 0; i < event.clipboardData.items.length; i++) {
+
+                        let clipboardItem = event.clipboardData.items[0];
+                        let type = clipboardItem.type;
+
+                        // Solo aplica para imagenes
+                        if (type.indexOf("image") != -1) {
+                            
+                            let blob = clipboardItem.getAsFile();
+
+                            let reader = new window.FileReader();
+                            reader.readAsDataURL(blob);
+                            
+                            reader.onload = function () {                                
+                                me.b64ImagenPP = reader.result;
+                                me.bandPortapapeles = true;
+
+                                Swal.fire({                                                                        
+                                    html:
+                                    '<img src="'+reader.result+'" width="200" height="200" style="border: 1px solid #0F67E8;">',
+                                    showCloseButton: true,
+                                    showCancelButton: true,
+                                    focusConfirm: false,
+                                    confirmButtonText:
+                                    'Subir imagen',
+                                    confirmButtonAriaLabel: 'Thumbs up, great!',
+                                    cancelButtonText:
+                                    'Cancelar',
+                                    cancelButtonAriaLabel: 'Thumbs down'
+                                }).then((result) => {       
+                                    if(result.value==true){                                        
+                                        me.oUploadFile.selectedFile = blob;                                           
+                                        me.onUploadFile();
+                                    }
+                                                    
+                                });
+
+
+                            };
+                            reader.onerror = function (error) {
+                                console.log('Error: ', error);
+                            };
+                        }
+                    }
+
+
+
+
+                });
             }
         }
     }

@@ -101,6 +101,10 @@ Route::get('/tienda/getPublicaciones', 'TiendasController@getPublicaciones');
 Route::get('/tienda/getDetallePublicacion', 'TiendasController@getDetallePublicacion');
 Route::get('/tienda/refreshMeli', 'TiendasController@refreshTokenMeli');
 Route::get('/tienda/cuentasActivasMeli', 'TiendasController@getCuentasActivasMELI');
+Route::get('/tienda/ultimaventameli', 'TiendasController@getUltimaVentaMeli');
+Route::get('/tienda/registraControlVenta', 'TiendasController@registraControlVenta');
+Route::get('/tienda/ventas', 'TiendasController@consultaVentasMeli');
+Route::get('/tienda/calculaEstadistica', 'TiendasController@calculaVentaEstadistica');
 
 // - Rutas para Publicaciones
 Route::get('/publicaciones', 'PublicacionesController@index');
@@ -115,6 +119,10 @@ Route::get('/batch/termino', 'BatchController@setTermino');
 Route::get('/batch/procesos', 'BatchController@getProcesosAll');
 Route::post('/batch/store', 'BatchController@storeProceso');
 Route::post('/batch/update', 'BatchController@updateProceso');
+
+
+// - Notificador
+Route::get('/notificador/batch_termino', 'NotificadorController@mailTerminoBatch');
 
 
 

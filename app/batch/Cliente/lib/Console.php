@@ -68,6 +68,7 @@ class Console {
 
     static $EOF = "\n";
 
+
     /**
      * Logs a string to console.
      * @param  string  $str        Input String
@@ -76,7 +77,7 @@ class Console {
      * @param  [type]  $background Background Color
      * @return [type]              Formatted output
      */
-    public static function log($str = '', $color = 'normal', $newline = true, $background_color = null)
+    public static function log($str = '', $color = 'normal', $newline = true, $background_color = null, $archivo = null)
     {
         if( is_bool($color) )
         {
@@ -89,6 +90,10 @@ class Console {
             $newline          = true;
         }
         $str = $newline ? $str . self::$EOF : $str;
+
+        if($archivo!=null){
+            fwrite($archivo, $str);
+        }
 
         echo self::$color($str, $background_color);
     }

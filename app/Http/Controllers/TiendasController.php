@@ -1,12 +1,18 @@
 <?php
 
 namespace App\Http\Controllers;
-use Config;
-
+Use Config;
+Use Exception;
+Use Log;
+use DB;
 use Illuminate\Http\Request;
 use App\CuentaTienda;
 use App\Tienda;
 use App\Publicacion;
+use App\ConfigPublicacion;
+use App\ControlVentasMeli;
+use App\VentaMeli;
+use App\Producto;
 use Session;
 use App\EstadisticaPublicacion;
 
@@ -340,6 +346,9 @@ class TiendasController extends Controller
 
                     array_push($detalleCuentas, array('idCuentaTienda'=>$idCuentaTienda, 'usuario'=>$usuario, 'estatus'=>'Cuenta activa, Se refresco la sesion', 'httpCode' => '200'));    
                 }else{
+                    CuentaTienda::where('usuario','=', $usuario)
+                    ->update([  'estatus' => 'NO_CONECTADO'  ]);
+                    
                     array_push($detalleCuentas, array('idCuentaTienda'=>$idCuentaTienda, 'usuario'=>$usuario, 'estatus'=>'No fue posible refrescar la sesion', 'httpCode' => 'NO_SESSION'));
                 }
 
@@ -363,6 +372,341 @@ class TiendasController extends Controller
 
         return $response;
     }
+
+    /**
+     * Recupera la ultima consulta de ventas
+     * Importante, debe entrar como parametro el id_cuenta_tienda
+     * API: /tienda/ultimaventameli
+     * 
+     */
+    public function getUltimaVentaMeli(Request $request){
+        try{
+            $idCuentaTienda = $request->id_cuenta_tienda;
+
+            $sql= " SELECT DATE_FORMAT(MAX(FECHA_FINAL)-1,'%Y-%m-%d') AS fecha 
+                    FROM control_ventas_meli 
+                    WHERE id_cuenta_tienda = $idCuentaTienda AND estatus = 'TER'";        
+
+            $rs = DB::select( $sql );
+
+            if(count($rs)>0){
+                $fechaUltima = $rs[0]->fecha;                
+
+                if($fechaUltima == null){
+                    $fechaUltima = Config::get('zicandi.meli.fechaInicialConsultaVentas');
+                }
+            }else{
+                $fechaUltima = Config::get('zicandi.meli.fechaInicialConsultaVentas');
+            }
+
+            $fechaActual = date('Y-m-d');
+            
+            return [ 'xstatus'=>true, 'fechaInicialMeli'=>$fechaUltima, 'fechaFinalMeli'=>$fechaActual];
+
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+    /**
+     * Registra la consulta de venta en mercadolibre
+     * 
+     * API: /tienda/registraControlVenta
+     * 
+     */
+    public function registraControlVenta(Request $request){
+        try{
+            $idCuentaTienda = $request->id_cuenta_tienda;
+
+            $fechas = $this->getUltimaVentaMeli($request);
+            $fechaInicial = $fechas['fechaInicialMeli'];
+            $fechaFinal = $fechas['fechaFinalMeli'];
+
+            $cuentaTienda = CuentaTienda::findOrFail($idCuentaTienda);//~Se busca en base al ID entrante
+
+            $idUsuario = $cuentaTienda->att_id;
+
+            //~Registra
+            $controlVentasMeli = new ControlVentasMeli();
+            $controlVentasMeli->id_cuenta_tienda= $idCuentaTienda;
+            $controlVentasMeli->fecha_inicial= $fechaInicial;
+            $controlVentasMeli->fecha_final= $fechaFinal;
+            $controlVentasMeli->total_registros= 0;
+            $controlVentasMeli->fecha_consulta= date('Y-m-d');
+            $controlVentasMeli->estatus= 'PEN';
+            $controlVentasMeli->save();
+
+            return [    'xstatus'=>true, 
+                        'fechaInicial'=>$fechaInicial.'T00:00:00.000-00:00', 
+                        'fechaFinal'=>$fechaFinal.'T00:00:00.000-00:00',
+                        'idControlVenta'=>$controlVentasMeli->id_control_ventas_meli];
+
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+    /**
+     * Consulta todas las ventas en mercadolibre
+     * 
+     * API: /tienda/ventas
+     * 
+     */
+    public function consultaVentasMeli(Request $request){
+        try{
+            $cntErrores = 0;
+            $idControlVentas = $request->idControlVenta;
+            $fechaInicial = $request->fechaInicial;
+            $fechaFinal = $request->fechaFinal;
+  
+            //~Consulta bitacora control
+            $controlVentasMeli = ControlVentasMeli::findOrFail($idControlVentas);//~Se busca en base al ID entrante
+            $idCuentaTienda = $controlVentasMeli->id_cuenta_tienda;
+
+            $controlVentasMeli->estatus = 'PRO';            
+            $controlVentasMeli->update();
+        
+            //~Detalle de la tienda
+            $cuentaTienda = CuentaTienda::findOrFail($idCuentaTienda);//~Se busca en base al ID entrante
+            $ventas = app(MercadoLibreController::class)->ventas($cuentaTienda->att_id, $cuentaTienda->att_access_token, $fechaInicial, $fechaFinal);
+
+            if($ventas['httpCode']==200){
+                $listaVentas = $ventas['lista'];                
+                foreach ($listaVentas as $venta) {
+                    $id = $venta->id;
+                    try{    
+                        $idPaquete = $venta->pack_id;                                                
+                        $idPublicacion = $venta->order_items[0]->item->id;
+                        $idVariante = $venta->order_items[0]->item->variation_id;
+                        $titulo = $venta->order_items[0]->item->title;
+                        $cantidad = $venta->order_items[0]->quantity;
+                        
+                        $comision = ($venta->order_items[0]->sale_fee) * $cantidad;
+
+                        foreach ($venta->payments as $pago) {
+                            if($pago->status == "approved"){
+                                $idPago = $pago->id;
+                                $precioVenta = $pago->transaction_amount;
+                                $montoPagado = $pago->total_paid_amount;                                
+                                $iva = ($precioVenta / 1.16)*.08;
+                                $fechaPago = substr($pago->date_approved, 0, 10);
+                            }
+                        }
+
+                        $nombreCliente = substr($venta->buyer->first_name.' '.$venta->buyer->last_name.'['.$venta->buyer->nickname.']',0,40);
+                        $idEnvio = $venta->shipping->id;                        
+                        
+                        $nota = $venta->comments;
+                        $statusMeli = $venta->status;
+
+                        //~Valida si ya existe la orden
+                        $ventaMeli = VentaMeli::where('id_orden_meli','=',$id)->get();  
+                        $existeVenta = true; 
+                        
+                        //~Inserta como PENDIENTE la venta
+                        if($ventaMeli->isEmpty()){
+                            $ventaMeli = new VentaMeli();
+                            $existeVenta = false; 
+                        }else{
+                            $ventaMeli = VentaMeli::findOrFail($ventaMeli[0]->id_venta_meli);
+                        }
+
+                        $ventaMeli->id_control_ventas_meli=$idControlVentas;
+                        $ventaMeli->id_cuenta_tienda=$idCuentaTienda;
+                        $ventaMeli->id_paquete_meli=$idPaquete;
+                        $ventaMeli->id_orden_meli=$id;
+                        $ventaMeli->id_publicacion=$idPublicacion;
+                        $ventaMeli->id_variante=$idVariante;
+                        $ventaMeli->titulo=$titulo;
+                        $ventaMeli->id_pago=$idPago;
+                        $ventaMeli->fecha_pago=$fechaPago;
+                        $ventaMeli->monto_pagado=$montoPagado;
+                        $ventaMeli->cantidad=$cantidad;
+                        $ventaMeli->precio_venta=$precioVenta;
+                        $ventaMeli->comision=$comision;                        
+                        $ventaMeli->iva=$iva;
+                        $ventaMeli->id_envio=$idEnvio;
+                        $venta->costo_envio_cliente=0;
+                        $venta->costo_envio_empresa=0;
+                        $ventaMeli->nombre_cliente=$nombreCliente;                        
+                        $ventaMeli->nota=$nota;
+                        $ventaMeli->estatus_meli=$statusMeli;
+                        $ventaMeli->estatus='PEN';
+
+                        if($existeVenta){
+                            $ventaMeli->update();
+                        }else{
+                            $ventaMeli->save();                            
+                        }
+
+                    }catch(Exception $e){
+                        Log::error( 'No fue posible procesar la venta '.$id. 'id Cuenta Tienda = '.$idCuentaTienda.': '.$e->getMessage() );                        
+                        Log::error( $e->getTraceAsString() );
+                        $cntErrores++;
+                        //~Actualiza control ventas
+                        $controlVentasMeli->estatus = 'ERR';
+                        $controlVentasMeli->update();
+                    }
+
+                        
+                }
+            }else{
+                throw new Exception('No fue posible recuperar la lista de ventas '.$ventas['httpCode']);
+            }
+
+
+            //~Borra las publicaciones al existir un solo error
+            if($cntErrores>0){
+                VentaMeli::where('id_control_ventas_meli','=',$idControlVentas)->delete();                
+            }
+  
+            
+
+            return [    'xstatus'=>true, 
+                        'totalProcesados'=>count($listaVentas),
+                        'totalErrores'=>$cntErrores
+                    ];
+
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+    /**
+     * Realiza el calculo de la utilidad y factores
+     * 
+     * API: /tienda/calculaEstadistica
+     * 
+     */
+    public function calculaVentaEstadistica(Request $request){
+        DB::beginTransaction();
+        try{
+            $idControlVentas = $request->idControlVenta;
+            
+            //~Consulta bitacora control
+            $controlVentasMeli = ControlVentasMeli::findOrFail($idControlVentas);//~Se busca en base al ID entrante
+            $idCuentaTienda = $controlVentasMeli->id_cuenta_tienda;
+            
+            //~Detalle de la tienda
+            $cuentaTienda = CuentaTienda::findOrFail($idCuentaTienda);//~Se busca en base al ID entrante
+
+            $ventas = VentaMeli::where('id_control_ventas_meli','=',$idControlVentas)->get();   
+
+            $cntVentaProcesada = 0;
+            foreach ($ventas as $venta) {
+                try{
+                    $idVentaMeli = $venta->id_venta_meli;
+                    $idPublicacion = $venta->id_publicacion;
+                    $idVariante = $venta->id_variante_publicacion;
+
+                    if($idVentaMeli==201 || $idVentaMeli==126 || $idVentaMeli==130){
+                        $detener=true;
+                    }
+                    
+                    //Completa el envio
+                    $idEnvio = $venta->id_envio;
+                    $envio = app(MercadoLibreController::class)->envioDetalle($idEnvio, $cuentaTienda->att_access_token);
+                    if($envio['httpCode'] == 200){
+                        $tipoEnvio = $envio['body']->logistic_type;
+                        $direccion = $envio['body']->receiver_address->city->name. ', '.$envio['body']->receiver_address->street_name. ' '.$envio['body']->receiver_address->street_number;                                            
+                        $costoEnvioCargoEmpresa = $envio['body']->shipping_option->list_cost;
+                        $costoEnvioCargoCliente = $envio['body']->shipping_option->cost;
+                    }else{
+                        $tipoEnvio = 'NoDef';
+                        $direccion = 'NoDef';
+                        $costoEnvioCargoEmpresa = 0;
+                        $costoEnvioCargoCliente = 0;
+                    }
+
+                    $idPago = $venta->id_pago;
+                    $pago = app(MercadoLibreController::class)->pagoDetalle($idPago, $cuentaTienda->att_access_token);
+
+                    $detalleTransaccion = $pago->transaction_details;
+                                        
+                    $neto = $detalleTransaccion->net_received_amount - (($venta->monto_pagado - $venta->precio_venta) + ($costoEnvioCargoEmpresa-$costoEnvioCargoCliente));
+            
+                    $isr = ($venta->precio_venta - ($costoEnvioCargoEmpresa-$costoEnvioCargoCliente)- $venta->comision - $venta->iva) - $neto;
+                    
+                    if($idVariante!=null){
+                        $publicacion = Publicacion::where('id_publicacion_tienda','=',$idPublicacion)->where('id_variante_publicacion','=',$idVariante)->get();
+                    }else{
+                        $publicacion = Publicacion::where('id_publicacion_tienda','=',$idPublicacion)->get();
+                    }
+
+                    if($publicacion->isEmpty()){
+                        $precioCompra = 0;
+                    }else{
+                        $idPub = $publicacion[0]->id_publicacion;
+                        $configPublicacion = ConfigPublicacion::where('id_publicacion','=',$publicacion[0]->id_publicacion)->get();
+
+                        if($configPublicacion->isEmpty()){
+                            $precioCompra = 0;
+                        }else{
+                            $precioCompra=0;                        
+                            foreach ($configPublicacion as $config) {
+                                $producto = Producto::findOrFail($config->id_producto);
+                                $precioCompra+= $producto->ultimo_precio_compra;
+                            }
+                            
+                        }
+                    }
+
+                    $utilidadMonto = $neto - $precioCompra;
+                    if($precioCompra==0){
+                        $utilidadPorcentaje = 0;
+                    }else{
+                        $utilidadPorcentaje = $utilidadMonto / $precioCompra;
+                    }
+
+
+                    $venta->isr=$isr;
+                    $venta->neto=$neto;
+                    $venta->precio_compra=$precioCompra;
+                    $venta->utl_monto=$utilidadMonto;
+                    $venta->utl_porcentaje=$utilidadPorcentaje;
+                    $venta->direccion_entrega=$direccion;
+                    $venta->metodo_envio=$tipoEnvio;
+                    $venta->costo_envio_cliente=$costoEnvioCargoCliente;
+                    $venta->costo_envio_empresa=$costoEnvioCargoEmpresa;
+                    $venta->estatus='TER';
+                    $venta->update();
+                    
+                    $cntVentaProcesada++;
+
+                }catch(Exception $e){
+                    DB::rollBack();
+                    Log::error( 'No fue posible procesar la venta '.$idVentaMeli.': '.$e->getMessage() );                        
+                    Log::error( $e->getTraceAsString() );
+                    
+                    //~Actualiza control ventas
+                    $controlVentasMeli->estatus = 'ERR';
+                    $controlVentasMeli->update();
+                    DB::commit();
+                    throw new Exception('No fue posible procesar la venta '.$idVentaMeli.': '.$e->getMessage());
+                }
+            
+            }
+
+            //~Actualiza control ventas
+            $controlVentasMeli->estatus = 'TER';
+            $controlVentasMeli->update();
+
+            DB::commit();
+            
+            return [    'xstatus'=>true, 
+                        'totalProcesados'=>$cntVentaProcesada
+                   ];        
+        }catch(Exception $e){
+            DB::rollBack();
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+
     
 
 }

@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+use Config;
+Use Log;
 use View;
 use Session;
 use Illuminate\Http\Request;
@@ -248,6 +250,103 @@ class MercadoLibreController extends Controller
             $params = array('access_token' => $token,
                             'ids' => $its);
             $result = $meli->get('/visits/items', $params);
+        }else{
+            $result = array('httpCode'=>'NO_SESSION');
+        }
+        
+        return $result;
+    }
+
+
+    public function ventas($id, $token, $fechaInicial, $fechaFinal){
+        $appId = Config::get('zicandi.meli.appId');
+        $secretKey = Config::get('zicandi.meli.secretKey');
+        $redirectURI = Config::get('zicandi.meli.redirectURI');
+        $siteId = Config::get('zicandi.meli.siteId');
+
+        $ventas = array();
+        $result = array('httpCode'=>'NO_SESSION');
+
+        if( $token!=null ){
+            $meli = new Meli($appId, $secretKey);
+            $offset = 0;
+            $limit = 50;
+
+            do{
+                $params = array('seller' => $id,
+                                'order.date_created.from' => $fechaInicial,
+                                'order.date_created.to' => $fechaFinal,
+                                'access_token' => $token,
+                                'offset' => $offset,
+                                'limit' => $limit);
+                $result = $meli->get('/orders/search', $params);
+
+                //~itera el resto de paginas
+                if($result['httpCode']=="200"){            
+                    $paging = $result['body']->paging;
+                    $totalPubicaciones = $paging->total;
+                    $results = $result['body']->results;
+                    
+                    for($i=0; $i < count($results); $i++){
+                        array_push($ventas, $results[$i]);
+                    }
+                    
+
+                    $offset = $offset + $limit;    
+                    $result = array('httpCode'=> $result['httpCode']);                
+                }else{
+                    break;
+                }
+            }while($offset < $totalPubicaciones);
+
+        }
+
+        $result['lista'] = $ventas;
+
+        
+        return $result;
+    }
+
+
+    public function envioDetalle($id, $token){
+        $appId = Config::get('zicandi.meli.appId');
+        $secretKey = Config::get('zicandi.meli.secretKey');
+        $redirectURI = Config::get('zicandi.meli.redirectURI');
+        $siteId = Config::get('zicandi.meli.siteId');
+
+        if($token!=null){
+            $meli = new Meli($appId, $secretKey);
+
+            $params = array('access_token' => $token);
+            $result = $meli->get('/shipments/'.$id, $params);
+        }else{
+            $result = array('httpCode'=>'NO_SESSION');
+        }
+        
+        return $result;
+    }
+
+
+    public function pagoDetalle($id, $token){
+        $appId = Config::get('zicandi.meli.appId');
+        $secretKey = Config::get('zicandi.meli.secretKey');
+        $redirectURI = Config::get('zicandi.meli.redirectURI');
+        $siteId = Config::get('zicandi.meli.siteId');
+
+        if($token!=null){
+            $ch = curl_init();
+
+            // set url
+            curl_setopt($ch, CURLOPT_URL, "https://api.mercadopago.com/v1/payments/".$id."?access_token=".$token);
+
+            //return the transfer as a string
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+            // $output contains the output string
+            $result = json_decode(curl_exec($ch));
+
+            // close curl resource to free up system resources
+            curl_close($ch);
         }else{
             $result = array('httpCode'=>'NO_SESSION');
         }

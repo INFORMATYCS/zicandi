@@ -216,9 +216,9 @@ class BetterwareController extends Controller{
                 $producto->nombre = substr($t->nombre, 0, 30);
                 $producto->url_imagen = Config::get('zicandi.url_public').$t->imagen_mini;
                 $producto->nota = $t->descripcion;
-                $producto->ultimo_precio_compra = $t->precio_oferta;
-                $producto->promedio_precio_compra = $t->precio_oferta;
-                $producto->precio_referenciado = $t->precio_oferta;
+                $producto->ultimo_precio_compra = $t->precio_oferta * Config::get('zicandi.betterware.factorConversion');
+                $producto->promedio_precio_compra = $t->precio_oferta * Config::get('zicandi.betterware.factorConversion');
+                $producto->precio_referenciado = $t->precio_oferta * Config::get('zicandi.betterware.factorConversion');
                 $producto->xstatus ='1';
                 $producto->save();
 
@@ -241,11 +241,11 @@ class BetterwareController extends Controller{
                 $ultimoPrecioCompras = $producto->calcularUltimoPrecioCompra();
 
                 if( $ultimoPrecioCompras<=0 ){
-                    $producto->ultimo_precio_compra = $t->precio_oferta;
-                    $producto->promedio_precio_compra = $t->precio_oferta;
-                    $producto->precio_referenciado = $t->precio_oferta;
+                    $producto->ultimo_precio_compra = $t->precio_oferta * Config::get('zicandi.betterware.factorConversion');
+                    $producto->promedio_precio_compra = $t->precio_oferta * Config::get('zicandi.betterware.factorConversion');
+                    $producto->precio_referenciado = $t->precio_oferta * Config::get('zicandi.betterware.factorConversion');
                 }else{
-                    $producto->precio_referenciado = $t->precio_oferta;
+                    $producto->precio_referenciado = $t->precio_oferta * Config::get('zicandi.betterware.factorConversion');
                 }
 
 

@@ -24,10 +24,11 @@ return [
     |
     */
     'meli'  => [
-        'appId'                 => '3145687774408719',
-        'secretKey'             => 'sQcT6u43C7J6UQtjVCJmYjEYG3ve77d3',
-        'redirectURI'           => 'http://localhost/zicandi/public/meli/login',
-        'siteId'                => 'MLM'        
+        'appId'                         => '3145687774408719',
+        'secretKey'                     => 'sQcT6u43C7J6UQtjVCJmYjEYG3ve77d3',
+        'redirectURI'                   => 'http://localhost/zicandi/public/meli/login',
+        'siteId'                        => 'MLM',
+        'fechaInicialConsultaVentas'    => '2020-10-01'       
     ],
 
     /*
@@ -43,7 +44,8 @@ return [
         'entrada'   => [
             'producto_mini'     => 'repositorio/entrada/productos/mini/',
             'productos'         => 'repositorio/entrada/productos/',
-            'adjuntos'          => 'repositorio/entrada/adjuntos/'
+            'adjuntos'          => 'repositorio/entrada/adjuntos/',
+            'log_batch'          => 'repositorio/entrada/log_batch/'
         ],
         'salida'    => [
 
@@ -64,7 +66,9 @@ return [
     |
     */
     'betterware'  => [
-        'path'                  => 'https://betterware.com.mx'
+        'path'                  => 'https://betterware.com.mx',
+        'factorConversion'     => .8135
     ],
+ 
 
 ];
