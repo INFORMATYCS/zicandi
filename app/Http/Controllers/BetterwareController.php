@@ -2,13 +2,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Config;
+Use Config;
+Use Exception;
+Use Log;
 use App\Http\Lib\ProcesadorImagenes;
 use App\TempCatBett;
 use App\Categoria;
 use App\Producto;
 use App\StockProducto;
 use App\Proveedor;
+use App\Asociada;
+use App\Semana;
+use App\OrdenEntrega;
+use DB;
 
 class BetterwareController extends Controller{
     /**
@@ -269,5 +275,363 @@ class BetterwareController extends Controller{
         return 1;
     }
 
+
+    
+    /**
+     * Recupera listado de asociadas
+     * API: /bett/asociadas
+     * 
+     */
+    public function listadoAsociadas(Request $request){
+        try{
+            
+            if(!$request->ajax())return redirect('/');
+
+            $buscar = $request->buscar;
+            $criterio = $request->criterio;
+            
+            if($buscar==''){
+                $listaAsociadas = Asociada::orderBy('id_bett_asociada','desc')->paginate(10);
+            }else{
+                $listaAsociadas = Asociada::where($criterio, 'like', '%' . $buscar . '%')->orderBy('id_bett_asociada','desc')->paginate(10);
+            }
+            
+
+            return [
+                'pagination' => [
+                    'total'         => $listaAsociadas->total(),
+                    'current_page'         => $listaAsociadas->currentPage(),
+                    'per_page'         => $listaAsociadas->perPage(),
+                    'last_page'         => $listaAsociadas->lastPage(),
+                    'from'         => $listaAsociadas->firstItem(),
+                    'to'         => $listaAsociadas->lastItem()
+                ],
+                'asociadas'=> $listaAsociadas,
+                'xstatus'=>true
+            ];
+
+
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+
+    /**
+     * Registra nueva asociada
+     * API: /bett/nueva_asociada
+     * 
+     */
+    public function nuevaAsociada(Request $request){
+        try{
+            
+            
+            $asociada = new Asociada();
+            $asociada->codigo=$request->codigo;
+            $asociada->nombre=$request->nombre;
+            $asociada->telefono=$request->telefono;
+            $asociada->direccion=$request->direccion;
+            $asociada->xstatus='1';
+
+            $asociada->save();
+
+            return [ 'xstatus'=>true, 'id_bett_asociada' => $asociada->id_bett_asociada ];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+
+    /**
+     * Actualiza asociada existente
+     * API: /bett/update_asociada
+     * 
+     */
+    public function actualizaAsociada(Request $request){
+        try{
+            
+            
+            $asociada = Asociada::findOrFail($request->id_bett_asociada);//~Se busca en base al ID entrante
+            $asociada->codigo=$request->codigo;
+            $asociada->nombre=$request->nombre;
+            $asociada->telefono=$request->telefono;
+            $asociada->direccion=$request->direccion;
+            $asociada->xstatus='1';
+
+            $asociada->save();
+
+            return [ 'xstatus'=>true, 'id_bett_asociada' => $asociada->id_bett_asociada ];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+
+    /**
+     * Activa asociada existente
+     * API: /bett/activar_asociada
+     * 
+     */
+    public function activarAsociada(Request $request){
+        try{
+            
+            
+            $asociada = Asociada::findOrFail($request->id_bett_asociada);//~Se busca en base al ID entrante           
+            $asociada->xstatus='1';
+
+            $asociada->save();
+
+            return [ 'xstatus'=>true, 'id_bett_asociada' => $asociada->id_bett_asociada ];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+    /**
+     * Desactiva asociada existente
+     * API: /bett/desactivar_asociada
+     * 
+     */
+    public function desactivarAsociada(Request $request){
+        try{
+            
+            
+            $asociada = Asociada::findOrFail($request->id_bett_asociada);//~Se busca en base al ID entrante           
+            $asociada->xstatus='0';
+
+            $asociada->save();
+
+            return [ 'xstatus'=>true, 'id_bett_asociada' => $asociada->id_bett_asociada ];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+
+    /**
+     * Registra nueva semana
+     * API: /bett/nueva_semana
+     * 
+     */
+    public function nuevaSemana(Request $request){
+        try{
+            
+            $semana = Semana::where('semana','=',$request->semana)->get();   
+            if(count($semana)>0){
+                throw new Exception('Ya existe la semana, favor de cambiar');
+            }else{
+                $semana = new Semana();
+                $semana->semana = $request->semana;
+                $semana->xstatus = 1;
+
+                $semana->save();
+            }
+            
+            return [ 'xstatus'=>true, 'id_semana' => $semana->id_bett_semana ];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+
+    /**
+     * Enlista todas las semanas
+     * API: /bett/semanas
+     * 
+     */
+    public function selectSemana(Request $request){
+        try{
+
+            $semanas = Semana::where('xstatus','=','1')
+            ->select('id_bett_semana as id_semana','semana')
+            ->orderBy('id_bett_semana', 'desc')
+            ->limit(10)
+            ->get();
+
+            
+            return [ 'xstatus'=>true, 'semanas' => $semanas ];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+
+    /**
+     * Enlista todas las asociadas, excluye aquellas que ya tienen una orden
+     * API: /bett/asociadas_orden
+     * 
+     */
+    public function selectAsociada(Request $request){
+        try{
+
+            $sql= "SELECT id_bett_asociada, nombre FROM bett_asociada aso
+                    WHERE xstatus = '1'
+                    and id_bett_asociada not in (
+                        SELECT id_bett_asociada FROM bett_orden_entrega orden
+		                WHERE orden.id_bett_semana = ".$request->id_bett_semana."                                                   
+                    ) ORDER BY nombre";
+
+
+            $rs = DB::select( $sql );
+            
+            return [ 'xstatus'=>true, 'asociadas' => $rs ];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+
+    /**
+     * Registra nueva orden
+     * API: /bett/nueva_orden
+     * 
+     */
+    public function nuevaOrden(Request $request){
+        try{
+            $ordernEntrega = new OrdenEntrega();
+            $asociada = Asociada::findOrFail($request->idBettAsociada);
+
+
+            $ordernEntrega->id_bett_semana= $request->idSemana;
+            $ordernEntrega->id_bett_asociada= $request->idBettAsociada;
+            $ordernEntrega->nombre_asociada= $asociada->nombre;
+            $ordernEntrega->grupo_entrega= $request->grupoEntrega;
+            $ordernEntrega->total_productos= $request->totalProductos;
+            $ordernEntrega->monto_cobrar= $request->montoCobrar;  
+            $ordernEntrega->bolsas_entregar= $request->bolsasEntregar;
+            $ordernEntrega->bolsas_recibir= $request->bolsasRecibir;
+            $ordernEntrega->comentarios_entrega= $request->comentariosEntrega;
+            $ordernEntrega->prioridad_entrega= $request->prioridadEntrega;
+            $ordernEntrega->estatus= 'EN CURSO';
+
+            $ordernEntrega->save();
+
+            return [ 'xstatus'=>true, 'id_bett_orden_entrega' => $ordernEntrega->id_bett_orden_entrega ];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+
+    /**
+     * Enlista ordenes de entrega por semana y grupo
+     * API: /bett/ordenes
+     * 
+     */
+    public function getOrdenesEntrega(Request $request){
+        try{
+
+            $ordenEntrega = OrdenEntrega::where('id_bett_semana','=',$request->idSemana)
+            ->select('id_bett_orden_entrega', 'id_bett_semana','id_bett_asociada','nombre_asociada','grupo_entrega','total_productos','monto_cobrar','monto_recibido','bolsas_entregar','bolsas_recibir','comentarios_entrega','comentarios_recibidos','metodo_pago','prioridad_entrega','estatus')
+            ->where('grupo_entrega','=',$request->grupoEntrega)  
+            ->orderBy('prioridad_entrega', 'asc')                      
+            ->get();                        
+            return [ 'xstatus'=>true, 'ordenes' => $ordenEntrega ];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+    /**
+     * Actualiza datos de la orden
+     * API: /bett/update_ordenes
+     * 
+     */
+    public function actualizaOrden(Request $request){
+        try{
+            $ordernEntrega = new OrdenEntrega();
+            $ordernEntrega = OrdenEntrega::findOrFail($request->idBettOrdenEntrega);
+                                                
+            $ordernEntrega->monto_recibido= $request->montoRecibido;
+            $ordernEntrega->bolsas_recibir= $request->bolsasRecibir;
+            $ordernEntrega->comentarios_recibidos= $request->comentariosRecibidos;
+            $ordernEntrega->metodo_pago= $request->metodoPago;
+            $ordernEntrega->estatus= $request->estatus;            
+            $ordernEntrega->total_productos= $request->totalProductos;
+            $ordernEntrega->monto_cobrar= $request->montoCobrar;
+            $ordernEntrega->bolsas_entregar= $request->bolsasEntregar;
+            $ordernEntrega->comentarios_entrega= $request->comentariosEntrega;
+            $ordernEntrega->prioridad_entrega= $request->prioridadEntrega;
+ 
+            if($request->eliminar){
+                $ordernEntrega->delete();
+            }else{
+                $ordernEntrega->update();
+            }
+
+            return [ 'xstatus'=>true];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+    /**
+     * Orden entregada o pospuesta
+     * API: /bett/finaliza_ordenes
+     * 
+     */
+    public function finalizaOrden(Request $request){
+        try{
+            $ordernEntrega = new OrdenEntrega();
+            $ordernEntrega = OrdenEntrega::findOrFail($request->idBettOrdenEntrega);
+                                                
+            $ordernEntrega->monto_recibido= $request->montoRecibido;
+            $ordernEntrega->bolsas_recibir= $request->bolsasRecibir;
+            $ordernEntrega->comentarios_recibidos= $request->comentariosRecibidos;
+            $ordernEntrega->metodo_pago= $request->metodoPago;
+            $ordernEntrega->estatus= $request->estatus;
+
+            $ordernEntrega->update();
+
+            return [ 'xstatus'=>true];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+
+    /**
+     * Crear resumen de entrega
+     * API: /bett/resumen_ordenes
+     */
+    public function creaResumenPDF(Request $request){
+        try{            
+            
+            $semana = Semana::findOrFail($request->id_bett_semana);
+            
+
+            $sql= "select 	orden.nombre_asociada, grupo_entrega, orden.total_productos, orden.monto_cobrar, orden.monto_recibido, orden.bolsas_entregar, orden.bolsas_recibir, orden.comentarios_entrega, orden.comentarios_recibidos, orden.metodo_pago, orden.prioridad_entrega, orden.estatus
+            from bett_orden_entrega orden, bett_semana semana
+            where orden.id_bett_semana = semana.id_bett_semana
+            and semana.semana = ".$semana->semana."
+            order by orden.grupo_entrega, orden.metodo_pago;";
+
+            $ordernEntrega = DB::select( $sql );
+
+            $arreglo = [
+                "titulo"    => "Resumen de entregas asociadas",
+                "fecha"     => date("d/m/Y"),
+                "semana"    => $semana->semana,
+                "resumen" => $ordernEntrega
+            ];           
+            $pdf = \PDF::loadView('exports/resumenOrdenEntrega', ['datos' => $arreglo]);
+            return $pdf->download('resumenOrdenEntrega.pdf');            
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
     
 }

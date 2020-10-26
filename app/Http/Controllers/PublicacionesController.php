@@ -9,6 +9,7 @@ Use Log;
 use App\Publicacion;
 use App\Exports\PublicacionesExport;
 use Maatwebsite\Excel\Facades\Excel;
+use DB;
 
 
 class PublicacionesController extends Controller
@@ -35,6 +36,9 @@ class PublicacionesController extends Controller
 
         if($filtros->pausadas)
         array_push($estatusPublicacion, 'paused');
+
+        if($filtros->sinligar)
+        $sinligar=true;
         
         
         if(strtoupper (substr( $buscar, 0, 3 )) === "MLM"){
@@ -44,8 +48,9 @@ class PublicacionesController extends Controller
         if($buscar==''){
             $publicaciones = Publicacion::with('config')            
             ->select('publicacion.id_publicacion' ,'publicacion.id_tienda' ,'publicacion.id_cuenta_tienda' ,'publicacion.id_publicacion_tienda' ,'publicacion.id_variante_publicacion' ,'publicacion.titulo' ,'publicacion.nombre_variante' ,'publicacion.precio' ,'publicacion.stock' ,'publicacion.ventas' ,'publicacion.visitas', 'publicacion.envio_gratis' ,'publicacion.full' ,'publicacion.link' ,'publicacion.foto_mini' ,'publicacion.fecha_consulta' ,'publicacion.estatus')
+            //->join('config_publicacion', 'publicacion.id_publicacion', '=', 'config_publicacion.id_publicacion')
             ->where('publicacion.id_cuenta_tienda', '=', $idCuentaTienda)            
-            ->whereIn('publicacion.estatus', $estatusPublicacion)
+            ->whereIn('publicacion.estatus', $estatusPublicacion)                        
             ->orderBy($campoOrden, $direccionOrden)
             ->paginate(100);
         }else{
@@ -57,6 +62,8 @@ class PublicacionesController extends Controller
             ->orderBy($campoOrden, $direccionOrden)
             ->paginate(100);
         }
+
+        
 
         return [
             'pagination' => [

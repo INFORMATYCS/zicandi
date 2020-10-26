@@ -32,9 +32,17 @@
         <publicacionestienda-component></publicacionestienda-component>
     </template>        
 
+    <template v-if="oppMenuSeleccion==15">
+        <asociada-component></asociada-component>
+    </template>
+    <template v-if="oppMenuSeleccion==16">
+        <entregas-component></entregas-component>
+    </template>
+
     <template v-if="oppMenuSeleccion==90">
         <mercadolibre-component></mercadolibre-component>
     </template>
+    
 
 
     

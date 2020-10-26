@@ -15,7 +15,7 @@
                     </li>
                     <li class="nav-item">
                         <a @click="oppMenuSeleccion=3" class="nav-link" href="#"><i class="icon-bag"></i> Almacenes</a>
-                    </li>
+                    </li>                    
                 </ul>
             </li>
             <li class="nav-item nav-dropdown">
@@ -50,6 +50,21 @@
                 <ul class="nav-dropdown-items">
                     <li class="nav-item">
                         <a @click="oppMenuSeleccion=12" class="nav-link" href="#"><i class="icon-bag"></i> Herramientas</a>
+                    </li>
+                    
+                    
+                </ul>
+            </li>
+
+
+            <li class="nav-item nav-dropdown">
+                <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-wallet"></i> Betterware</a>
+                <ul class="nav-dropdown-items">
+                    <li class="nav-item">
+                        <a @click="oppMenuSeleccion=15" class="nav-link" href="#"><i class="icon-bag"></i> Asociadas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a @click="oppMenuSeleccion=16" class="nav-link" href="#"><i class="icon-bag"></i> Orden Entregas</a>
                     </li>
                     
                     

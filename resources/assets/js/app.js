@@ -37,6 +37,10 @@ Vue.component('headerzicandi-component', require('./components/HeaderZicandiComp
 
 Vue.component('publicacionestienda-component', require('./components/PublicacionesTiendaComponent.vue'));
 
+Vue.component('asociada-component', require('./components/AsociadaComponent.vue'));
+
+Vue.component('entregas-component', require('./components/EntregasBettComponent.vue'));
+
 
 const app = new Vue({
     el: '#app',

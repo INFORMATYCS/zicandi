@@ -89,6 +89,20 @@ Route::get('/bett/get', 'BetterwareController@getPage');
 Route::get('/bett/resumen', 'BetterwareController@resumenMigracion');
 Route::get('/bett/limpia', 'BetterwareController@limpiaTablaTemporal');
 Route::get('/bett/migracion', 'BetterwareController@migracionProductos');
+Route::get('/bett/asociadas', 'BetterwareController@listadoAsociadas');
+Route::post('/bett/nueva_asociada', 'BetterwareController@nuevaAsociada');
+Route::post('/bett/update_asociada', 'BetterwareController@actualizaAsociada');
+Route::post('/bett/activar_asociada', 'BetterwareController@activarAsociada');
+Route::post('/bett/desactivar_asociada', 'BetterwareController@desactivarAsociada');
+Route::post('/bett/nueva_semana', 'BetterwareController@nuevaSemana');
+Route::get('/bett/semanas', 'BetterwareController@selectSemana');
+Route::get('/bett/asociadas_orden', 'BetterwareController@selectAsociada');
+Route::post('/bett/nueva_orden', 'BetterwareController@nuevaOrden');
+Route::get('/bett/ordenes', 'BetterwareController@getOrdenesEntrega');
+Route::post('/bett/update_ordenes', 'BetterwareController@actualizaOrden');
+Route::post('/bett/finaliza_ordenes', 'BetterwareController@finalizaOrden');
+Route::get('/bett/resumen_ordenes', 'BetterwareController@creaResumenPDF');
+
 
 // ~  Rutas Tiendas
 Route::get('/tienda/getcuentas', 'TiendasController@index');

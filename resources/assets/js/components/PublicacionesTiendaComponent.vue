@@ -30,6 +30,9 @@
                     <p class="card-text">                                                                
                             <input type="checkbox" v-model="chkEstatusPausadas"> Pausadas                        
                     </p>
+                    <p class="card-text">                                                                
+                            <input type="checkbox" v-model="chkEstatusSinLigar"> Sin ligar                        
+                    </p>
                 </div>
             </div>
 
@@ -125,7 +128,8 @@
                     </thead>
                     <tbody>
                         <tr v-for="publicacion in listaPublicaciones" :key="publicacion.id_publicacion">
-                            <td>
+                            
+                            <td v-if="(chkEstatusSinLigar && publicacion.config.length == 0) || (chkEstatusSinLigar==false)">
                                 <button type="button" class="btn btn-info btn-sm" @click="abrirPublicacion(publicacion.link,'popup')">
                                     <i class="icon-screen-desktop"></i>
                                 </button> &nbsp;
@@ -141,11 +145,11 @@
                                 
                                 
                             </td>
-                            <td>               
+                            <td v-if="(chkEstatusSinLigar && publicacion.config.length == 0) || (chkEstatusSinLigar==false)">               
                                 
                                 <a href="#" @click="abrirPublicacion(publicacion.link,'swal')"><img :src="publicacion.foto_mini" alt="dog"></a>
                             </td>                            
-                            <td>
+                            <td v-if="(chkEstatusSinLigar && publicacion.config.length == 0) || (chkEstatusSinLigar==false)">
                                 <h6 v-text="publicacion.titulo"></h6>
                                 <small class="text-muted"><strong>ID </strong></small>
                                 <small class="text-muted" v-text="publicacion.id_publicacion_tienda"></small>
@@ -155,8 +159,8 @@
                                 <small class="text-muted" v-if="publicacion.id_variante_publicacion>0" v-text="publicacion.nombre_variante"></small>
 
                             </td>
-                            <td><span v-text="publicacion.precio"></span></td>
-                            <td>
+                            <td v-if="(chkEstatusSinLigar && publicacion.config.length == 0) || (chkEstatusSinLigar==false)"><span v-text="publicacion.precio"></span></td>
+                            <td v-if="(chkEstatusSinLigar && publicacion.config.length == 0) || (chkEstatusSinLigar==false)">
                                 <div>
                                     <small class="text-muted">Stock:</small> <div class="badge badge-pill badge-primary"><span v-text="redondear(publicacion.stock, 0)"></span></div>
                                 </div>
@@ -167,13 +171,13 @@
                                     <small class="text-muted">Visitas:</small> <div class="badge badge-pill badge-secondary"><span v-text="redondear(publicacion.visitas,0)"></span></div>
                                 </div>
                             </td>
-                            <td>                                
+                            <td v-if="(chkEstatusSinLigar && publicacion.config.length == 0) || (chkEstatusSinLigar==false)">                                
                                 <div class="badge badge-pill badge-success" v-if="publicacion.envio_gratis"><span>Envio gratis</span></div>
                                 <div>
                                 <div class="badge badge-pill badge-warning" v-if="publicacion.full"><span>Full</span></div>
                                 </div>
                             </td>
-                            <td>
+                            <td v-if="(chkEstatusSinLigar && publicacion.config.length == 0) || (chkEstatusSinLigar==false)">
                                 <div class="badge badge-pill badge-danger" v-if="publicacion.config.length <= 0" @click="showModal('producto','ligar', publicacion)">                                    
                                     <span style="cursor: pointer;">Falta ligar</span>
                                 </div>                                                                
@@ -184,7 +188,7 @@
                                     </li>
                                 </ul>
                             </td>  
-                            <td>
+                            <td v-if="(chkEstatusSinLigar && publicacion.config.length == 0) || (chkEstatusSinLigar==false)">
                                 <div v-if="publicacion.estatus=='active'">
                                     <span class="badge badge-success">Activo</span>
                                 </div>
@@ -366,6 +370,7 @@
                 offset : 3,
                 chkEstatusActivas: true,
                 chkEstatusPausadas: false,
+                chkEstatusSinLigar: false,
                 orden: 'publicacion.id_publicacion|desc',
                 criterio: 'titulo',
                 buscar: '',
@@ -445,6 +450,7 @@
                         filtros: {
                             'activas': this.chkEstatusActivas,
                             'pausadas': this.chkEstatusPausadas,
+                            'sinligar': this.chkEstatusSinLigar,
                             'orden': this.orden
                         }
                     }
@@ -476,6 +482,7 @@
                         filtros: {
                             'activas': this.chkEstatusActivas,
                             'pausadas': this.chkEstatusPausadas,
+                            'sinligar': this.chkEstatusSinLigar,
                             'orden': this.orden
                         }
                     };
@@ -489,43 +496,7 @@
 
 
                 window.open('/zicandi/public/publicaciones/exportar?param='+encodeURIComponent(json));
-
-
-       /*
-                if(aplLoading){
-                    this.isLoading = 1;
-                }
-
-                let me=this;                
-                
-                axios.get('/zicandi/public/publicaciones/exportar',{
-                    params: {                       
-                        'buscar': buscar,
-                        'criterio': criterio,
-                        'idCuentaTienda': this.objPublicacion.idCuentaTienda,
-                        filtros: {
-                            'activas': this.chkEstatusActivas,
-                            'pausadas': this.chkEstatusPausadas,
-                            'orden': this.orden
-                        }
-                    }
-                })
-                .then(function (response) {        
-                     me.isLoading = 0;
-
-                    const url = window.URL.createObjectURL(new Blob([response.data]));
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.setAttribute('download', 'invoices.xlsx'); //or any other extension
-                    document.body.appendChild(link);
-                    link.click();
-                })
-                .catch(function (error) {                    
-                    me.isLoading = 0;
-                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
-                });
-
-                */
+     
             },
             selectTienda(){                
                 let me=this;                
