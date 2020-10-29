@@ -138,8 +138,9 @@ class PublicacionesController extends Controller
             if($producto['xstatus']){
                 $idPublicacion = $request->idPublicacion;
                 $idProducto = $producto['id_producto'];
+                $cantidad = $producto['cantidad'];
 
-                $publicacion->config()->attach($idPublicacion, ['id_producto'=>$idProducto]);
+                $publicacion->config()->attach($idPublicacion, ['id_producto'=>$idProducto,'cantidad'=>$cantidad]);
                 $total++;
             }
         }        
