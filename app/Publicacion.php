@@ -23,7 +23,10 @@ class Publicacion extends Model{
     }
 
     public function config(){
-        return  $this->belongsToMany('App\Producto', 'config_publicacion', 'id_publicacion', 'id_producto');
+        return  $this->belongsToMany('App\Producto', 'config_publicacion', 'id_publicacion', 'id_producto')
+                ->withTimestamps()
+                ->withPivot('id_config_publicacion', 'id_producto', 'cantidad')
+                ->as('detalle');
 
     }
 

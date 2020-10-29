@@ -111,7 +111,7 @@ class TiendasController extends Controller
                 
                 $shipping       = $publicacion->shipping;
                 $envioGratis    = $shipping->free_shipping;
-                $tipoEnvio      = $shipping->logistic_type;
+                $tipoEnvio      = $shipping->logistic_type;                
 
                 $variations     = $publicacion->variations;
                 if(count($variations)>0){
@@ -180,7 +180,7 @@ class TiendasController extends Controller
 
         //~Persiste en BD
         foreach ($listaPublicacionesDeta as $pub) {
-            $idPublicacion = $pub['id'];
+            $idPublicacion = $pub['id'];            
 
             if(isset($pub['idVariante'])){
                 $publicacion = Publicacion::where('id_publicacion_tienda','=',$pub['id'])
@@ -191,6 +191,7 @@ class TiendasController extends Controller
                 ->get()->first();
             }
 
+            $visitas = 0;
             //~Inserta
             if($publicacion==null){
                 $publicacion = new Publicacion();
@@ -204,7 +205,7 @@ class TiendasController extends Controller
                 $publicacion->precio = (isset($pub['precio']) ? $pub['precio'] : null);
                 $publicacion->stock = (isset($pub['stock']) ? $pub['stock'] : null);
                 $publicacion->ventas = (isset($pub['ventas']) ? $pub['ventas'] : null);
-                $publicacion->visitas = (isset($pub['visitas']) ? $pub['visitas'] : null);                    
+                $publicacion->visitas = (isset($pub['visitas']) ? $pub['visitas'] : null);
                 $publicacion->envio_gratis = (isset($pub['envioGratis']) ? $pub['envioGratis'] : null);
                 $publicacion->full = ($pub['tipoEnvio'] == 'fulfillment' ? true : false);
                 $publicacion->link = (isset($pub['link']) ? $pub['link'] : null);
@@ -213,7 +214,8 @@ class TiendasController extends Controller
                 $publicacion->estatus = (isset($pub['estatus']) ? $pub['estatus'] : null);
 
                 $publicacion->save();                    
-            }else{                    
+            }else{      
+                $visitas = $publicacion->visitas;              
                 $publicacion->titulo = (isset($pub['titulo']) ? $pub['titulo'] : null);
                 $publicacion->nombre_variante = (isset($pub['nombreVariante']) ? $pub['nombreVariante'] : null);
                 $publicacion->precio = (isset($pub['precio']) ? $pub['precio'] : null);
@@ -225,6 +227,7 @@ class TiendasController extends Controller
                 $publicacion->foto_mini = (isset($pub['fotoMini']) ? $pub['fotoMini'] : null);
                 $publicacion->fecha_consulta = new \DateTime();
                 $publicacion->estatus = (isset($pub['estatus']) ? $pub['estatus'] : null);
+                $publicacion->visitas = (isset($pub['visitas']) ? $pub['visitas'] : $visitas);                    
 
                 $publicacion->update();
             }
@@ -234,7 +237,7 @@ class TiendasController extends Controller
             $estadisticaPublicacion->id_publicacion = $publicacion->id_publicacion;
             $estadisticaPublicacion->stock = (isset($pub['stock']) ? $pub['stock'] : null);
             $estadisticaPublicacion->ventas = (isset($pub['ventas']) ? $pub['ventas'] : null);
-            $estadisticaPublicacion->visitas = (isset($pub['visitas']) ? $pub['visitas'] : null); 
+            $estadisticaPublicacion->visitas = (isset($pub['visitas']) ? $pub['visitas'] : $visitas); 
             $estadisticaPublicacion->fecha_consulta = new \DateTime();
 
             $estadisticaPublicacion->save();
@@ -253,7 +256,8 @@ class TiendasController extends Controller
 
 
     public function getPublicaciones(Request $request){     
-        
+        DB::beginTransaction();
+
         $idCuentaTienda = $request->idCuentaTienda;
         $cuenta = CuentaTienda::findOrFail($idCuentaTienda);
         $idUsuarioMELI = $cuenta->att_id;
@@ -262,6 +266,25 @@ class TiendasController extends Controller
 
         $publicaciones = app(MercadoLibreController::class)->publicaciones($idUsuarioMELI, $token);
 
+        //~Depura todas aquellas publicaciones que no estan registradas en mercadolibre
+        $sql= "select distinct id_publicacion_tienda as id_publicacion_tienda from publicacion where id_cuenta_tienda = ".$idCuentaTienda;
+        $rsPublicacionesActuales = DB::select( $sql );
+        $publicacionesActuales = array();
+        foreach ($rsPublicacionesActuales as $publicacion) {
+            array_push($publicacionesActuales, $publicacion->id_publicacion_tienda);
+        }        
+        $publicacionesMl = $publicaciones['lista'];
+
+        $resultado = array_diff($publicacionesActuales, $publicacionesMl);
+        foreach ($resultado as $publicacion) {
+            $regUpdate = Publicacion::where('id_publicacion_tienda','=',$publicacion)
+                        ->where('id_cuenta_tienda','=',$idCuentaTienda)
+                        ->update(['estatus'=>'eliminado']);
+        }
+        
+
+        DB::commit();
+        
         return $publicaciones;
         
     }
@@ -602,10 +625,7 @@ class TiendasController extends Controller
                     $idPublicacion = $venta->id_publicacion;
                     $idVariante = $venta->id_variante_publicacion;
 
-                    if($idVentaMeli==201 || $idVentaMeli==126 || $idVentaMeli==130){
-                        $detener=true;
-                    }
-                    
+                   
                     //Completa el envio
                     $idEnvio = $venta->id_envio;
                     $envio = app(MercadoLibreController::class)->envioDetalle($idEnvio, $cuentaTienda->att_access_token);
@@ -648,7 +668,8 @@ class TiendasController extends Controller
                             $precioCompra=0;                        
                             foreach ($configPublicacion as $config) {
                                 $producto = Producto::findOrFail($config->id_producto);
-                                $precioCompra+= $producto->ultimo_precio_compra;
+                                $cantidad = $config->cantidad;
+                                $precioCompra+= ($producto->ultimo_precio_compra)*$cantidad;
                             }
                             
                         }
@@ -675,7 +696,6 @@ class TiendasController extends Controller
                     $venta->update();
                     
                     $cntVentaProcesada++;
-
                 }catch(Exception $e){
                     DB::rollBack();
                     Log::error( 'No fue posible procesar la venta '.$idVentaMeli.': '.$e->getMessage() );                        

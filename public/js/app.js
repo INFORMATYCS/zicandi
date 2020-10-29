@@ -63085,6 +63085,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -63361,9 +63368,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         },
         getProduccionSeleccion: function getProduccionSeleccion(producto) {
             producto.temporal = true;
+            producto.cantidad = 1;
             this.modalProductosLigados.productosligados.push(producto);
         },
         onGetProductosLigados: function onGetProductosLigados(publicacion) {
+            for (var i = 0; i < publicacion.config.length; i++) {
+                publicacion.config[i].cantidad = publicacion.config[i].detalle.cantidad;
+            }
+            console.log(publicacion.config);
             this.modalProductosLigados.productosligados = publicacion.config;
         },
         onGuardarProductosLigados: function onGuardarProductosLigados() {
@@ -64401,26 +64413,69 @@ var render = function() {
                                       ]),
                                       _vm._v(" "),
                                       _c("div", { staticClass: "col-md-8" }, [
-                                        _c("p", [
-                                          _c("span", {
-                                            staticClass: "font-weight-bold",
-                                            domProps: {
-                                              textContent: _vm._s(
-                                                producto.codigo
-                                              )
-                                            }
-                                          }),
-                                          _vm._v(" "),
-                                          producto.temporal
-                                            ? _c(
-                                                "span",
-                                                {
-                                                  staticClass:
-                                                    "text-right text-muted"
+                                        _c("div", { staticClass: "row" }, [
+                                          _c(
+                                            "div",
+                                            { staticClass: "col-md-3" },
+                                            [
+                                              _c("input", {
+                                                directives: [
+                                                  {
+                                                    name: "model",
+                                                    rawName: "v-model",
+                                                    value: producto.cantidad,
+                                                    expression:
+                                                      "producto.cantidad"
+                                                  }
+                                                ],
+                                                staticClass: "form-control",
+                                                attrs: { type: "text" },
+                                                domProps: {
+                                                  value: producto.cantidad
                                                 },
-                                                [_vm._v("Sin guardar")]
-                                              )
-                                            : _vm._e()
+                                                on: {
+                                                  input: function($event) {
+                                                    if (
+                                                      $event.target.composing
+                                                    ) {
+                                                      return
+                                                    }
+                                                    _vm.$set(
+                                                      producto,
+                                                      "cantidad",
+                                                      $event.target.value
+                                                    )
+                                                  }
+                                                }
+                                              })
+                                            ]
+                                          ),
+                                          _vm._v(" "),
+                                          _c(
+                                            "div",
+                                            { staticClass: "col-md-9" },
+                                            [
+                                              _c("span", {
+                                                staticClass: "font-weight-bold",
+                                                domProps: {
+                                                  textContent: _vm._s(
+                                                    producto.codigo
+                                                  )
+                                                }
+                                              }),
+                                              _vm._v(" "),
+                                              producto.temporal
+                                                ? _c(
+                                                    "span",
+                                                    {
+                                                      staticClass:
+                                                        "text-right text-muted"
+                                                    },
+                                                    [_vm._v("Sin guardar")]
+                                                  )
+                                                : _vm._e()
+                                            ]
+                                          )
                                         ]),
                                         _vm._v(" "),
                                         _c("span", {
@@ -66368,6 +66423,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                                     break;
                                 }
                         }
+                        break;
                     }
                 case 'orden':
                     {
@@ -66424,6 +66480,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                                     this.oOrdenEntrega.estatus = data['estatus'];
                                 }
                         }
+                        break;
                     }
             }
         },
@@ -66535,10 +66592,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     util.MSG('Algo salio Mal!', 'Defina el metodo de pago', util.tipoErr);
                     return;
                 }
-                if (orden.bolsas_recibir == 0) {
-                    util.MSG('Algo salio Mal!', 'Cuentas bolsas entregan', util.tipoErr);
-                    return;
-                }
+
                 if (orden.metodo_pago == "EFE" && (orden.monto_recibido == 0 || orden.monto_recibido == null)) {
                     util.MSG('Algo salio Mal!', 'Falta monto recibido', util.tipoErr);
                     return;

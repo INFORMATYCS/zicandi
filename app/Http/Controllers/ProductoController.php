@@ -81,6 +81,7 @@ class ProductoController extends Controller{
         $producto->nota = $request->nota;
         $producto->ultimo_precio_compra = 0;
         $producto->promedio_precio_compra = 0;
+        $producto->precio_referenciado = 0;
         $producto->xstatus ='1';
 
         

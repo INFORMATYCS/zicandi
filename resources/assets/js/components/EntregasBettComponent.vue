@@ -464,8 +464,9 @@
                                 this.modalSemana.tipoAccion = 1;
 
                                 break;
-                            }
+                            }                        
                         }
+                    break;    
                     }
                     case 'orden':
                     {
@@ -525,6 +526,7 @@
                                 
                             }
                         }
+                    break;
                     }
                 }
             },
@@ -649,10 +651,7 @@
                         util.MSG('Algo salio Mal!','Defina el metodo de pago', util.tipoErr);
                         return;
                     }
-                    if(orden.bolsas_recibir==0){                        
-                        util.MSG('Algo salio Mal!','Cuentas bolsas entregan', util.tipoErr);
-                        return;
-                    }
+                    
                     if(orden.metodo_pago=="EFE" && (orden.monto_recibido==0 || orden.monto_recibido==null)){
                         util.MSG('Algo salio Mal!','Falta monto recibido', util.tipoErr);
                         return;

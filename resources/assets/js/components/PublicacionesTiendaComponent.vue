@@ -256,14 +256,21 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        <div class="row">                                            
+                                        <div class="row">                                             
                                             <div class="col-md-4">
                                                 <img :src="producto.url_imagen" alt="dog" width="50%">                                                 
                                             </div>
                                             <div class="col-md-8">
-                                                <p>
-                                                    <span class="font-weight-bold" v-text="producto.codigo"></span> <span  class="text-right text-muted" v-if="producto.temporal">Sin guardar</span>
-                                                </p>
+                                    
+                                                    <div class="row">  
+                                                        <div class="col-md-3">
+                                                            <input type="text" class="form-control" v-model="producto.cantidad">
+                                                        </div>
+                                                        <div class="col-md-9">
+                                                            <span class="font-weight-bold" v-text="producto.codigo"></span> <span  class="text-right text-muted" v-if="producto.temporal">Sin guardar</span>
+                                                        </div>
+                                                    </div>
+                                        
                                                 <span v-text="producto.nombre"></span>                                                
                                             </div>
                                         </div>                                                                                                                                              
@@ -381,7 +388,7 @@
                     errorProducto: 0,
                     erroresProductoMsjList: [],
                     productosligados:[],
-                    publicacionSeleccion: {}                    
+                    publicacionSeleccion: {}
                 },
                 modalGrafico: {
                     modal: 0,
@@ -625,9 +632,14 @@
             },
             getProduccionSeleccion(producto){                                
                 producto.temporal = true;
+                producto.cantidad = 1;
                 this.modalProductosLigados.productosligados.push(producto);
             },
-            onGetProductosLigados(publicacion){                
+            onGetProductosLigados(publicacion){        
+                for (let i = 0; i < publicacion.config.length ; i++) {                            
+                    publicacion.config[i].cantidad = publicacion.config[i].detalle.cantidad;                            
+                }        
+                console.log(publicacion.config);
                 this.modalProductosLigados.productosligados = publicacion.config;                                
             },
             onGuardarProductosLigados(){     

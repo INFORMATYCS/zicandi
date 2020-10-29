@@ -97,21 +97,28 @@ class BetterwareController extends Controller{
             $puntero = $finalPrecio;      
             
             //Procesa imagen
-            $fichero = Config::get('zicandi.betterware.path').$urlImagen;
-            $ext = substr($urlImagen, -3);
+            try{//
+                $fichero = Config::get('zicandi.betterware.path').$urlImagen;
+                $ext = substr($urlImagen, -3);
+        
+                $actual = file_get_contents($fichero);
     
-            $actual = file_get_contents($fichero);
-
-            $b64= base64_encode($actual);
-
-            $procesadorImagenes = new ProcesadorImagenes();
-            $imagen = array(    
-                'nombre'=>$codigo.'.'.$ext,
-                'size'=>0,
-                'type'=>$ext,
-                'b64'=>$b64
-            );
-            $url_imagen = $procesadorImagenes->publicaImagenMini100C($imagen); 
+                $b64= base64_encode($actual);
+    
+                $procesadorImagenes = new ProcesadorImagenes();
+                $imagen = array(    
+                    'nombre'=>$codigo.'.'.$ext,
+                    'size'=>0,
+                    'type'=>$ext,
+                    'b64'=>$b64
+                );
+                $url_imagen = $procesadorImagenes->publicaImagenMini100C($imagen); 
+            }catch (\Exception $e) {
+                $ERROR = $e->getMessage();
+                echo $ERROR;
+                Log::error( $ERROR );
+                $url_imagen = "";
+            }    
 
             //~Busca la descripcion del producto
             $clienteDetalle = curl_init();
