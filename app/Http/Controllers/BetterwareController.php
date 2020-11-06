@@ -339,6 +339,7 @@ class BetterwareController extends Controller{
             $asociada->nombre=$request->nombre;
             $asociada->telefono=$request->telefono;
             $asociada->direccion=$request->direccion;
+            $asociada->tipo=$request->tipo;
             $asociada->xstatus='1';
 
             $asociada->save();
@@ -365,6 +366,7 @@ class BetterwareController extends Controller{
             $asociada->nombre=$request->nombre;
             $asociada->telefono=$request->telefono;
             $asociada->direccion=$request->direccion;
+            $asociada->tipo=$request->tipo;
             $asociada->xstatus='1';
 
             $asociada->save();
@@ -536,10 +538,14 @@ class BetterwareController extends Controller{
      */
     public function getOrdenesEntrega(Request $request){
         try{
-
+            $grupo = $request->grupoEntrega;
+            if($grupo==""){
+                $grupo = "%";
+            }
+            
             $ordenEntrega = OrdenEntrega::where('id_bett_semana','=',$request->idSemana)
-            ->select('id_bett_orden_entrega', 'id_bett_semana','id_bett_asociada','nombre_asociada','grupo_entrega','total_productos','monto_cobrar','monto_recibido','bolsas_entregar','bolsas_recibir','comentarios_entrega','comentarios_recibidos','metodo_pago','prioridad_entrega','estatus')
-            ->where('grupo_entrega','=',$request->grupoEntrega)  
+            ->select('id_bett_orden_entrega', 'id_bett_semana','id_bett_asociada','nombre_asociada','grupo_entrega','total_productos','monto_cobrar','monto_recibido','bolsas_entregar','bolsas_recibir','comentarios_entrega','comentarios_recibidos','metodo_pago','prioridad_entrega','estatus')            
+            ->where('grupo_entrega','like',$grupo)              
             ->orderBy('prioridad_entrega', 'asc')                      
             ->get();                        
             return [ 'xstatus'=>true, 'ordenes' => $ordenEntrega ];

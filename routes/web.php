@@ -119,11 +119,14 @@ Route::get('/tienda/ultimaventameli', 'TiendasController@getUltimaVentaMeli');
 Route::get('/tienda/registraControlVenta', 'TiendasController@registraControlVenta');
 Route::get('/tienda/ventas', 'TiendasController@consultaVentasMeli');
 Route::get('/tienda/calculaEstadistica', 'TiendasController@calculaVentaEstadistica');
+Route::get('/tienda/ventasList', 'TiendasController@getListaVentas');
+Route::get('/tienda/ventas/export', 'TiendasController@exportar');
 
 // - Rutas para Publicaciones
 Route::get('/publicaciones', 'PublicacionesController@index');
 Route::post('/publicaciones/guardarProductos', 'PublicacionesController@saveProductosLigados');
 Route::get('/publicaciones/exportar', 'PublicacionesController@exportar');
+Route::get('/publicaciones/get', 'PublicacionesController@getPublicacion');
 
 // - Rutas para procesos BATCH
 Route::get('/batch/tareas', 'BatchController@getTareas');

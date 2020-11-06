@@ -40,6 +40,9 @@
                     <li class="nav-item">
                         <a @click="oppMenuSeleccion=14" class="nav-link" href="#"><i class="icon-bag"></i> Publicaciones</a>
                     </li>
+                    <li class="nav-item">
+                        <a @click="oppMenuSeleccion=17" class="nav-link" href="#"><i class="icon-bag"></i> Ventas</a>
+                    </li>
                     
                     
                 </ul>

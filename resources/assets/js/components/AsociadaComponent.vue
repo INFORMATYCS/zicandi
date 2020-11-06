@@ -53,6 +53,7 @@
                             <th>Nombre</th>
                             <th>Telfono</th>
                             <th>Direccion</th>
+                            <th>Tipo</th>
                             <th>Estado</th>
                         </tr>
                     </thead>
@@ -77,7 +78,8 @@
                             <td v-text="asociada.codigo"></td>
                             <td v-text="asociada.nombre"></td>
                             <td v-text="asociada.telefono"></td>
-                            <td v-text="asociada.direccion"></td>                                
+                            <td v-text="asociada.direccion"></td>
+                            <td v-text="asociada.tipo"></td>
                             <td>
                                 <div v-if="asociada.xstatus">
                                     <span class="badge badge-success">Activo</span>
@@ -152,6 +154,16 @@
                                     <input type="email" class="form-control" placeholder="Direccion de entrega" v-model="oAsociada.direccion">
                                 </div>
                             </div>
+                            <div class="form-group row">
+                                <label class="col-md-3 form-control-label" for="text-input">Tipo</label>
+                                <div class="col-md-9">
+                                    <select class="form-control col-md-3" v-model="oAsociada.tipo">                               
+                                        <option value="Asociada">Asociada</option>
+                                        <option value="Distribuidora">Distribuidora</option>
+                                        <option value="Cliente">Cliente</option>                                        
+                                    </select>
+                                </div>
+                            </div>
 
                             <div v-show="modalAsociada.error" class="form-group row div-error">
                                 <div class="text-center text-error">
@@ -187,6 +199,7 @@
                     nombre: '',
                     telefono: '',
                     direccion: '',
+                    tipo: ''
                 },                
                 listaAsociadas: [],
                 modalAsociada: {
@@ -254,6 +267,7 @@
                     'nombre':       this.oAsociada.nombre,
                     'telefono':   this.oAsociada.telefono,
                     'direccion':     this.oAsociada.direccion,
+                    'tipo':     this.oAsociada.tipo
                 })
                 .then(function (response) {                    
                     me.buscador.textoBuscar = '';
@@ -280,6 +294,7 @@
                     'nombre':       this.oAsociada.nombre,
                     'telefono':   this.oAsociada.telefono,
                     'direccion':     this.oAsociada.direccion,
+                    'tipo':     this.oAsociada.tipo
                 })
                 .then(function (response) {                    
                     me.closeModal();
@@ -368,6 +383,7 @@
                                 this.oAsociada.nombre = data['nombre'];
                                 this.oAsociada.telefono = data['telefono'];
                                 this.oAsociada.direccion = data['direccion'];
+                                this.oAsociada.tipo = data['tipo'];
                                 this.oAsociada.id_bett_asociada = data['id_bett_asociada'];
 
 
