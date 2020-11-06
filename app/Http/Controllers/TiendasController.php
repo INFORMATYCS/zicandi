@@ -15,6 +15,7 @@ use App\VentaMeli;
 use App\Producto;
 use Session;
 use App\EstadisticaPublicacion;
+use App\Exports\VentasExport;
 
 
 class TiendasController extends Controller
@@ -422,7 +423,7 @@ class TiendasController extends Controller
                 $fechaUltima = Config::get('zicandi.meli.fechaInicialConsultaVentas');
             }
 
-            $fechaActual = date('Y-m-d');
+            $fechaActual = date('Y-m-d', strtotime("+1 day"));
             
             return [ 'xstatus'=>true, 'fechaInicialMeli'=>$fechaUltima, 'fechaFinalMeli'=>$fechaActual];
 
@@ -499,12 +500,14 @@ class TiendasController extends Controller
                 $listaVentas = $ventas['lista'];                
                 foreach ($listaVentas as $venta) {
                     $id = $venta->id;
+
                     try{    
                         $idPaquete = $venta->pack_id;                                                
                         $idPublicacion = $venta->order_items[0]->item->id;
                         $idVariante = $venta->order_items[0]->item->variation_id;
                         $titulo = $venta->order_items[0]->item->title;
-                        $cantidad = $venta->order_items[0]->quantity;
+                        $cantidad = $venta->order_items[0]->quantity;                        
+                        $fechaVenta = new \DateTime($venta->date_created);
                         
                         $comision = ($venta->order_items[0]->sale_fee) * $cantidad;
 
@@ -540,6 +543,7 @@ class TiendasController extends Controller
                         $ventaMeli->id_cuenta_tienda=$idCuentaTienda;
                         $ventaMeli->id_paquete_meli=$idPaquete;
                         $ventaMeli->id_orden_meli=$id;
+                        $ventaMeli->fecha_venta=$fechaVenta;
                         $ventaMeli->id_publicacion=$idPublicacion;
                         $ventaMeli->id_variante=$idVariante;
                         $ventaMeli->titulo=$titulo;
@@ -571,9 +575,7 @@ class TiendasController extends Controller
                         //~Actualiza control ventas
                         $controlVentasMeli->estatus = 'ERR';
                         $controlVentasMeli->update();
-                    }
-
-                        
+                    }                        
                 }
             }else{
                 throw new Exception('No fue posible recuperar la lista de ventas '.$ventas['httpCode']);
@@ -727,6 +729,130 @@ class TiendasController extends Controller
     }
 
 
+    /**
+     * Enlistas todas las ventas segun filtros
+     * 
+     * API: /tienda/ventasList
+     * 
+     */
+    public function getListaVentas(Request $request){
+        try{
+            $idCuentaTienda = $request->idCuentaTienda;
+            $fechaInicial = $request->fechaInicial;
+            $fechaFinal = $request->fechaFinal;
+            $page = $request->page;
+            $buscar = $request->buscar;
+            $color = $request->color;
+
+            $sqlBuscar ="";
+            if($buscar!=null){
+                $sqlBuscar ="and (titulo like '%".$buscar."%' or id_publicacion like'%".$buscar."%' or nombre_cliente like '%".$buscar."%')";
+            }
+
+            $sqlColor ="";
+            if($color!="todos"){
+                if($color=="verde"){
+                    $sqlColor =" and utl_porcentaje >= .20 ";
+                }elseif($color=="naranja"){
+                    $sqlColor =" and (utl_porcentaje >= .05 and utl_porcentaje < .20) ";
+                }else{
+                    $sqlColor =" and utl_porcentaje  < .05 ";
+                }
+            }
+
+            $sql= "select 	id_venta_meli idVentaMeli, 			
+                            IF(id_paquete_meli>0, (	select count(*) 
+                                                    from venta_meli vaux 
+                                                    where vaux.id_control_ventas_meli = vmeli.id_control_ventas_meli 
+                                                    and vaux.id_cuenta_tienda = vmeli.id_cuenta_tienda 
+                                                    and vaux.id_paquete_meli = vmeli.id_paquete_meli), 1) totalPaquete,
+                            id_paquete_meli idPaqueteMeli, 
+                            id_orden_meli idOrdenMeli,         
+                            DATE_FORMAT(fecha_venta,'%d/%m%/%Y') fechaVenta, 
+                            id_publicacion idPublicacion, 
+                            id_variante idVariante, 
+                            titulo, 
+                            id_pago idPago, 
+                            DATE_FORMAT(fecha_pago,'%d/%m%/%Y') fechaPago, 
+                            monto_pagado montoPagoCliente, 
+                            cantidad, 
+                            precio_venta precioVenta, 
+                            comision, 
+                            isr, 
+                            iva, 
+                            neto, 
+                            precio_compra ultimoPrecioCompra, 
+                            utl_monto utlMonto, 
+                            utl_porcentaje utlPorcentaje, 
+                            id_envio idEnvio,  
+                            nombre_cliente nombreCliente, 
+                            direccion_entrega direccionEntrega, 
+                            metodo_envio metodoEnvio, 
+                            costo_envio_cliente costoEnvioCliente, 
+                            costo_envio_empresa costoEnvioEmpresa, 
+                            nota nota, 
+                            estatus_meli estatusVentaMeli        
+                    from venta_meli vmeli
+                    where id_cuenta_tienda = $idCuentaTienda
+                    and estatus = 'TER'
+                    $sqlBuscar
+                    $sqlColor
+                    and DATE(fecha_venta) between STR_TO_DATE('$fechaInicial', '%Y-%m-%d') and STR_TO_DATE('$fechaFinal', '%Y-%m-%d')
+                    order by id_paquete_meli";        
+
+            $rs = DB::select( $sql );
+            $collect = collect($rs);                    
+            $size=100;
+            
+            $paginationData = new  \Illuminate\Pagination\LengthAwarePaginator(
+                $collect->forPage($page, $size),
+                $collect->count(), 
+                $size, 
+                $page
+              );
+
+            return [                
+                'pagination' => $paginationData,
+                'xstatus'=>true, 
+                'ventas'=>$rs
+            ];
+
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+
+
+    /**
+     * Exporta a excel ventas conforme a los filtros de pantalla
+     * API: /tienda/ventas/export
+     * 
+     */
+    public function exportar(Request $request){
+        try{
+
+            $param = json_decode($request->param);
+
+            $idCuentaTienda = $param->idCuentaTienda;
+            $fechaInicial = $param->fechaInicial;
+            $fechaFinal = $param->fechaFinal;            
+            $buscar = $param->buscar;
+            $color = $param->color;
+            $nombreSalida = 'ventas_'.uniqid().'_reporte.xlsx';
+
+
+            return (new VentasExport)->define($buscar, $fechaInicial, $fechaFinal, $idCuentaTienda, $color)->download($nombreSalida);
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+        
+    }
+
+
+    
     
 
 }

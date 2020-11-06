@@ -39,9 +39,15 @@
         <entregas-component></entregas-component>
     </template>
 
+    <template v-if="oppMenuSeleccion==17">
+        <ventastienda-component></ventastienda-component>
+    </template>
+
     <template v-if="oppMenuSeleccion==90">
         <mercadolibre-component></mercadolibre-component>
     </template>
+
+    
     
 
 

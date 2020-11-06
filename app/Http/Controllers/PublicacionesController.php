@@ -148,5 +148,30 @@ class PublicacionesController extends Controller
         return ['total' => $total];        
     }
 
+    /**
+     * Recupera detalle de la publicacion
+     * 
+     * API: /publicaciones/get
+     * 
+     */
+    public function getPublicacion(Request $request){
+        try{
+            $idPublicacion = $request->idPublicacion;
+ 
+            $pub = Publicacion::with('config')
+            ->where('id_publicacion_tienda','=',$idPublicacion)->get();
+            
+
+            return [                
+                'publicacion' => $pub,
+                'xstatus'=>true
+            ];
+
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
     
 }

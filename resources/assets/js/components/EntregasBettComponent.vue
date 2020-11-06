@@ -47,7 +47,7 @@
                             <h5 class="card-title">Grupo de entrega</h5>
                             <p class="card-text">                                
                                 <select class="form-control col-md-3" v-model="oOrdenEntrega.grupoEntrega">
-                                    <option value="0" disabled>Seleccione...</option>
+                                    <option value="%">Todos</option>
                                     <option v-for="grupo in grupoEntrega" :key="grupo.llave" :value="grupo.llave" v-text="grupo.valor"></option>
                                 </select>                                                                                                     
                             </p>

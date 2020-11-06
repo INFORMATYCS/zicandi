@@ -41,6 +41,8 @@ Vue.component('asociada-component', require('./components/AsociadaComponent.vue'
 
 Vue.component('entregas-component', require('./components/EntregasBettComponent.vue'));
 
+Vue.component('ventastienda-component', require('./components/VentasTiendaComponent.vue'));
+
 
 const app = new Vue({
     el: '#app',

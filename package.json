@@ -20,6 +20,7 @@
         "vue": "^2.5.7"
     },
     "dependencies": {
-        "vue-barcode": "^1.2.0"
+        "vue-barcode": "^1.2.0",
+        "vuejs-datepicker": "^1.6.2"
     }
 }
