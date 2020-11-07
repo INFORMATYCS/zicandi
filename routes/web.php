@@ -57,6 +57,8 @@ Route::post('/almacenes/registrar', 'AlmacenController@store');
 Route::post('/almacenes/actualizar', 'AlmacenController@update');
 Route::post('/almacenes/desactivar', 'AlmacenController@desactivar');
 Route::post('/almacenes/activar', 'AlmacenController@activar');
+Route::get('/almacenes/movimiento', 'AlmacenController@movimientoAlmacen');
+Route::get('/almacenes/export', 'AlmacenController@exportar');
 
 
 // - Rutas para Compras

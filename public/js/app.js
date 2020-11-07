@@ -56955,6 +56955,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -57043,7 +57046,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             var me = this;
             this.isLoading = 1;
-            axios.p('/zicandi/public/almacenes/actualizar', {
+            axios.post('/zicandi/public/almacenes/actualizar', {
                 'id_almacen': this.oAlmacen.id_almacen,
                 'nombre': this.oAlmacen.nombre,
                 'ubicacion': this.oAlmacen.ubicacion,
@@ -57066,7 +57069,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     _this.isLoading = 1;
                     var me = _this;
 
-                    axios.p('/zicandi/public/almacenes/desactivar', {
+                    axios.post('/zicandi/public/almacenes/desactivar', {
                         'id_almacen': id_almacen
                     }).then(function (response) {
                         me.isLoading = 0;
@@ -57087,7 +57090,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     _this2.isLoading = 1;
                     var me = _this2;
 
-                    axios.p('/zicandi/public/almacenes/activar', {
+                    axios.post('/zicandi/public/almacenes/activar', {
                         'id_almacen': id_almacen
                     }).then(function (response) {
                         me.isLoading = 0;
@@ -57155,6 +57158,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             me.pagination.current_page = page;
 
             me.listar(page, true);
+        },
+        onExportarPublicaciones: function onExportarPublicaciones() {
+
+            window.open('/zicandi/public/almacenes/export');
         }
     },
     mounted: function mounted() {
@@ -57198,6 +57205,23 @@ var render = function() {
             [
               _c("i", { staticClass: "icon-plus" }),
               _vm._v(" Nuevo\n                ")
+            ]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary",
+              attrs: { type: "button" },
+              on: {
+                click: function($event) {
+                  return _vm.onExportarPublicaciones()
+                }
+              }
+            },
+            [
+              _c("i", { staticClass: "icon-plus" }),
+              _vm._v(" Exportar Detalle Excel\n                ")
             ]
           )
         ])

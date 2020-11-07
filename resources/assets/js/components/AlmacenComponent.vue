@@ -21,7 +21,10 @@
                     <i class="fa fa-align-justify"></i> Tareas:
                     <button type="button" class="btn btn-secondary" @click="showModal('almacen','registrar')">
                         <i class="icon-plus"></i>&nbsp;Nuevo
-                    </button>                    
+                    </button> 
+                    <button type="button" class="btn btn-secondary" @click="onExportarPublicaciones()">
+                        <i class="icon-plus"></i>&nbsp;Exportar Detalle Excel
+                    </button>                     
                 </div>   
             </div>
             
@@ -241,7 +244,7 @@
 
                 let me = this;
                 this.isLoading = 1;
-                axios.p('/zicandi/public/almacenes/actualizar',{
+                axios.post('/zicandi/public/almacenes/actualizar',{
                     'id_almacen': this.oAlmacen.id_almacen,
                     'nombre': this.oAlmacen.nombre,
                     'ubicacion': this.oAlmacen.ubicacion,
@@ -265,7 +268,7 @@
                         this.isLoading = 1;
                         let me = this;
 
-                        axios.p('/zicandi/public/almacenes/desactivar',{
+                        axios.post('/zicandi/public/almacenes/desactivar',{
                             'id_almacen': id_almacen
                         })
                         .then(function (response) {
@@ -290,7 +293,7 @@
                         this.isLoading = 1;
                         let me = this;
 
-                        axios.p('/zicandi/public/almacenes/activar',{
+                        axios.post('/zicandi/public/almacenes/activar',{
                             'id_almacen': id_almacen
                         })
                         .then(function (response) {
@@ -360,6 +363,11 @@
                 me.pagination.current_page = page;
 
                 me.listar(page, true);
+            },
+            onExportarPublicaciones(){                
+                
+                window.open('/zicandi/public/almacenes/export');
+     
             }
         },
         mounted() {
