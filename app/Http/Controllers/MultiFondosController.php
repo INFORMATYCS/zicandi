@@ -45,11 +45,11 @@ class MultiFondosController extends Controller
             $movProducto->save();
 
 
-            //~Actualiza stock
-            $stockProducto->stock = $stockProducto->stock + $deta['cantidad'];
-            $stockProducto->disponible = $stockProducto->disponible + $deta['cantidad'];
-            $stockProducto->ultima_entrada = $currentDBtime[0]->fecha;
-            $stockProducto->update();
+            //~Actualiza stock <<<Se cancela hasta corregir la liquidacion de recursos>>>
+            //$stockProducto->stock = $stockProducto->stock + $deta['cantidad'];
+            //$stockProducto->disponible = $stockProducto->disponible + $deta['cantidad'];
+            //$stockProducto->ultima_entrada = $currentDBtime[0]->fecha;
+            //$stockProducto->update();
 
             //~Actualiza precio de compra
             $precioPromedio = $this->calculaPrecioPromedio($producto->id_producto, $deta['precio']);

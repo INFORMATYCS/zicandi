@@ -19,9 +19,13 @@ class ProductoController extends Controller{
     public function index(Request $request){
        
         if(!$request->ajax())return redirect('/');
-
+    
         $buscar = $request->buscar;
         $criterio = $request->criterio;
+
+        if(is_numeric($buscar)) {
+            $criterio = "codigo";
+        }
         
         if($buscar==''){
             $productos = Producto::with('atributos')

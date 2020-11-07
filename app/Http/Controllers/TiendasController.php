@@ -677,6 +677,9 @@ class TiendasController extends Controller
                         }
                     }
 
+                    //~Multiplica por la cantidad de piezas vendidas
+                    $precioCompra = $precioCompra * $venta->cantidad;
+
                     $utilidadMonto = $neto - $precioCompra;
                     if($precioCompra==0){
                         $utilidadPorcentaje = 0;

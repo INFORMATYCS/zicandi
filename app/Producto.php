@@ -39,6 +39,11 @@ class Producto extends Model
         return $this->belongsTo('App\StockProducto', 'id_producto', 'id_producto');
     }
 
+    //~Relacion One To Many
+    public function almacen(){
+        return $this->hasMany('App\BitaResumenAlmacen', 'id_producto', 'id_producto');
+    }
+
     //~Evalua cual tienda se encuentra aun logeada en mercadolibre
     public function calcularUltimoPrecioCompra(){
         $precio=0;
