@@ -13,7 +13,7 @@ class Producto extends Model
     protected $primaryKey = 'id_producto'; 
 
     //~Por seguridad se agrega para evitar ataques. Toda las columnas de la tabla
-    protected $fillable = ['id_categoria','codigo','nombre','url_imagen','nota','ultimo_precio_compra','precio_referenciado','promedio_precio_compra','xstatus'];
+    protected $fillable = ['id_categoria','id_carpeta_adjuntos','codigo','nombre','url_imagen','nota','ultimo_precio_compra','precio_referenciado','promedio_precio_compra','xstatus'];
 
 
     //~Relacion inversa One To Many

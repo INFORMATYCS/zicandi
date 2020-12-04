@@ -30,13 +30,13 @@ class ProductoController extends Controller{
         if($buscar==''){
             $productos = Producto::with('atributos')
             ->join('categoria','producto.id_categoria','=','categoria.id_categoria')
-            ->select('producto.id_producto','producto.id_categoria','producto.codigo','producto.nombre as nombre','producto.url_imagen','producto.nota','categoria.codigo as codigo_categoria','.producto.promedio_precio_compra','producto.ultimo_precio_compra','producto.xstatus')
+            ->select('producto.id_producto','producto.id_categoria','producto.id_carpeta_adjuntos','producto.codigo','producto.nombre as nombre','producto.url_imagen','producto.nota','categoria.codigo as codigo_categoria','.producto.promedio_precio_compra','producto.ultimo_precio_compra','producto.xstatus')
             ->orderBy('producto.id_producto', 'desc')
             ->paginate(10);
         }else{
             $productos = Producto::with('atributos')
             ->join('categoria','producto.id_categoria','=','categoria.id_categoria')
-            ->select('producto.id_producto','producto.id_categoria','producto.codigo','producto.nombre as nombre','producto.url_imagen','producto.nota','categoria.codigo as codigo_categoria','.producto.promedio_precio_compra','producto.ultimo_precio_compra','producto.xstatus')
+            ->select('producto.id_producto','producto.id_categoria','producto.id_carpeta_adjuntos','producto.codigo','producto.nombre as nombre','producto.url_imagen','producto.nota','categoria.codigo as codigo_categoria','.producto.promedio_precio_compra','producto.ultimo_precio_compra','producto.xstatus')
             ->where('producto.'.$criterio, 'like', '%' . $buscar . '%')
             ->orderBy('producto.id_producto', 'desc')
             ->paginate(10);
@@ -79,10 +79,11 @@ class ProductoController extends Controller{
         
         $producto = new Producto();
         $producto->id_categoria = $request->id_categoria;
+        $producto->id_carpeta_adjuntos = $request->id_carpeta_adjuntos;
         $producto->codigo = $request->codigo;
         $producto->nombre = $request->nombre;
         $producto->url_imagen = $url_imagen;
-        $producto->nota = $request->nota;
+        $producto->nota = $request->nota;        
         $producto->ultimo_precio_compra = 0;
         $producto->promedio_precio_compra = 0;
         $producto->precio_referenciado = 0;
@@ -127,6 +128,7 @@ class ProductoController extends Controller{
         
         $producto = Producto::findOrFail($request->id_producto);//~Se busca en base al ID entrante
         $producto->id_categoria = $request->id_categoria;
+        $producto->id_carpeta_adjuntos = $request->id_carpeta_adjuntos;
         $producto->codigo = $request->codigo;        
         $producto->nombre = $request->nombre;
         $producto->nota = $request->nota;

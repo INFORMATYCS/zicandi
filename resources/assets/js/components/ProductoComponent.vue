@@ -28,9 +28,9 @@
                 <div class="form-group row">
                     <div class="col-md-6">
                         <div class="input-group">
-                            <select class="form-control col-md-3" v-model="criterio">
-                                <option value="codigo">Codigo</option>
-                                <option value="nombre">Nombre</option>                                
+                            <select class="form-control col-md-3" v-model="criterio">                                
+                                <option value="nombre">Nombre</option>               
+                                <option value="codigo">Codigo</option>                 
                             </select>
                             <input type="text" v-model="buscar" @keyup.enter="listarProductos(1, buscar, criterio, true)" class="form-control" placeholder="Texto a buscar">
                             <button type="submit" class="btn btn-primary" @click="listarProductos(1, buscar, criterio, true)"><i class="fa fa-search"></i> Buscar</button>
@@ -133,7 +133,7 @@
         
 
         <!--Inicio del modal agregar/actualizar-->
-        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none; bottom: -500px;" aria-hidden="true" :class="{'mostrar' : modalProducto.modal}">
+        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none; bottom: -500px;" aria-hidden="true" :class="{'mostrar' : modalProducto.modal}">            
             <div class="modal-dialog modal-primary modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -143,6 +143,7 @@
                         </button>
                     </div>
                     <div class="modal-body">
+                        <upload-component ref="adjuntos"></upload-component>
                         <form action="" method="post" enctype="multipart/form-data" class="form-horizontal">
                             <div class="form-group row">
                                 <label class="col-md-3 form-control-label" for="text-input">Categoria</label>
@@ -369,7 +370,8 @@
                         size: 0,
                         type: ''
                     },
-                    codigoNextVal: 0
+                    codigoNextVal: 0,
+                    id_carpeta_adjuntos: 0
                 },     
                 oDetaProveedorProducto:{
                     selectProveedor:'',
@@ -398,7 +400,7 @@
                     to : 0
                 },
                 offset : 3,
-                criterio: 'codigo',
+                criterio: 'nombre',
                 buscar: '',
                 isLoading: 0,
                 listaCategorias: [],
@@ -477,7 +479,8 @@
                     'imagen_local': this.oProducto.imagen.local,
                     'imagen_nombre': this.oProducto.imagen.nombre,
                     'imagen_size': this.oProducto.imagen.size,
-                    'imagen_type': this.oProducto.imagen.type
+                    'imagen_type': this.oProducto.imagen.type,
+                    'id_carpeta_adjuntos': this.oProducto.id_carpeta_adjuntos
                 })
                 .then(function (response) {                    
                     me.buscar = '';
@@ -509,7 +512,8 @@
                     'imagen_local': this.oProducto.imagen.local,
                     'imagen_nombre': this.oProducto.imagen.nombre,
                     'imagen_size': this.oProducto.imagen.size,
-                    'imagen_type': this.oProducto.imagen.type
+                    'imagen_type': this.oProducto.imagen.type,
+                    'id_carpeta_adjuntos': this.oProducto.id_carpeta_adjuntos
                 })
                 .then(function (response) {                    
                     me.closeModal();
@@ -595,6 +599,8 @@
                                 this.oProducto.imagen.type='';                                
                                 this.oProducto.especificacionList = [];
 
+                                this.onCargaComponenteUpload();
+
                                 break;
                             }
                             case 'actualizar':
@@ -605,6 +611,7 @@
                                 
                                 this.oProducto.id_producto=     data['id_producto'];
                                 this.oProducto.id_categoria=    data['id_categoria'];
+                                this.oProducto.id_carpeta_adjuntos = data['id_carpeta_adjuntos'];
                                 this.oProducto.codigo_categoria=data['codigo_categoria'];
                                 this.oProducto.codigo=          data['codigo'];
                                 this.oProducto.nombre=          data['nombre'];
@@ -614,13 +621,16 @@
                                 this.oProducto.imagen.nombre='';
                                 this.oProducto.imagen.size=0;
                                 this.oProducto.imagen.type='';                                
-                                this.oProducto.especificacionList = []; 
+                                this.oProducto.especificacionList = [];                                 
                                 
                                 for (let i = 0; i < data['atributos'].length; i++) {
                                     let att = data['atributos'][i];
                                     let especificacion= {llave:att['atributo'], valor:att['valor'], edicion: false, xstatus: true};
                                     this.oProducto.especificacionList.push(especificacion);                                    
                                 };
+
+                                //~Carga documentos adjuntos
+                                this.onCargaComponenteUpload();
                             }
                         }
 
@@ -825,6 +835,26 @@
                     me.isLoading = 0;
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
+            },
+            onCargaComponenteUpload(){
+                if(this.oProducto.id_carpeta_adjuntos==0 || this.oProducto.id_carpeta_adjuntos==null){
+                    let me = this;                    
+                    axios.post('/zicandi/public/uploadfile/nuevaCarpeta',{
+                        'nombre': 'carpeta_producto'                   
+                    })
+                    .then(function (response) {                                                                
+                        console.log(response);
+
+                        me.oProducto.id_carpeta_adjuntos=response.data;
+                        me.$refs.adjuntos.onLoadAdjuntos(me.oProducto.id_carpeta_adjuntos);
+                    })
+                    .catch(function (error) {                               
+                        util.MSG('Algo salio Mal','Error al crear la carpeta: '.util.getErrorMensaje(error), util.tipoErr);
+                    });
+                }else{
+                    this.$refs.adjuntos.onLoadAdjuntos(this.oProducto.id_carpeta_adjuntos);
+                }
+                
             },
 
         },
