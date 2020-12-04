@@ -2,6 +2,7 @@
     <thead>
     <tr>
         <th style="background-color: #B9C636;">Codigo Producto</th>
+        <th style="background-color: #B9C636;">ID Producto</th>
         <th style="background-color: #B9C636;">Producto</th>
         <th style="background-color: #B9C636;">Ultimo Precio Compra</th>
         <th style="background-color: #B9C636;">ID almacen</th>
@@ -13,6 +14,7 @@
     <tbody>
     @foreach($stock as $s)
         <tr>            
+            <td>{{ $s->codigo }}</td> 			
             <td>{{ $s->id_producto }}</td> 			
             <td>{{ $s->nombre }}</td>
             <td>{{ $s->ultimo_precio_compra }}</td> 

@@ -407,7 +407,7 @@ class TiendasController extends Controller
         try{
             $idCuentaTienda = $request->id_cuenta_tienda;
 
-            $sql= " SELECT DATE_FORMAT(MAX(FECHA_FINAL)-1,'%Y-%m-%d') AS fecha 
+            $sql= " SELECT DATE_FORMAT(DATE_SUB(MAX(FECHA_FINAL),INTERVAL 1 DAY),'%Y-%m-%d') AS fecha 
                     FROM control_ventas_meli 
                     WHERE id_cuenta_tienda = $idCuentaTienda AND estatus = 'TER'";        
 
