@@ -22,7 +22,7 @@ class AlmacenController extends Controller{
      */
     public function index(Request $request){
        
-        if(!$request->ajax())return redirect('/');
+        //if(!$request->ajax())return redirect('/');
 
 
         $listaAlmacen = Almacen::orderBy('id_almacen','desc')->paginate(10);
@@ -59,7 +59,7 @@ class AlmacenController extends Controller{
         $almacen->save();
 
 
-
+        return [ 'xstatus'=>true, 'error' => null ];
     }
 
     /**
@@ -77,6 +77,9 @@ class AlmacenController extends Controller{
         $almacen->xstatus ='1';
 
         $almacen->save();
+
+
+        return [ 'xstatus'=>true, 'error' => null ];
 
     }
 

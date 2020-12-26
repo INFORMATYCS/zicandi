@@ -60177,10 +60177,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
-//
-//
-//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -60195,7 +60191,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             },
             isBuscadorProductoDiv: 0,
             offset: 3,
-            criterio: 'codigo',
+            criterio: 'all',
             buscar: '',
             isLoading: 0,
             listaProductos: []
@@ -60262,43 +60258,6 @@ var render = function() {
       _c("div", { staticClass: "form-group row" }, [
         _c("div", { staticClass: "col-md-12" }, [
           _c("div", { staticClass: "input-group" }, [
-            _c(
-              "select",
-              {
-                directives: [
-                  {
-                    name: "model",
-                    rawName: "v-model",
-                    value: _vm.criterio,
-                    expression: "criterio"
-                  }
-                ],
-                staticClass: "form-control col-md-6",
-                on: {
-                  change: function($event) {
-                    var $$selectedVal = Array.prototype.filter
-                      .call($event.target.options, function(o) {
-                        return o.selected
-                      })
-                      .map(function(o) {
-                        var val = "_value" in o ? o._value : o.value
-                        return val
-                      })
-                    _vm.criterio = $event.target.multiple
-                      ? $$selectedVal
-                      : $$selectedVal[0]
-                  }
-                }
-              },
-              [
-                _c("option", { attrs: { value: "codigo" } }, [
-                  _vm._v("Codigo")
-                ]),
-                _vm._v(" "),
-                _c("option", { attrs: { value: "nombre" } }, [_vm._v("Nombre")])
-              ]
-            ),
-            _vm._v(" "),
             _c("input", {
               directives: [
                 {
