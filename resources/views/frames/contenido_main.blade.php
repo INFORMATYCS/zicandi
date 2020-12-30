@@ -43,6 +43,10 @@
         <ventastienda-component></ventastienda-component>
     </template>
 
+    <template v-if="oppMenuSeleccion==18">
+        <saldocuentaconta-component></saldocuentaconta-component>
+    </template>
+
     <template v-if="oppMenuSeleccion==90">
         <mercadolibre-component></mercadolibre-component>
     </template>

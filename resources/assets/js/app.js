@@ -43,6 +43,8 @@ Vue.component('entregas-component', require('./components/EntregasBettComponent.
 
 Vue.component('ventastienda-component', require('./components/VentasTiendaComponent.vue'));
 
+Vue.component('saldocuentaconta-component', require('./components/SaldoCuentaContaComponent.vue'));
+
 
 const app = new Vue({
     el: '#app',
