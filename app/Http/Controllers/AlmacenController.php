@@ -388,4 +388,88 @@ class AlmacenController extends Controller{
     }
 
 
+    /**
+     * Recupera el resumen del almacen
+     * 
+     * 
+     */
+    public function resumenAlmacen(Request $request){
+        try{
+            
+            $idAlmacen = $request->id_almacen;
+
+            $almacen = Almacen::findOrFail($idAlmacen);//~Se busca en base al ID entrante
+            
+            $sql= " SELECT  COUNT(p.id_producto) total_prod, 
+                            SUM(bal.stock) total_stock,
+                            ROUND(SUM(p.ultimo_precio_compra * bal.stock),2) total_pesos
+                    FROM almacen al, bita_resumen_almacen bal, producto p
+                    WHERE al.id_almacen = bal.id_almacen
+                    AND bal.id_producto = p.id_producto
+                    AND al.id_almacen = $idAlmacen
+                    AND p.xstatus = 1";  
+            $rs = DB::select( $sql );
+
+            $totalProductos = 0;
+            $totalStock = 0;
+            $totalPesos = 0;
+            
+            if(count($rs)>0){                
+                $totalProductos = $rs[0]->total_prod;
+                $totalStock = $rs[0]->total_stock;
+                $totalPesos = $rs[0]->total_pesos;                         
+            }
+            
+            
+            return [    'xstatus'=>true, 
+                        'totalProductos'=>$totalProductos, 
+                        'totalStock'=>$totalStock, 
+                        'totalPesos'=>$totalPesos, 
+                        'almacen'=>$almacen];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+        
+    }
+
+    /**
+     * Obtiene el detalle de productos dentro del almacen junto con su stock
+     * 
+     * 
+     */
+    public function resumenDetalleProductosAlmacen(Request $request){
+        try{
+            
+            $idAlmacen = $request->id_almacen;
+            $idProductoBuscar = $request->id_producto;
+
+
+            if($idProductoBuscar == null){
+                $almacen = Almacen::join('bita_resumen_almacen', 'almacen.id_almacen', '=', 'bita_resumen_almacen.id_almacen')
+                ->join('producto','producto.id_producto','=','bita_resumen_almacen.id_producto')
+                ->select('producto.id_producto','producto.codigo','producto.nombre','producto.url_imagen','producto.ultimo_precio_compra','bita_resumen_almacen.stock')
+                ->where('almacen.id_almacen', '=', $idAlmacen)
+                ->where('producto.xstatus', '=', 1)
+                ->paginate(30);
+            }else{
+                $almacen = Almacen::join('bita_resumen_almacen', 'almacen.id_almacen', '=', 'bita_resumen_almacen.id_almacen')
+                ->join('producto','producto.id_producto','=','bita_resumen_almacen.id_producto')
+                ->select('producto.id_producto','producto.codigo','producto.nombre','producto.url_imagen','producto.ultimo_precio_compra','bita_resumen_almacen.stock')
+                ->where('almacen.id_almacen', '=', $idAlmacen)
+                ->where('producto.id_producto', '=', $idProductoBuscar)
+                ->where('producto.xstatus', '=', 1)
+                ->paginate(30);
+            }
+
+
+            return [    'xstatus'=>true, 'detalle'=> $almacen ];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+        
+    }
+
+
 }
