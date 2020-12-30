@@ -20,11 +20,13 @@ class UploadFileController extends Controller{
        $file = $request->file('file');
        $carpeta = $request->id_carpeta_adjuntos;
 
-       $procesadorImagenes = new ProcesadorImagenes();
-       $path = $procesadorImagenes->publicaDocumento($carpeta, $file);  
+       if($carpeta > 0){
+        $procesadorImagenes = new ProcesadorImagenes();
+        $path = $procesadorImagenes->publicaDocumento($carpeta, $file);  
 
-       //~Guarda en base
-       $this->store($request->id_carpeta_adjuntos, $path, substr($request->nombre, 0, 50));
+        //~Guarda en base
+        $this->store($request->id_carpeta_adjuntos, $path, substr($request->nombre, 0, 50));
+       }
     }
 
 

@@ -59,6 +59,8 @@ Route::post('/almacenes/desactivar', 'AlmacenController@desactivar');
 Route::post('/almacenes/activar', 'AlmacenController@activar');
 Route::get('/almacenes/movimiento', 'AlmacenController@movimientoAlmacen');
 Route::get('/almacenes/export', 'AlmacenController@exportar');
+Route::get('/almacenes/resumen', 'AlmacenController@resumenAlmacen');
+Route::get('/almacenes/resumen/detalle', 'AlmacenController@resumenDetalleProductosAlmacen');
 
 
 // - Rutas para Compras
@@ -145,3 +147,8 @@ Route::get('/notificador/batch_termino', 'NotificadorController@mailTerminoBatch
 
 
 
+//~ Contabilidad
+Route::get('/conta/plantilla', 'ContabilidadController@plantillaByEmpresa');
+Route::post('/conta/ejercicio/crear', 'ContabilidadController@crearEjercicio');
+Route::post('/conta/ejercicio/update_saldo', 'ContabilidadController@updateSaldo');
+Route::get('/conta/select_empresa', 'ContabilidadController@selectEmpresa');

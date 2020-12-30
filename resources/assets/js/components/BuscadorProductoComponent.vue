@@ -5,13 +5,9 @@
              
             <div class="card-body">
                 <!-- Buscador -->
-                <div class="form-group row">
+                <div class="form-group row"> 
                     <div class="col-md-12">
-                        <div class="input-group">
-                            <select class="form-control col-md-6" v-model="criterio">
-                                <option value="codigo">Codigo</option>
-                                <option value="nombre">Nombre</option>                                
-                            </select>
+                        <div class="input-group">                            
                             <input type="text" v-model="buscar" @keyup.enter="listarProductos(1, buscar, criterio, true)" class="form-control" placeholder="Texto a buscar">
                             <button type="button" class="btn btn-primary" @click="listarProductos(1, buscar, criterio, true)"><i class="fa fa-search"></i> Buscar producto</button>
                         </div>                
@@ -78,7 +74,7 @@
                 },
                 isBuscadorProductoDiv: 0,
                 offset : 3,
-                criterio: 'codigo',
+                criterio: 'all',
                 buscar: '',
                 isLoading: 0,
                 listaProductos: []

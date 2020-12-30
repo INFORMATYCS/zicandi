@@ -5086,6 +5086,8 @@ Vue.component('entregas-component', __webpack_require__(134));
 
 Vue.component('ventastienda-component', __webpack_require__(139));
 
+Vue.component('saldocuentaconta-component', __webpack_require__(145));
+
 var app = new Vue({
   el: '#app',
   data: {
@@ -60177,10 +60179,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
-//
-//
-//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -60195,7 +60193,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             },
             isBuscadorProductoDiv: 0,
             offset: 3,
-            criterio: 'codigo',
+            criterio: 'all',
             buscar: '',
             isLoading: 0,
             listaProductos: []
@@ -60262,43 +60260,6 @@ var render = function() {
       _c("div", { staticClass: "form-group row" }, [
         _c("div", { staticClass: "col-md-12" }, [
           _c("div", { staticClass: "input-group" }, [
-            _c(
-              "select",
-              {
-                directives: [
-                  {
-                    name: "model",
-                    rawName: "v-model",
-                    value: _vm.criterio,
-                    expression: "criterio"
-                  }
-                ],
-                staticClass: "form-control col-md-6",
-                on: {
-                  change: function($event) {
-                    var $$selectedVal = Array.prototype.filter
-                      .call($event.target.options, function(o) {
-                        return o.selected
-                      })
-                      .map(function(o) {
-                        var val = "_value" in o ? o._value : o.value
-                        return val
-                      })
-                    _vm.criterio = $event.target.multiple
-                      ? $$selectedVal
-                      : $$selectedVal[0]
-                  }
-                }
-              },
-              [
-                _c("option", { attrs: { value: "codigo" } }, [
-                  _vm._v("Codigo")
-                ]),
-                _vm._v(" "),
-                _c("option", { attrs: { value: "nombre" } }, [_vm._v("Nombre")])
-              ]
-            ),
-            _vm._v(" "),
             _c("input", {
               directives: [
                 {
@@ -73009,6 +72970,1072 @@ if (false) {
   module.hot.accept()
   if (module.hot.data) {
     require("vue-hot-reload-api")      .rerender("data-v-0720aa94", module.exports)
+  }
+}
+
+/***/ }),
+/* 145 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__(0)
+/* script */
+var __vue_script__ = __webpack_require__(146)
+/* template */
+var __vue_template__ = __webpack_require__(147)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/SaldoCuentaContaComponent.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-3b5b0d98", Component.options)
+  } else {
+    hotAPI.reload("data-v-3b5b0d98", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 146 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    data: function data() {
+        return {
+            buscador: {
+                id_conta_empresa: 0,
+                ejercicio: '',
+                listaEmpresas: []
+            },
+            saldosPlantillaList: [],
+            saldoGlobal: 0,
+            idCarpetaAdjuntos: 0,
+            modalNuevo: {
+                modal: 0,
+                tituloModal: '',
+                tipoAccion: 0,
+                error: 0,
+                erroresMsjList: [],
+                id_conta_empresa: 0,
+                ejercicio: ''
+            },
+            isLoading: 0
+
+        };
+    },
+
+    computed: {},
+    methods: {
+        /**
+         * 
+         * 
+         * 
+         */
+        onSelectEmpresas: function onSelectEmpresas() {
+            var me = this;
+            var url = '/zicandi/public/conta/select_empresa';
+            axios.get(url).then(function (response) {
+                var respuesta = response.data;
+                me.buscador.listaEmpresas = respuesta.empresas;
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+
+        /**
+         * 
+         * 
+         * 
+         */
+        onConsultaPlantilla: function onConsultaPlantilla() {
+            var me = this;
+            this.isLoading = 1;
+            var url = '/zicandi/public/conta/plantilla?id_conta_empresa=' + this.buscador.id_conta_empresa + '&ejercicio=' + this.buscador.ejercicio;
+            axios.get(url).then(function (response) {
+                me.isLoading = 0;
+
+                if (response.data.xstatus) {
+                    var respuesta = response.data;
+                    me.saldosPlantillaList = respuesta.plantilla;
+
+                    me.onResumenSaldosPlantilla();
+
+                    me.onCargaComponenteUpload();
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+
+
+        /**
+         * 
+         * 
+         * 
+         */
+        onResumenSaldosPlantilla: function onResumenSaldosPlantilla() {
+            var saldosPlantillaList = this.saldosPlantillaList;
+
+            this.saldoGlobal = 0;
+            var saldoAcum = 0;
+
+            if (saldosPlantillaList.length > 0) {
+                for (var i = 0; i < saldosPlantillaList.length; i++) {
+                    var saldo = saldosPlantillaList[i];
+
+                    if (parseFloat(saldo.saldo_cierre) >= 0) {
+                        saldoAcum += parseFloat(saldo.saldo_cierre);
+                    }
+
+                    this.idCarpetaAdjuntos = saldo.id_carpeta_adjuntos;
+                }
+
+                this.saldoGlobal = this.toMoneda(saldoAcum);
+            }
+        },
+
+
+        /**
+         * 
+         * 
+         * 
+         */
+        toMoneda: function toMoneda(valor) {
+            var val = (valor / 1).toFixed(2).replace(',', '.');
+            return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        },
+
+
+        /**
+         * 
+         * 
+         * 
+         */
+        onCargaComponenteUpload: function onCargaComponenteUpload() {
+            if (this.idCarpetaAdjuntos > 0) {
+                this.$refs.adjuntos.onLoadAdjuntos(this.idCarpetaAdjuntos);
+            }
+        },
+
+
+        /**
+         * 
+         * 
+         * 
+         */
+        showModal: function showModal(modelo, accion) {
+            var data = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+            switch (modelo) {
+                case 'plantilla':
+                    {
+                        switch (accion) {
+                            case 'registrar':
+                                {
+                                    this.modalNuevo.modal = 1;
+                                    this.modalNuevo.id_conta_empresa = 0;
+                                    this.modalNuevo.ejercicio = '';
+                                    this.modalNuevo.tituloModal = 'Registrar Ejercicio';
+                                    this.modalNuevo.tipoAccion = 1;
+
+                                    break;
+                                }
+                        }
+                    }
+            }
+        },
+
+        /**
+         * 
+         * 
+         * 
+         * 
+         */
+        closeModal: function closeModal() {
+            this.modalNuevo.modal = 0;
+            this.ubicacion = '';
+            this.nota = '';
+            this.modalNuevo.tituloModal = '';
+        },
+
+        /**
+         * 
+         * 
+         * 
+         */
+        onCrearPlantilla: function onCrearPlantilla() {
+            if (this.validarNuevoEjercicio()) {
+                return;
+            }
+
+            var me = this;
+            this.isLoading = 1;
+            axios.post('/zicandi/public/conta/ejercicio/crear', {
+                'id_conta_empresa': this.modalNuevo.id_conta_empresa,
+                'ejercicio': this.modalNuevo.ejercicio
+            }).then(function (response) {
+                me.isLoading = 0;
+                if (response.data.xstatus) {
+                    var totalCreados = response.data.totalCreados;
+                    me.idCarpetaAdjuntos = response.data.idCarpetaAdjunto;
+
+                    util.AVISO('Perfecto, se creo el ejercicio', util.tipoOk);
+
+                    me.buscador.id_conta_empresa = me.modalNuevo.id_conta_empresa;
+                    me.buscador.ejercicio = me.modalNuevo.ejercicio;
+                    me.onConsultaPlantilla();
+
+                    me.closeModal();
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+
+        /**
+         * 
+         * 
+         * 
+         */
+        onUpdateSaldosPlantilla: function onUpdateSaldosPlantilla() {
+            var me = this;
+            this.isLoading = 1;
+            axios.post('/zicandi/public/conta/ejercicio/update_saldo', {
+                'id_conta_empresa': this.buscador.id_conta_empresa,
+                'detalle_saldos': this.saldosPlantillaList
+            }).then(function (response) {
+                me.isLoading = 0;
+                if (response.data.xstatus) {
+                    util.AVISO('Perfecto, actualizacion de saldos OK', util.tipoOk);
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+
+        /**
+         * 
+         * 
+         * 
+         */
+        validarNuevoEjercicio: function validarNuevoEjercicio() {
+            this.modalNuevo.error = 0;
+            this.modalNuevo.erroresMsjList = [];
+
+            if (!this.modalNuevo.ejercicio) this.modalNuevo.erroresMsjList.push("Se requiere el ejericio");
+            if (this.modalNuevo.id_conta_empresa <= 0) this.modalNuevo.erroresMsjList.push("Elegir la empresa");
+
+            if (this.modalNuevo.erroresMsjList.length) this.modalNuevo.error = 1;
+
+            return this.modalNuevo.error;
+        }
+    },
+    mounted: function mounted() {
+        this.onSelectEmpresas();
+    }
+});
+
+/***/ }),
+/* 147 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("main", { staticClass: "main" }, [
+    _c("div", {
+      staticClass: "sbl-circ-ripple",
+      class: { "abrir-load-sbl": _vm.isLoading },
+      staticStyle: { display: "none" }
+    }),
+    _vm._v(" "),
+    _vm._m(0),
+    _vm._v(" "),
+    _c(
+      "div",
+      { staticClass: "container-fluid" },
+      [
+        _c("div", { staticClass: "card" }, [
+          _c("div", { staticClass: "card-header" }, [
+            _c("i", { staticClass: "fa fa-align-justify" }),
+            _vm._v(" Tareas:\n                "),
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-secondary",
+                attrs: { type: "button" },
+                on: {
+                  click: function($event) {
+                    return _vm.showModal("plantilla", "registrar")
+                  }
+                }
+              },
+              [
+                _c("i", { staticClass: "icon-plus" }),
+                _vm._v(" Nuevo ejercicio\n                ")
+              ]
+            ),
+            _vm._v(" "),
+            _vm.saldosPlantillaList.length > 0
+              ? _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.onUpdateSaldosPlantilla()
+                      }
+                    }
+                  },
+                  [
+                    _c("i", { staticClass: "icon-plus" }),
+                    _vm._v(" Guardar saldos\n                ")
+                  ]
+                )
+              : _vm._e()
+          ])
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "form-group row" }, [
+          _c("div", { staticClass: "col-md-4" }, [
+            _c("div", { staticClass: "input-group" }, [
+              _c("span", [_vm._v("Ejercicio")]),
+              _vm._v("          \n                    "),
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.buscador.ejercicio,
+                    expression: "buscador.ejercicio"
+                  }
+                ],
+                staticClass: "form-control",
+                attrs: { type: "text", placeholder: "ddaaaa", maxlength: "30" },
+                domProps: { value: _vm.buscador.ejercicio },
+                on: {
+                  input: function($event) {
+                    if ($event.target.composing) {
+                      return
+                    }
+                    _vm.$set(_vm.buscador, "ejercicio", $event.target.value)
+                  }
+                }
+              })
+            ])
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-md-4" }, [
+            _c("div", { staticClass: "input-group" }, [
+              _vm._v(
+                "                                                        \n                    Empresa: \n                    "
+              ),
+              _c(
+                "select",
+                {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.buscador.id_conta_empresa,
+                      expression: "buscador.id_conta_empresa"
+                    }
+                  ],
+                  staticClass: "form-control",
+                  on: {
+                    change: function($event) {
+                      var $$selectedVal = Array.prototype.filter
+                        .call($event.target.options, function(o) {
+                          return o.selected
+                        })
+                        .map(function(o) {
+                          var val = "_value" in o ? o._value : o.value
+                          return val
+                        })
+                      _vm.$set(
+                        _vm.buscador,
+                        "id_conta_empresa",
+                        $event.target.multiple
+                          ? $$selectedVal
+                          : $$selectedVal[0]
+                      )
+                    }
+                  }
+                },
+                [
+                  _c("option", { attrs: { value: "0", disabled: "" } }, [
+                    _vm._v("Seleccione...")
+                  ]),
+                  _vm._v(" "),
+                  _vm._l(_vm.buscador.listaEmpresas, function(empresa) {
+                    return _c("option", {
+                      key: empresa.id_conta_empresa,
+                      domProps: {
+                        value: empresa.id_conta_empresa,
+                        textContent: _vm._s(empresa.nombre)
+                      }
+                    })
+                  })
+                ],
+                2
+              )
+            ])
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-md-4" }, [
+            _c("div", { staticClass: "input-group" }, [
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-primary",
+                  attrs: { type: "submit" },
+                  on: {
+                    click: function($event) {
+                      return _vm.onConsultaPlantilla()
+                    }
+                  }
+                },
+                [_c("i", { staticClass: "fa fa-search" }), _vm._v(" buscar")]
+              )
+            ])
+          ])
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "card" }, [
+          _vm._m(1),
+          _vm._v(" "),
+          _c(
+            "ul",
+            { staticClass: "list-group list-group-flush" },
+            [
+              _vm._l(_vm.saldosPlantillaList, function(subcuenta) {
+                return _c(
+                  "li",
+                  {
+                    key: subcuenta.id_conta_subcuenta,
+                    staticClass: "list-group-item"
+                  },
+                  [
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c("div", { staticClass: "col-md-4" }, [
+                        _c("div", { staticClass: "input-group" }, [
+                          _c("small", {
+                            staticClass: "text-muted",
+                            domProps: {
+                              textContent: _vm._s(subcuenta.codigo_cuenta)
+                            }
+                          }),
+                          _vm._v(
+                            "                                  \n                              \n                            "
+                          ),
+                          _c("span", {
+                            domProps: { textContent: _vm._s(subcuenta.cuenta) }
+                          })
+                        ])
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-4" }, [
+                        _c("div", { staticClass: "input-group" }, [
+                          _c("small", {
+                            staticClass: "text-muted",
+                            domProps: {
+                              textContent: _vm._s(subcuenta.codigo_subcuenta)
+                            }
+                          }),
+                          _vm._v(
+                            "                                  \n                              \n                            "
+                          ),
+                          _c("span", {
+                            domProps: {
+                              textContent: _vm._s(subcuenta.subcuenta)
+                            }
+                          })
+                        ])
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-4" }, [
+                        _c("div", { staticClass: "input-group" }, [
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: subcuenta.saldo_cierre,
+                                expression: "subcuenta.saldo_cierre"
+                              }
+                            ],
+                            staticClass: "form-control text-right",
+                            attrs: {
+                              type: "text",
+                              placeholder: "0.00",
+                              maxlength: "30"
+                            },
+                            domProps: { value: subcuenta.saldo_cierre },
+                            on: {
+                              keyup: function($event) {
+                                return _vm.onResumenSaldosPlantilla()
+                              },
+                              input: function($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.$set(
+                                  subcuenta,
+                                  "saldo_cierre",
+                                  $event.target.value
+                                )
+                              }
+                            }
+                          })
+                        ])
+                      ])
+                    ])
+                  ]
+                )
+              }),
+              _vm._v(" "),
+              _c("li", { staticClass: "list-group-item" }, [
+                _c("div", { staticClass: "form-group row" }, [
+                  _vm._m(2),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-md-4" }, [
+                    _c(
+                      "div",
+                      { staticClass: "text-right", attrs: { width: "100%" } },
+                      [
+                        _c("h1", {
+                          domProps: { textContent: _vm._s(_vm.saldoGlobal) }
+                        })
+                      ]
+                    )
+                  ])
+                ])
+              ])
+            ],
+            2
+          )
+        ]),
+        _vm._v(" "),
+        _c("upload-component", { ref: "adjuntos" })
+      ],
+      1
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.modalNuevo.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-primary modal-lg",
+            attrs: { role: "document" }
+          },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c("div", { staticClass: "modal-header" }, [
+                _c("h4", {
+                  staticClass: "modal-title",
+                  domProps: { textContent: _vm._s(_vm.modalNuevo.tituloModal) }
+                }),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "close",
+                    attrs: { type: "button", "aria-label": "Close" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeModal()
+                      }
+                    }
+                  },
+                  [
+                    _c("span", { attrs: { "aria-hidden": "true" } }, [
+                      _vm._v("×")
+                    ])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-body" }, [
+                _c(
+                  "form",
+                  {
+                    staticClass: "form-horizontal",
+                    attrs: {
+                      action: "",
+                      method: "post",
+                      enctype: "multipart/form-data"
+                    }
+                  },
+                  [
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Ejercicio")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.modalNuevo.ejercicio,
+                              expression: "modalNuevo.ejercicio"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: { type: "text", placeholder: "ddaaaa" },
+                          domProps: { value: _vm.modalNuevo.ejercicio },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.modalNuevo,
+                                "ejercicio",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Empresa")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.modalNuevo.id_conta_empresa,
+                                expression: "modalNuevo.id_conta_empresa"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.$set(
+                                  _vm.modalNuevo,
+                                  "id_conta_empresa",
+                                  $event.target.multiple
+                                    ? $$selectedVal
+                                    : $$selectedVal[0]
+                                )
+                              }
+                            }
+                          },
+                          [
+                            _c(
+                              "option",
+                              { attrs: { value: "0", disabled: "" } },
+                              [_vm._v("Seleccione...")]
+                            ),
+                            _vm._v(" "),
+                            _vm._l(_vm.buscador.listaEmpresas, function(
+                              empresa
+                            ) {
+                              return _c("option", {
+                                key: empresa.id_conta_empresa,
+                                domProps: {
+                                  value: empresa.id_conta_empresa,
+                                  textContent: _vm._s(empresa.nombre)
+                                }
+                              })
+                            })
+                          ],
+                          2
+                        )
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      {
+                        directives: [
+                          {
+                            name: "show",
+                            rawName: "v-show",
+                            value: _vm.modalNuevo.error,
+                            expression: "modalNuevo.error"
+                          }
+                        ],
+                        staticClass: "form-group row div-error"
+                      },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "text-center text-error" },
+                          _vm._l(_vm.modalNuevo.erroresMsjList, function(
+                            error
+                          ) {
+                            return _c("div", {
+                              key: error,
+                              domProps: { textContent: _vm._s(error) }
+                            })
+                          }),
+                          0
+                        )
+                      ]
+                    )
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeModal()
+                      }
+                    }
+                  },
+                  [_vm._v("Cerrar")]
+                ),
+                _vm._v(" "),
+                _vm.modalNuevo.tipoAccion == 1
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-primary",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.onCrearPlantilla()
+                          }
+                        }
+                      },
+                      [_vm._v("Crear")]
+                    )
+                  : _vm._e()
+              ])
+            ])
+          ]
+        )
+      ]
+    )
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("ol", { staticClass: "breadcrumb" }, [
+      _c("li", { staticClass: "breadcrumb-item" }, [_vm._v("Home")]),
+      _vm._v(" "),
+      _c("li", { staticClass: "breadcrumb-item" }, [_vm._v("Conta")]),
+      _vm._v(" "),
+      _c("li", { staticClass: "breadcrumb-item active" }, [_vm._v("Saldos")])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "card-header" }, [
+      _c("div", { staticClass: "row" }, [
+        _c("div", { staticClass: "col-md-4" }, [
+          _c("strong", [_vm._v("CUENTA")])
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "col-md-4" }, [
+          _c("strong", [_vm._v("SUB CUENTA")])
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "col-md-4" }, [
+          _c("strong", [_vm._v("SALDO CIERRE")])
+        ])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "col-md-8" }, [
+      _c("div", { staticClass: "input-group" }, [
+        _vm._v(
+          "                                                                        \n                            TOTAL\n                        "
+        )
+      ])
+    ])
+  }
+]
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-3b5b0d98", module.exports)
   }
 }
 

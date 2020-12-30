@@ -22,9 +22,20 @@ class ProductoController extends Controller{
     
         $buscar = $request->buscar;
         $criterio = $request->criterio;
+        $codigoML = false;
 
         if(is_numeric($buscar)) {
             $criterio = "codigo";
+            
+            if(strlen($buscar)>=9 && strlen($buscar)<=10 ){
+                $codigoML = true;
+                $buscar = "MLM".$buscar;
+            }
+        }else{
+            if(strtoupper(substr($buscar,0,3))=="MLM"){
+                $codigoML = true;
+            }
+            $criterio = "nombre";
         }
         
         if($buscar==''){
@@ -40,6 +51,19 @@ class ProductoController extends Controller{
             ->where('producto.'.$criterio, 'like', '%' . $buscar . '%')
             ->orderBy('producto.id_producto', 'desc')
             ->paginate(10);
+
+            if($productos->total() == 0 && $codigoML == true){
+                $productos = Producto::with('atributos')
+                ->join('categoria','producto.id_categoria','=','categoria.id_categoria')                
+                ->join('config_publicacion','producto.id_producto','=','config_publicacion.id_producto')
+                ->join('publicacion','publicacion.id_publicacion','=','config_publicacion.id_publicacion')
+                ->select('producto.id_producto','producto.id_categoria','producto.id_carpeta_adjuntos','producto.codigo','producto.nombre as nombre','producto.url_imagen','producto.nota','categoria.codigo as codigo_categoria','.producto.promedio_precio_compra','producto.ultimo_precio_compra','producto.xstatus')
+                ->where('publicacion.id_publicacion_tienda', '=', $buscar)
+                ->orderBy('producto.id_producto', 'desc')
+                ->paginate(10);
+            }
+
+            
         }
         
 
