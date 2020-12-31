@@ -57,7 +57,13 @@ class ContabilidadController extends Controller
 
             //~Valida si ya existe el ejercicio en tabla de saldos
             $sql= " SELECT COUNT(*) AS total FROM conta_subcuenta_saldo
-                    WHERE ejercicio = '".$ejercicio."'";  
+                    WHERE ejercicio = '".$ejercicio."'
+                    AND id_conta_subcuenta IN (
+                        SELECT sub.id_conta_subcuenta FROM conta_empresa emp, conta_cuenta cta, conta_subcuenta sub
+                        WHERE emp.id_conta_empresa = cta.id_conta_empresa
+                        AND cta.id_conta_cuenta = sub.id_conta_cuenta
+                        AND emp.id_conta_empresa = ".$idEmpresa."
+                    )";  
             $rs = DB::select( $sql );
 
             $totalReg = 0;            

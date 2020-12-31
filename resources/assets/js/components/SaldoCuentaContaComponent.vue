@@ -279,10 +279,11 @@
 
                 if(saldosPlantillaList.length>0){
                     for(let i=0; i<saldosPlantillaList.length; i++){
-                        let saldo = saldosPlantillaList[i];
-                        
-                        if(parseFloat(saldo.saldo_cierre) >= 0){
-                            saldoAcum+=parseFloat(saldo.saldo_cierre);                                            
+                        let saldo = saldosPlantillaList[i];                        
+                                                
+                        if(!isNaN(saldo.saldo_cierre) && saldo.saldo_cierre!=''){
+                            saldoAcum+=parseFloat(saldo.saldo_cierre);     
+                                                               
                         }
 
                         this.idCarpetaAdjuntos = saldo.id_carpeta_adjuntos;

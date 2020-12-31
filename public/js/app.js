@@ -73302,7 +73302,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 for (var i = 0; i < saldosPlantillaList.length; i++) {
                     var saldo = saldosPlantillaList[i];
 
-                    if (parseFloat(saldo.saldo_cierre) >= 0) {
+                    if (!isNaN(saldo.saldo_cierre) && saldo.saldo_cierre != '') {
                         saldoAcum += parseFloat(saldo.saldo_cierre);
                     }
 

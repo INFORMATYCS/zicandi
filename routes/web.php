@@ -92,7 +92,6 @@ Route::get('/meli/refresh', 'MercadoLibreController@refreshToken');
 Route::get('/bett/get', 'BetterwareController@getPage');
 Route::get('/bett/resumen', 'BetterwareController@resumenMigracion');
 Route::get('/bett/limpia', 'BetterwareController@limpiaTablaTemporal');
-Route::get('/bett/migracion', 'BetterwareController@migracionProductos');
 Route::get('/bett/asociadas', 'BetterwareController@listadoAsociadas');
 Route::post('/bett/nueva_asociada', 'BetterwareController@nuevaAsociada');
 Route::post('/bett/update_asociada', 'BetterwareController@actualizaAsociada');
@@ -106,6 +105,8 @@ Route::get('/bett/ordenes', 'BetterwareController@getOrdenesEntrega');
 Route::post('/bett/update_ordenes', 'BetterwareController@actualizaOrden');
 Route::post('/bett/finaliza_ordenes', 'BetterwareController@finalizaOrden');
 Route::get('/bett/resumen_ordenes', 'BetterwareController@creaResumenPDF');
+Route::get('/bett/get/productos', 'BetterwareController@getProductosBett');
+Route::get('/bett/migracion', 'BetterwareController@procesaTempProducto');
 
 
 // ~  Rutas Tiendas
