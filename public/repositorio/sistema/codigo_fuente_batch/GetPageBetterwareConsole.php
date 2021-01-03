@@ -7,34 +7,39 @@ $logFisico = fopen("zicandi.log", 'a+') or die("Se produjo un error al crear el 
 
 Console::log('ZICANDI Obtener catalogo betterware', 'white', true, 'blue', $logFisico);
 
-Console::log('Limpiando tabla temporal', 'green', true, 'black', $logFisico);
-Restfull::sendGet(Param::$_BASE_PATH_API.'zicandi/public/bett/limpia');
+Console::log('Obteniendo catalogo BETTERWARE, espere...', 'green', true, 'black', $logFisico);
+$scat = Restfull::sendGet(Param::$_BASE_PATH_API.'zicandi/public/bett/get/productos');
+$cat = json_decode($scat);
+$xstatus = $cat->xstatus;
 
-getCatalogoByCategoria("productos-lavanderia-y-limpieza", $logFisico);
-getCatalogoByCategoria("productos-nuevos", $logFisico);
-getCatalogoByCategoria("productos-cocina", $logFisico);
-getCatalogoByCategoria("productos-hogar", $logFisico);
-getCatalogoByCategoria("productos-bw-contigo", $logFisico);
-getCatalogoByCategoria("productos-recamara", $logFisico);
-getCatalogoByCategoria("productos-bano", $logFisico);
-getCatalogoByCategoria("productos-ultima-llamada", $logFisico);
+if($xstatus == true){
+    $productosList = $cat->productos;
 
+    foreach ($productosList as $c) {
+        $idTempCatBett = $c[0];
+        $producto = $c[1];
 
-$respServidor = Restfull::sendGet(Param::$_BASE_PATH_API.'zicandi/public/batch/termino?archivo=GetPageBetterwareConsole.php');
+        Console::log(substr($producto,0,20), 'yellow', false, 'black', $logFisico);
 
-function getCatalogoByCategoria($cat, $logFisico){
-    Console::log('', 'green', true, 'black', $logFisico);
-    Console::log('Inicia carga '.$cat, 'green', true, 'black', $logFisico);
-    for($pag=1; $pag<=10; $pag++){    
-        $resp = Restfull::sendGet(Param::$_BASE_PATH_API.'zicandi/public/bett/get', array("url" => "https://betterware.com.mx/".$cat."?pagina=".$pag));
-        if($resp=="OK"){
-            Console::log('.', 'yellow', false, 'black', $logFisico);
+        $jsonProcesa = Restfull::sendGet(Param::$_BASE_PATH_API.'zicandi/public/bett/migracion?id_temp_cat_bett='.$idTempCatBett);
+        $resp = json_decode($jsonProcesa);
+        if($resp->xstatus == true){
+            Console::log(' OK ', 'green', true, 'black', $logFisico);
         }else{
-            Console::log($resp, 'red', false, 'black', $logFisico);
+            Console::log(' OK ', 'red', true, 'black', $logFisico);
+            Console::log($resp->error , 'red', true, 'black', $logFisico);
         }
         
+
+        
+        
     }
+}else{
+    Console::log('Error grave al consumir servicio ', 'red', true, 'black', $logFisico);
+    Console::log($cat->error , 'red', true, 'black', $logFisico);
 }
+
+
 
 
 fclose($logFisico); 

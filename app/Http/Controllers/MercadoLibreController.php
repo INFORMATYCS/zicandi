@@ -8,6 +8,7 @@ use Session;
 use Illuminate\Http\Request;
 use App\Http\Lib\Meli;
 use App\CuentaTienda;
+use App\Parametria;
 
 class MercadoLibreController extends Controller
 {
@@ -352,6 +353,71 @@ class MercadoLibreController extends Controller
         }
         
         return $result;
+    }
+    
+
+
+    /**
+     * Calcula el costo de venta en mercadolibre
+     * 
+     * 
+     * 
+     */
+    public function precioVentaCategoria($idCategoria, $tipoListing, $precioReferencia){
+        $appId = Config::get('zicandi.meli.appId');
+        $secretKey = Config::get('zicandi.meli.secretKey');
+        $redirectURI = Config::get('zicandi.meli.redirectURI');
+        $siteId = Config::get('zicandi.meli.siteId');
+
+        
+        $meli = new Meli($appId, $secretKey);
+
+        $params = array(    'category_id' => $idCategoria,
+                            'price' => $precioReferencia);
+        $result = $meli->get('/sites/'.$siteId.'/listing_prices/'.$tipoListing, $params);
+        
+        
+        if($result['httpCode']=="200"){
+            $resultMeli = $result['body'];
+            $comision = $resultMeli->sale_fee_amount;
+        }else{            
+            //~Porcentaje default
+            $parametria = Parametria::where('xstatus','=','1')->where('clave_proceso','=','PUBLICA')->where('llave','=','PORCE_DEFAULT_ML')->select('valor')->first();
+            $comision = floatval($parametria->valor);   
+        }
+        
+        return $comision;
+    }
+
+
+    /**
+     * Precio por envio para publicacion
+     * 
+     * 
+     */
+    public function costoEnvioGratis($item_id, $idUsuarioMELI){
+        $appId = Config::get('zicandi.meli.appId');
+        $secretKey = Config::get('zicandi.meli.secretKey');
+        $redirectURI = Config::get('zicandi.meli.redirectURI');
+        $siteId = Config::get('zicandi.meli.siteId');
+
+        
+        $meli = new Meli($appId, $secretKey);
+
+        $params = array(    'item_id' => $item_id);
+        $result = $meli->get('/users/'.$idUsuarioMELI.'/shipping_options/free', $params);
+        
+        
+        if($result['httpCode']=="200"){
+            $resultMeli = $result['body'];
+            $costo = $resultMeli->coverage->all_country->list_cost;
+        }else{
+            //~Costo envio default
+            $parametria = Parametria::where('xstatus','=','1')->where('clave_proceso','=','PUBLICA')->where('llave','=','COSTO_ENVIO_DEFAULT_ML')->select('valor')->first();
+            $costo = floatval($parametria->valor);            
+        }
+        
+        return $costo;
     }
 
 

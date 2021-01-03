@@ -33,7 +33,7 @@ class ContabilidadController extends Controller
                         'conta_subcuenta_saldo.ejercicio', 'conta_subcuenta_saldo.id_carpeta_adjuntos', 'conta_subcuenta_saldo.ejercicio', 'conta_subcuenta_saldo.saldo_cierre')
             ->where('conta_empresa.id_conta_empresa', '=', $idEmpresa)
             ->where('conta_subcuenta_saldo.ejercicio', '=', $ejercicio)                        
-            ->orderBy('conta_subcuenta.id_conta_subcuenta', 'asc')
+            ->orderBy('conta_cuenta.codigo', 'asc', 'conta_subcuenta.codigo', 'asc')
             ->get();
 
 
