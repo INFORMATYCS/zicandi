@@ -38,12 +38,15 @@
 
             <div class="card small bg-dark text-white" style="width: 15rem; display: inline-block;">
                 <div class="card-body">
-                    <h5 class="card-title">Ventas</h5>                            
-                    <p class="card-text">
-                        <input type="radio" checked> Mas vendido en los ultimos 7 dias
+                    <h5 class="card-title">Utilidad</h5>                            
+                    <p class="card-text">                        
+                        <input type="checkbox" v-model="chkUtilidadEstatusVerde"> Verde
                     </p>
-                    <p class="card-text">
-                        <input type="radio" > Sin ventas en los ultimos 7 dias
+                    <p class="card-text" >
+                        <input type="checkbox" v-model="chkUtilidadEstatusAmarilla"> Amarilla
+                    </p>
+                    <p class="card-text" >
+                        <input type="checkbox" v-model="chkUtilidadEstatusRoja"> Roja
                     </p>
                 </div>
             </div>
@@ -129,7 +132,7 @@
                     <tbody>
                         <tr v-for="publicacion in listaPublicaciones" :key="publicacion.id_publicacion">
                             
-                            <td v-if="(chkEstatusSinLigar && publicacion.config.length == 0) || (chkEstatusSinLigar==false)">
+                            <td v-if="(chkEstatusSinLigar && publicacion.config.length == 0) || (chkEstatusSinLigar==false) || (onValidaVisibleUtilidad(publicacion.p_neto) == 1)">
                                 <button type="button" class="btn btn-info btn-sm" @click="abrirPublicacion(publicacion.link,'popup')">
                                     <i class="icon-screen-desktop"></i>
                                 </button> &nbsp;
@@ -159,7 +162,10 @@
                                 <small class="text-muted" v-if="publicacion.id_variante_publicacion>0" v-text="publicacion.nombre_variante"></small>
 
                             </td>
-                            <td v-if="(chkEstatusSinLigar && publicacion.config.length == 0) || (chkEstatusSinLigar==false)"><span v-text="publicacion.precio"></span></td>
+                            <td v-if="(chkEstatusSinLigar && publicacion.config.length == 0) || (chkEstatusSinLigar==false)">
+                                <span v-text="publicacion.precio"></span>                            
+                                <span :class="colorPorcentaje(publicacion.p_neto)" data-toggle="tooltip" data-placement="top" @click="onDetalleVentaCalculadora(publicacion)" v-if="publicacion.p_neto !=null"><span v-text="publicacion.p_neto"></span>%</span>                            
+                            </td>
                             <td v-if="(chkEstatusSinLigar && publicacion.config.length == 0) || (chkEstatusSinLigar==false)">
                                 <div>
                                     <small class="text-muted">Stock:</small> <div class="badge badge-pill badge-primary"><span v-text="redondear(publicacion.stock, 0)"></span></div>
@@ -399,6 +405,9 @@
                     varTotalVentas: [],
                     varDiaVentas: []
                 },
+                chkUtilidadEstatusVerde: true,
+                chkUtilidadEstatusAmarilla: true,
+                chkUtilidadEstatusRoja: true
 
                 
             }
@@ -723,9 +732,47 @@
                         }
                     }
                 });
+            },
+
+            onDetalleVentaCalculadora(publicacion){
+                let mensaje =   '<p><strong>Tipo de publicacion:</strong> '+publicacion.tipo_listing+'</p>'
+                                +'<p><strong>Costo envio:</strong> '+publicacion.costo_envio+'</p>'
+                                +'<p><strong>Comision venta:</strong> '+publicacion.comision_venta+'</p>'
+                                +'<p><strong>Iva:</strong> '+publicacion.iva+'</p>'
+                                +'<p><strong>Isr:</strong> '+publicacion.isr+'</p>'
+                                +'<p><strong>Neto Venta:</strong> '+publicacion.neto_venta_final+'</p>'
+                                +'<p><strong>Precio Compra:</strong> '+publicacion.ultimo_precio_compra+'</p>'
+                                +'<p><strong>Neto:</strong> '+publicacion.neto+'</p>';
+                util.MSG((publicacion.p_neto)+' %',mensaje, util.tipoInf);       
+            },
+            colorPorcentaje(valor){
+                if(valor>=20){
+                    return "badge badge-success";
+                }else if(valor >=5 && valor<20){
+                    return "badge badge-warning";
+                }else{
+                    return "badge badge-danger";
+                }
+            },
+            onValidaVisibleUtilidad(valor){
+                if(this.chkUtilidadEstatusVerde == true && valor >= 20){
+                    console.log(valor + " salida 1 verde");
+                    return 1;
+                }else if(this.chkUtilidadEstatusAmarilla == true && (valor >=5 && valor<20)){
+                    console.log(valor + " salida 1 amarilla");
+                    return 1;
+                }else if(this.chkUtilidadEstatusRoja == true && valor < 5){
+                    console.log(valor + " salida 1 roja");
+                    return 1;
+                }else{
+                    console.log(valor + " salida 0");
+                    return 0;
+                }
             }
 
+
         },
+        
         mounted() {            
             this.selectTienda();
         }

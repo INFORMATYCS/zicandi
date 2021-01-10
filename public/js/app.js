@@ -63139,6 +63139,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -63195,7 +63201,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 ventas: [],
                 varTotalVentas: [],
                 varDiaVentas: []
-            }
+            },
+            chkUtilidadEstatusVerde: true,
+            chkUtilidadEstatusAmarilla: true,
+            chkUtilidadEstatusRoja: true
 
         };
     },
@@ -63487,8 +63496,37 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     }
                 }
             });
+        },
+        onDetalleVentaCalculadora: function onDetalleVentaCalculadora(publicacion) {
+            var mensaje = '<p><strong>Tipo de publicacion:</strong> ' + publicacion.tipo_listing + '</p>' + '<p><strong>Costo envio:</strong> ' + publicacion.costo_envio + '</p>' + '<p><strong>Comision venta:</strong> ' + publicacion.comision_venta + '</p>' + '<p><strong>Iva:</strong> ' + publicacion.iva + '</p>' + '<p><strong>Isr:</strong> ' + publicacion.isr + '</p>' + '<p><strong>Neto Venta:</strong> ' + publicacion.neto_venta_final + '</p>' + '<p><strong>Precio Compra:</strong> ' + publicacion.ultimo_precio_compra + '</p>' + '<p><strong>Neto:</strong> ' + publicacion.neto + '</p>';
+            util.MSG(publicacion.p_neto + ' %', mensaje, util.tipoInf);
+        },
+        colorPorcentaje: function colorPorcentaje(valor) {
+            if (valor >= 20) {
+                return "badge badge-success";
+            } else if (valor >= 5 && valor < 20) {
+                return "badge badge-warning";
+            } else {
+                return "badge badge-danger";
+            }
+        },
+        onValidaVisibleUtilidad: function onValidaVisibleUtilidad(valor) {
+            if (this.chkUtilidadEstatusVerde == true && valor >= 20) {
+                console.log(valor + " salida 1 verde");
+                return 1;
+            } else if (this.chkUtilidadEstatusAmarilla == true && valor >= 5 && valor < 20) {
+                console.log(valor + " salida 1 amarilla");
+                return 1;
+            } else if (this.chkUtilidadEstatusRoja == true && valor < 5) {
+                console.log(valor + " salida 1 roja");
+                return 1;
+            } else {
+                console.log(valor + " salida 0");
+                return 0;
+            }
         }
     },
+
     mounted: function mounted() {
         this.selectTienda();
     }
@@ -63673,7 +63711,144 @@ var render = function() {
         ]
       ),
       _vm._v(" "),
-      _vm._m(1),
+      _c(
+        "div",
+        {
+          staticClass: "card small bg-dark text-white",
+          staticStyle: { width: "15rem", display: "inline-block" }
+        },
+        [
+          _c("div", { staticClass: "card-body" }, [
+            _c("h5", { staticClass: "card-title" }, [_vm._v("Utilidad")]),
+            _vm._v(" "),
+            _c("p", { staticClass: "card-text" }, [
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.chkUtilidadEstatusVerde,
+                    expression: "chkUtilidadEstatusVerde"
+                  }
+                ],
+                attrs: { type: "checkbox" },
+                domProps: {
+                  checked: Array.isArray(_vm.chkUtilidadEstatusVerde)
+                    ? _vm._i(_vm.chkUtilidadEstatusVerde, null) > -1
+                    : _vm.chkUtilidadEstatusVerde
+                },
+                on: {
+                  change: function($event) {
+                    var $$a = _vm.chkUtilidadEstatusVerde,
+                      $$el = $event.target,
+                      $$c = $$el.checked ? true : false
+                    if (Array.isArray($$a)) {
+                      var $$v = null,
+                        $$i = _vm._i($$a, $$v)
+                      if ($$el.checked) {
+                        $$i < 0 &&
+                          (_vm.chkUtilidadEstatusVerde = $$a.concat([$$v]))
+                      } else {
+                        $$i > -1 &&
+                          (_vm.chkUtilidadEstatusVerde = $$a
+                            .slice(0, $$i)
+                            .concat($$a.slice($$i + 1)))
+                      }
+                    } else {
+                      _vm.chkUtilidadEstatusVerde = $$c
+                    }
+                  }
+                }
+              }),
+              _vm._v(" Verde\n                ")
+            ]),
+            _vm._v(" "),
+            _c("p", { staticClass: "card-text" }, [
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.chkUtilidadEstatusAmarilla,
+                    expression: "chkUtilidadEstatusAmarilla"
+                  }
+                ],
+                attrs: { type: "checkbox" },
+                domProps: {
+                  checked: Array.isArray(_vm.chkUtilidadEstatusAmarilla)
+                    ? _vm._i(_vm.chkUtilidadEstatusAmarilla, null) > -1
+                    : _vm.chkUtilidadEstatusAmarilla
+                },
+                on: {
+                  change: function($event) {
+                    var $$a = _vm.chkUtilidadEstatusAmarilla,
+                      $$el = $event.target,
+                      $$c = $$el.checked ? true : false
+                    if (Array.isArray($$a)) {
+                      var $$v = null,
+                        $$i = _vm._i($$a, $$v)
+                      if ($$el.checked) {
+                        $$i < 0 &&
+                          (_vm.chkUtilidadEstatusAmarilla = $$a.concat([$$v]))
+                      } else {
+                        $$i > -1 &&
+                          (_vm.chkUtilidadEstatusAmarilla = $$a
+                            .slice(0, $$i)
+                            .concat($$a.slice($$i + 1)))
+                      }
+                    } else {
+                      _vm.chkUtilidadEstatusAmarilla = $$c
+                    }
+                  }
+                }
+              }),
+              _vm._v(" Amarilla\n                ")
+            ]),
+            _vm._v(" "),
+            _c("p", { staticClass: "card-text" }, [
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.chkUtilidadEstatusRoja,
+                    expression: "chkUtilidadEstatusRoja"
+                  }
+                ],
+                attrs: { type: "checkbox" },
+                domProps: {
+                  checked: Array.isArray(_vm.chkUtilidadEstatusRoja)
+                    ? _vm._i(_vm.chkUtilidadEstatusRoja, null) > -1
+                    : _vm.chkUtilidadEstatusRoja
+                },
+                on: {
+                  change: function($event) {
+                    var $$a = _vm.chkUtilidadEstatusRoja,
+                      $$el = $event.target,
+                      $$c = $$el.checked ? true : false
+                    if (Array.isArray($$a)) {
+                      var $$v = null,
+                        $$i = _vm._i($$a, $$v)
+                      if ($$el.checked) {
+                        $$i < 0 &&
+                          (_vm.chkUtilidadEstatusRoja = $$a.concat([$$v]))
+                      } else {
+                        $$i > -1 &&
+                          (_vm.chkUtilidadEstatusRoja = $$a
+                            .slice(0, $$i)
+                            .concat($$a.slice($$i + 1)))
+                      }
+                    } else {
+                      _vm.chkUtilidadEstatusRoja = $$c
+                    }
+                  }
+                }
+              }),
+              _vm._v(" Roja\n                ")
+            ])
+          ])
+        ]
+      ),
       _vm._v(" "),
       _c(
         "div",
@@ -63919,14 +64094,15 @@ var render = function() {
         "table",
         { staticClass: "table table-bordered table-striped table-sm" },
         [
-          _vm._m(2),
+          _vm._m(1),
           _vm._v(" "),
           _c(
             "tbody",
             _vm._l(_vm.listaPublicaciones, function(publicacion) {
               return _c("tr", { key: publicacion.id_publicacion }, [
                 (_vm.chkEstatusSinLigar && publicacion.config.length == 0) ||
-                _vm.chkEstatusSinLigar == false
+                _vm.chkEstatusSinLigar == false ||
+                _vm.onValidaVisibleUtilidad(publicacion.p_neto) == 1
                   ? _c("td", [
                       _c(
                         "button",
@@ -64018,7 +64194,7 @@ var render = function() {
                         domProps: { textContent: _vm._s(publicacion.titulo) }
                       }),
                       _vm._v(" "),
-                      _vm._m(3, true),
+                      _vm._m(2, true),
                       _vm._v(" "),
                       _c("small", {
                         staticClass: "text-muted",
@@ -64066,7 +64242,35 @@ var render = function() {
                   ? _c("td", [
                       _c("span", {
                         domProps: { textContent: _vm._s(publicacion.precio) }
-                      })
+                      }),
+                      _vm._v(" "),
+                      publicacion.p_neto != null
+                        ? _c(
+                            "span",
+                            {
+                              class: _vm.colorPorcentaje(publicacion.p_neto),
+                              attrs: {
+                                "data-toggle": "tooltip",
+                                "data-placement": "top"
+                              },
+                              on: {
+                                click: function($event) {
+                                  return _vm.onDetalleVentaCalculadora(
+                                    publicacion
+                                  )
+                                }
+                              }
+                            },
+                            [
+                              _c("span", {
+                                domProps: {
+                                  textContent: _vm._s(publicacion.p_neto)
+                                }
+                              }),
+                              _vm._v("%")
+                            ]
+                          )
+                        : _vm._e()
                     ])
                   : _vm._e(),
                 _vm._v(" "),
@@ -64544,7 +64748,7 @@ var render = function() {
                 )
               ]),
               _vm._v(" "),
-              _vm._m(4),
+              _vm._m(3),
               _vm._v(" "),
               _c("div", { staticClass: "modal-footer" }, [
                 _c(
@@ -64622,7 +64826,7 @@ var render = function() {
               )
             ]),
             _vm._v(" "),
-            _vm._m(5)
+            _vm._m(4)
           ])
         ])
       ]
@@ -64643,33 +64847,6 @@ var staticRenderFns = [
       _vm._v(" "),
       _c("li", { staticClass: "breadcrumb-item active" }, [_vm._v("Productos")])
     ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c(
-      "div",
-      {
-        staticClass: "card small bg-dark text-white",
-        staticStyle: { width: "15rem", display: "inline-block" }
-      },
-      [
-        _c("div", { staticClass: "card-body" }, [
-          _c("h5", { staticClass: "card-title" }, [_vm._v("Ventas")]),
-          _vm._v(" "),
-          _c("p", { staticClass: "card-text" }, [
-            _c("input", { attrs: { type: "radio", checked: "" } }),
-            _vm._v(" Mas vendido en los ultimos 7 dias\n                ")
-          ]),
-          _vm._v(" "),
-          _c("p", { staticClass: "card-text" }, [
-            _c("input", { attrs: { type: "radio" } }),
-            _vm._v(" Sin ventas en los ultimos 7 dias\n                ")
-          ])
-        ])
-      ]
-    )
   },
   function() {
     var _vm = this
