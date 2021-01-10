@@ -45,7 +45,8 @@ return [
             'producto_mini'     => 'repositorio/entrada/productos/mini/',
             'productos'         => 'repositorio/entrada/productos/',
             'adjuntos'          => 'repositorio/entrada/adjuntos/',
-            'log_batch'          => 'repositorio/entrada/log_batch/'
+            'log_batch'         => 'repositorio/entrada/log_batch/',
+            'bettimg'           => 'repositorio/entrada/productos/better_alta_resolucion/',
         ],
         'salida'    => [
 

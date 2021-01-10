@@ -19,7 +19,7 @@ class ProcesadorImagenes{
         $base64_string = $configImagen['b64'];
         $nombre_archivo = $configImagen['nombre'];
 
-        return $_SERVER["HTTP_REFERER"].$this->creaImagen("mini_prod_", $nombre_archivo, $base64_string, $repositorio, 100, 100);
+        return $_SERVER["HTTP_REFERER"].$this->creaImagen("mini_prod_", $nombre_archivo, $base64_string, $repositorio, 100, 100, true);
         
     }
 
@@ -34,7 +34,7 @@ class ProcesadorImagenes{
         $base64_string = $configImagen['b64'];
         $nombre_archivo = $configImagen['nombre'];
 
-        return $this->creaImagen("mini_prod_c_", $nombre_archivo, $base64_string, $repositorio, 100, 100);
+        return $this->creaImagen("mini_prod_c_", $nombre_archivo, $base64_string, $repositorio, 100, 100, true);
         
     }
 
@@ -44,7 +44,38 @@ class ProcesadorImagenes{
         $base64_string = $configImagen['b64'];
         $nombre_archivo = $configImagen['nombre'];
 
-        return $this->creaImagen("medio_prod_", $nombre_archivo, $base64_string, $repositorio, 250, 250);        
+        return $this->creaImagen("medio_prod_", $nombre_archivo, $base64_string, $repositorio, 250, 250, true);        
+    }
+
+
+    /**
+     * Guarda las imagenes de better original
+     * 
+     * 
+     */
+    public function publicaImagenRespBett($configImagen){           
+        $repositorio = Config::get('zicandi.repositorio.entrada.bettimg');
+        
+        $base64_string = $configImagen['b64'];
+        $nombre_archivo = $configImagen['nombre'];
+
+        return $this->creaImagen("original_", $nombre_archivo, $base64_string, $repositorio, 0, 0, false);
+        
+    }
+
+    /**
+     * Guarda las imagenes de better 100px
+     * 
+     * 
+     */
+    public function publicaImagenMini100Bett($configImagen){           
+        $repositorio = Config::get('zicandi.repositorio.entrada.producto_mini');
+        
+        $base64_string = $configImagen['b64'];
+        $nombre_archivo = $configImagen['nombre'];
+
+        return $this->creaImagen("mini_prod_c_", $nombre_archivo, $base64_string, $repositorio, 100, 100, false);
+        
     }
 
     /**
@@ -52,10 +83,15 @@ class ProcesadorImagenes{
      * 
      * 
      */
-    private function creaImagen($prefijo, $nombre_archivo, $base64_string, $destino, $ancho, $alto){
+    private function creaImagen($prefijo, $nombre_archivo, $base64_string, $destino, $ancho, $alto, $isNombreAuto){
         $tmp = Config::get('zicandi.repositorio.img.tmp');
 
-        $nombreDestino = $this->calcNombreImage($prefijo, $nombre_archivo);
+        if($isNombreAuto){
+            $nombreDestino = $this->calcNombreImage($prefijo, $nombre_archivo);
+        }else{
+            $nombreDestino = $prefijo.$nombre_archivo;
+        }
+
 
         $file = fopen( $tmp.$nombre_archivo, "wb");
 
@@ -69,9 +105,15 @@ class ProcesadorImagenes{
 
         fclose($file);
     
-        $imagen_optimizada = $this->redimensionar_imagen($nombre_archivo, $tmp.$nombre_archivo,$ancho,$alto);
+        if($ancho!=0 && $alto!=0){
+            $imagen_optimizada = $this->redimensionar_imagen($nombre_archivo, $tmp.$nombre_archivo,$ancho,$alto);
+            imagejpeg($imagen_optimizada, $destino.$nombreDestino);
+        }else{
+            copy($tmp.$nombre_archivo, $destino.$nombreDestino);
+        }
         
-        imagejpeg($imagen_optimizada, $destino.$nombreDestino);
+        unlink($tmp.$nombre_archivo);
+        
 
         return $destino.$nombreDestino;
     }

@@ -33,7 +33,7 @@ class ContabilidadController extends Controller
                         'conta_subcuenta_saldo.ejercicio', 'conta_subcuenta_saldo.id_carpeta_adjuntos', 'conta_subcuenta_saldo.ejercicio', 'conta_subcuenta_saldo.saldo_cierre')
             ->where('conta_empresa.id_conta_empresa', '=', $idEmpresa)
             ->where('conta_subcuenta_saldo.ejercicio', '=', $ejercicio)                        
-            ->orderBy('conta_subcuenta.id_conta_subcuenta', 'asc')
+            ->orderBy('conta_cuenta.codigo', 'asc', 'conta_subcuenta.codigo', 'asc')
             ->get();
 
 
@@ -57,7 +57,13 @@ class ContabilidadController extends Controller
 
             //~Valida si ya existe el ejercicio en tabla de saldos
             $sql= " SELECT COUNT(*) AS total FROM conta_subcuenta_saldo
-                    WHERE ejercicio = '".$ejercicio."'";  
+                    WHERE ejercicio = '".$ejercicio."'
+                    AND id_conta_subcuenta IN (
+                        SELECT sub.id_conta_subcuenta FROM conta_empresa emp, conta_cuenta cta, conta_subcuenta sub
+                        WHERE emp.id_conta_empresa = cta.id_conta_empresa
+                        AND cta.id_conta_cuenta = sub.id_conta_cuenta
+                        AND emp.id_conta_empresa = ".$idEmpresa."
+                    )";  
             $rs = DB::select( $sql );
 
             $totalReg = 0;            

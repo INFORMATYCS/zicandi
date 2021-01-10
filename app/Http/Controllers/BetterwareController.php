@@ -17,157 +17,7 @@ use App\OrdenEntrega;
 use DB;
 
 class BetterwareController extends Controller{
-    /**
-     * Lee pagina betterware e inserta en temporales
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function getPage(Request $request){
-    try{
-        $url = $request->url;
 
-        $cliente = curl_init();
-		curl_setopt($cliente, CURLOPT_URL, $url);	
-		curl_setopt($cliente, CURLOPT_HEADER, 0);
-		curl_setopt($cliente, CURLOPT_RETURNTRANSFER, true); 
-
-		$contenido = curl_exec($cliente);
-		$puntero = 1;
-		
-        $productos = array();
-        $msgErrorSalida ="";
-		while(true){
-            try{
-            $puntero = strpos($contenido, '<div class="productThumbs"', $puntero);
-            if($puntero<=0){
-                break;
-            }
-
-            $inicialUrlDetalle = strpos($contenido, '<a href="', $puntero);
-            $finalUrlDetalle = strpos($contenido, '" class="img-link">', $inicialUrlDetalle);
-            $urlDetalle = substr($contenido, $inicialUrlDetalle + 9, $finalUrlDetalle - ($inicialUrlDetalle+9));
-            
-            
-            $inicialImagen = strpos($contenido, '<img src="', $puntero);
-            $finalImagen = strpos($contenido, '" class="', $inicialImagen);
-            $urlImagen = substr($contenido, $inicialImagen + 10, $finalImagen - ($inicialImagen+10));                        
-
-			$puntero = strpos($contenido, '<div class="nombre">', $puntero);							
-			
-			//Busca nombre del producto
-			$inicialNombre = strpos($contenido, '>', $puntero + 21);
-			$finalNombre = strpos($contenido, '</a>', $inicialNombre);
-			$nombre = substr($contenido, $inicialNombre + 1, $finalNombre - ($inicialNombre+1));
-			
-			$puntero = $finalNombre;
-			
-			//Busca el codigo del producto
-			$puntero = strpos($contenido, '<div class="codigo">', $puntero);	
-			
-			$inicialCodigo = strpos($contenido, '<b>', $puntero + 22);
-			$finalCodigo = strpos($contenido, '</b>', $inicialCodigo);
-			$codigo = substr($contenido, $inicialCodigo + 3, $finalCodigo - ($inicialCodigo+3));
-			
-			$puntero = $finalCodigo;
-			$puntero = strpos($contenido, '<div>', $puntero);	
-			
-			//Busca el precio del producto
-            //$inicialPrecio = $puntero  + 5;
-            $inicialPrecio = strpos($contenido, '$', $puntero);
-			$finalPrecio = strpos($contenido, '</div>', $inicialPrecio);
-			$precio = substr($contenido, $inicialPrecio, $finalPrecio - $inicialPrecio);
-			
-			//Precio con descuento
-			if(strpos($precio, "a")>0){
-                $inicialPrecioGrande = strpos($precio, '$');
-				$finalPrecioGrande = strpos($precio, 'a <b>$');
-				$precioGrande = substr($precio, $inicialPrecioGrande, $finalPrecioGrande - $inicialPrecioGrande);
-				
-				
-				$inicialPrecioDes = $finalPrecioGrande  + 5;
-				$finalPrecioDes = strpos($precio, '</b>', $inicialPrecioDes);
-				$precio = substr($precio, $inicialPrecioDes, $finalPrecioDes - $inicialPrecioDes);
-			}else{
-				$precioGrande = $precio;
-			}
-			
-			$precio = str_replace("$", "", $precio );
-			$precioGrande = str_replace("$", "", $precioGrande );
-			
-            $puntero = $finalPrecio;      
-            
-            //Procesa imagen
-            try{//
-                $fichero = Config::get('zicandi.betterware.path').$urlImagen;
-                $ext = substr($urlImagen, -3);
-        
-                $actual = file_get_contents($fichero);
-    
-                $b64= base64_encode($actual);
-    
-                $procesadorImagenes = new ProcesadorImagenes();
-                $imagen = array(    
-                    'nombre'=>$codigo.'.'.$ext,
-                    'size'=>0,
-                    'type'=>$ext,
-                    'b64'=>$b64
-                );
-                $url_imagen = $procesadorImagenes->publicaImagenMini100C($imagen); 
-            }catch (\Exception $e) {
-                $ERROR = $e->getMessage();
-                echo $ERROR;
-                Log::error( $ERROR );
-                $url_imagen = "";
-            }    
-
-            //~Busca la descripcion del producto
-            $clienteDetalle = curl_init();
-            curl_setopt($clienteDetalle, CURLOPT_URL, Config::get('zicandi.betterware.path').$urlDetalle);	
-            curl_setopt($clienteDetalle, CURLOPT_HEADER, 0);
-            curl_setopt($clienteDetalle, CURLOPT_RETURNTRANSFER, true); 
-
-            $detalle = curl_exec($clienteDetalle);
-            $pDetalle = strpos($detalle, '<strong>Descripción</strong><br />');
-            $descripcion = "";
-            if($pDetalle>0){
-                $inicialDesc = $pDetalle;
-			    $finalDesc = strpos($detalle, '</p>', $inicialDesc);
-                $descripcion = substr($detalle, $inicialDesc + 35, $finalDesc - ($inicialDesc+35));
-                $descripcion = ltrim($descripcion);
-                $descripcion = rtrim($descripcion);
-            }
-
-            curl_close($clienteDetalle);
-
-            $temp = new TempCatBett();
-            $temp->codigo = substr($codigo,0,15);
-            $temp->nombre = substr($nombre,0,50);
-            $temp->precio = trim($precio);
-            $temp->precio_oferta = trim($precioGrande);
-            $temp->url =Config::get('zicandi.betterware.path').$urlDetalle;
-            $temp->descripcion =substr($descripcion,0,250);           
-            $temp->imagen =Config::get('zicandi.betterware.path').$urlImagen;
-            $temp->imagen_mini =$url_imagen;
-            
-            $temp->save();     
-            }catch (\Exception $e) {
-                $msgErrorSalida = "Error en ".$codigo." ".$e->getMessage();
-            }                                    
-		}	
-		
-        curl_close($cliente);   
-        
-        if($msgErrorSalida==""){
-            return "OK";    
-        }else{
-            return $msgErrorSalida;
-        }
-        
-    }catch (\Exception $e) {
-        $ERROR = $e->getMessage();
-        echo $ERROR;
-    }    
-    }
 
     public function limpiaTablaTemporal(Request $request){
         $temp = new TempCatBett();
@@ -188,100 +38,7 @@ class BetterwareController extends Controller{
         return array("total"=>$total, "update"=>$existe, "nuevo"=>$nuevo);            
     }
 
-    public function migracionProductos(Request $request){
-        //~Configura proveedor
-        $proveedor = Proveedor::where('nombre_corto','=','BETT')
-        ->select('id_proveedor','nombre')        
-        ->get(); 
-
-        $idProveedor = $proveedor[0]->id_proveedor;
-
-        //~Configura categoria
-        $idCategoria = 0;
-        $categorias = Categoria::where('xstatus','=','1')
-        ->select('id_categoria','nombre')
-        ->where('nombre','=','Carga Masiva')
-        ->get();        
-
-        if($categorias->isEmpty()){
-            $categoria = new Categoria();
-            $categoria->codigo = "MAS";
-            $categoria->nombre = "Carga Masiva"; 
-            $categoria->save();   
-            
-            $idCategoria = $categoria->id_categoria;
-        }else{
-            $idCategoria = $categorias[0]->id_categoria;
-        }            
-
-        $temp = TempCatBett::all();        
-
-        foreach($temp as $t){
-            
-            $producto = Producto::where('codigo','=',$t->codigo)
-            ->select('id_producto','nombre','codigo','url_imagen','nota','ultimo_precio_compra','promedio_precio_compra','xstatus')            
-            ->get(); 
-
-            if($producto->isEmpty()){
-                $producto = new Producto();    
-                $producto->id_categoria = $idCategoria;
-                $producto->codigo = $t->codigo;
-                $producto->nombre = substr($t->nombre, 0, 30);
-                $producto->url_imagen = Config::get('zicandi.url_public').$t->imagen_mini;
-                $producto->nota = $t->descripcion;
-                $producto->ultimo_precio_compra = $t->precio * Config::get('zicandi.betterware.factorConversion');
-                $producto->promedio_precio_compra = $t->precio * Config::get('zicandi.betterware.factorConversion');
-                $producto->precio_referenciado = $t->precio * Config::get('zicandi.betterware.factorConversion');
-                $producto->xstatus ='1';
-                $producto->save();
-
-                $producto->proveedores()->attach($idProveedor,['codigo_barras'=>$t->codigo]);
-
-
-                //~Registra stock
-                $stock = new StockProducto();
-                $stock->id_producto = $producto->id_producto;
-                $stock->stock = 0;
-                $stock->disponible = 0;
-                $stock->retenido = 0;
-                $stock->save();
-
-            }else{
-                $producto = Producto::find($producto[0]->id_producto);
-                $producto->nombre = substr($t->nombre, 0, 30);
-                $producto->url_imagen = Config::get('zicandi.url_public').$t->imagen_mini;
-                $producto->nota = $t->descripcion;                
-                $ultimoPrecioCompras = $producto->calcularUltimoPrecioCompra();
-
-                if( $ultimoPrecioCompras<=0 ){
-                    $producto->ultimo_precio_compra = $t->precio * Config::get('zicandi.betterware.factorConversion');
-                    $producto->promedio_precio_compra = $t->precio * Config::get('zicandi.betterware.factorConversion');
-                    $producto->precio_referenciado = $t->precio * Config::get('zicandi.betterware.factorConversion');
-                }else{
-                    $producto->precio_referenciado = $t->precio * Config::get('zicandi.betterware.factorConversion');
-                }
-
-
-                $producto->save();
-
-
-                //~Registra stock
-                $productoStock = StockProducto::where('id_producto','=',$producto->id_producto)->get();
-                if($productoStock->isEmpty()){
-                    $stock = new StockProducto();
-                    $stock->id_producto = $producto->id_producto;
-                    $stock->stock = 0;
-                    $stock->disponible = 0;
-                    $stock->retenido = 0;
-                    $stock->save();
-                }
-            }
-
-        }
-
-        return 1;
-    }
-
+    
 
     
     /**
@@ -641,6 +398,230 @@ class BetterwareController extends Controller{
             ];           
             $pdf = \PDF::loadView('exports/resumenOrdenEntrega', ['datos' => $arreglo]);
             return $pdf->download('resumenOrdenEntrega.pdf');            
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+
+
+    /**
+     * Recupera todos los productos
+     * 
+     * 
+     * 
+     */
+    public function getProductosBett(Request $request){
+        try{            
+            $totalProd = 500;
+            $data = json_decode( file_get_contents('https://www.betterware.com.mx/mx/es/cms/product-grid?categoryId=categories&categoryName&offset=0&limit='.$totalProd.'&heroImageType=picture&thumbnailImageType=swatch&variationField=style&filter={"q":"","facets":{}}&t=54521545122'), true );            
+            
+            $this->limpiaTablaTemporal($request);
+
+            $productos = $data['products'];
+            $resp = array();
+
+            foreach ($productos as $p) {
+                $temp = new TempCatBett();
+                $temp->codigo = $p['id'];
+                $temp->nombre = $p['name'];
+                $temp->precio = $p['price']['value'];
+                $temp->precio_oferta = $p['offerPrice'];
+                $temp->url =Config::get('zicandi.betterware.path').$p['url'];
+                $temp->imagen =$p['heroImage'];
+                $temp->descripcion =$p['description'];
+                $temp->categoria =$p['primaryCategoryName'];
+                $temp->espec_json =json_encode($p['classificationData']);            
+                $temp->save();
+
+
+                array_push($resp, [$temp['id_temp_cat_bett'], $temp['nombre']]);
+            }            
+
+            return [ 'xstatus'=>true, 'productos'=>$resp ];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+    
+    
+    /**
+     * Descarga imagenes de betterware
+     * 
+     * 
+     * 
+     */
+    private function getImagenBett($pathImagen, $codigo, $nombreSalida, $isAplicaMini){
+        $band = true;
+        $urlPublicacion = "";
+        $urlPublicacionMini = "";
+        try{
+            $ext = substr($pathImagen, -3);            
+            $actual = file_get_contents($pathImagen);            
+
+            $b64= base64_encode($actual);
+
+            $procesadorImagenes = new ProcesadorImagenes();
+            $imagen = array(    
+                'nombre'=>$nombreSalida.'.'.$ext,
+                'size'=>0,
+                'type'=>$ext,
+                'b64'=>$b64
+            );
+
+            
+            if($isAplicaMini){
+                $urlPublicacionMini = $procesadorImagenes->publicaImagenMini100Bett($imagen);     
+            }
+
+            $urlPublicacion = $procesadorImagenes->publicaImagenRespBett($imagen);
+        }catch (\Exception $e) {
+            $ERROR = $e->getMessage();                
+            Log::error( $ERROR );
+            $urlPublicacion = "";
+            $urlPublicacionMini = "";
+            $band = false;
+        }
+
+
+        return array ($band, $urlPublicacion, $urlPublicacionMini);
+    }
+
+
+    /**
+     * Procesa por producto
+     * Lee el temporal y realiza la migracion a producto
+     * Procesa la imagen
+     * 
+     */
+    public function procesaTempProducto(Request $request){
+        try{            
+            $idTempCatBett = $request->id_temp_cat_bett;
+            
+            $temp = TempCatBett::findOrFail($idTempCatBett);
+
+            $codigo = $temp->codigo;
+            $nombre = $temp->nombre;
+            $precio = $temp->precio;
+            $precio_oferta = $temp->precio_oferta;
+            $url = $temp->url;
+            $imagen = $temp->imagen;
+            $descripcion = $temp->descripcion;
+            $categoria = $temp->categoria;
+            $espec_json = $temp->espec_json;
+
+            //Procesa imagen 1 y mini
+            list ($bandExito, $url_original, $url_imagen) = $this->getImagenBett($imagen, $codigo, $codigo, true);
+
+            //~Intenta recuperar la segunda imagen
+            if($bandExito){
+                $pathAlterno = str_replace('_1.jpg','_2.jpg',$imagen);
+                list ($bandExito, $url_original, $url_imagen) = $this->getImagenBett($pathAlterno, $codigo, $codigo."_2", false);
+
+                if(!$bandExito){
+                    $pathAlterno = str_replace('-H_1.jpg','_2.jpg',$imagen);
+                    list ($bandExito, $url_original, $url_imagen) = $this->getImagenBett($pathAlterno, $codigo, $codigo."_2", false);
+
+                }
+            }
+            
+
+            $temp->imagen_mini = $url_imagen;
+            $temp->imagen_respaldo = $url_original;
+            $temp->estatus_proceso = 'PRO';
+
+            $temp->update();
+
+            //~Configura proveedor
+            $proveedor = Proveedor::where('nombre_corto','=','BETT')
+            ->select('id_proveedor','nombre')        
+            ->get(); 
+
+            $idProveedor = $proveedor[0]->id_proveedor;
+
+            //~Configura categoria
+            $idCategoria = 0;
+            $categorias = Categoria::where('xstatus','=','1')
+            ->select('id_categoria','nombre')
+            ->where('nombre','=','Carga Masiva')
+            ->get();        
+
+            if($categorias->isEmpty()){
+                $categoria = new Categoria();
+                $categoria->codigo = "MAS";
+                $categoria->nombre = "Carga Masiva"; 
+                $categoria->save();   
+                
+                $idCategoria = $categoria->id_categoria;
+            }else{
+                $idCategoria = $categorias[0]->id_categoria;
+            }         
+            
+            //Realiza la migracion a Producto
+            $producto = Producto::where('codigo','=',$codigo)
+            ->select('id_producto','nombre','codigo','url_imagen','nota','ultimo_precio_compra','promedio_precio_compra','xstatus')            
+            ->get(); 
+
+            if($producto->isEmpty()){
+                $producto = new Producto();    
+                $producto->id_categoria = $idCategoria;
+                $producto->codigo = $codigo;
+                $producto->nombre = substr($nombre, 0, 30);
+                $producto->url_imagen = Config::get('zicandi.url_public').$url_imagen;
+                $producto->nota = $descripcion;
+                $producto->id_carpeta_adjuntos = 0;
+                $producto->ultimo_precio_compra = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
+                $producto->promedio_precio_compra = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
+                $producto->precio_referenciado = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
+                $producto->xstatus ='1';
+                $producto->save();
+
+                $producto->proveedores()->attach($idProveedor,['codigo_barras'=>$codigo]);
+
+
+                //~Registra stock
+                $stock = new StockProducto();
+                $stock->id_producto = $producto->id_producto;
+                $stock->stock = 0;
+                $stock->disponible = 0;
+                $stock->retenido = 0;
+                $stock->save();
+
+            }else{
+                $producto = Producto::find($producto[0]->id_producto);
+                $producto->nombre = substr($nombre, 0, 30);
+                $producto->url_imagen = Config::get('zicandi.url_public').$url_imagen;
+                $producto->nota = $descripcion;                
+                $ultimoPrecioCompras = $producto->calcularUltimoPrecioCompra();
+
+                if( $ultimoPrecioCompras<=0 ){
+                    $producto->ultimo_precio_compra = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
+                    $producto->promedio_precio_compra = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
+                    $producto->precio_referenciado = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
+                }else{
+                    $producto->precio_referenciado = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
+                }
+
+
+                $producto->save();
+
+
+                //~Registra stock
+                $productoStock = StockProducto::where('id_producto','=',$producto->id_producto)->get();
+                if($productoStock->isEmpty()){
+                    $stock = new StockProducto();
+                    $stock->id_producto = $producto->id_producto;
+                    $stock->stock = 0;
+                    $stock->disponible = 0;
+                    $stock->retenido = 0;
+                    $stock->save();
+                }
+            }
+            
+            return [ 'xstatus'=>true ];
         }catch(Exception $e){
             Log::error( $e->getTraceAsString() );            
             return [ 'xstatus'=>false, 'error' => $e->getMessage() ];

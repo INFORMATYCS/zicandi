@@ -13,6 +13,7 @@ use App\ConfigPublicacion;
 use App\ControlVentasMeli;
 use App\VentaMeli;
 use App\Producto;
+use App\Parametria;
 use Session;
 use App\EstadisticaPublicacion;
 use App\Exports\VentasExport;
@@ -89,6 +90,13 @@ class TiendasController extends Controller
         $usuarioMELI = $cuenta->usuario;
         $token = $cuenta->att_access_token;        
 
+        //~Tasas de impuestos
+        $parametria = Parametria::where('xstatus','=','1')->where('clave_proceso','=','IMPUESTO')->where('llave','=','TASA_IVA')->select('valor')->first();
+        $tasaIva = floatval($parametria->valor);
+
+        $parametria = Parametria::where('xstatus','=','1')->where('clave_proceso','=','IMPUESTO')->where('llave','=','TASA_ISR')->select('valor')->first();
+        $tasaIsr = floatval($parametria->valor);
+
 
         //********* Consulta detalle de la publicacion **********
         $p = app(MercadoLibreController::class)->items($publicaciones20, $token);
@@ -100,7 +108,7 @@ class TiendasController extends Controller
             $listaPublicaciones = $p['body'];
 
             for($b=0; $b<count($listaPublicaciones); $b++){
-                $publicacion = $listaPublicaciones[$b]->body;
+                $publicacion    = $listaPublicaciones[$b]->body;
                 $id             = $publicacion->id;
                 $titulo         = $publicacion->title;
                 $precio         = $publicacion->price;
@@ -112,7 +120,27 @@ class TiendasController extends Controller
                 
                 $shipping       = $publicacion->shipping;
                 $envioGratis    = $shipping->free_shipping;
-                $tipoEnvio      = $shipping->logistic_type;                
+                $tipoEnvio      = $shipping->logistic_type;  
+                $idCategoria    = $publicacion->category_id;
+                $tipoListing    = $publicacion->listing_type_id;
+                $envioGratis    = $publicacion->shipping->free_shipping;
+
+                //~Calcula la comision por venta del producto
+                $comisionVenta = app(MercadoLibreController::class)->precioVentaCategoria($idCategoria, $tipoListing, $precio);                
+                
+                //~Calcula impuestos aplicables
+                $baseGravable = $precio / 1.16;
+                $iva = $baseGravable * $tasaIva;
+                $isr = $baseGravable * $tasaIsr;
+
+                //~Precio del envio en caso de aplicar
+                if($envioGratis){
+                    $costoEnvio = app(MercadoLibreController::class)->costoEnvioGratis($id, $idUsuarioMELI);
+                }else{
+                    $costoEnvio = 0;
+                }
+
+                $final = $precio - $comisionVenta - $iva - $isr - $costoEnvio;                
 
                 $variations     = $publicacion->variations;
                 if(count($variations)>0){
@@ -136,7 +164,13 @@ class TiendasController extends Controller
                             'envioGratis'=>$envioGratis,
                             'tipoEnvio'=>$tipoEnvio,
                             'idVariante'=>$idVariante,
-                            'nombreVariante'=>$nombreVariante
+                            'nombreVariante'=>$nombreVariante,
+                            'comisionVenta'=>$comisionVenta,
+                            'tipoListing'=>$tipoListing,
+                            'iva'=>$iva,
+                            'isr'=>$isr,
+                            'costoEnvio'=>$costoEnvio,
+                            'final'=>$final
                         );
 
                         array_push($listaPublicacionesDeta, $publicacionSalida);
@@ -152,7 +186,13 @@ class TiendasController extends Controller
                         'link'=>$link,
                         'fotoMini'=>$fotoMini,
                         'envioGratis'=>$envioGratis,
-                        'tipoEnvio'=>$tipoEnvio
+                        'tipoEnvio'=>$tipoEnvio,
+                        'comisionVenta'=>$comisionVenta,
+                        'tipoListing'=>$tipoListing,
+                        'iva'=>$iva,
+                        'isr'=>$isr,
+                        'costoEnvio'=>$costoEnvio,
+                        'final'=>$final
                     );
 
                     array_push($listaPublicacionesDeta, $publicacionSalida);
@@ -172,10 +212,7 @@ class TiendasController extends Controller
                         $listaPublicacionesDeta[$g]['visitas'] = $visitas;
                     }
                 }
-
             }
-
-
         }
 
 
@@ -214,8 +251,32 @@ class TiendasController extends Controller
                 $publicacion->fecha_consulta = new \DateTime();
                 $publicacion->estatus = (isset($pub['estatus']) ? $pub['estatus'] : null);
 
+                $publicacion->tipo_listing = (isset($pub['tipoListing']) ? $pub['tipoListing'] : null);
+                $publicacion->costo_envio = 0;
+                $publicacion->comision_venta = 0;
+                $publicacion->iva = 0;
+                $publicacion->isr = 0;
+                $publicacion->neto_venta_final = 0;
+                $publicacion->ultimo_precio_compra = 0;
+
+
                 $publicacion->save();                    
-            }else{      
+            }else{
+                //~Calcula precio de compra
+                $configPublicacion = ConfigPublicacion::where('id_publicacion','=',$publicacion->id_publicacion)->get();
+
+                if($configPublicacion->isEmpty()){
+                    $precioCompra = 0;
+                }else{                    
+                    foreach ($configPublicacion as $config) {
+                        $producto = Producto::findOrFail($config->id_producto);
+                        $cantidad = $config->cantidad;
+                        $precioCompra+= ($producto->ultimo_precio_compra)*$cantidad;
+                    }
+                    
+                }
+                
+
                 $visitas = $publicacion->visitas;              
                 $publicacion->titulo = (isset($pub['titulo']) ? $pub['titulo'] : null);
                 $publicacion->nombre_variante = (isset($pub['nombreVariante']) ? $pub['nombreVariante'] : null);
@@ -228,7 +289,15 @@ class TiendasController extends Controller
                 $publicacion->foto_mini = (isset($pub['fotoMini']) ? $pub['fotoMini'] : null);
                 $publicacion->fecha_consulta = new \DateTime();
                 $publicacion->estatus = (isset($pub['estatus']) ? $pub['estatus'] : null);
-                $publicacion->visitas = (isset($pub['visitas']) ? $pub['visitas'] : $visitas);                    
+                $publicacion->visitas = (isset($pub['visitas']) ? $pub['visitas'] : $visitas);   
+                
+                $publicacion->tipo_listing = (isset($pub['tipoListing']) ? $pub['tipoListing'] : null);
+                $publicacion->costo_envio = (isset($pub['costoEnvio']) ? $pub['costoEnvio'] : 0);
+                $publicacion->comision_venta = (isset($pub['comisionVenta']) ? $pub['comisionVenta'] : 0);
+                $publicacion->iva = (isset($pub['iva']) ? $pub['iva'] : 0);
+                $publicacion->isr = (isset($pub['isr']) ? $pub['isr'] : 0);
+                $publicacion->neto_venta_final = (isset($pub['final']) ? $pub['final'] : 0);
+                $publicacion->ultimo_precio_compra = $precioCompra;
 
                 $publicacion->update();
             }
