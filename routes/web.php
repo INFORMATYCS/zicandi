@@ -57,10 +57,13 @@ Route::post('/almacenes/registrar', 'AlmacenController@store');
 Route::post('/almacenes/actualizar', 'AlmacenController@update');
 Route::post('/almacenes/desactivar', 'AlmacenController@desactivar');
 Route::post('/almacenes/activar', 'AlmacenController@activar');
-Route::get('/almacenes/movimiento', 'AlmacenController@movimientoAlmacen');
+Route::post('/almacenes/movimiento', 'AlmacenController@movimientoAlmacen');
 Route::get('/almacenes/export', 'AlmacenController@exportar');
 Route::get('/almacenes/resumen', 'AlmacenController@resumenAlmacen');
 Route::get('/almacenes/resumen/detalle', 'AlmacenController@resumenDetalleProductosAlmacen');
+Route::get('/almacenes/resumen/movimientos', 'AlmacenController@detalleMovAlmacen');
+Route::get('/almacenes/resumen/genera_lote', 'AlmacenController@generaLoteAlmacen');
+Route::get('/almacenes/resumen/exporta_ticket', 'AlmacenController@exportTicketOrden');
 
 
 // - Rutas para Compras

@@ -12,6 +12,8 @@ use App\Producto;
 use App\StockProducto;
 use App\BitaResumenAlmacen;
 use App\MovimientoAlmacen;
+use App\CatUbicaProducto;
+use App\StockUbicaProducto;
 use App\Exports\AlmacenExport;
 
 class AlmacenController extends Controller{
@@ -219,11 +221,12 @@ class AlmacenController extends Controller{
     public function movimientoAlmacen(Request $request){
         DB::beginTransaction();
         try{
-            $idAlmacen = $request->id_almacen;
-            $idProducto = $request->id_producto;
-            $tipoMovimiento = $request->tipo_movimiento;
+            $idAlmacen = $request->idAlmacen;
+            $idProducto = $request->idProducto;
+            $tipoMovimiento = $request->tipoMovimiento;
             $cantidad = $request->cantidad;
-            $ubicacion = $request->ubicacion;            
+            $ubicacion = $request->ubicacion;  
+            $loteReferencia = $request->loteReferencia; 
 
             //~Validaciones
             if($tipoMovimiento!="INGRESO" && $tipoMovimiento!="RETIRO"){
@@ -247,8 +250,19 @@ class AlmacenController extends Controller{
                 throw new Exception('Almacen no activo');
             }
 
+             //~Valida la ubicacion
+             $catUbicaProducto = CatUbicaProducto::where('codigo', '=', $ubicacion)
+             ->where('xstatus','=', '1')
+             ->get()->first();
+
+             if($catUbicaProducto == null){
+                throw new Exception('No existe la ubicacion');
+             }
+
             //~Stock del producto
-            $stockProducto = StockProducto::where('id_producto', '=', $idProducto)->get()->first();
+            $stockProducto = StockProducto::where('id_producto', '=', $idProducto)
+            ->where('id_almacen','=',$idAlmacen)
+            ->get()->first();
 
             //~Valida si existe registro en stock_producto    
             if($stockProducto == null){
@@ -296,6 +310,7 @@ class AlmacenController extends Controller{
             $movimientoAlmacen->cantidad=$cantidad;            
             $movimientoAlmacen->stock=$nuevoStockAlmacen;            
             $movimientoAlmacen->ubicacion=$ubicacion;
+            $movimientoAlmacen->lote_referencia=$loteReferencia;            
             $movimientoAlmacen->estatus_movimientos='A';
 
             $movimientoAlmacen->save();
@@ -303,28 +318,50 @@ class AlmacenController extends Controller{
             //~Actualiza stock del producto
             $stockProducto->stock = $nuevoStockProducto;
             $stockProducto->disponible = $nuevoStockProducto - $stockProducto->retenido;
-            $stockProducto->update();                            
 
-            //~Valida si existe registro en bita_resumen_almacen            
-            $bitaResumenAlmacen = BitaResumenAlmacen::where('id_producto', '=', $idProducto)
-            ->where('id_almacen', '=', $idAlmacen)->get()->first();
+            if($tipoMovimiento=="INGRESO"){
+                $stockProducto->ultima_entrada = new \DateTime();
+            }else{
+                $stockProducto->ultima_salida = new \DateTime();
+            }            
+            
+            $stockProducto->update();                                        
 
-            if($bitaResumenAlmacen == null){
-                $bitaResumenAlmacen = new BitaResumenAlmacen();
-                $bitaResumenAlmacen->id_producto = $idProducto;
-                $bitaResumenAlmacen->id_almacen = $idAlmacen;
-                $bitaResumenAlmacen->stock = $nuevoStockAlmacen;
-                $bitaResumenAlmacen->primer_registro = new \DateTime();;
-                $bitaResumenAlmacen->ultimo_registro = new \DateTime();;                
-                $bitaResumenAlmacen->save();
-            }else{                
-                $bitaResumenAlmacen->stock = $nuevoStockAlmacen;                
-                $bitaResumenAlmacen->ultimo_registro = new \DateTime();;                
-                $bitaResumenAlmacen->update();
+            //~Actualiza el stock de la ubicacion
+            $stockUbicaProducto = StockUbicaProducto::where('id_stock_producto','=',$stockProducto->id_stock_producto)
+            ->where('id_producto', '=', $idProducto)
+            ->where('codigo_ubica','=',$catUbicaProducto->codigo)
+            ->get()->first();
+
+            if($stockUbicaProducto==null){
+                $stockUbicaProducto = new StockUbicaProducto();
+                $stockUbicaProducto->id_stock_producto=$stockProducto->id_stock_producto;
+                $stockUbicaProducto->id_producto=$idProducto;
+                $stockUbicaProducto->codigo_ubica=$catUbicaProducto->codigo;
+
+                if($tipoMovimiento=="INGRESO"){
+                    $stockUbicaProducto->stock=$cantidad;
+                }else{
+                    $stockUbicaProducto->stock=$cantidad;
+                }
+            
+                $stockUbicaProducto->save();
+            }else{
+                $stockActual = $stockUbicaProducto->stock;
+
+                if($tipoMovimiento=="INGRESO"){
+                    $stockActual = $stockActual + $cantidad;
+                }else{
+                    $stockActual = $stockActual - $cantidad;
+                }
+                $stockUbicaProducto->stock=$stockActual;
+            
+                $stockUbicaProducto->update();
             }
 
+
             DB::commit();
-            return [ 'xstatus'=>true];
+            return [ 'xstatus'=>true, 'movimiento'=>$movimientoAlmacen, 'stockUbicacion'=>$stockUbicaProducto, 'stockProducto'=>$stockProducto];
         }catch(Exception $e){
             DB::rollBack();
             Log::error( $e->getTraceAsString() );            
@@ -340,26 +377,22 @@ class AlmacenController extends Controller{
     public function getStock($idAlmacen, $idProducto){
         try{
             $ultimoSaldo = 0;
-            $sql= " SELECT stock FROM movimiento_almacen
+            $sql = "SELECT stock FROM movimiento_almacen
                     WHERE id_movimiento_almacen = (
-                        SELECT max(id_movimiento_almacen) FROM movimiento_almacen
-                        WHERE id_almacen = $idAlmacen AND id_producto = $idProducto
-                        AND fecha_aplicacion = (
-                            SELECT ultimo_registro FROM bita_resumen_almacen
-                            WHERE id_almacen = $idAlmacen AND id_producto = $idProducto
-                        )
-                    )";        
+                    SELECT MAX(id_movimiento_almacen) FROM movimiento_almacen
+                    WHERE id_almacen = 1
+                    AND id_producto = 32
+                    AND fecha_aplicacion = (
+                        SELECT IF(ultima_entrada>ultima_salida, ultima_entrada, ultima_salida) FROM stock_producto 
+                        WHERE id_producto = 32 AND id_almacen = 1
+                    )
+                )";            
 
             $rs = DB::select( $sql );
 
             if(count($rs)>0){
-                $ultimoSaldo = $rs[0]->stock;                
-               
-            }else{
-                $ultimoSaldo;
+                $ultimoSaldo = $rs[0]->stock;                               
             }
-
-
 
             return $ultimoSaldo;
         }catch(Exception $e){
@@ -389,9 +422,10 @@ class AlmacenController extends Controller{
 
 
     /**
-     * Recupera el resumen del almacen
-     * 
-     * 
+     * Obtiene el resumen por almacen
+     * Total de productos
+     * Total de piezas
+     * Valor del almacen
      */
     public function resumenAlmacen(Request $request){
         try{
@@ -400,14 +434,15 @@ class AlmacenController extends Controller{
 
             $almacen = Almacen::findOrFail($idAlmacen);//~Se busca en base al ID entrante
             
-            $sql= " SELECT  COUNT(p.id_producto) total_prod, 
-                            SUM(bal.stock) total_stock,
-                            ROUND(SUM(p.ultimo_precio_compra * bal.stock),2) total_pesos
-                    FROM almacen al, bita_resumen_almacen bal, producto p
-                    WHERE al.id_almacen = bal.id_almacen
-                    AND bal.id_producto = p.id_producto
-                    AND al.id_almacen = $idAlmacen
-                    AND p.xstatus = 1";  
+
+            $sql="select 	count(p.id_producto) total_productos,
+            sum(sp.stock) total_piezas,
+            sum(sp.stock * p.ultimo_precio_compra) valor
+            from almacen a, producto p, stock_producto sp
+            where sp.id_almacen = a.id_almacen
+            and sp.id_producto = p.id_producto
+            and a.id_almacen = ".$idAlmacen;
+
             $rs = DB::select( $sql );
 
             $totalProductos = 0;
@@ -415,9 +450,9 @@ class AlmacenController extends Controller{
             $totalPesos = 0;
             
             if(count($rs)>0){                
-                $totalProductos = $rs[0]->total_prod;
-                $totalStock = $rs[0]->total_stock;
-                $totalPesos = $rs[0]->total_pesos;                         
+                $totalProductos = $rs[0]->total_productos;
+                $totalStock = $rs[0]->total_piezas;
+                $totalPesos = $rs[0]->valor;                         
             }
             
             
@@ -446,17 +481,17 @@ class AlmacenController extends Controller{
 
 
             if($idProductoBuscar == null){
-                $almacen = Almacen::join('bita_resumen_almacen', 'almacen.id_almacen', '=', 'bita_resumen_almacen.id_almacen')
-                ->join('producto','producto.id_producto','=','bita_resumen_almacen.id_producto')
-                ->select('producto.id_producto','producto.codigo','producto.nombre','producto.url_imagen','producto.ultimo_precio_compra','bita_resumen_almacen.stock')
-                ->where('almacen.id_almacen', '=', $idAlmacen)
+                $almacen = StockProducto::with('ubicacionStock')
+                ->join('producto','producto.id_producto','=','stock_producto.id_producto')
+                ->select('stock_producto.id_stock_producto','stock_producto.id_almacen','producto.id_producto','producto.codigo','producto.nombre','producto.url_imagen','producto.ultimo_precio_compra','stock_producto.stock','stock_producto.retenido','stock_producto.disponible')
+                ->where('stock_producto.id_almacen', '=', $idAlmacen)
                 ->where('producto.xstatus', '=', 1)
                 ->paginate(30);
             }else{
-                $almacen = Almacen::join('bita_resumen_almacen', 'almacen.id_almacen', '=', 'bita_resumen_almacen.id_almacen')
-                ->join('producto','producto.id_producto','=','bita_resumen_almacen.id_producto')
-                ->select('producto.id_producto','producto.codigo','producto.nombre','producto.url_imagen','producto.ultimo_precio_compra','bita_resumen_almacen.stock')
-                ->where('almacen.id_almacen', '=', $idAlmacen)
+                $almacen = StockProducto::with('ubicacionStock')
+                ->join('producto','producto.id_producto','=','stock_producto.id_producto')
+                ->select('stock_producto.id_stock_producto','stock_producto.id_almacen','producto.id_producto','producto.codigo','producto.nombre','producto.url_imagen','producto.ultimo_precio_compra','stock_producto.stock','stock_producto.retenido','stock_producto.disponible')
+                ->where('stock_producto.id_almacen', '=', $idAlmacen)
                 ->where('producto.id_producto', '=', $idProductoBuscar)
                 ->where('producto.xstatus', '=', 1)
                 ->paginate(30);
@@ -471,5 +506,110 @@ class AlmacenController extends Controller{
         
     }
 
+
+    /**
+     * Recupera el detalle de movimientos en el almacen por producto
+     * 
+     * 
+     */
+    public function detalleMovAlmacen(Request $request){
+        try{
+            
+            $idAlmacen = $request->id_almacen;
+            $idProducto = $request->id_producto;
+
+            $detalle = MovimientoAlmacen::where('id_almacen','=',$idAlmacen) 
+            ->where('id_producto', '=', $idProducto)
+            ->select('id_almacen','id_producto','tipo_movimiento',DB::raw("DATE_FORMAT(fecha_aplicacion, '%m/%d/%Y') as fecha_aplicacion"), 'cantidad','stock','ubicacion','estatus_movimientos')
+            ->orderBy('fecha_aplicacion','asc')
+            ->orderBy('id_movimiento_almacen','desc')
+            ->paginate(50);
+
+
+
+
+            return [    'xstatus'=>true, 'detalle'=> $detalle ];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+        
+    }
+
+
+    /**
+     * Crear lote de ingreso o retiro
+     * 
+     * 
+     */
+    public function generaLoteAlmacen(Request $request){
+        try{
+            
+            
+            $seq = app(ParametriaController::class)->seqFolioRegistroAlmacen_nextval();
+            $lote = 'INOUT_'.str_pad($seq,10,"0",STR_PAD_LEFT);
+
+
+            return [    'xstatus'=>true, 'lote'=> $lote ];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+        
+    }
+
+
+    /**
+     * General ticket con la orden de entrada y salida
+     * 
+     * 
+     */
+    public function exportTicketOrden(Request $request){
+        try{
+            
+            $loteReferencia = $request->lote_referencia;
+
+            $pdf = \PDF::loadView('exports/ticketMovAlmacen');
+  return $pdf->download('pruebapdf.pdf');
+
+           // $pdf = app('dompdf.wrapper');
+/*
+            $customPaper = array(0,0,100,283.80);
+            $pdf->setPaper($customPaper, 'landscape');
+    $pdf->loadHTML('<h1>Styde.net</h1>
+    <p>hola</p>
+    <p>hola</p>
+    <p>hola</p>
+    <p>hola</p>
+    <p>hola</p>
+    <p>hola</p>
+    <p>hola</p>
+    <p>Setting the paper size in PHP requires knowing the point (pt) measurement, points being the native PDF unit. The PDF resolution (with Dompdf) is 72pt/inch. So 10cm x 20cm is roughly equivalent to 283 X 566 (as you noted in your answer).
+
+    You can, however, allow Dompdf to calculate the appropriate point size by specifying your page dimensions in CSS. This is available starting with Dompdf 0.6.2.</p>
+    <p>1</p>
+    <p>1</p>
+    <p>1</p>
+    <p>1</p>
+    <p>1</p>
+    <p>2</p>
+    <p>2</p>
+    <p>3</p>
+    ');
+
+    return $pdf->download('mi-archivo.pdf');
+            */
+
+            
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+        
+    }
+
+
+
+    
 
 }
