@@ -45,6 +45,9 @@ Vue.component('ventastienda-component', require('./components/VentasTiendaCompon
 
 Vue.component('saldocuentaconta-component', require('./components/SaldoCuentaContaComponent.vue'));
 
+Vue.component('almacenstockproducto-component', require('./components/AlmacenStockProductoComponent.vue'));
+
+
 
 const app = new Vue({
     el: '#app',

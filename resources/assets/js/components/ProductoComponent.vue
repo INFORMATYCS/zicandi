@@ -179,8 +179,8 @@
                                     <label class="col-md-3 form-control-label" for="text-input">Imagen referencia</label>                                    
                                     <div class="col-md-3">
                                         <div class="custom-file">
-                                            <input type="file" class="custom-file-input" id="customFileLang" lang="es" accept="image/png, .jpeg, .jpg, image/gif" @change="getImagenLocal">
-                                            <label class="btn btn-primary custom-file-label" for="customFileLang">Seleccionar Archivo</label>                                            
+                                            <input type="file" class="custom-file-input" id="customFileLangLocal" lang="es" accept="image/png, .jpeg, .jpg, image/gif" @change="getImagenLocal">
+                                            <label class="btn btn-primary custom-file-label" for="customFileLangLocal">Seleccionar Archivo</label>                                            
                                         </div>
 
                                     </div>
@@ -757,13 +757,11 @@
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
             },
-            getImagenLocal(e){                
+            getImagenLocal(e){                       
                 let file = e.target.files[0];
                 this.oProducto.imagen.nombre = file.name;
                 this.oProducto.imagen.size = file.size;
-                this.oProducto.imagen.type = file.type;
-
-                console.log(file);
+                this.oProducto.imagen.type = file.type;                
                             
                 let reader = new FileReader();
 

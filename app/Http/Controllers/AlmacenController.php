@@ -268,6 +268,7 @@ class AlmacenController extends Controller{
             if($stockProducto == null){
                 $stockProducto = new StockProducto();
                 $stockProducto->id_producto = $idProducto;
+                $stockProducto->id_almacen = $idAlmacen;
                 $stockProducto->stock = 0;
                 $stockProducto->disponible = 0;
                 $stockProducto->retenido = 0;                
@@ -380,11 +381,17 @@ class AlmacenController extends Controller{
             $sql = "SELECT stock FROM movimiento_almacen
                     WHERE id_movimiento_almacen = (
                     SELECT MAX(id_movimiento_almacen) FROM movimiento_almacen
-                    WHERE id_almacen = 1
-                    AND id_producto = 32
+                    WHERE id_almacen = $idAlmacen
+                    AND id_producto = $idProducto
                     AND fecha_aplicacion = (
-                        SELECT IF(ultima_entrada>ultima_salida, ultima_entrada, ultima_salida) FROM stock_producto 
-                        WHERE id_producto = 32 AND id_almacen = 1
+                        SELECT CASE
+									WHEN ultima_entrada IS NOT NULL AND ultima_salida IS NULL THEN ultima_entrada
+									WHEN ultima_entrada IS NULL AND ultima_salida IS NOT NULL THEN ultima_salida
+									WHEN ultima_entrada>ultima_salida THEN ultima_entrada
+									WHEN ultima_entrada<ultima_salida THEN ultima_salida    
+								END 
+                        FROM stock_producto 
+                        WHERE id_producto = $idProducto AND id_almacen = $idAlmacen
                     )
                 )";            
 
@@ -486,7 +493,7 @@ class AlmacenController extends Controller{
                 ->select('stock_producto.id_stock_producto','stock_producto.id_almacen','producto.id_producto','producto.codigo','producto.nombre','producto.url_imagen','producto.ultimo_precio_compra','stock_producto.stock','stock_producto.retenido','stock_producto.disponible')
                 ->where('stock_producto.id_almacen', '=', $idAlmacen)
                 ->where('producto.xstatus', '=', 1)
-                ->paginate(30);
+                ->paginate(10);
             }else{
                 $almacen = StockProducto::with('ubicacionStock')
                 ->join('producto','producto.id_producto','=','stock_producto.id_producto')
@@ -494,11 +501,23 @@ class AlmacenController extends Controller{
                 ->where('stock_producto.id_almacen', '=', $idAlmacen)
                 ->where('producto.id_producto', '=', $idProductoBuscar)
                 ->where('producto.xstatus', '=', 1)
-                ->paginate(30);
+                ->paginate(10);
             }
 
+            
 
-            return [    'xstatus'=>true, 'detalle'=> $almacen ];
+
+            return [    'xstatus'=>true, 
+                        'detalle'=> $almacen,
+                        'pagination' => [
+                            'total'         => $almacen->total(),
+                            'current_page'         => $almacen->currentPage(),
+                            'per_page'         => $almacen->perPage(),
+                            'last_page'         => $almacen->lastPage(),
+                            'from'         => $almacen->firstItem(),
+                            'to'         => $almacen->lastItem()
+                        ]
+                    ];
         }catch(Exception $e){
             Log::error( $e->getTraceAsString() );            
             return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
@@ -520,15 +539,25 @@ class AlmacenController extends Controller{
 
             $detalle = MovimientoAlmacen::where('id_almacen','=',$idAlmacen) 
             ->where('id_producto', '=', $idProducto)
-            ->select('id_almacen','id_producto','tipo_movimiento',DB::raw("DATE_FORMAT(fecha_aplicacion, '%m/%d/%Y') as fecha_aplicacion"), 'cantidad','stock','ubicacion','estatus_movimientos')
+            ->select('id_movimiento_almacen','id_almacen','id_producto','tipo_movimiento',DB::raw("DATE_FORMAT(fecha_aplicacion, '%m/%d/%Y') as fecha_aplicacion"), 'cantidad','stock','ubicacion','estatus_movimientos')
             ->orderBy('fecha_aplicacion','asc')
             ->orderBy('id_movimiento_almacen','desc')
-            ->paginate(50);
+            ->paginate(30);
 
 
 
 
-            return [    'xstatus'=>true, 'detalle'=> $detalle ];
+            return [    'xstatus'=>true, 
+                        'detalle'=> $detalle,
+                        'pagination' => [
+                            'total'         => $detalle->total(),
+                            'current_page'         => $detalle->currentPage(),
+                            'per_page'         => $detalle->perPage(),
+                            'last_page'         => $detalle->lastPage(),
+                            'from'         => $detalle->firstItem(),
+                            'to'         => $detalle->lastItem()
+                        ]
+                    ];
         }catch(Exception $e){
             Log::error( $e->getTraceAsString() );            
             return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
@@ -606,6 +635,52 @@ class AlmacenController extends Controller{
             return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
         }
         
+    }
+
+
+    /**
+     * Map almacen
+     * 
+     * 
+     * 
+     */
+    public function selectAlmacen(Request $request){
+        try{
+            if(!$request->ajax())return redirect('/');
+
+            $almacen = Almacen::select('id_almacen','nombre')
+            ->where('xstatus','=', '1')
+            ->orderBy('nombre', 'asc')
+            ->get();
+
+            return ['almacen' => $almacen];
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());            
+            return ['exception' => $e->getMessage()];
+        }   
+    }
+
+
+    /**
+     * Map ubicaciones
+     * 
+     * 
+     * 
+     */
+    public function selectAlmacenUbicaciones(Request $request){
+        try{
+            if(!$request->ajax())return redirect('/');
+
+            $cat = CatUbicaProducto::select('codigo','nombre')
+            ->where('xstatus','=', '1')
+            ->orderBy('nombre', 'asc')
+            ->get();
+
+            return ['ubicaciones' => $cat];
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());            
+            return ['exception' => $e->getMessage()];
+        }   
     }
 
 

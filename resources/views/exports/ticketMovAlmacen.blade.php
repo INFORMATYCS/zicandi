@@ -50,8 +50,8 @@
         }
 
         .ticket {
-            width: 300px;
-            max-width: 300px;
+            width: 280px;
+            max-width: 280px;
         }
 
         img {
@@ -66,7 +66,7 @@
 
         .ticket {
             margin: 0;
-            padding: 0;
+            padding: 10;
         }
 
         body {
@@ -77,8 +77,11 @@
 
 <body>
     <div class="ticket centrado">
-        <h1>NOMBRE DEL NEGOCIO</h1>
-        <h2>Ticket de venta #12</h2>
+        <h1>RESUMEN MOVIMIENTO</h1>
+        <h1>ALMACEN</h1>
+
+        <h2>MARSELLA</h2>
+        <h2>MARSELLA</h2>
         <h2>2020-02-05 00:12:22</h2>
 
 

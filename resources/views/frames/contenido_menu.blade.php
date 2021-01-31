@@ -16,6 +16,9 @@
                     <li class="nav-item">
                         <a @click="oppMenuSeleccion=3" class="nav-link" href="#"><i class="icon-bag"></i> Almacenes</a>
                     </li>                    
+                    <li class="nav-item">
+                        <a @click="oppMenuSeleccion=19" class="nav-link" href="#"><i class="icon-bag"></i> Stock</a>
+                    </li>
                 </ul>
             </li>
             <li class="nav-item nav-dropdown">

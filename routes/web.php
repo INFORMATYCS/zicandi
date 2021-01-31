@@ -64,6 +64,8 @@ Route::get('/almacenes/resumen/detalle', 'AlmacenController@resumenDetalleProduc
 Route::get('/almacenes/resumen/movimientos', 'AlmacenController@detalleMovAlmacen');
 Route::get('/almacenes/resumen/genera_lote', 'AlmacenController@generaLoteAlmacen');
 Route::get('/almacenes/resumen/exporta_ticket', 'AlmacenController@exportTicketOrden');
+Route::get('/almacenes/map', 'AlmacenController@selectAlmacen');
+Route::get('/almacenes/map_ubicacion', 'AlmacenController@selectAlmacenUbicaciones');
 
 
 // - Rutas para Compras

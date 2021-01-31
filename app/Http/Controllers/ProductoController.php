@@ -132,12 +132,12 @@ class ProductoController extends Controller{
         }
 
         //~Registra stock
-        $stock = new StockProducto();
+        /*$stock = new StockProducto();
         $stock->id_producto = $producto->id_producto;
         $stock->stock = 0;
         $stock->disponible = 0;
         $stock->retenido = 0;
-        $stock->save();
+        $stock->save();*/
 
     }
 

@@ -86,7 +86,13 @@
         },
         methods:{
             listarProductos(page, buscar, criterio, aplLoading=false){
-                
+                                
+                if(buscar==""){
+                    this.setProducto("all");
+                    this.isLoading = 0;
+                    return;
+                }
+
                 if(aplLoading){
                     this.isLoading = 1;
                 }
