@@ -20,8 +20,7 @@
         td,
         th,
         tr,
-        table {
-            border-top: 1px solid black;
+        table {            
             border-collapse: collapse;
             margin: 0 auto;
         }
@@ -37,6 +36,10 @@
 
         td.producto {
             text-align: center;
+        }
+
+        .izq {
+            text-align: left;
         }
 
         th {
@@ -72,249 +75,87 @@
         body {
             text-align: center;
         }
+
+        .circulo {
+            width: 10px;
+            height: 10px;
+            -moz-border-radius: 50%;
+            -webkit-border-radius: 50%;
+            border-radius: 50%;
+            background: #5cb85c;
+        }
     </style>
 </head>
+@php
+$totalIngresos = 0;
+$totalRetiros = 0;
+$total = 0;
+
+$totalIngresosPiezas = 0;
+$totalRetirosPiezas = 0;
+$totalPiezas = 0;
+@endphp
 
 <body>
     <div class="ticket centrado">
         <h1>RESUMEN MOVIMIENTO</h1>
         <h1>ALMACEN</h1>
-
+        <p>&nbsp;</p>
         <h2>MARSELLA</h2>
-        <h2>MARSELLA</h2>
-        <h2>2020-02-05 00:12:22</h2>
+        <h2>{{$datos["fecha"]}}</h2>
+        <p>&nbsp;</p>
+        <h1>{{$datos["loteReferencia"]}}</h1>
+        <p>&nbsp;</p>
 
-
-        <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla provident temporibus quidem, expedita esse doloremque eos, animi itaque maiores minima pariatur dolores suscipit, deleniti reprehenderit velit architecto ea alias impedit.
-        </p>
-        <p>
-        producto
-        </p>
-        <p>
-        Ejemplo
-        </p>
-        <p>
-        .
-        </p>
-        <p>
-        .
-        </p>
-        <p>
-        .
-        </p>
-        <p>
-        .
-        </p>
-        <p>
-        .
-        </p>
-        <p>
-        .
-        </p>
-        <p>
-        .
-        </p>
-        <p>
-        .
-        </p>
-        <p>
-        .
-        </p>
-        <p>
-        .
-        </p>
-        <p>
-        .
-        </p>
-        <p>
-        .
-        </p>
-        <p>
-        .
-        </p>
-        <p>
-        https://parzibyte.me/blog/2020/06/22/generar-ticket-pdf-php/
-        </p>
-
-
-        <table>
-            <thead>
-                <tr class="centrado">
-                    <th class="cantidad">CANTIDADN </th>
-                    <th class="producto">PRODUCTO</th>
-                    <th class="precio">$$</th>
-                </tr>
-            </thead>
-            <tbody>
-                
+        @foreach ($datos["tabla"] as $value)
+        <table width=100%;>            
+            <tbody>                
                     <tr>
-                        <td class="cantidad">250</td>
-                        <td class="producto">Disco duir</td>
-                        <td class="precio">300.25</td>
+                        <td class="izq"><strong>{{$value->codigo}}</strong></td>
+                        <td colspan="2" class="producto">{{$value->nombre}}</td>                        
                     </tr>
-                
-            </tbody>
-            <tr>
-                <td class="cantidad"></td>
-                <td class="producto">
-                    <strong>TOTAL</strong>
-                </td>
-                <td class="precio">
-                    6568.3356
-                </td>
-            </tr>
-            <tr>
-                <td class="cantidad"></td>
-                <td class="producto">
-                    <strong>TOTAL</strong>
-                </td>
-                <td class="precio">
-                    6568.3356
-                </td>
-            </tr>
-            <tr>
-                <td class="cantidad"></td>
-                <td class="producto">
-                    <strong>TOTAL</strong>
-                </td>
-                <td class="precio">
-                    6568.3356
-                </td>
-            </tr>
-            <tr>
-                <td class="cantidad"></td>
-                <td class="producto">
-                    <strong>TOTAL</strong>
-                </td>
-                <td class="precio">
-                    6568.3356
-                </td>
-            </tr>
-            <tr>
-                <td class="cantidad"></td>
-                <td class="producto">
-                    <strong>TOTAL</strong>
-                </td>
-                <td class="precio">
-                    6568.3356
-                </td>
-            </tr>
-            <tr>
-                <td class="cantidad"></td>
-                <td class="producto">
-                    <strong>TOTAL</strong>
-                </td>
-                <td class="precio">
-                    6568.3356
-                </td>
-            </tr>
-            <tr>
-                <td class="cantidad"></td>
-                <td class="producto">
-                    <strong>TOTAL</strong>
-                </td>
-                <td class="precio">
-                    6568.3356
-                </td>
-            </tr>
-            <tr>
-                <td class="cantidad"></td>
-                <td class="producto">
-                    <strong>TOTAL</strong>
-                </td>
-                <td class="precio">
-                    6568.3356
-                </td>
-            </tr>
-            <tr>
-                <td class="cantidad"></td>
-                <td class="producto">
-                    <strong>TOTAL</strong>
-                </td>
-                <td class="precio">
-                    6568.3356
-                </td>
-            </tr>
-            <tr>
-                <td class="cantidad"></td>
-                <td class="producto">
-                    <strong>TOTAL</strong>
-                </td>
-                <td class="precio">
-                    6568.3356
-                </td>
-            </tr>
-            <tr>
-                <td class="cantidad"></td>
-                <td class="producto">
-                    <strong>TOTAL</strong>
-                </td>
-                <td class="precio">
-                    6568.3356
-                </td>
-            </tr>
-            <tr>
-                <td class="cantidad"></td>
-                <td class="producto">
-                    <strong>TOTAL</strong>
-                </td>
-                <td class="precio">
-                    6568.3356
-                </td>
-            </tr>
-            <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla provident temporibus quidem, expedita esse doloremque eos, animi itaque maiores minima pariatur dolores suscipit, deleniti reprehenderit velit architecto ea alias impedit.
-        </p>
-        <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla provident temporibus quidem, expedita esse doloremque eos, animi itaque maiores minima pariatur dolores suscipit, deleniti reprehenderit velit architecto ea alias impedit.
-        </p>
-        <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla provident temporibus quidem, expedita esse doloremque eos, animi itaque maiores minima pariatur dolores suscipit, deleniti reprehenderit velit architecto ea alias impedit.
-        </p>
-        <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla provident temporibus quidem, expedita esse doloremque eos, animi itaque maiores minima pariatur dolores suscipit, deleniti reprehenderit velit architecto ea alias impedit.
-        </p>
-        <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla provident temporibus quidem, expedita esse doloremque eos, animi itaque maiores minima pariatur dolores suscipit, deleniti reprehenderit velit architecto ea alias impedit.
-        </p>
-        <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla provident temporibus quidem, expedita esse doloremque eos, animi itaque maiores minima pariatur dolores suscipit, deleniti reprehenderit velit architecto ea alias impedit.
-        </p>
-        <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla provident temporibus quidem, expedita esse doloremque eos, animi itaque maiores minima pariatur dolores suscipit, deleniti reprehenderit velit architecto ea alias impedit.
-        </p>
-        <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla provident temporibus quidem, expedita esse doloremque eos, animi itaque maiores minima pariatur dolores suscipit, deleniti reprehenderit velit architecto ea alias impedit.
-        </p>
-        <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla provident temporibus quidem, expedita esse doloremque eos, animi itaque maiores minima pariatur dolores suscipit, deleniti reprehenderit velit architecto ea alias impedit.
-        </p>
-        <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla provident temporibus quidem, expedita esse doloremque eos, animi itaque maiores minima pariatur dolores suscipit, deleniti reprehenderit velit architecto ea alias impedit.
-        </p>
-            <tr>
-                <td class="cantidad"></td>
-                <td class="producto">
-                    <strong>TOTAL</strong>
-                </td>
-                <td class="precio">
-                    6568.3356
-                </td>
-            </tr>
-            <tr>
-                <td class="cantidad"></td>
-                <td class="producto">
-                    <strong>TOTAL</strong>
-                </td>
-                <td class="precio">
-                    6568.3356
-                </td>
-            </tr>
+                    <tr>
+                        <td class="izq"><h2>{{$value->ubicacion}}</h2></td>
+                        <td class="producto"><strong>{{$value->cantidad}}</strong></td>          
+                        <td class="precio">{{$value->stock}}</td>                                      
+                    </tr>                
+            </tbody>            
         </table>
-       
-        <p class="centrado">¡GRACIAS POR SU COMPRA!
-            <br>parzibyte.me</p>
+        <hr>
+
+        @php
+            if($value->tipo_movimiento=="RET"){
+                $totalRetiros++;
+                $totalRetirosPiezas+=$value->cantidad*-1;
+            }else{
+                $totalIngresos++;
+                $totalIngresosPiezas+=$value->cantidad;
+            }
+
+            $total++;            
+        @endphp
+        @endforeach
+        
+        <p>&nbsp;</p>        
+        <p class="centrado"><strong>.::RESUMEN::.</strong></p>
+        <table width=100%;>
+            <tr>
+                <td class="centrado">Retiros</td>
+                <td class="centrado">Ingresos</td>
+                <td class="centrado">Total</td>
+            </tr>
+            <tr>
+                <td class="centrado">{{$totalRetiros}}</td>
+                <td class="centrado">{{$totalIngresos}}</td>
+                <td class="centrado">{{$total}}</td>
+            </tr>
+            <tr>
+                <td class="centrado">{{$totalRetirosPiezas}}</td>
+                <td class="centrado">{{$totalIngresosPiezas}}</td>
+                <td class="centrado">{{$totalIngresosPiezas + $totalRetirosPiezas}}</td>
+            </tr>
+        </table>        
+        <p></p>
     </div>
 </body>
 

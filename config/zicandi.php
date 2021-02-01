@@ -47,13 +47,14 @@ return [
             'adjuntos'          => 'repositorio/entrada/adjuntos/',
             'log_batch'         => 'repositorio/entrada/log_batch/',
             'bettimg'           => 'repositorio/entrada/productos/better_alta_resolucion/',
+            'tmp'               => 'repositorio/entrada/tmp/',
         ],
         'salida'    => [
 
         ],
         'img'       => [
             'tmp'               => 'img/tmp/'
-        ],
+        ]
 
     ],
 

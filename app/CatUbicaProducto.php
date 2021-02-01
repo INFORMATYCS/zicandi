@@ -8,6 +8,8 @@ class CatUbicaProducto extends Model
 {
     //~Nombre de la tabla
     protected $table = 'cat_ubica_producto';
+
+    public $timestamps = false;
     
     //~Llave primaria
     protected $primaryKey = 'id_cat_ubica_producto'; 

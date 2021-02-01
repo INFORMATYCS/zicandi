@@ -22,12 +22,16 @@
                     <button type="button" class="btn btn-secondary" @click="showModal('orden_entrada_salida','mostrar')">
                         <i class="icon-plus"></i>&nbsp;Orden Entrada / Salida
                     </button> 
-                    <button type="button" class="btn btn-secondary" @click="showModal('almacen','registrar')">
-                        <i class="icon-plus"></i>&nbsp;Set Stock
+                    <button type="button" class="btn btn-secondary" @click="showModal('orden_entrada_salida','mostrarUbicaciones')">
+                        <i class="icon-plus"></i>&nbsp;Ubicaciones
                     </button>                     
                     <button type="button" class="btn btn-secondary" @click="onReiniciarCapturaOrden()">
                         <i class="icon-plus"></i>&nbsp;Reiniciar
                     </button>                     
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <button type="button" class="btn btn-info" @click="showModal('carga_masiva','mostrar')">
+                        <i class="icon-plus"></i>&nbsp;Carga masiva
+                    </button>  
                 </div>   
             </div>
 
@@ -44,7 +48,7 @@
                                 <p class="card-text">                                    
                                     <select class="form-control" v-model="idAlmacenSeleccion" @change="onResumenAlmacen()">
                                         <option value="0" disabled>Seleccione...</option>
-                                        <option v-for="almacen in mapAlmacen" :key="almacen.id_almacen" :value="almacen.id_almacen" v-text="almacen.nombre"></option>
+                                        <option v-for="almacen in mapAlmacen" :key="almacen.id_almacen" :value="almacen.id_almacen" v-text="almacen.nombre"></option>                                        
                                     </select> 
                                 </p>                  
                             </div>
@@ -161,8 +165,8 @@
 
         <!--Inicio del modal detalle de movimientos-->
         <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true" :class="{'mostrar' : modalDetalleMovimientos.modal}">
-            <div class="modal-dialog modal-primary" role="document">
-                <div class="modal-content">
+            <div class="modal-dialog modal-primary" style="max-width: 60% !important;" role="document">
+                <div class="modal-content" style="height: 700px;">
                     <div class="modal-header">
 
                         <h4 class="modal-title" v-text="modalDetalleMovimientos.tituloModal"></h4>
@@ -171,13 +175,14 @@
                         </button>
 
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body" style="max-height: calc(100% - 120px); overflow-y: scroll;">
                         
                         <!-- Lista -->
                         <table class="table table-bordered table-striped table-sm">
                             <thead>
                                 <tr>
                                     <th>Fecha</th>
+                                    <th>Lote</th>
                                     <th>Tipo movimiento</th>
                                     <th>Ubicacion</th>
                                     <th>Cantidad</th>
@@ -188,6 +193,7 @@
                             <tbody>
                                 <tr v-for="detaMov in modalDetalleMovimientos.detalleMovimientos" :key="detaMov.id_movimiento_almacen">                                                      
                                     <td v-text="detaMov.fecha_aplicacion"></td>
+                                    <td v-text="detaMov.lote_referencia"></td>
                                     <td>
                                         <span v-if="detaMov.tipo_movimiento=='ING'">Ingreso</span>
                                         <span v-if="detaMov.tipo_movimiento=='RET'">Retiro</span>
@@ -226,11 +232,113 @@
             </div>
             <!-- /.modal-dialog -->
         </div>
+
+
+        <!--Inicio del modal tareas ubicacion-->
+        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true" :class="{'mostrar' : modalTareasUbicacion.modal}">
+            <div class="modal-dialog modal-primary" style="max-width: 70% !important;" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+
+                        <h4 class="modal-title" v-text="modalTareasUbicacion.tituloModal"></h4>
+                        <button type="button" class="close" aria-label="Close" @click="closeModal();">
+                            <span aria-hidden="true">×</span>
+                        </button>
+
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-1">
+                                <button type="button" class="btn btn-warning btn-sm" @click="onCargaDetalleUbicacion('origen','ticket')">
+                                    <i class="icon-printer"></i>
+                                </button>
+                            </div>
+                            <div class="col-4"> 
+                                <select class="form-control" v-model="modalTareasUbicacion.codigoOrigen" @change="onCargaDetalleUbicacion('origen','consulta')">
+                                    <option value="0" disabled>Seleccione...</option>
+                                    <option v-for="newUbica in mapUbicaciones" :key="newUbica.codigo" :value="newUbica.codigo" v-text="newUbica.nombre"></option>                                    
+                                </select>
+                            </div>
+                            <div class="col-2">
+                                <h1>=></h1>
+                            </div>
+                            <div class="col-1">
+                                <button type="button" class="btn btn-warning btn-sm" @click="onCargaDetalleUbicacion('destino','ticket')">
+                                    <i class="icon-printer"></i>
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <select class="form-control" v-model="modalTareasUbicacion.codigoDestino" @change="onCargaDetalleUbicacion('destino', 'consulta')">
+                                    <option value="0" disabled>Seleccione...</option>
+                                    <option v-for="newUbica in mapUbicaciones" :key="newUbica.codigo" :value="newUbica.codigo" v-text="newUbica.nombre"></option>                                    
+                                </select>
+
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-md-5">
+                                <ul class="list-group">
+                                    <li class="list-group-item">
+                                        <div class="row">
+                                            <div class="col-3"><strong>Codigo</strong></div>
+                                            <div class="col-6"><strong>Producto</strong></div>
+                                            <div class="col-3"><strong>Stock</strong></div>
+                                        </div>
+                                    </li>                                
+
+                                    <li class="list-group-item" v-for="detalle in modalTareasUbicacion.detalleOrigen" :key="detalle.codigo">                                    
+                                        <div class="row">
+                                            <div class="col-3" v-text="detalle.codigo"></div>
+                                            <div class="col-6" v-text="detalle.nombre"></div>
+                                            <div class="col-3" v-text="detalle.stock"></div>
+                                        </div>
+                                    </li>                                                               
+                                </ul>
+                            </div>
+                        
+                            <div class="col-md-2">
+                               
+                            </div>
+                            <div class="col-md-5">
+                                <ul class="list-group">
+                                    <li class="list-group-item">
+                                        <div class="row">
+                                            <div class="col-3"><strong>Codigo</strong></div>
+                                            <div class="col-6"><strong>Producto</strong></div>
+                                            <div class="col-3"><strong>Stock</strong></div>
+                                        </div>
+                                    </li>                                
+
+                                    <li class="list-group-item" v-for="detalle in modalTareasUbicacion.detalleDestino" :key="detalle.codigo">                                    
+                                        <div class="row">
+                                            <div class="col-3" v-text="detalle.codigo"></div>
+                                            <div class="col-6" v-text="detalle.nombre"></div>
+                                            <div class="col-3" v-text="detalle.stock"></div>
+                                        </div>
+                                    </li>                                                               
+                                </ul>
+                            </div>
+                        </div>
+                        
+                       
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" @click="onUnificarUbicaciones();">Unificar</button>                        
+                        <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>                        
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
         <!--Fin del modal-->
 
         <!--Inicio del modal Orden entrada y salida-->
         <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true" :class="{'mostrar' : modalOrdenEntradaSalida.modal}">
-            <div class="modal-dialog modal-primary" style="max-width: 80% !important;" role="document">
+            <div class="modal-dialog modal-primary" style="max-width: 90% !important;" role="document">
                 <div class="modal-content" style="height: 700px;">
                     <div class="modal-header">
 
@@ -255,31 +363,35 @@
                                         <span v-text="orden.disponible"></span>&nbsp;/&nbsp;<span class="text-muted" v-text="orden.retenido"></span>
                                     </div>
                                     <div class="col-md-4">
-                                        <ul class="list-unstyled">
-                                            <li v-for="ubica in orden.ubicacion_stock" :key="ubica.codigo_ubica">
+                                        
+                                            <div v-for="ubica in orden.ubicacion_stock" :key="ubica.codigo_ubica">
                                                 <div class="row">
-                                                    <div class="col-md-1">                                                        
+                                                    <div class="col-1">                                                        
                                                         <a href="#" class="badge badge-pill badge-danger" v-if="ubica.isMovimientoProcesado && ubica.xstatus == false" @click="onShowResultadoMov(ubica)">Err</a>
 
                                                         <a href="#" class="badge badge-pill badge-success" v-if="ubica.isMovimientoProcesado && ubica.xstatus == true" @click="onShowResultadoMov(ubica)">Ok</a>
                                                     </div>
-                                                    <div class="col-md-4">
+                                                    <div class="col-3">
                                                         <strong v-text="ubica.codigo_ubica"></strong>&nbsp;<span class="text-muted" v-text="ubica.stock"></span>
                                                     </div>
-                                                    <div class="col-md-6">
-                                                        <input type="text" style="width:60%;" class="form-control" v-model="ubica.nuevoStock">
+                                                    <div class="col-4">                                                        
+                                                        <input type="text" style="width:100%;" class="form-control" v-model="ubica.nuevoStock">
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <input type="text" style="width:100%;" class="form-control" v-model="ubica.setStock" v-if="chkModoSet" @keyup.enter="onCaculaNuevoStock(ubica)">
                                                     </div>
                                                 </div>
                                                 
                                                 
-                                            </li>
-                                            <li>                                            
+                                            </div>
+                                            <div>                                            
                                                 <select class="form-control" v-model="orden.nuevaUbicacionSelect" @change="onNuevaUbicacionOrden(orden)">
                                                     <option value="0" disabled>Seleccione...</option>
                                                     <option v-for="newUbica in mapUbicaciones" :key="newUbica.codigo" :value="newUbica.codigo" v-text="newUbica.nombre"></option>
+                                                    <option value="_new_" >-- Nuevo --</option>
                                                 </select>   
-                                            </li>
-                                        </ul>
+                                            </div>
+                                        
                                     </div>
                                 </div>   
 
@@ -288,14 +400,23 @@
                             
                         
                         </div>
+  
                        
                        
                     </div>
-                    
+                    <div class="modal-footer justify-content-start">
+                        <div style="padding-left:30px;">                            
+                            <input type="checkbox" class="form-check-input" v-model="chkModoSet">
+                            <label class="form-check-label" for="exampleCheck1">Activar modo SET</label>
+                        </div>
+                                    
+                    </div>                                        
                     <div class="modal-footer">
+    
                         <button type="button" class="btn btn-secondary" v-if="modalOrdenEntradaSalida.resultadoProcesaLote == 0 || modalOrdenEntradaSalida.resultadoProcesaLote == 1" @click="onAplicarOrden();">Aplicar</button>
                         <button type="button" class="btn btn-secondary" v-if="modalOrdenEntradaSalida.resultadoProcesaLote >= 1" @click="onGenerarReporte();">Generar reporte</button>
                         <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>                            
+                                    
                     </div>
                 </div>
                 <!-- /.modal-content -->
@@ -305,6 +426,75 @@
         <!--Fin del modal-->
 
 
+        <!--Inicio modal craear ubicacion-->
+        <div class="modal fade" :class="{'mostrar' : modalCatUbicacion.modal}" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" v-text="modalCatUbicacion.tituloModal"></h5>
+                <button type="button" class="close" aria-label="Close" @click="closeModal();">
+                    <span aria-hidden="true">×</span>
+                </button>                
+            </div>
+            <div class="modal-body">
+                <form>
+                <div class="form-group">
+                    <label for="recipient-name" class="col-form-label">Codigo:</label>
+                    <input type="text" class="form-control" v-model="modalCatUbicacion.codigo">
+                </div>
+                <div class="form-group">
+                    <label for="message-text" class="col-form-label">Nombre:</label>
+                    <input type="text" class="form-control" v-model="modalCatUbicacion.nombre">
+                </div>
+                </form>
+            </div>
+            <div class="modal-footer">                
+                <button type="button" class="btn btn-primary" @click="onStoreUbicacionAlmacen()">Guardar</button>
+            </div>
+            </div>
+        </div>
+        </div>
+
+        <!--Inicio del modal carga masiva-->
+        <div class="modal fade" :class="{'mostrar' : modalCargaMasiva.modal}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-primary" style="max-width: 70% !important;" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+
+                        <h4 class="modal-title" v-text="modalCargaMasiva.tituloModal"></h4>
+                        <button type="button" class="close" aria-label="Close" @click="closeModal();">
+                            <span aria-hidden="true">×</span>
+                        </button>
+
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-4">
+                               Archivo:
+                            </div>
+                            <div class="col-4">                                 
+                                <input type="file" class="custom-file-input" id="customFileLangLocal" lang="es" accept=".xls, .xlsx" @change="onUploadExcel()">
+                                <label class="btn btn-primary custom-file-label" for="customFileLangLocal">Examinar</label>                                            
+                            </div>
+                            <div class="col-2">
+                                
+                            </div>
+                            
+                        </div>
+                        
+                       
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" @click="onUnificarUbicaciones();">Unificar</button>                        
+                        <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>                        
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!--Fin del modal-->
 
 
 
@@ -353,6 +543,16 @@
                     erroresMsjList: [],
                     resultadoProcesaLote: 0
                 },
+                modalTareasUbicacion: {
+                    modal: 0,
+                    tituloModal: '',                    
+                    error: 0,
+                    erroresMsjList: [],
+                    codigoOrigen: '',
+                    codigoDestino: '',
+                    detalleOrigen: [],
+                    detalleDestino: []
+                },
                 pagination: {
                     total : 0,
                     current_page  : 0,
@@ -361,8 +561,24 @@
                     from : 0,
                     to : 0                    
                 },
+                modalCatUbicacion: {
+                    modal: 0,
+                    tituloModal: '',                    
+                    error: 0,
+                    erroresMsjList: [],
+                    codigo:'',
+                    nombre:''
+                },
                 loteReferencia: '',
-                
+                chkModoSet: false,
+                modalCargaMasiva: {
+                    modal: 0,
+                    tituloModal: '',                    
+                    error: 0,
+                    erroresMsjList: [],
+                    fileSeleccion: null,
+                    fileServidor: ''
+                },
             }
         },
         computed:{
@@ -471,11 +687,11 @@
                 let url = '/zicandi/public/almacenes/resumen/detalle?page=' + page + '&id_almacen='+this.idAlmacenSeleccion;
                 if(id_producto!=null){
                     url = url + '&id_producto='+id_producto;
-                }
+                }                
 
                 axios.get(url)
                 .then(function (response) {  
-                    me.isLoading = 0;       
+                    me.isLoading = 0;                                             
              
                     if(response.data.xstatus){ 
                         //~Marca si ya fue seleccionado
@@ -497,7 +713,7 @@
                         me.detalleAlmacenSeleccion = resultado;                                            
                         me.pagination = response.data.pagination;
 
-                        if( me.detalleAlmacenSeleccion.length == 0 ){
+                        if( me.detalleAlmacenSeleccion.length == 0 && me.buscador.id_producto!=null){
                             let registro = {
                                 codigo:me.buscador.codigo, 
                                 disponible:0,
@@ -642,10 +858,60 @@
                                 
                                 break;
                             }
+                            case 'mostrarUbicaciones':
+                            {                                
+                                
+                                this.modalTareasUbicacion.tituloModal = 'Tareas ubicaciones';
+                                this.modalTareasUbicacion.tipoAccion = 1;
+                                this.modalTareasUbicacion.modal = 1;                                
+                                
+                                break;
+                            }
+                            
                         }
 
                         break;
-                    }                
+                    }      
+                    case 'cat_ubicacion':
+                    {
+                        switch(accion){
+                            case 'mostrar':
+                            {                                
+                                this.modalCatUbicacion.tituloModal = 'Nueva ubicacion';
+                                this.modalCatUbicacion.tipoAccion = 1;
+                                this.modalCatUbicacion.modal = 1;   
+                                
+                                break;
+                            }
+                            
+                        }
+
+                        break;
+                    }
+                    case 'carga_masiva':
+                    {
+                        switch(accion){
+                            case 'mostrar':
+                            {                                                                
+                                this.modalCargaMasiva.tituloModal = 'Carga masiva de stock';
+                                this.modalCargaMasiva.tipoAccion = 1;
+                                this.modalCargaMasiva.modal = 1;   
+                                
+                                break;
+                            }
+                            
+                        }
+
+                        break;
+                    } 
+
+
+
+                    
+                    
+                    
+
+                    
                 }                
             },
             /**
@@ -661,6 +927,15 @@
                 this.modalOrdenEntradaSalida.modal = 0;                
                 this.modalOrdenEntradaSalida.tituloModal = '';
 
+                this.modalTareasUbicacion.modal = 0;                
+                this.modalTareasUbicacion.tituloModal = '';
+
+                this.modalCatUbicacion.modal = 0;                
+                this.modalCatUbicacion.tituloModal = '';
+
+                this.modalCargaMasiva.modal = 0;                
+                this.modalCargaMasiva.tituloModal = '';
+        
             },
 
             addDetalleSeleccion(data){   
@@ -688,6 +963,11 @@
                 console.log(orden);
                 console.log(orden.nuevaUbicacionSelect);
 
+                if(orden.nuevaUbicacionSelect=="_new_"){
+                    this.showModal('cat_ubicacion','mostrar');
+                    return;
+                }
+
                 let ubicacion = orden.ubicacion_stock;
                 let existe = false;
                 for(let i=0; i<=ubicacion.length-1; i++){
@@ -705,9 +985,8 @@
                         stock: '',
                         nuevo: 'si'
                     };                    
-                    console.log(registro);
                     orden.ubicacion_stock.push(registro);                    
-                    console.log(orden);
+
                 }
 
             },
@@ -723,11 +1002,26 @@
                 this.detalleAlmacenSeleccion=[];                
                 this.detalleSeleccion=[];
                 this.loteReferencia = '';
+                this.chkModoSet = false;
                 
+                this.modalDetalleMovimientos.modal=0;
+                this.modalDetalleMovimientos.tituloModal='';
+                this.modalDetalleMovimientos.error=0;
+                this.modalDetalleMovimientos.erroresMsjList=[];
+                this.modalDetalleMovimientos.detalleMovimientos=[];
+                this.modalDetalleMovimientos.producto=null;                
+
+                this.modalOrdenEntradaSalida.modal=0;
+                this.modalOrdenEntradaSalida.tituloModal='';
+                this.modalOrdenEntradaSalida.error=0;
+                this.modalOrdenEntradaSalida.erroresMsjList=[];
+                this.modalOrdenEntradaSalida.resultadoProcesaLote=0;
 
                 this.onGetMapAlmacen();
                 this.onGetMapAlmacenUbicacion();
                 this.onGeneraLoteReferencia();
+
+
             },
             /***
              * Aplica el movimiento en el almacen
@@ -768,6 +1062,7 @@
                     let orden = this.detalleSeleccion[i];
                     let ubicacion = orden.ubicacion_stock;
                     for(let n=0; n<=ubicacion.length-1; n++){
+                    
                         let ubicacionStock = ubicacion[n];
                         let tipoMovimiento = 'INGRESO';
                         if(parseFloat(ubicacionStock.nuevoStock)<0){
@@ -786,8 +1081,11 @@
                         };
 
                         if(!(ubicacionStock.isMovimientoProcesado && ubicacionStock.xstatus)){
-                            pilaTrabajo.push(registro);
-                            ubicacionStock.isMovimientoProcesado = false;
+                            console.log(registro);
+                            if(parseFloat(registro.cantidad)!=0 && !isNaN(registro.cantidad)){                            
+                                pilaTrabajo.push(registro);
+                                ubicacionStock.isMovimientoProcesado = false;
+                            }
                             
                         }
                         
@@ -801,7 +1099,7 @@
                 pilaTrabajo.reduce(
                     function (sequence, datosVO) {
                         return sequence.then(function() {
-                            //~Proceso a ejecutar
+                            //~Proceso a ejecutar               
                             return me.onAplicarMovimientos(datosVO);
                         }).then(function(response) {
                             console.log('Termina ejecucion de proceso');
@@ -856,8 +1154,187 @@
                 }
             },
 
-            onGenerarReporte(){                                
-                window.open('/zicandi/public/almacenes/resumen/exporta_ticket?lote_referencia=' + this.loteReferencia);        
+            /**
+             * Muestras pdf ticket en pantalla
+             * 
+             */
+            onGenerarReporte(){             
+                let url = '/zicandi/public/almacenes/resumen/exporta_ticket?lote_referencia=' + this.loteReferencia;                
+                Swal.fire({
+                    title: 'Ticket',
+                    html: '<embed src="'+url+'" type="application/pdf" width="100%" height="300px" />',
+                    showCloseButton: false,
+                    showCancelButton: false,
+                    focusConfirm: false                    
+                });       
+            },
+
+            /**
+             * Realiza el calculo del nuevo stock
+             * 
+             */
+            onCaculaNuevoStock(ubica){                
+                let stock = parseFloat(ubica.stock);
+                let setStock = parseFloat(ubica.setStock);
+                if(setStock<0){
+                    setStock = stock;
+                }
+
+                let complemento = setStock - stock;
+                ubica.nuevoStock = complemento;
+
+                this.$forceUpdate();
+            },
+
+
+            /**
+             * Carga el detalle actual por ubicacion
+             * 
+             * 
+             */
+            onCargaDetalleUbicacion(tag, tipoSalida){
+                let me = this;                
+                let codigoOrigen = this.modalTareasUbicacion.codigoOrigen;
+                let codigoDestino = this.modalTareasUbicacion.codigoDestino;         
+                
+                if(tag=="origen"){
+                    url = '/zicandi/public/almacenes/cat_ubica/resumen?opcion='+tipoSalida+'&codigoUbicacion='+codigoOrigen;
+                }else{
+                    url = '/zicandi/public/almacenes/cat_ubica/resumen?opcion='+tipoSalida+'&codigoUbicacion='+codigoDestino;
+                }
+
+                if(tipoSalida=="ticket"){
+                    if((me.modalTareasUbicacion.detalleOrigen.length > 0 && tag == "origen") || (me.modalTareasUbicacion.detalleDestino.length > 0 && tag == "destino"))
+                    Swal.fire({
+                        title: 'Ticket',
+                        html: '<embed src="'+url+'" type="application/pdf" width="100%" height="300px" />',
+                        showCloseButton: false,
+                        showCancelButton: false,
+                        focusConfirm: false                    
+                    });
+                }else{
+                    this.isLoading = 1;
+
+                    axios.get(url)
+                    .then(function (response) {  
+                        me.isLoading = 0;                           
+                        if(response.data.xstatus){ 
+                            if(tag=="origen"){
+                                me.modalTareasUbicacion.detalleOrigen = response.data.detalleUbicacion;                                            
+                            }else{
+                                me.modalTareasUbicacion.detalleDestino = response.data.detalleUbicacion;                                            
+                            }                                                
+                        }else{
+                            throw new Error(response.data.error);
+                        } 
+                                        
+                    })
+                    .catch(function (error) {       
+                        me.isLoading = 0;             
+                        util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                    });
+                }
+
+            },
+
+
+            /***
+             * Realiza la unificacion de ubicaciones
+             * 
+             * 
+             */
+            onUnificarUbicaciones(){
+                let me = this;                
+                let codigoOrigen = this.modalTareasUbicacion.codigoOrigen;
+                let codigoDestino = this.modalTareasUbicacion.codigoDestino; 
+
+                if(me.modalTareasUbicacion.detalleOrigen.length <= 0){
+                    util.MSG('Algo salio Mal!', 'Sin registros origen que unificar', util.tipoErr);
+                    return;
+                }
+
+
+                this.isLoading = 1;
+                axios.post('/zicandi/public/almacenes/cat_ubica/unifica',{
+                        'ubicacionOrigen': codigoOrigen,
+                        'ubicacionDestino': codigoDestino                       
+                })
+                .then(function (response) {  
+                    me.isLoading = 0;           
+                    console.log(response);                
+                    if(response.data.xstatus){ 
+                        if(response.data.totalUnificados>0){
+                            me.onCargaDetalleUbicacion('origen', 'consulta');
+                            me.onCargaDetalleUbicacion('detino', 'consulta');
+                            util.AVISO('Perfecto, unificacion exitosa', util.tipoOk);
+                        }
+                       
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+                                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+
+            },
+
+
+            onStoreUbicacionAlmacen(){
+                let me = this;                
+                
+
+
+                this.isLoading = 1;
+                axios.post('/zicandi/public/almacenes/cat_ubica/store',{
+                        'codigo': this.modalCatUbicacion.codigo,
+                        'nombre': this.modalCatUbicacion.nombre                       
+                })
+                .then(function (response) {  
+                    me.isLoading = 0;           
+                    
+                    if(response.data.xstatus){ 
+                        let ubicacion = response.data.ubicacion;
+                        me.mapUbicaciones.push(ubicacion);
+                        me.$forceUpdate();
+                        me.modalCatUbicacion.modal = 0;                
+                        me.modalCatUbicacion.tituloModal = '';
+                        util.AVISO('Se registro nueva ubicacion, seleccionala...', util.tipoOk);
+                       
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+                                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+
+            },
+
+            onUploadExcel(){
+                for(let i=0; i<event.target.files.length; i++){
+                    this.modalCargaMasiva.fileSeleccion = event.target.files[i];
+                }
+                
+                let nombreArchivo = this.modalCargaMasiva.fileSeleccion.name;
+                
+                const fd = new FormData();
+                fd.append('file', this.modalCargaMasiva.fileSeleccion, nombreArchivo);                
+
+                let me = this;
+                me.modalCargaMasiva.cargaServidorExitosa = false;
+                axios.post('/zicandi/public/almacenes/carga_masiva', fd)
+                .then(function (response) {                                                                                
+                    me.modalCargaMasiva.cargaServidorExitosa = true;
+                })
+                .catch(function (error) {       
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+
             }
 
         },

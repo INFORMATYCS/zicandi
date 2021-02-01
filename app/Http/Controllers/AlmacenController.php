@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 Use Config;
 Use Exception;
 Use Log;
@@ -14,7 +15,10 @@ use App\BitaResumenAlmacen;
 use App\MovimientoAlmacen;
 use App\CatUbicaProducto;
 use App\StockUbicaProducto;
+use App\TempCargaStock;
 use App\Exports\AlmacenExport;
+use App\Imports\StockMasivaImport;
+
 
 class AlmacenController extends Controller{
     /**
@@ -360,6 +364,11 @@ class AlmacenController extends Controller{
                 $stockUbicaProducto->update();
             }
 
+            //~Elimina todos los registros en cero
+            StockUbicaProducto::where('id_stock_producto','=',$stockProducto->id_stock_producto)
+            ->where('stock', '=', 0)            
+            ->delete();
+
 
             DB::commit();
             return [ 'xstatus'=>true, 'movimiento'=>$movimientoAlmacen, 'stockUbicacion'=>$stockUbicaProducto, 'stockProducto'=>$stockProducto];
@@ -389,6 +398,7 @@ class AlmacenController extends Controller{
 									WHEN ultima_entrada IS NULL AND ultima_salida IS NOT NULL THEN ultima_salida
 									WHEN ultima_entrada>ultima_salida THEN ultima_entrada
 									WHEN ultima_entrada<ultima_salida THEN ultima_salida    
+                                    WHEN ultima_entrada=ultima_salida THEN ultima_salida
 								END 
                         FROM stock_producto 
                         WHERE id_producto = $idProducto AND id_almacen = $idAlmacen
@@ -539,7 +549,7 @@ class AlmacenController extends Controller{
 
             $detalle = MovimientoAlmacen::where('id_almacen','=',$idAlmacen) 
             ->where('id_producto', '=', $idProducto)
-            ->select('id_movimiento_almacen','id_almacen','id_producto','tipo_movimiento',DB::raw("DATE_FORMAT(fecha_aplicacion, '%m/%d/%Y') as fecha_aplicacion"), 'cantidad','stock','ubicacion','estatus_movimientos')
+            ->select('id_movimiento_almacen','id_almacen','id_producto','tipo_movimiento',DB::raw("DATE_FORMAT(fecha_aplicacion, '%m/%d/%Y') as fecha_aplicacion"), 'cantidad','stock','ubicacion','estatus_movimientos','lote_referencia')
             ->orderBy('fecha_aplicacion','asc')
             ->orderBy('id_movimiento_almacen','desc')
             ->paginate(30);
@@ -595,39 +605,26 @@ class AlmacenController extends Controller{
      */
     public function exportTicketOrden(Request $request){
         try{
-            
-            $loteReferencia = $request->lote_referencia;
 
-            $pdf = \PDF::loadView('exports/ticketMovAlmacen');
-  return $pdf->download('pruebapdf.pdf');
+            $sql= "select p.codigo, p.nombre, IF(tipo_movimiento='RET', cantidad*-1, cantidad) cantidad, stock, ubicacion, tipo_movimiento
+            from movimiento_almacen ma, producto p
+            where ma.id_producto = p.id_producto
+            and lote_referencia = '".$request->lote_referencia."'";
 
-           // $pdf = app('dompdf.wrapper');
-/*
-            $customPaper = array(0,0,100,283.80);
-            $pdf->setPaper($customPaper, 'landscape');
-    $pdf->loadHTML('<h1>Styde.net</h1>
-    <p>hola</p>
-    <p>hola</p>
-    <p>hola</p>
-    <p>hola</p>
-    <p>hola</p>
-    <p>hola</p>
-    <p>hola</p>
-    <p>Setting the paper size in PHP requires knowing the point (pt) measurement, points being the native PDF unit. The PDF resolution (with Dompdf) is 72pt/inch. So 10cm x 20cm is roughly equivalent to 283 X 566 (as you noted in your answer).
+            $ordernEntrega = DB::select( $sql );
 
-    You can, however, allow Dompdf to calculate the appropriate point size by specifying your page dimensions in CSS. This is available starting with Dompdf 0.6.2.</p>
-    <p>1</p>
-    <p>1</p>
-    <p>1</p>
-    <p>1</p>
-    <p>1</p>
-    <p>2</p>
-    <p>2</p>
-    <p>3</p>
-    ');
 
-    return $pdf->download('mi-archivo.pdf');
-            */
+            $arreglo = [
+                "loteReferencia"    => $request->lote_referencia,
+                "fecha"             => date("d/m/Y"),
+                "tabla"             => $ordernEntrega
+            ];              
+
+            //$pdf = \PDF::loadView('exports/ticketMovAlmacen', ['datos' => $arreglo]);
+            return \PDF::loadView('exports/ticketMovAlmacen', ['datos' => $arreglo])
+            ->stream('archivo.pdf');
+
+            //return $pdf->download('resumenOrdenEntrega.pdf');  
 
             
         }catch(Exception $e){
@@ -683,6 +680,271 @@ class AlmacenController extends Controller{
         }   
     }
 
+
+    /**
+     * Crea nueva ubicacion
+     * 
+     * 
+     */
+    public function storeUbicacion(Request $request){
+        try{
+            //~Busca que no exista la ubicacion
+            $reqCat = CatUbicaProducto::where('codigo','=', $request->codigo)->get();
+
+            if($reqCat->isEmpty()){
+                $cat = new CatUbicaProducto();
+                $cat->codigo = $request->codigo;
+                $cat->nombre = $request->nombre;            
+                $cat->xstatus ='1';
+                $cat->save();
+
+                return [ 'xstatus'=>true, 'ubicacion' => $cat ];
+            }else{
+                return [ 'xstatus'=>false, 'error' => 'Ya existe la ubicacion' ];
+            }            
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());       
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
+        }                 
+    }
+
+
+    /**
+     * Unifica dos ubicaciones
+     * 
+     * 
+     */
+    public function unificaUbicacion(Request $request){
+        DB::beginTransaction();
+        try{
+            //~Busca que no exista la ubicacion
+            $origen = CatUbicaProducto::where('codigo','=', $request->ubicacionOrigen)->first();
+            if($origen==null){                
+                return [ 'xstatus'=>false, 'error' => 'No existe ubicacion origen' ];
+            }
+
+            $destino = CatUbicaProducto::where('codigo','=', $request->ubicacionDestino)->first();
+            if($destino==null){                
+                return [ 'xstatus'=>false, 'error' => 'No existe ubicacion destino' ];
+            }
+
+            $codigoOrigen = $origen->codigo;
+            $codigoDestino = $destino->codigo;
+
+
+            //~Actualiza el codigo de ubicacion
+            $stockUbicaProductoTotal = StockUbicaProducto::where('codigo_ubica','=',$codigoOrigen) 
+            ->update(['codigo_ubica'=> $codigoDestino]);
+
+            if($stockUbicaProductoTotal > 0){
+                //~Realiza la unificacion
+                $sql= "select id_stock_producto, id_producto, codigo_ubica, sum(stock) stock
+                from stock_ubica_producto
+                where codigo_ubica = '".$codigoDestino."'
+                group by id_stock_producto, id_producto, codigo_ubica";            
+
+                $ubicaciones = DB::select( $sql );
+
+                StockUbicaProducto::where('codigo_ubica','=',$codigoDestino)->delete();
+
+
+                foreach($ubicaciones as $p){                                                
+                    $stockUbicaProducto = new StockUbicaProducto();
+                    $stockUbicaProducto->id_stock_producto=$p->id_stock_producto;
+                    $stockUbicaProducto->id_producto=$p->id_producto;
+                    $stockUbicaProducto->codigo_ubica=$p->codigo_ubica;  
+                    $stockUbicaProducto->stock=$p->stock;
+
+                    $stockUbicaProducto->save();
+                }
+            }
+
+            DB::commit();  
+
+            return [ 'xstatus'=>true, 'totalUnificados' => $stockUbicaProductoTotal ];
+        }catch (\Exception $e) {
+            DB::rollBack();
+
+            \Log::error($e->getTraceAsString());       
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
+        }                 
+    }
+
+
+
+    /**
+     * Consulta el detalle/resumen por ubicacion
+     * 
+     * 
+     * 
+     */
+    public function resumenUbicacion(Request $request){
+        
+        try{
+            $opcion = $request->opcion;
+            $sql= " select 	    p.codigo,
+                                p.nombre,
+                                sup.stock
+                    from stock_ubica_producto sup, producto p
+                    where sup.id_producto = p.id_producto
+                    and sup.codigo_ubica = '".$request->codigoUbicacion."'
+                    order by p.codigo";   
+            $detalle = DB::select( $sql );
+
+            if($opcion=="ticket"){
+
+                $arreglo = [                    
+                    "fecha"             => date("d/m/Y"),
+                    "ubicacion"             => $request->codigoUbicacion,
+                    "tabla"             => $detalle
+                ];              
+                    
+                return \PDF::loadView('exports/ticketDetalleUbicacion', ['datos' => $arreglo])
+                ->stream('archivo.pdf');
+            }else{
+                return [ 'xstatus'=>true, 'detalleUbicacion' => $detalle ];
+            }
+
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());       
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
+        }                 
+    }
+
+
+    /**
+     * Carga el archivo en temporales
+     * 
+     * 
+     */
+    public function cargaTempArchivoXLS(Request $request){        
+        try{
+            $temp = new TempCargaStock();
+            $temp->truncate();
+
+
+            $file = $request->file('file');
+            $resp = Excel::import(new StockMasivaImport, $file);
+
+            //~Procesa la informacion
+            $temp = TempCargaStock::all();
+
+
+            foreach($temp as $t){   
+                try{
+                    $idProducto = intval($t->id_producto);
+                    $codigoProducto = trim($t->codigo_producto);
+                    $idAlmacen = intval($t->id_almacen);
+                    $tipoMovimiento = strtoupper(trim($t->tipo_movimiento));
+                    $codigoUbicacion = trim($t->codigo_ubicacion);
+                    $stock = floatval ($t->stock);
+                    $loteReferencia = trim ($t->lote_referencia);
+
+                    if($idProducto ==0 && $codigoProducto == null){
+                        throw new Exception('Se requiere especificar el producto');
+                    }
+
+                    //~1 Busca el producto
+                    $producto=null;
+                    if($idProducto>0){
+                        $producto = Producto::where('id_producto','=', $idProducto)
+                        ->where('xstatus','=','1')
+                        ->first();                        
+                    }
+
+                    if($producto==null){                
+                        $producto = Producto::where('codigo','=', $codigoProducto)
+                        ->where('xstatus','=','1')
+                        ->first();
+
+                        if($producto==null){
+                            throw new Exception('Producto no encontrado en catalogo');
+                        }
+                    }
+
+
+                    //~2 Busca el almacen
+                    $almacen=null;
+                    if($idAlmacen>0){
+                        $almacen = Almacen::where('id_almacen','=', $idAlmacen)
+                        ->where('xstatus','=','1')
+                        ->first();  
+                        
+                        if($almacen==null){
+                            throw new Exception('Almacen no encontrado en catalogo');
+                        }
+                    }else{
+                        throw new Exception('Se requiere el ID del almacen');
+                    }
+
+                    //~3 Tipo de movimiento
+                    if($tipoMovimiento != 'INGRESO' && $tipoMovimiento != 'RETIRO'){
+                        throw new Exception('Tipo movimiento invalido, solo se permite INGRESO|RETIRO');
+                    }
+
+
+                    //~4 Busca que no exista la ubicacion
+                    $catUbicaProducto = CatUbicaProducto::where('codigo','=', $codigoUbicacion)->first();
+                    if($catUbicaProducto==null){                
+                        throw new Exception('No existe la ubicacion');
+                    }
+
+                    //~5 Evalua Stock a setear
+                    if($stock<0){
+                        throw new Exception('El stock no puede ser menor a Cero o negativo');
+                    }
+
+                    //~6 Lote
+                    if($loteReferencia = ''){
+                        throw new Exception('Ingresa un lote de referencia');
+                    }
+
+                    /*
+                    //7 Calcula stock actual
+                    $stockProducto =  StockProducto::where('id_producto','=', $producto->id_producto)
+                    ->where('id_almacen','=', $almacen->id_almacen)
+                    ->first();
+
+                    if($stockProducto == null){
+                        $stockActual = 0;
+                        $idStockProducto = null;
+                    }else{
+                        $stockActual = $stockProducto->stock;
+                        $idStockProducto = $stockProducto->id_stock_producto;
+                    }
+
+                    $registroSotck = array(
+                        'idProducto'        => $producto->id_producto,
+                        'idAlmacen'         => $almacen->id_almacen,
+                        'tipoMovimiento'    => $tipoMovimiento,
+                        'codigoUbicacion'   => $catUbicaProducto->codigo,
+                        'nuevoStock'        => $stock,
+                        'actualStock'       => $stockActual,
+                        'idStockProducto'   => $idStockProducto,
+                        'loteReferencia'    => $loteReferencia
+                    );
+
+                    */
+
+                    $t->estatus = 'ACE';                    
+                    $t->update();
+
+                    
+                }catch (\Exception $e) {                    
+                    $t->estatus = 'ERR';
+                    $t->diagnostico = $e->getMessage();
+                    $t->update();
+                }      
+                
+            }
+
+            
+            return [ 'xstatus'=>true, 'carga' => $resp ];
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());       
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
+        }                 
+    }
 
 
     

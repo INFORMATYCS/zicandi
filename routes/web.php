@@ -66,6 +66,11 @@ Route::get('/almacenes/resumen/genera_lote', 'AlmacenController@generaLoteAlmace
 Route::get('/almacenes/resumen/exporta_ticket', 'AlmacenController@exportTicketOrden');
 Route::get('/almacenes/map', 'AlmacenController@selectAlmacen');
 Route::get('/almacenes/map_ubicacion', 'AlmacenController@selectAlmacenUbicaciones');
+Route::post('/almacenes/carga_masiva', 'AlmacenController@cargaTempArchivoXLS');
+
+Route::post('/almacenes/cat_ubica/store', 'AlmacenController@storeUbicacion');
+Route::post('/almacenes/cat_ubica/unifica', 'AlmacenController@unificaUbicacion');
+Route::get('/almacenes/cat_ubica/resumen', 'AlmacenController@resumenUbicacion');
 
 
 // - Rutas para Compras
@@ -82,6 +87,7 @@ Route::post('/uploadfile', 'UploadFileController@index');
 Route::post('/uploadfile/getAdjuntosByCarpeta', 'UploadFileController@getAdjuntosByCarpeta');
 Route::post('/uploadfile/delete', 'UploadFileController@delete');
 Route::post('/uploadfile/nuevaCarpeta', 'UploadFileController@nuevaCarpeta');
+Route::post('/uploadfile/generico', 'UploadFileController@uploadGenerico');
 
 // - Rutas multifondos
 Route::post('/mf2/liquidarCompra', 'MultiFondosController@liquidarCompra');

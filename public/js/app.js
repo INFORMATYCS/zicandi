@@ -74590,6 +74590,196 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -74630,6 +74820,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 erroresMsjList: [],
                 resultadoProcesaLote: 0
             },
+            modalTareasUbicacion: {
+                modal: 0,
+                tituloModal: '',
+                error: 0,
+                erroresMsjList: [],
+                codigoOrigen: '',
+                codigoDestino: '',
+                detalleOrigen: [],
+                detalleDestino: []
+            },
             pagination: {
                 total: 0,
                 current_page: 0,
@@ -74638,8 +74838,24 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 from: 0,
                 to: 0
             },
-            loteReferencia: ''
-
+            modalCatUbicacion: {
+                modal: 0,
+                tituloModal: '',
+                error: 0,
+                erroresMsjList: [],
+                codigo: '',
+                nombre: ''
+            },
+            loteReferencia: '',
+            chkModoSet: false,
+            modalCargaMasiva: {
+                modal: 0,
+                tituloModal: '',
+                error: 0,
+                erroresMsjList: [],
+                fileSeleccion: null,
+                fileServidor: ''
+            }
         };
     },
 
@@ -74767,7 +74983,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     me.detalleAlmacenSeleccion = resultado;
                     me.pagination = response.data.pagination;
 
-                    if (me.detalleAlmacenSeleccion.length == 0) {
+                    if (me.detalleAlmacenSeleccion.length == 0 && me.buscador.id_producto != null) {
                         var registro = {
                             codigo: me.buscador.codigo,
                             disponible: 0,
@@ -74912,10 +75128,53 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
                                     break;
                                 }
+                            case 'mostrarUbicaciones':
+                                {
+
+                                    this.modalTareasUbicacion.tituloModal = 'Tareas ubicaciones';
+                                    this.modalTareasUbicacion.tipoAccion = 1;
+                                    this.modalTareasUbicacion.modal = 1;
+
+                                    break;
+                                }
+
                         }
 
                         break;
                     }
+                case 'cat_ubicacion':
+                    {
+                        switch (accion) {
+                            case 'mostrar':
+                                {
+                                    this.modalCatUbicacion.tituloModal = 'Nueva ubicacion';
+                                    this.modalCatUbicacion.tipoAccion = 1;
+                                    this.modalCatUbicacion.modal = 1;
+
+                                    break;
+                                }
+
+                        }
+
+                        break;
+                    }
+                case 'carga_masiva':
+                    {
+                        switch (accion) {
+                            case 'mostrar':
+                                {
+                                    this.modalCargaMasiva.tituloModal = 'Carga masiva de stock';
+                                    this.modalCargaMasiva.tipoAccion = 1;
+                                    this.modalCargaMasiva.modal = 1;
+
+                                    break;
+                                }
+
+                        }
+
+                        break;
+                    }
+
             }
         },
 
@@ -74931,6 +75190,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             this.modalOrdenEntradaSalida.modal = 0;
             this.modalOrdenEntradaSalida.tituloModal = '';
+
+            this.modalTareasUbicacion.modal = 0;
+            this.modalTareasUbicacion.tituloModal = '';
+
+            this.modalCatUbicacion.modal = 0;
+            this.modalCatUbicacion.tituloModal = '';
+
+            this.modalCargaMasiva.modal = 0;
+            this.modalCargaMasiva.tituloModal = '';
         },
         addDetalleSeleccion: function addDetalleSeleccion(data) {
             data.seleccion = 'si';
@@ -74956,6 +75224,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             console.log(orden);
             console.log(orden.nuevaUbicacionSelect);
 
+            if (orden.nuevaUbicacionSelect == "_new_") {
+                this.showModal('cat_ubicacion', 'mostrar');
+                return;
+            }
+
             var ubicacion = orden.ubicacion_stock;
             var existe = false;
             for (var i = 0; i <= ubicacion.length - 1; i++) {
@@ -74973,9 +75246,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     stock: '',
                     nuevo: 'si'
                 };
-                console.log(registro);
                 orden.ubicacion_stock.push(registro);
-                console.log(orden);
             }
         },
 
@@ -74991,6 +75262,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             this.detalleAlmacenSeleccion = [];
             this.detalleSeleccion = [];
             this.loteReferencia = '';
+            this.chkModoSet = false;
+
+            this.modalDetalleMovimientos.modal = 0;
+            this.modalDetalleMovimientos.tituloModal = '';
+            this.modalDetalleMovimientos.error = 0;
+            this.modalDetalleMovimientos.erroresMsjList = [];
+            this.modalDetalleMovimientos.detalleMovimientos = [];
+            this.modalDetalleMovimientos.producto = null;
+
+            this.modalOrdenEntradaSalida.modal = 0;
+            this.modalOrdenEntradaSalida.tituloModal = '';
+            this.modalOrdenEntradaSalida.error = 0;
+            this.modalOrdenEntradaSalida.erroresMsjList = [];
+            this.modalOrdenEntradaSalida.resultadoProcesaLote = 0;
 
             this.onGetMapAlmacen();
             this.onGetMapAlmacenUbicacion();
@@ -75034,6 +75319,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 var orden = this.detalleSeleccion[i];
                 var ubicacion = orden.ubicacion_stock;
                 for (var n = 0; n <= ubicacion.length - 1; n++) {
+
                     var ubicacionStock = ubicacion[n];
                     var tipoMovimiento = 'INGRESO';
                     if (parseFloat(ubicacionStock.nuevoStock) < 0) {
@@ -75052,8 +75338,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     };
 
                     if (!(ubicacionStock.isMovimientoProcesado && ubicacionStock.xstatus)) {
-                        pilaTrabajo.push(registro);
-                        ubicacionStock.isMovimientoProcesado = false;
+                        console.log(registro);
+                        if (parseFloat(registro.cantidad) != 0 && !isNaN(registro.cantidad)) {
+                            pilaTrabajo.push(registro);
+                            ubicacionStock.isMovimientoProcesado = false;
+                        }
                     }
                 }
             }
@@ -75063,7 +75352,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             //~Procesa la pila de trabajo
             pilaTrabajo.reduce(function (sequence, datosVO) {
                 return sequence.then(function () {
-                    //~Proceso a ejecutar
+                    //~Proceso a ejecutar               
                     return me.onAplicarMovimientos(datosVO);
                 }).then(function (response) {
                     console.log('Termina ejecucion de proceso');
@@ -75111,8 +75400,168 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(resultado.error), util.tipoErr);
             }
         },
+
+
+        /**
+         * Muestras pdf ticket en pantalla
+         * 
+         */
         onGenerarReporte: function onGenerarReporte() {
-            window.open('/zicandi/public/almacenes/resumen/exporta_ticket?lote_referencia=' + this.loteReferencia);
+            var url = '/zicandi/public/almacenes/resumen/exporta_ticket?lote_referencia=' + this.loteReferencia;
+            Swal.fire({
+                title: 'Ticket',
+                html: '<embed src="' + url + '" type="application/pdf" width="100%" height="300px" />',
+                showCloseButton: false,
+                showCancelButton: false,
+                focusConfirm: false
+            });
+        },
+
+
+        /**
+         * Realiza el calculo del nuevo stock
+         * 
+         */
+        onCaculaNuevoStock: function onCaculaNuevoStock(ubica) {
+            var stock = parseFloat(ubica.stock);
+            var setStock = parseFloat(ubica.setStock);
+            if (setStock < 0) {
+                setStock = stock;
+            }
+
+            var complemento = setStock - stock;
+            ubica.nuevoStock = complemento;
+
+            this.$forceUpdate();
+        },
+
+
+        /**
+         * Carga el detalle actual por ubicacion
+         * 
+         * 
+         */
+        onCargaDetalleUbicacion: function onCargaDetalleUbicacion(tag, tipoSalida) {
+            var me = this;
+            var codigoOrigen = this.modalTareasUbicacion.codigoOrigen;
+            var codigoDestino = this.modalTareasUbicacion.codigoDestino;
+
+            if (tag == "origen") {
+                url = '/zicandi/public/almacenes/cat_ubica/resumen?opcion=' + tipoSalida + '&codigoUbicacion=' + codigoOrigen;
+            } else {
+                url = '/zicandi/public/almacenes/cat_ubica/resumen?opcion=' + tipoSalida + '&codigoUbicacion=' + codigoDestino;
+            }
+
+            if (tipoSalida == "ticket") {
+                if (me.modalTareasUbicacion.detalleOrigen.length > 0 && tag == "origen" || me.modalTareasUbicacion.detalleDestino.length > 0 && tag == "destino") Swal.fire({
+                    title: 'Ticket',
+                    html: '<embed src="' + url + '" type="application/pdf" width="100%" height="300px" />',
+                    showCloseButton: false,
+                    showCancelButton: false,
+                    focusConfirm: false
+                });
+            } else {
+                this.isLoading = 1;
+
+                axios.get(url).then(function (response) {
+                    me.isLoading = 0;
+                    if (response.data.xstatus) {
+                        if (tag == "origen") {
+                            me.modalTareasUbicacion.detalleOrigen = response.data.detalleUbicacion;
+                        } else {
+                            me.modalTareasUbicacion.detalleDestino = response.data.detalleUbicacion;
+                        }
+                    } else {
+                        throw new Error(response.data.error);
+                    }
+                }).catch(function (error) {
+                    me.isLoading = 0;
+                    util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+                });
+            }
+        },
+
+
+        /***
+         * Realiza la unificacion de ubicaciones
+         * 
+         * 
+         */
+        onUnificarUbicaciones: function onUnificarUbicaciones() {
+            var me = this;
+            var codigoOrigen = this.modalTareasUbicacion.codigoOrigen;
+            var codigoDestino = this.modalTareasUbicacion.codigoDestino;
+
+            if (me.modalTareasUbicacion.detalleOrigen.length <= 0) {
+                util.MSG('Algo salio Mal!', 'Sin registros origen que unificar', util.tipoErr);
+                return;
+            }
+
+            this.isLoading = 1;
+            axios.post('/zicandi/public/almacenes/cat_ubica/unifica', {
+                'ubicacionOrigen': codigoOrigen,
+                'ubicacionDestino': codigoDestino
+            }).then(function (response) {
+                me.isLoading = 0;
+                console.log(response);
+                if (response.data.xstatus) {
+                    if (response.data.totalUnificados > 0) {
+                        me.onCargaDetalleUbicacion('origen', 'consulta');
+                        me.onCargaDetalleUbicacion('detino', 'consulta');
+                        util.AVISO('Perfecto, unificacion exitosa', util.tipoOk);
+                    }
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onStoreUbicacionAlmacen: function onStoreUbicacionAlmacen() {
+            var me = this;
+
+            this.isLoading = 1;
+            axios.post('/zicandi/public/almacenes/cat_ubica/store', {
+                'codigo': this.modalCatUbicacion.codigo,
+                'nombre': this.modalCatUbicacion.nombre
+            }).then(function (response) {
+                me.isLoading = 0;
+
+                if (response.data.xstatus) {
+                    var ubicacion = response.data.ubicacion;
+                    me.mapUbicaciones.push(ubicacion);
+                    me.$forceUpdate();
+                    me.modalCatUbicacion.modal = 0;
+                    me.modalCatUbicacion.tituloModal = '';
+                    util.AVISO('Se registro nueva ubicacion, seleccionala...', util.tipoOk);
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onUploadExcel: function onUploadExcel() {
+            for (var i = 0; i < event.target.files.length; i++) {
+                this.modalCargaMasiva.fileSeleccion = event.target.files[i];
+            }
+
+            var nombreArchivo = this.modalCargaMasiva.fileSeleccion.name;
+
+            var fd = new FormData();
+            fd.append('file', this.modalCargaMasiva.fileSeleccion, nombreArchivo);
+            fd.append('nombre', nombreArchivo);
+
+            var me = this;
+            me.modalCargaMasiva.cargaServidorExitosa = false;
+            axios.post('/zicandi/public/uploadfile/generico', fd).then(function (response) {
+                me.modalCargaMasiva.fileServidor = response.data.file;
+                me.modalCargaMasiva.cargaServidorExitosa = true;
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
         }
     },
     mounted: function mounted() {
@@ -75168,13 +75617,16 @@ var render = function() {
               attrs: { type: "button" },
               on: {
                 click: function($event) {
-                  return _vm.showModal("almacen", "registrar")
+                  return _vm.showModal(
+                    "orden_entrada_salida",
+                    "mostrarUbicaciones"
+                  )
                 }
               }
             },
             [
               _c("i", { staticClass: "icon-plus" }),
-              _vm._v(" Set Stock\n                ")
+              _vm._v(" Ubicaciones\n                ")
             ]
           ),
           _vm._v(" "),
@@ -75192,6 +75644,25 @@ var render = function() {
             [
               _c("i", { staticClass: "icon-plus" }),
               _vm._v(" Reiniciar\n                ")
+            ]
+          ),
+          _vm._v(
+            "                     \n                      \n                "
+          ),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-info",
+              attrs: { type: "button" },
+              on: {
+                click: function($event) {
+                  return _vm.showModal("carga_masiva", "mostrar")
+                }
+              }
+            },
+            [
+              _c("i", { staticClass: "icon-plus" }),
+              _vm._v(" Carga masiva\n                ")
             ]
           )
         ])
@@ -75574,6 +76045,267 @@ var render = function() {
           "div",
           {
             staticClass: "modal-dialog modal-primary",
+            staticStyle: { "max-width": "60% !important" },
+            attrs: { role: "document" }
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "modal-content",
+                staticStyle: { height: "700px" }
+              },
+              [
+                _c("div", { staticClass: "modal-header" }, [
+                  _c("h4", {
+                    staticClass: "modal-title",
+                    domProps: {
+                      textContent: _vm._s(
+                        _vm.modalDetalleMovimientos.tituloModal
+                      )
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "close",
+                      attrs: { type: "button", "aria-label": "Close" },
+                      on: {
+                        click: function($event) {
+                          return _vm.closeModal()
+                        }
+                      }
+                    },
+                    [
+                      _c("span", { attrs: { "aria-hidden": "true" } }, [
+                        _vm._v("×")
+                      ])
+                    ]
+                  )
+                ]),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass: "modal-body",
+                    staticStyle: {
+                      "max-height": "calc(100% - 120px)",
+                      "overflow-y": "scroll"
+                    }
+                  },
+                  [
+                    _c(
+                      "table",
+                      {
+                        staticClass:
+                          "table table-bordered table-striped table-sm"
+                      },
+                      [
+                        _vm._m(2),
+                        _vm._v(" "),
+                        _c(
+                          "tbody",
+                          _vm._l(
+                            _vm.modalDetalleMovimientos.detalleMovimientos,
+                            function(detaMov) {
+                              return _c(
+                                "tr",
+                                { key: detaMov.id_movimiento_almacen },
+                                [
+                                  _c("td", {
+                                    domProps: {
+                                      textContent: _vm._s(
+                                        detaMov.fecha_aplicacion
+                                      )
+                                    }
+                                  }),
+                                  _vm._v(" "),
+                                  _c("td", {
+                                    domProps: {
+                                      textContent: _vm._s(
+                                        detaMov.lote_referencia
+                                      )
+                                    }
+                                  }),
+                                  _vm._v(" "),
+                                  _c("td", [
+                                    detaMov.tipo_movimiento == "ING"
+                                      ? _c("span", [_vm._v("Ingreso")])
+                                      : _vm._e(),
+                                    _vm._v(" "),
+                                    detaMov.tipo_movimiento == "RET"
+                                      ? _c("span", [_vm._v("Retiro")])
+                                      : _vm._e()
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("td", {
+                                    domProps: {
+                                      textContent: _vm._s(detaMov.ubicacion)
+                                    }
+                                  }),
+                                  _vm._v(" "),
+                                  _c(
+                                    "td",
+                                    { staticStyle: { "text-align": "right" } },
+                                    [
+                                      detaMov.tipo_movimiento == "RET"
+                                        ? _c("span", [_vm._v("-")])
+                                        : _vm._e(),
+                                      _vm._v(" "),
+                                      _c("span", {
+                                        domProps: {
+                                          textContent: _vm._s(detaMov.cantidad)
+                                        }
+                                      })
+                                    ]
+                                  ),
+                                  _vm._v(" "),
+                                  _c("td", {
+                                    staticStyle: { "text-align": "right" },
+                                    domProps: {
+                                      textContent: _vm._s(detaMov.stock)
+                                    }
+                                  }),
+                                  _vm._v(" "),
+                                  _c("td", {
+                                    domProps: {
+                                      textContent: _vm._s(
+                                        detaMov.estatus_movimientos
+                                      )
+                                    }
+                                  })
+                                ]
+                              )
+                            }
+                          ),
+                          0
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c("nav", [
+                      _c(
+                        "ul",
+                        { staticClass: "pagination" },
+                        [
+                          _vm.modalDetalleMovimientos.pagination.current_page >
+                          1
+                            ? _c("li", { staticClass: "page-item" }, [
+                                _c(
+                                  "a",
+                                  {
+                                    staticClass: "page-link",
+                                    attrs: { href: "#" },
+                                    on: {
+                                      click: function($event) {
+                                        $event.preventDefault()
+                                        return _vm.cambiarPaginaDM(
+                                          _vm.modalDetalleMovimientos.pagination
+                                            .current_page - 1
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("Ant")]
+                                )
+                              ])
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _vm._l(_vm.pagesNumberDM, function(page) {
+                            return _c(
+                              "li",
+                              {
+                                key: page,
+                                staticClass: "page-item",
+                                class: [page == _vm.isActivedDM ? "active" : ""]
+                              },
+                              [
+                                _c("a", {
+                                  staticClass: "page-link",
+                                  attrs: { href: "#" },
+                                  domProps: { textContent: _vm._s(page) },
+                                  on: {
+                                    click: function($event) {
+                                      $event.preventDefault()
+                                      return _vm.cambiarPaginaDM(page)
+                                    }
+                                  }
+                                })
+                              ]
+                            )
+                          }),
+                          _vm._v(" "),
+                          _vm.modalDetalleMovimientos.pagination.current_page <
+                          _vm.modalDetalleMovimientos.pagination.last_page
+                            ? _c("li", { staticClass: "page-item" }, [
+                                _c(
+                                  "a",
+                                  {
+                                    staticClass: "page-link",
+                                    attrs: { href: "#" },
+                                    on: {
+                                      click: function($event) {
+                                        $event.preventDefault()
+                                        return _vm.cambiarPaginaDM(
+                                          _vm.modalDetalleMovimientos.pagination
+                                            .current_page + 1
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("Sig")]
+                                )
+                              ])
+                            : _vm._e()
+                        ],
+                        2
+                      )
+                    ])
+                  ]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "modal-footer" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-secondary",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.closeModal()
+                        }
+                      }
+                    },
+                    [_vm._v("Cerrar")]
+                  )
+                ])
+              ]
+            )
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.modalTareasUbicacion.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-primary",
+            staticStyle: { "max-width": "70% !important" },
             attrs: { role: "document" }
           },
           [
@@ -75582,7 +76314,7 @@ var render = function() {
                 _c("h4", {
                   staticClass: "modal-title",
                   domProps: {
-                    textContent: _vm._s(_vm.modalDetalleMovimientos.tituloModal)
+                    textContent: _vm._s(_vm.modalTareasUbicacion.tituloModal)
                   }
                 }),
                 _vm._v(" "),
@@ -75606,162 +76338,283 @@ var render = function() {
               ]),
               _vm._v(" "),
               _c("div", { staticClass: "modal-body" }, [
-                _c(
-                  "table",
-                  {
-                    staticClass: "table table-bordered table-striped table-sm"
-                  },
-                  [
-                    _vm._m(2),
-                    _vm._v(" "),
+                _c("div", { staticClass: "row" }, [
+                  _c("div", { staticClass: "col-1" }, [
                     _c(
-                      "tbody",
-                      _vm._l(
-                        _vm.modalDetalleMovimientos.detalleMovimientos,
-                        function(detaMov) {
+                      "button",
+                      {
+                        staticClass: "btn btn-warning btn-sm",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.onCargaDetalleUbicacion(
+                              "origen",
+                              "ticket"
+                            )
+                          }
+                        }
+                      },
+                      [_c("i", { staticClass: "icon-printer" })]
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-4" }, [
+                    _c(
+                      "select",
+                      {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.modalTareasUbicacion.codigoOrigen,
+                            expression: "modalTareasUbicacion.codigoOrigen"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        on: {
+                          change: [
+                            function($event) {
+                              var $$selectedVal = Array.prototype.filter
+                                .call($event.target.options, function(o) {
+                                  return o.selected
+                                })
+                                .map(function(o) {
+                                  var val = "_value" in o ? o._value : o.value
+                                  return val
+                                })
+                              _vm.$set(
+                                _vm.modalTareasUbicacion,
+                                "codigoOrigen",
+                                $event.target.multiple
+                                  ? $$selectedVal
+                                  : $$selectedVal[0]
+                              )
+                            },
+                            function($event) {
+                              return _vm.onCargaDetalleUbicacion(
+                                "origen",
+                                "consulta"
+                              )
+                            }
+                          ]
+                        }
+                      },
+                      [
+                        _c("option", { attrs: { value: "0", disabled: "" } }, [
+                          _vm._v("Seleccione...")
+                        ]),
+                        _vm._v(" "),
+                        _vm._l(_vm.mapUbicaciones, function(newUbica) {
+                          return _c("option", {
+                            key: newUbica.codigo,
+                            domProps: {
+                              value: newUbica.codigo,
+                              textContent: _vm._s(newUbica.nombre)
+                            }
+                          })
+                        })
+                      ],
+                      2
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _vm._m(3),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-1" }, [
+                    _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-warning btn-sm",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.onCargaDetalleUbicacion(
+                              "destino",
+                              "ticket"
+                            )
+                          }
+                        }
+                      },
+                      [_c("i", { staticClass: "icon-printer" })]
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-4" }, [
+                    _c(
+                      "select",
+                      {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.modalTareasUbicacion.codigoDestino,
+                            expression: "modalTareasUbicacion.codigoDestino"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        on: {
+                          change: [
+                            function($event) {
+                              var $$selectedVal = Array.prototype.filter
+                                .call($event.target.options, function(o) {
+                                  return o.selected
+                                })
+                                .map(function(o) {
+                                  var val = "_value" in o ? o._value : o.value
+                                  return val
+                                })
+                              _vm.$set(
+                                _vm.modalTareasUbicacion,
+                                "codigoDestino",
+                                $event.target.multiple
+                                  ? $$selectedVal
+                                  : $$selectedVal[0]
+                              )
+                            },
+                            function($event) {
+                              return _vm.onCargaDetalleUbicacion(
+                                "destino",
+                                "consulta"
+                              )
+                            }
+                          ]
+                        }
+                      },
+                      [
+                        _c("option", { attrs: { value: "0", disabled: "" } }, [
+                          _vm._v("Seleccione...")
+                        ]),
+                        _vm._v(" "),
+                        _vm._l(_vm.mapUbicaciones, function(newUbica) {
+                          return _c("option", {
+                            key: newUbica.codigo,
+                            domProps: {
+                              value: newUbica.codigo,
+                              textContent: _vm._s(newUbica.nombre)
+                            }
+                          })
+                        })
+                      ],
+                      2
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "row" }, [
+                  _c("div", { staticClass: "col-md-5" }, [
+                    _c(
+                      "ul",
+                      { staticClass: "list-group" },
+                      [
+                        _vm._m(4),
+                        _vm._v(" "),
+                        _vm._l(_vm.modalTareasUbicacion.detalleOrigen, function(
+                          detalle
+                        ) {
                           return _c(
-                            "tr",
-                            { key: detaMov.id_movimiento_almacen },
+                            "li",
+                            {
+                              key: detalle.codigo,
+                              staticClass: "list-group-item"
+                            },
                             [
-                              _c("td", {
-                                domProps: {
-                                  textContent: _vm._s(detaMov.fecha_aplicacion)
-                                }
-                              }),
-                              _vm._v(" "),
-                              _c("td", [
-                                detaMov.tipo_movimiento == "ING"
-                                  ? _c("span", [_vm._v("Ingreso")])
-                                  : _vm._e(),
+                              _c("div", { staticClass: "row" }, [
+                                _c("div", {
+                                  staticClass: "col-3",
+                                  domProps: {
+                                    textContent: _vm._s(detalle.codigo)
+                                  }
+                                }),
                                 _vm._v(" "),
-                                detaMov.tipo_movimiento == "RET"
-                                  ? _c("span", [_vm._v("Retiro")])
-                                  : _vm._e()
-                              ]),
-                              _vm._v(" "),
-                              _c("td", {
-                                domProps: {
-                                  textContent: _vm._s(detaMov.ubicacion)
-                                }
-                              }),
-                              _vm._v(" "),
-                              _c(
-                                "td",
-                                { staticStyle: { "text-align": "right" } },
-                                [
-                                  detaMov.tipo_movimiento == "RET"
-                                    ? _c("span", [_vm._v("-")])
-                                    : _vm._e(),
-                                  _vm._v(" "),
-                                  _c("span", {
-                                    domProps: {
-                                      textContent: _vm._s(detaMov.cantidad)
-                                    }
-                                  })
-                                ]
-                              ),
-                              _vm._v(" "),
-                              _c("td", {
-                                staticStyle: { "text-align": "right" },
-                                domProps: { textContent: _vm._s(detaMov.stock) }
-                              }),
-                              _vm._v(" "),
-                              _c("td", {
-                                domProps: {
-                                  textContent: _vm._s(
-                                    detaMov.estatus_movimientos
-                                  )
-                                }
-                              })
+                                _c("div", {
+                                  staticClass: "col-6",
+                                  domProps: {
+                                    textContent: _vm._s(detalle.nombre)
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("div", {
+                                  staticClass: "col-3",
+                                  domProps: {
+                                    textContent: _vm._s(detalle.stock)
+                                  }
+                                })
+                              ])
                             ]
                           )
-                        }
-                      ),
-                      0
+                        })
+                      ],
+                      2
                     )
-                  ]
-                ),
-                _vm._v(" "),
-                _c("nav", [
-                  _c(
-                    "ul",
-                    { staticClass: "pagination" },
-                    [
-                      _vm.modalDetalleMovimientos.pagination.current_page > 1
-                        ? _c("li", { staticClass: "page-item" }, [
-                            _c(
-                              "a",
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-md-2" }),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-md-5" }, [
+                    _c(
+                      "ul",
+                      { staticClass: "list-group" },
+                      [
+                        _vm._m(5),
+                        _vm._v(" "),
+                        _vm._l(
+                          _vm.modalTareasUbicacion.detalleDestino,
+                          function(detalle) {
+                            return _c(
+                              "li",
                               {
-                                staticClass: "page-link",
-                                attrs: { href: "#" },
-                                on: {
-                                  click: function($event) {
-                                    $event.preventDefault()
-                                    return _vm.cambiarPaginaDM(
-                                      _vm.modalDetalleMovimientos.pagination
-                                        .current_page - 1
-                                    )
-                                  }
-                                }
+                                key: detalle.codigo,
+                                staticClass: "list-group-item"
                               },
-                              [_vm._v("Ant")]
+                              [
+                                _c("div", { staticClass: "row" }, [
+                                  _c("div", {
+                                    staticClass: "col-3",
+                                    domProps: {
+                                      textContent: _vm._s(detalle.codigo)
+                                    }
+                                  }),
+                                  _vm._v(" "),
+                                  _c("div", {
+                                    staticClass: "col-6",
+                                    domProps: {
+                                      textContent: _vm._s(detalle.nombre)
+                                    }
+                                  }),
+                                  _vm._v(" "),
+                                  _c("div", {
+                                    staticClass: "col-3",
+                                    domProps: {
+                                      textContent: _vm._s(detalle.stock)
+                                    }
+                                  })
+                                ])
+                              ]
                             )
-                          ])
-                        : _vm._e(),
-                      _vm._v(" "),
-                      _vm._l(_vm.pagesNumberDM, function(page) {
-                        return _c(
-                          "li",
-                          {
-                            key: page,
-                            staticClass: "page-item",
-                            class: [page == _vm.isActivedDM ? "active" : ""]
-                          },
-                          [
-                            _c("a", {
-                              staticClass: "page-link",
-                              attrs: { href: "#" },
-                              domProps: { textContent: _vm._s(page) },
-                              on: {
-                                click: function($event) {
-                                  $event.preventDefault()
-                                  return _vm.cambiarPaginaDM(page)
-                                }
-                              }
-                            })
-                          ]
+                          }
                         )
-                      }),
-                      _vm._v(" "),
-                      _vm.modalDetalleMovimientos.pagination.current_page <
-                      _vm.modalDetalleMovimientos.pagination.last_page
-                        ? _c("li", { staticClass: "page-item" }, [
-                            _c(
-                              "a",
-                              {
-                                staticClass: "page-link",
-                                attrs: { href: "#" },
-                                on: {
-                                  click: function($event) {
-                                    $event.preventDefault()
-                                    return _vm.cambiarPaginaDM(
-                                      _vm.modalDetalleMovimientos.pagination
-                                        .current_page + 1
-                                    )
-                                  }
-                                }
-                              },
-                              [_vm._v("Sig")]
-                            )
-                          ])
-                        : _vm._e()
-                    ],
-                    2
-                  )
+                      ],
+                      2
+                    )
+                  ])
                 ])
               ]),
               _vm._v(" "),
               _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-primary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.onUnificarUbicaciones()
+                      }
+                    }
+                  },
+                  [_vm._v("Unificar")]
+                ),
+                _vm._v(" "),
                 _c(
                   "button",
                   {
@@ -75800,7 +76653,7 @@ var render = function() {
           "div",
           {
             staticClass: "modal-dialog modal-primary",
-            staticStyle: { "max-width": "80% !important" },
+            staticStyle: { "max-width": "90% !important" },
             attrs: { role: "document" }
           },
           [
@@ -75900,113 +76753,148 @@ var render = function() {
                                 })
                               ]),
                               _vm._v(" "),
-                              _c("div", { staticClass: "col-md-4" }, [
-                                _c(
-                                  "ul",
-                                  { staticClass: "list-unstyled" },
-                                  [
-                                    _vm._l(orden.ubicacion_stock, function(
-                                      ubica
-                                    ) {
-                                      return _c(
-                                        "li",
-                                        { key: ubica.codigo_ubica },
-                                        [
-                                          _c("div", { staticClass: "row" }, [
-                                            _c(
-                                              "div",
-                                              { staticClass: "col-md-1" },
-                                              [
-                                                ubica.isMovimientoProcesado &&
-                                                ubica.xstatus == false
-                                                  ? _c(
-                                                      "a",
-                                                      {
-                                                        staticClass:
-                                                          "badge badge-pill badge-danger",
-                                                        attrs: { href: "#" },
-                                                        on: {
-                                                          click: function(
-                                                            $event
-                                                          ) {
-                                                            return _vm.onShowResultadoMov(
-                                                              ubica
-                                                            )
-                                                          }
-                                                        }
-                                                      },
-                                                      [_vm._v("Err")]
-                                                    )
-                                                  : _vm._e(),
-                                                _vm._v(" "),
-                                                ubica.isMovimientoProcesado &&
-                                                ubica.xstatus == true
-                                                  ? _c(
-                                                      "a",
-                                                      {
-                                                        staticClass:
-                                                          "badge badge-pill badge-success",
-                                                        attrs: { href: "#" },
-                                                        on: {
-                                                          click: function(
-                                                            $event
-                                                          ) {
-                                                            return _vm.onShowResultadoMov(
-                                                              ubica
-                                                            )
-                                                          }
-                                                        }
-                                                      },
-                                                      [_vm._v("Ok")]
-                                                    )
-                                                  : _vm._e()
-                                              ]
-                                            ),
+                              _c(
+                                "div",
+                                { staticClass: "col-md-4" },
+                                [
+                                  _vm._l(orden.ubicacion_stock, function(
+                                    ubica
+                                  ) {
+                                    return _c(
+                                      "div",
+                                      { key: ubica.codigo_ubica },
+                                      [
+                                        _c("div", { staticClass: "row" }, [
+                                          _c("div", { staticClass: "col-1" }, [
+                                            ubica.isMovimientoProcesado &&
+                                            ubica.xstatus == false
+                                              ? _c(
+                                                  "a",
+                                                  {
+                                                    staticClass:
+                                                      "badge badge-pill badge-danger",
+                                                    attrs: { href: "#" },
+                                                    on: {
+                                                      click: function($event) {
+                                                        return _vm.onShowResultadoMov(
+                                                          ubica
+                                                        )
+                                                      }
+                                                    }
+                                                  },
+                                                  [_vm._v("Err")]
+                                                )
+                                              : _vm._e(),
                                             _vm._v(" "),
-                                            _c(
-                                              "div",
-                                              { staticClass: "col-md-4" },
-                                              [
-                                                _c("strong", {
-                                                  domProps: {
-                                                    textContent: _vm._s(
-                                                      ubica.codigo_ubica
-                                                    )
+                                            ubica.isMovimientoProcesado &&
+                                            ubica.xstatus == true
+                                              ? _c(
+                                                  "a",
+                                                  {
+                                                    staticClass:
+                                                      "badge badge-pill badge-success",
+                                                    attrs: { href: "#" },
+                                                    on: {
+                                                      click: function($event) {
+                                                        return _vm.onShowResultadoMov(
+                                                          ubica
+                                                        )
+                                                      }
+                                                    }
+                                                  },
+                                                  [_vm._v("Ok")]
+                                                )
+                                              : _vm._e()
+                                          ]),
+                                          _vm._v(" "),
+                                          _c("div", { staticClass: "col-3" }, [
+                                            _c("strong", {
+                                              domProps: {
+                                                textContent: _vm._s(
+                                                  ubica.codigo_ubica
+                                                )
+                                              }
+                                            }),
+                                            _vm._v(" "),
+                                            _c("span", {
+                                              staticClass: "text-muted",
+                                              domProps: {
+                                                textContent: _vm._s(ubica.stock)
+                                              }
+                                            })
+                                          ]),
+                                          _vm._v(" "),
+                                          _c("div", { staticClass: "col-4" }, [
+                                            _c("input", {
+                                              directives: [
+                                                {
+                                                  name: "model",
+                                                  rawName: "v-model",
+                                                  value: ubica.nuevoStock,
+                                                  expression: "ubica.nuevoStock"
+                                                }
+                                              ],
+                                              staticClass: "form-control",
+                                              staticStyle: { width: "100%" },
+                                              attrs: { type: "text" },
+                                              domProps: {
+                                                value: ubica.nuevoStock
+                                              },
+                                              on: {
+                                                input: function($event) {
+                                                  if ($event.target.composing) {
+                                                    return
                                                   }
-                                                }),
-                                                _vm._v(" "),
-                                                _c("span", {
-                                                  staticClass: "text-muted",
-                                                  domProps: {
-                                                    textContent: _vm._s(
-                                                      ubica.stock
-                                                    )
-                                                  }
-                                                })
-                                              ]
-                                            ),
-                                            _vm._v(" "),
-                                            _c(
-                                              "div",
-                                              { staticClass: "col-md-6" },
-                                              [
-                                                _c("input", {
+                                                  _vm.$set(
+                                                    ubica,
+                                                    "nuevoStock",
+                                                    $event.target.value
+                                                  )
+                                                }
+                                              }
+                                            })
+                                          ]),
+                                          _vm._v(" "),
+                                          _c("div", { staticClass: "col-3" }, [
+                                            _vm.chkModoSet
+                                              ? _c("input", {
                                                   directives: [
                                                     {
                                                       name: "model",
                                                       rawName: "v-model",
-                                                      value: ubica.nuevoStock,
+                                                      value: ubica.setStock,
                                                       expression:
-                                                        "ubica.nuevoStock"
+                                                        "ubica.setStock"
                                                     }
                                                   ],
                                                   staticClass: "form-control",
-                                                  staticStyle: { width: "60%" },
+                                                  staticStyle: {
+                                                    width: "100%"
+                                                  },
                                                   attrs: { type: "text" },
                                                   domProps: {
-                                                    value: ubica.nuevoStock
+                                                    value: ubica.setStock
                                                   },
                                                   on: {
+                                                    keyup: function($event) {
+                                                      if (
+                                                        !$event.type.indexOf(
+                                                          "key"
+                                                        ) &&
+                                                        _vm._k(
+                                                          $event.keyCode,
+                                                          "enter",
+                                                          13,
+                                                          $event.key,
+                                                          "Enter"
+                                                        )
+                                                      ) {
+                                                        return null
+                                                      }
+                                                      return _vm.onCaculaNuevoStock(
+                                                        ubica
+                                                      )
+                                                    },
                                                     input: function($event) {
                                                       if (
                                                         $event.target.composing
@@ -76015,105 +76903,163 @@ var render = function() {
                                                       }
                                                       _vm.$set(
                                                         ubica,
-                                                        "nuevoStock",
+                                                        "setStock",
                                                         $event.target.value
                                                       )
                                                     }
                                                   }
                                                 })
-                                              ]
-                                            )
+                                              : _vm._e()
                                           ])
-                                        ]
-                                      )
-                                    }),
-                                    _vm._v(" "),
-                                    _c("li", [
-                                      _c(
-                                        "select",
-                                        {
-                                          directives: [
-                                            {
-                                              name: "model",
-                                              rawName: "v-model",
-                                              value: orden.nuevaUbicacionSelect,
-                                              expression:
-                                                "orden.nuevaUbicacionSelect"
-                                            }
-                                          ],
-                                          staticClass: "form-control",
-                                          on: {
-                                            change: [
-                                              function($event) {
-                                                var $$selectedVal = Array.prototype.filter
-                                                  .call(
-                                                    $event.target.options,
-                                                    function(o) {
-                                                      return o.selected
-                                                    }
-                                                  )
-                                                  .map(function(o) {
-                                                    var val =
-                                                      "_value" in o
-                                                        ? o._value
-                                                        : o.value
-                                                    return val
-                                                  })
-                                                _vm.$set(
-                                                  orden,
-                                                  "nuevaUbicacionSelect",
-                                                  $event.target.multiple
-                                                    ? $$selectedVal
-                                                    : $$selectedVal[0]
-                                                )
-                                              },
-                                              function($event) {
-                                                return _vm.onNuevaUbicacionOrden(
-                                                  orden
-                                                )
-                                              }
-                                            ]
+                                        ])
+                                      ]
+                                    )
+                                  }),
+                                  _vm._v(" "),
+                                  _c("div", [
+                                    _c(
+                                      "select",
+                                      {
+                                        directives: [
+                                          {
+                                            name: "model",
+                                            rawName: "v-model",
+                                            value: orden.nuevaUbicacionSelect,
+                                            expression:
+                                              "orden.nuevaUbicacionSelect"
                                           }
-                                        },
-                                        [
-                                          _c(
-                                            "option",
-                                            {
-                                              attrs: {
-                                                value: "0",
-                                                disabled: ""
-                                              }
-                                            },
-                                            [_vm._v("Seleccione...")]
-                                          ),
-                                          _vm._v(" "),
-                                          _vm._l(_vm.mapUbicaciones, function(
-                                            newUbica
-                                          ) {
-                                            return _c("option", {
-                                              key: newUbica.codigo,
-                                              domProps: {
-                                                value: newUbica.codigo,
-                                                textContent: _vm._s(
-                                                  newUbica.nombre
-                                                )
-                                              }
-                                            })
-                                          })
                                         ],
-                                        2
-                                      )
-                                    ])
-                                  ],
-                                  2
-                                )
-                              ])
+                                        staticClass: "form-control",
+                                        on: {
+                                          change: [
+                                            function($event) {
+                                              var $$selectedVal = Array.prototype.filter
+                                                .call(
+                                                  $event.target.options,
+                                                  function(o) {
+                                                    return o.selected
+                                                  }
+                                                )
+                                                .map(function(o) {
+                                                  var val =
+                                                    "_value" in o
+                                                      ? o._value
+                                                      : o.value
+                                                  return val
+                                                })
+                                              _vm.$set(
+                                                orden,
+                                                "nuevaUbicacionSelect",
+                                                $event.target.multiple
+                                                  ? $$selectedVal
+                                                  : $$selectedVal[0]
+                                              )
+                                            },
+                                            function($event) {
+                                              return _vm.onNuevaUbicacionOrden(
+                                                orden
+                                              )
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      [
+                                        _c(
+                                          "option",
+                                          {
+                                            attrs: { value: "0", disabled: "" }
+                                          },
+                                          [_vm._v("Seleccione...")]
+                                        ),
+                                        _vm._v(" "),
+                                        _vm._l(_vm.mapUbicaciones, function(
+                                          newUbica
+                                        ) {
+                                          return _c("option", {
+                                            key: newUbica.codigo,
+                                            domProps: {
+                                              value: newUbica.codigo,
+                                              textContent: _vm._s(
+                                                newUbica.nombre
+                                              )
+                                            }
+                                          })
+                                        }),
+                                        _vm._v(" "),
+                                        _c(
+                                          "option",
+                                          { attrs: { value: "_new_" } },
+                                          [_vm._v("-- Nuevo --")]
+                                        )
+                                      ],
+                                      2
+                                    )
+                                  ])
+                                ],
+                                2
+                              )
                             ])
                           ]
                         )
                       }),
                       0
                     )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  { staticClass: "modal-footer justify-content-start" },
+                  [
+                    _c("div", { staticStyle: { "padding-left": "30px" } }, [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.chkModoSet,
+                            expression: "chkModoSet"
+                          }
+                        ],
+                        staticClass: "form-check-input",
+                        attrs: { type: "checkbox" },
+                        domProps: {
+                          checked: Array.isArray(_vm.chkModoSet)
+                            ? _vm._i(_vm.chkModoSet, null) > -1
+                            : _vm.chkModoSet
+                        },
+                        on: {
+                          change: function($event) {
+                            var $$a = _vm.chkModoSet,
+                              $$el = $event.target,
+                              $$c = $$el.checked ? true : false
+                            if (Array.isArray($$a)) {
+                              var $$v = null,
+                                $$i = _vm._i($$a, $$v)
+                              if ($$el.checked) {
+                                $$i < 0 && (_vm.chkModoSet = $$a.concat([$$v]))
+                              } else {
+                                $$i > -1 &&
+                                  (_vm.chkModoSet = $$a
+                                    .slice(0, $$i)
+                                    .concat($$a.slice($$i + 1)))
+                              }
+                            } else {
+                              _vm.chkModoSet = $$c
+                            }
+                          }
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c(
+                        "label",
+                        {
+                          staticClass: "form-check-label",
+                          attrs: { for: "exampleCheck1" }
+                        },
+                        [_vm._v("Activar modo SET")]
+                      )
+                    ])
                   ]
                 ),
                 _vm._v(" "),
@@ -76170,6 +77116,275 @@ var render = function() {
           ]
         )
       ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.modalCatUbicacion.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          id: "exampleModal",
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "exampleModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          { staticClass: "modal-dialog", attrs: { role: "document" } },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c("div", { staticClass: "modal-header" }, [
+                _c("h5", {
+                  staticClass: "modal-title",
+                  domProps: {
+                    textContent: _vm._s(_vm.modalCatUbicacion.tituloModal)
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "close",
+                    attrs: { type: "button", "aria-label": "Close" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeModal()
+                      }
+                    }
+                  },
+                  [
+                    _c("span", { attrs: { "aria-hidden": "true" } }, [
+                      _vm._v("×")
+                    ])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-body" }, [
+                _c("form", [
+                  _c("div", { staticClass: "form-group" }, [
+                    _c(
+                      "label",
+                      {
+                        staticClass: "col-form-label",
+                        attrs: { for: "recipient-name" }
+                      },
+                      [_vm._v("Codigo:")]
+                    ),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.modalCatUbicacion.codigo,
+                          expression: "modalCatUbicacion.codigo"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text" },
+                      domProps: { value: _vm.modalCatUbicacion.codigo },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.modalCatUbicacion,
+                            "codigo",
+                            $event.target.value
+                          )
+                        }
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "form-group" }, [
+                    _c(
+                      "label",
+                      {
+                        staticClass: "col-form-label",
+                        attrs: { for: "message-text" }
+                      },
+                      [_vm._v("Nombre:")]
+                    ),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.modalCatUbicacion.nombre,
+                          expression: "modalCatUbicacion.nombre"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: { type: "text" },
+                      domProps: { value: _vm.modalCatUbicacion.nombre },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.modalCatUbicacion,
+                            "nombre",
+                            $event.target.value
+                          )
+                        }
+                      }
+                    })
+                  ])
+                ])
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-primary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.onStoreUbicacionAlmacen()
+                      }
+                    }
+                  },
+                  [_vm._v("Guardar")]
+                )
+              ])
+            ])
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.modalCargaMasiva.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-primary",
+            staticStyle: { "max-width": "70% !important" },
+            attrs: { role: "document" }
+          },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c("div", { staticClass: "modal-header" }, [
+                _c("h4", {
+                  staticClass: "modal-title",
+                  domProps: {
+                    textContent: _vm._s(_vm.modalCargaMasiva.tituloModal)
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "close",
+                    attrs: { type: "button", "aria-label": "Close" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeModal()
+                      }
+                    }
+                  },
+                  [
+                    _c("span", { attrs: { "aria-hidden": "true" } }, [
+                      _vm._v("×")
+                    ])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-body" }, [
+                _c("div", { staticClass: "row" }, [
+                  _c("div", { staticClass: "col-4" }, [
+                    _vm._v(
+                      "\n                           Archivo:\n                        "
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-4" }, [
+                    _c("input", {
+                      staticClass: "custom-file-input",
+                      attrs: {
+                        type: "file",
+                        id: "customFileLangLocal",
+                        lang: "es",
+                        accept: ".xls, .xlsx"
+                      },
+                      on: {
+                        change: function($event) {
+                          return _vm.onUploadExcel()
+                        }
+                      }
+                    }),
+                    _vm._v(" "),
+                    _c(
+                      "label",
+                      {
+                        staticClass: "btn btn-primary custom-file-label",
+                        attrs: { for: "customFileLangLocal" }
+                      },
+                      [_vm._v("Examinar")]
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-2" })
+                ])
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-primary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.onUnificarUbicaciones()
+                      }
+                    }
+                  },
+                  [_vm._v("Unificar")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeModal()
+                      }
+                    }
+                  },
+                  [_vm._v("Cerrar")]
+                )
+              ])
+            ])
+          ]
+        )
+      ]
     )
   ])
 }
@@ -76216,6 +77431,8 @@ var staticRenderFns = [
       _c("tr", [
         _c("th", [_vm._v("Fecha")]),
         _vm._v(" "),
+        _c("th", [_vm._v("Lote")]),
+        _vm._v(" "),
         _c("th", [_vm._v("Tipo movimiento")]),
         _vm._v(" "),
         _c("th", [_vm._v("Ubicacion")]),
@@ -76225,6 +77442,44 @@ var staticRenderFns = [
         _c("th", [_vm._v("Stock")]),
         _vm._v(" "),
         _c("th", [_vm._v("Estatus")])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "col-2" }, [_c("h1", [_vm._v("=>")])])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("li", { staticClass: "list-group-item" }, [
+      _c("div", { staticClass: "row" }, [
+        _c("div", { staticClass: "col-3" }, [_c("strong", [_vm._v("Codigo")])]),
+        _vm._v(" "),
+        _c("div", { staticClass: "col-6" }, [
+          _c("strong", [_vm._v("Producto")])
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "col-3" }, [_c("strong", [_vm._v("Stock")])])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("li", { staticClass: "list-group-item" }, [
+      _c("div", { staticClass: "row" }, [
+        _c("div", { staticClass: "col-3" }, [_c("strong", [_vm._v("Codigo")])]),
+        _vm._v(" "),
+        _c("div", { staticClass: "col-6" }, [
+          _c("strong", [_vm._v("Producto")])
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "col-3" }, [_c("strong", [_vm._v("Stock")])])
       ])
     ])
   }
