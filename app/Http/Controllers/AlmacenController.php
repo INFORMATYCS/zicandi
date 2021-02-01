@@ -17,6 +17,7 @@ use App\CatUbicaProducto;
 use App\StockUbicaProducto;
 use App\TempCargaStock;
 use App\Exports\AlmacenExport;
+use App\Exports\AlmacenDetalleExport;
 use App\Imports\StockMasivaImport;
 
 
@@ -478,6 +479,33 @@ class AlmacenController extends Controller{
                         'totalStock'=>$totalStock, 
                         'totalPesos'=>$totalPesos, 
                         'almacen'=>$almacen];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+        
+    }
+
+
+    /**
+     * Genera el detalle del resumen
+     * 
+     * 
+     * 
+     */
+    public function resumenAlmacenReporte(Request $request){
+        try{
+            
+            $idAlmacen = $request->idAlmacen;
+
+            $almacen = Almacen::findOrFail($idAlmacen);//~Se busca en base al ID entrante
+
+            //Multiples hojas
+            //https://www.youtube.com/watch?v=FZZGJ8-0EzU
+
+            $nombreSalida = 'almacen_'.uniqid().'_reporte.xlsx';            
+            return (new AlmacenDetalleExport)->define($idAlmacen)->download($nombreSalida);
+
         }catch(Exception $e){
             Log::error( $e->getTraceAsString() );            
             return [ 'xstatus'=>false, 'error' => $e->getMessage() ];

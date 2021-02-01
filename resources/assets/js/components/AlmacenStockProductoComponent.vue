@@ -43,7 +43,7 @@
                 <div class="card small">
                     <div class="card-body">
                         <div class="row">                            
-                            <div class="col-md-6">
+                            <div class="col-5">
                                 <h5 class="card-title">Almacen</h5>                            
                                 <p class="card-text">                                    
                                     <select class="form-control" v-model="idAlmacenSeleccion" @change="onResumenAlmacen()">
@@ -53,7 +53,7 @@
                                 </p>                  
                             </div>
 
-                            <div class="col-md-6">                           
+                            <div class="col-5">                           
                                   
                                     <div class="row">                 
                                         <div class="col-7">
@@ -80,8 +80,12 @@
                                         <div class="col-5">
                                             <h6 v-text="resumenAlmacenSeleccion.totalPesos"></h6>
                                         </div>          
-                                    </div>
-                  
+                                    </div>                  
+                            </div>
+                            <div class="col-1">
+                                <button type="button" class="btn btn-info" @click="onGenerarDetalleAlmacen()">
+                                    <i class="icon-printer"></i>
+                                </button>               
                             </div>
                         </div>        
                     </div>
@@ -1335,6 +1339,15 @@
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
 
+            },
+
+            /**
+             * Genera reporte en excel del detalle del almacen
+             * 
+             * 
+             */
+            onGenerarDetalleAlmacen(){
+                 window.open('/zicandi/public/almacenes/exportDetalle?idAlmacen='+this.idAlmacenSeleccion);
             }
 
         },

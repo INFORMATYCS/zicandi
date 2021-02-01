@@ -74780,6 +74780,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -75552,16 +75556,24 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             var fd = new FormData();
             fd.append('file', this.modalCargaMasiva.fileSeleccion, nombreArchivo);
-            fd.append('nombre', nombreArchivo);
 
             var me = this;
             me.modalCargaMasiva.cargaServidorExitosa = false;
-            axios.post('/zicandi/public/uploadfile/generico', fd).then(function (response) {
-                me.modalCargaMasiva.fileServidor = response.data.file;
+            axios.post('/zicandi/public/almacenes/carga_masiva', fd).then(function (response) {
                 me.modalCargaMasiva.cargaServidorExitosa = true;
             }).catch(function (error) {
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
             });
+        },
+
+
+        /**
+         * Genera reporte en excel del detalle del almacen
+         * 
+         * 
+         */
+        onGenerarDetalleAlmacen: function onGenerarDetalleAlmacen() {
+            window.open('/zicandi/public/almacenes/exportDetalle?idAlmacen=' + this.idAlmacenSeleccion);
         }
     },
     mounted: function mounted() {
@@ -75672,7 +75684,7 @@ var render = function() {
         _c("div", { staticClass: "card small" }, [
           _c("div", { staticClass: "card-body" }, [
             _c("div", { staticClass: "row" }, [
-              _c("div", { staticClass: "col-md-6" }, [
+              _c("div", { staticClass: "col-5" }, [
                 _c("h5", { staticClass: "card-title" }, [_vm._v("Almacen")]),
                 _vm._v(" "),
                 _c("p", { staticClass: "card-text" }, [
@@ -75729,7 +75741,7 @@ var render = function() {
                 ])
               ]),
               _vm._v(" "),
-              _c("div", { staticClass: "col-md-6" }, [
+              _c("div", { staticClass: "col-5" }, [
                 _c("div", { staticClass: "row" }, [
                   _c("div", { staticClass: "col-7" }, [
                     _vm._v(
@@ -75783,6 +75795,22 @@ var render = function() {
                     })
                   ])
                 ])
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "col-1" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-info",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.onGenerarDetalleAlmacen()
+                      }
+                    }
+                  },
+                  [_c("i", { staticClass: "icon-printer" })]
+                )
               ])
             ])
           ])
