@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Lib\ProcesadorImagenes;
 use App\CarpetaAdjuntos;
 use App\ArchivoAdjunto;
+use Config;
 
 
 class UploadFileController extends Controller{
@@ -83,4 +84,40 @@ class UploadFileController extends Controller{
 
         return $carpeta->id_carpeta_adjuntos;
     }
+
+    /**
+     * Resive un archivo como entrada, lo mueve al temporal
+     * y contesta con la ruta
+     * 
+     * 
+     */
+    public function uploadGenerico(Request $request){
+        try{
+            
+            $file = $request->file('file');
+            $nombre = $request->nombre;
+            $repositorio = Config::get('zicandi.repositorio.entrada.tmp');
+            
+            if (move_uploaded_file($file, $repositorio.$nombre)){
+                return [ 'xstatus'=>true, 'file' =>  $repositorio.$nombre];
+            }
+            else{
+                return [ 'xstatus'=>true, 'error' =>  'No fue posible cargar el archivo'];
+            }
+
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+
+
+
+        
+
+
+
+
+    }
+
+
 }

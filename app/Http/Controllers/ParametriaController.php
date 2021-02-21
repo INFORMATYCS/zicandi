@@ -102,4 +102,44 @@ class ParametriaController extends Controller{
 
         return $anioActual.$seq;
     }
+
+
+
+    /**
+     * Crea una secuencia por año actual 
+     * para el folio del registro en el almacen
+     */
+    public function seqFolioRegistroAlmacen_nextval(){        
+        $anioActual = date("Y");
+        $seq=0;
+        
+        $parametria = Parametria::where('clave_proceso', '=', 'SEQ_REG_ALMACEN')
+        ->where('llave', '=', $anioActual)
+        ->where('xstatus', '=', '1')
+        ->select('id_parametria','clave_proceso','llave','valor','descripcion')
+        ->first(); 
+
+        if($parametria==null){            
+            $parametria = new Parametria();
+            $parametria->clave_proceso = 'SEQ_REG_ALMACEN';
+            $parametria->llave = $anioActual;
+            $parametria->valor = 100;
+            $parametria->xstatus = 1;   
+            
+            $seq = 100;
+        }else{
+            $valor = $parametria->valor;            
+            $parametria->clave_proceso = 'SEQ_REG_ALMACEN';
+            $parametria->llave = $anioActual;
+            $parametria->valor = $valor + 1;
+            $parametria->xstatus = 1;   
+            
+            $seq= $valor + 1;
+        }     
+        
+        $parametria->save();
+        
+
+        return $anioActual.$seq;
+    }
 }

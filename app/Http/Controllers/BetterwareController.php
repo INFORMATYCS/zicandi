@@ -513,17 +513,22 @@ class BetterwareController extends Controller{
             $categoria = $temp->categoria;
             $espec_json = $temp->espec_json;
 
+            //~No todos los productos tienen precio de oferta
+            if($precio_oferta == null || $precio_oferta == 0){
+                $precio_oferta = $precio;
+            }
+
             //Procesa imagen 1 y mini
             list ($bandExito, $url_original, $url_imagen) = $this->getImagenBett($imagen, $codigo, $codigo, true);
 
             //~Intenta recuperar la segunda imagen
             if($bandExito){
                 $pathAlterno = str_replace('_1.jpg','_2.jpg',$imagen);
-                list ($bandExito, $url_original, $url_imagen) = $this->getImagenBett($pathAlterno, $codigo, $codigo."_2", false);
+                list ($bandExito, $url_original, $url_imagen_aux) = $this->getImagenBett($pathAlterno, $codigo, $codigo."_2", false);
 
                 if(!$bandExito){
                     $pathAlterno = str_replace('-H_1.jpg','_2.jpg',$imagen);
-                    list ($bandExito, $url_original, $url_imagen) = $this->getImagenBett($pathAlterno, $codigo, $codigo."_2", false);
+                    list ($bandExito, $url_original, $url_imagen_aux) = $this->getImagenBett($pathAlterno, $codigo, $codigo."_2", false);
 
                 }
             }

@@ -57,10 +57,22 @@ Route::post('/almacenes/registrar', 'AlmacenController@store');
 Route::post('/almacenes/actualizar', 'AlmacenController@update');
 Route::post('/almacenes/desactivar', 'AlmacenController@desactivar');
 Route::post('/almacenes/activar', 'AlmacenController@activar');
-Route::get('/almacenes/movimiento', 'AlmacenController@movimientoAlmacen');
+Route::post('/almacenes/movimiento', 'AlmacenController@movimientoAlmacen');
 Route::get('/almacenes/export', 'AlmacenController@exportar');
 Route::get('/almacenes/resumen', 'AlmacenController@resumenAlmacen');
 Route::get('/almacenes/resumen/detalle', 'AlmacenController@resumenDetalleProductosAlmacen');
+Route::get('/almacenes/resumen/movimientos', 'AlmacenController@detalleMovAlmacen');
+Route::get('/almacenes/resumen/genera_lote', 'AlmacenController@generaLoteAlmacen');
+Route::get('/almacenes/resumen/exporta_ticket', 'AlmacenController@exportTicketOrden');
+Route::get('/almacenes/map', 'AlmacenController@selectAlmacen');
+Route::get('/almacenes/map_ubicacion', 'AlmacenController@selectAlmacenUbicaciones');
+Route::post('/almacenes/carga_masiva', 'AlmacenController@cargaTempArchivoXLS');
+Route::post('/almacenes/aplica/carga_masiva', 'AlmacenController@aplicaCargaExcel');
+Route::get('/almacenes/exportDetalle', 'AlmacenController@aplicaCargaExcel');
+
+Route::post('/almacenes/cat_ubica/store', 'AlmacenController@storeUbicacion');
+Route::post('/almacenes/cat_ubica/unifica', 'AlmacenController@unificaUbicacion');
+Route::get('/almacenes/cat_ubica/resumen', 'AlmacenController@resumenUbicacion');
 
 
 // - Rutas para Compras
@@ -77,6 +89,7 @@ Route::post('/uploadfile', 'UploadFileController@index');
 Route::post('/uploadfile/getAdjuntosByCarpeta', 'UploadFileController@getAdjuntosByCarpeta');
 Route::post('/uploadfile/delete', 'UploadFileController@delete');
 Route::post('/uploadfile/nuevaCarpeta', 'UploadFileController@nuevaCarpeta');
+Route::post('/uploadfile/generico', 'UploadFileController@uploadGenerico');
 
 // - Rutas multifondos
 Route::post('/mf2/liquidarCompra', 'MultiFondosController@liquidarCompra');

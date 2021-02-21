@@ -47,6 +47,10 @@
         <saldocuentaconta-component></saldocuentaconta-component>
     </template>
 
+    <template v-if="oppMenuSeleccion==19">
+        <almacenstockproducto-component></almacenstockproducto-component>
+    </template>
+
     <template v-if="oppMenuSeleccion==90">
         <mercadolibre-component></mercadolibre-component>
     </template>

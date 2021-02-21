@@ -62,8 +62,6 @@ class Producto extends Model
         return $precio;
                         
     }
-
-
 }
 
 

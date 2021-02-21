@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 Use Config;
 Use Exception;
 Use Log;
@@ -12,7 +13,13 @@ use App\Producto;
 use App\StockProducto;
 use App\BitaResumenAlmacen;
 use App\MovimientoAlmacen;
+use App\CatUbicaProducto;
+use App\StockUbicaProducto;
+use App\TempCargaStock;
 use App\Exports\AlmacenExport;
+use App\Exports\AlmacenDetalleExport;
+use App\Imports\StockMasivaImport;
+
 
 class AlmacenController extends Controller{
     /**
@@ -219,11 +226,12 @@ class AlmacenController extends Controller{
     public function movimientoAlmacen(Request $request){
         DB::beginTransaction();
         try{
-            $idAlmacen = $request->id_almacen;
-            $idProducto = $request->id_producto;
-            $tipoMovimiento = $request->tipo_movimiento;
+            $idAlmacen = $request->idAlmacen;
+            $idProducto = $request->idProducto;
+            $tipoMovimiento = $request->tipoMovimiento;
             $cantidad = $request->cantidad;
-            $ubicacion = $request->ubicacion;            
+            $ubicacion = $request->ubicacion;  
+            $loteReferencia = $request->loteReferencia; 
 
             //~Validaciones
             if($tipoMovimiento!="INGRESO" && $tipoMovimiento!="RETIRO"){
@@ -247,13 +255,25 @@ class AlmacenController extends Controller{
                 throw new Exception('Almacen no activo');
             }
 
+             //~Valida la ubicacion
+             $catUbicaProducto = CatUbicaProducto::where('codigo', '=', $ubicacion)
+             ->where('xstatus','=', '1')
+             ->get()->first();
+
+             if($catUbicaProducto == null){
+                throw new Exception('No existe la ubicacion');
+             }
+
             //~Stock del producto
-            $stockProducto = StockProducto::where('id_producto', '=', $idProducto)->get()->first();
+            $stockProducto = StockProducto::where('id_producto', '=', $idProducto)
+            ->where('id_almacen','=',$idAlmacen)
+            ->get()->first();
 
             //~Valida si existe registro en stock_producto    
             if($stockProducto == null){
                 $stockProducto = new StockProducto();
                 $stockProducto->id_producto = $idProducto;
+                $stockProducto->id_almacen = $idAlmacen;
                 $stockProducto->stock = 0;
                 $stockProducto->disponible = 0;
                 $stockProducto->retenido = 0;                
@@ -296,6 +316,7 @@ class AlmacenController extends Controller{
             $movimientoAlmacen->cantidad=$cantidad;            
             $movimientoAlmacen->stock=$nuevoStockAlmacen;            
             $movimientoAlmacen->ubicacion=$ubicacion;
+            $movimientoAlmacen->lote_referencia=$loteReferencia;            
             $movimientoAlmacen->estatus_movimientos='A';
 
             $movimientoAlmacen->save();
@@ -303,28 +324,55 @@ class AlmacenController extends Controller{
             //~Actualiza stock del producto
             $stockProducto->stock = $nuevoStockProducto;
             $stockProducto->disponible = $nuevoStockProducto - $stockProducto->retenido;
-            $stockProducto->update();                            
 
-            //~Valida si existe registro en bita_resumen_almacen            
-            $bitaResumenAlmacen = BitaResumenAlmacen::where('id_producto', '=', $idProducto)
-            ->where('id_almacen', '=', $idAlmacen)->get()->first();
+            if($tipoMovimiento=="INGRESO"){
+                $stockProducto->ultima_entrada = new \DateTime();
+            }else{
+                $stockProducto->ultima_salida = new \DateTime();
+            }            
+            
+            $stockProducto->update();                                        
 
-            if($bitaResumenAlmacen == null){
-                $bitaResumenAlmacen = new BitaResumenAlmacen();
-                $bitaResumenAlmacen->id_producto = $idProducto;
-                $bitaResumenAlmacen->id_almacen = $idAlmacen;
-                $bitaResumenAlmacen->stock = $nuevoStockAlmacen;
-                $bitaResumenAlmacen->primer_registro = new \DateTime();;
-                $bitaResumenAlmacen->ultimo_registro = new \DateTime();;                
-                $bitaResumenAlmacen->save();
-            }else{                
-                $bitaResumenAlmacen->stock = $nuevoStockAlmacen;                
-                $bitaResumenAlmacen->ultimo_registro = new \DateTime();;                
-                $bitaResumenAlmacen->update();
+            //~Actualiza el stock de la ubicacion
+            $stockUbicaProducto = StockUbicaProducto::where('id_stock_producto','=',$stockProducto->id_stock_producto)
+            ->where('id_producto', '=', $idProducto)
+            ->where('codigo_ubica','=',$catUbicaProducto->codigo)
+            ->get()->first();
+
+            if($stockUbicaProducto==null){
+                $stockUbicaProducto = new StockUbicaProducto();
+                $stockUbicaProducto->id_stock_producto=$stockProducto->id_stock_producto;
+                $stockUbicaProducto->id_producto=$idProducto;
+                $stockUbicaProducto->codigo_ubica=$catUbicaProducto->codigo;
+
+                if($tipoMovimiento=="INGRESO"){
+                    $stockUbicaProducto->stock=$cantidad;
+                }else{
+                    $stockUbicaProducto->stock=$cantidad;
+                }
+            
+                $stockUbicaProducto->save();
+            }else{
+                $stockActual = $stockUbicaProducto->stock;
+
+                if($tipoMovimiento=="INGRESO"){
+                    $stockActual = $stockActual + $cantidad;
+                }else{
+                    $stockActual = $stockActual - $cantidad;
+                }
+                $stockUbicaProducto->stock=$stockActual;
+            
+                $stockUbicaProducto->update();
             }
 
+            //~Elimina todos los registros en cero
+            StockUbicaProducto::where('id_stock_producto','=',$stockProducto->id_stock_producto)
+            ->where('stock', '=', 0)            
+            ->delete();
+
+
             DB::commit();
-            return [ 'xstatus'=>true];
+            return [ 'xstatus'=>true, 'movimiento'=>$movimientoAlmacen, 'stockUbicacion'=>$stockUbicaProducto, 'stockProducto'=>$stockProducto];
         }catch(Exception $e){
             DB::rollBack();
             Log::error( $e->getTraceAsString() );            
@@ -340,26 +388,29 @@ class AlmacenController extends Controller{
     public function getStock($idAlmacen, $idProducto){
         try{
             $ultimoSaldo = 0;
-            $sql= " SELECT stock FROM movimiento_almacen
+            $sql = "SELECT stock FROM movimiento_almacen
                     WHERE id_movimiento_almacen = (
-                        SELECT max(id_movimiento_almacen) FROM movimiento_almacen
-                        WHERE id_almacen = $idAlmacen AND id_producto = $idProducto
-                        AND fecha_aplicacion = (
-                            SELECT ultimo_registro FROM bita_resumen_almacen
-                            WHERE id_almacen = $idAlmacen AND id_producto = $idProducto
-                        )
-                    )";        
+                    SELECT MAX(id_movimiento_almacen) FROM movimiento_almacen
+                    WHERE id_almacen = $idAlmacen
+                    AND id_producto = $idProducto
+                    AND fecha_aplicacion = (
+                        SELECT CASE
+									WHEN ultima_entrada IS NOT NULL AND ultima_salida IS NULL THEN ultima_entrada
+									WHEN ultima_entrada IS NULL AND ultima_salida IS NOT NULL THEN ultima_salida
+									WHEN ultima_entrada>ultima_salida THEN ultima_entrada
+									WHEN ultima_entrada<ultima_salida THEN ultima_salida    
+                                    WHEN ultima_entrada=ultima_salida THEN ultima_salida
+								END 
+                        FROM stock_producto 
+                        WHERE id_producto = $idProducto AND id_almacen = $idAlmacen
+                    )
+                )";            
 
             $rs = DB::select( $sql );
 
             if(count($rs)>0){
-                $ultimoSaldo = $rs[0]->stock;                
-               
-            }else{
-                $ultimoSaldo;
+                $ultimoSaldo = $rs[0]->stock;                               
             }
-
-
 
             return $ultimoSaldo;
         }catch(Exception $e){
@@ -389,9 +440,10 @@ class AlmacenController extends Controller{
 
 
     /**
-     * Recupera el resumen del almacen
-     * 
-     * 
+     * Obtiene el resumen por almacen
+     * Total de productos
+     * Total de piezas
+     * Valor del almacen
      */
     public function resumenAlmacen(Request $request){
         try{
@@ -400,14 +452,15 @@ class AlmacenController extends Controller{
 
             $almacen = Almacen::findOrFail($idAlmacen);//~Se busca en base al ID entrante
             
-            $sql= " SELECT  COUNT(p.id_producto) total_prod, 
-                            SUM(bal.stock) total_stock,
-                            ROUND(SUM(p.ultimo_precio_compra * bal.stock),2) total_pesos
-                    FROM almacen al, bita_resumen_almacen bal, producto p
-                    WHERE al.id_almacen = bal.id_almacen
-                    AND bal.id_producto = p.id_producto
-                    AND al.id_almacen = $idAlmacen
-                    AND p.xstatus = 1";  
+
+            $sql="select 	count(p.id_producto) total_productos,
+            sum(sp.stock) total_piezas,
+            sum(sp.stock * p.ultimo_precio_compra) valor
+            from almacen a, producto p, stock_producto sp
+            where sp.id_almacen = a.id_almacen
+            and sp.id_producto = p.id_producto
+            and a.id_almacen = ".$idAlmacen;
+
             $rs = DB::select( $sql );
 
             $totalProductos = 0;
@@ -415,9 +468,9 @@ class AlmacenController extends Controller{
             $totalPesos = 0;
             
             if(count($rs)>0){                
-                $totalProductos = $rs[0]->total_prod;
-                $totalStock = $rs[0]->total_stock;
-                $totalPesos = $rs[0]->total_pesos;                         
+                $totalProductos = $rs[0]->total_productos;
+                $totalStock = $rs[0]->total_piezas;
+                $totalPesos = $rs[0]->valor;                         
             }
             
             
@@ -426,6 +479,30 @@ class AlmacenController extends Controller{
                         'totalStock'=>$totalStock, 
                         'totalPesos'=>$totalPesos, 
                         'almacen'=>$almacen];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+        
+    }
+
+
+    /**
+     * Genera el detalle del resumen
+     * 
+     * 
+     * 
+     */
+    public function resumenAlmacenReporte(Request $request){
+        try{
+            
+            $idAlmacen = $request->idAlmacen;
+
+            $almacen = Almacen::findOrFail($idAlmacen);//~Se busca en base al ID entrante        
+
+            $nombreSalida = 'almacen_'.$almacen->nombre."_".uniqid().'_reporte.xlsx';            
+            return (new AlmacenDetalleExport)->define($idAlmacen)->download($nombreSalida);
+
         }catch(Exception $e){
             Log::error( $e->getTraceAsString() );            
             return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
@@ -446,24 +523,36 @@ class AlmacenController extends Controller{
 
 
             if($idProductoBuscar == null){
-                $almacen = Almacen::join('bita_resumen_almacen', 'almacen.id_almacen', '=', 'bita_resumen_almacen.id_almacen')
-                ->join('producto','producto.id_producto','=','bita_resumen_almacen.id_producto')
-                ->select('producto.id_producto','producto.codigo','producto.nombre','producto.url_imagen','producto.ultimo_precio_compra','bita_resumen_almacen.stock')
-                ->where('almacen.id_almacen', '=', $idAlmacen)
+                $almacen = StockProducto::with('ubicacionStock')
+                ->join('producto','producto.id_producto','=','stock_producto.id_producto')
+                ->select('stock_producto.id_stock_producto','stock_producto.id_almacen','producto.id_producto','producto.codigo','producto.nombre','producto.url_imagen','producto.ultimo_precio_compra','stock_producto.stock','stock_producto.retenido','stock_producto.disponible')
+                ->where('stock_producto.id_almacen', '=', $idAlmacen)
                 ->where('producto.xstatus', '=', 1)
-                ->paginate(30);
+                ->paginate(10);
             }else{
-                $almacen = Almacen::join('bita_resumen_almacen', 'almacen.id_almacen', '=', 'bita_resumen_almacen.id_almacen')
-                ->join('producto','producto.id_producto','=','bita_resumen_almacen.id_producto')
-                ->select('producto.id_producto','producto.codigo','producto.nombre','producto.url_imagen','producto.ultimo_precio_compra','bita_resumen_almacen.stock')
-                ->where('almacen.id_almacen', '=', $idAlmacen)
+                $almacen = StockProducto::with('ubicacionStock')
+                ->join('producto','producto.id_producto','=','stock_producto.id_producto')
+                ->select('stock_producto.id_stock_producto','stock_producto.id_almacen','producto.id_producto','producto.codigo','producto.nombre','producto.url_imagen','producto.ultimo_precio_compra','stock_producto.stock','stock_producto.retenido','stock_producto.disponible')
+                ->where('stock_producto.id_almacen', '=', $idAlmacen)
                 ->where('producto.id_producto', '=', $idProductoBuscar)
                 ->where('producto.xstatus', '=', 1)
-                ->paginate(30);
+                ->paginate(10);
             }
 
+            
 
-            return [    'xstatus'=>true, 'detalle'=> $almacen ];
+
+            return [    'xstatus'=>true, 
+                        'detalle'=> $almacen,
+                        'pagination' => [
+                            'total'         => $almacen->total(),
+                            'current_page'         => $almacen->currentPage(),
+                            'per_page'         => $almacen->perPage(),
+                            'last_page'         => $almacen->lastPage(),
+                            'from'         => $almacen->firstItem(),
+                            'to'         => $almacen->lastItem()
+                        ]
+                    ];
         }catch(Exception $e){
             Log::error( $e->getTraceAsString() );            
             return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
@@ -471,5 +560,564 @@ class AlmacenController extends Controller{
         
     }
 
+
+    /**
+     * Recupera el detalle de movimientos en el almacen por producto
+     * 
+     * 
+     */
+    public function detalleMovAlmacen(Request $request){
+        try{
+            
+            $idAlmacen = $request->id_almacen;
+            $idProducto = $request->id_producto;
+
+            $detalle = MovimientoAlmacen::where('id_almacen','=',$idAlmacen) 
+            ->where('id_producto', '=', $idProducto)
+            ->select('id_movimiento_almacen','id_almacen','id_producto','tipo_movimiento',DB::raw("DATE_FORMAT(fecha_aplicacion, '%d/%m/%Y') as fecha_aplicacion"), 'cantidad','stock','ubicacion','estatus_movimientos','lote_referencia')            
+            ->orderBy('id_movimiento_almacen','desc')
+            ->paginate(30);
+
+
+
+
+            return [    'xstatus'=>true, 
+                        'detalle'=> $detalle,
+                        'pagination' => [
+                            'total'         => $detalle->total(),
+                            'current_page'         => $detalle->currentPage(),
+                            'per_page'         => $detalle->perPage(),
+                            'last_page'         => $detalle->lastPage(),
+                            'from'         => $detalle->firstItem(),
+                            'to'         => $detalle->lastItem()
+                        ]
+                    ];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+        
+    }
+
+
+    /**
+     * Crear lote de ingreso o retiro
+     * 
+     * 
+     */
+    public function generaLoteAlmacen(Request $request){
+        try{
+            
+            
+            $seq = app(ParametriaController::class)->seqFolioRegistroAlmacen_nextval();
+            $lote = 'INOUT_'.str_pad($seq,10,"0",STR_PAD_LEFT);
+
+
+            return [    'xstatus'=>true, 'lote'=> $lote ];
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+        
+    }
+
+
+    /**
+     * General ticket con la orden de entrada y salida
+     * 
+     * 
+     */
+    public function exportTicketOrden(Request $request){
+        try{
+
+            $sql= "select p.codigo, p.nombre, IF(tipo_movimiento='RET', cantidad*-1, cantidad) cantidad, stock, ubicacion, tipo_movimiento
+            from movimiento_almacen ma, producto p
+            where ma.id_producto = p.id_producto
+            and lote_referencia = '".$request->lote_referencia."'";
+
+            $ordernEntrega = DB::select( $sql );
+
+
+            $arreglo = [
+                "loteReferencia"    => $request->lote_referencia,
+                "fecha"             => date("d/m/Y"),
+                "tabla"             => $ordernEntrega
+            ];              
+
+            //$pdf = \PDF::loadView('exports/ticketMovAlmacen', ['datos' => $arreglo]);
+            return \PDF::loadView('exports/ticketMovAlmacen', ['datos' => $arreglo])
+            ->stream('archivo.pdf');
+
+            //return $pdf->download('resumenOrdenEntrega.pdf');  
+
+            
+        }catch(Exception $e){
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+        
+    }
+
+
+    /**
+     * Map almacen
+     * 
+     * 
+     * 
+     */
+    public function selectAlmacen(Request $request){
+        try{
+            if(!$request->ajax())return redirect('/');
+
+            $almacen = Almacen::select('id_almacen','nombre')
+            ->where('xstatus','=', '1')
+            ->orderBy('nombre', 'asc')
+            ->get();
+
+            return ['almacen' => $almacen];
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());            
+            return ['exception' => $e->getMessage()];
+        }   
+    }
+
+
+    /**
+     * Map ubicaciones
+     * 
+     * 
+     * 
+     */
+    public function selectAlmacenUbicaciones(Request $request){
+        try{
+            if(!$request->ajax())return redirect('/');
+
+            $cat = CatUbicaProducto::select('codigo','nombre')
+            ->where('xstatus','=', '1')
+            ->orderBy('nombre', 'asc')
+            ->get();
+
+            return ['ubicaciones' => $cat];
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());            
+            return ['exception' => $e->getMessage()];
+        }   
+    }
+
+
+    /**
+     * Crea nueva ubicacion
+     * 
+     * 
+     */
+    public function storeUbicacion(Request $request){
+        try{
+            //~Busca que no exista la ubicacion
+            $reqCat = CatUbicaProducto::where('codigo','=', $request->codigo)->get();
+
+            if($reqCat->isEmpty()){
+                $cat = new CatUbicaProducto();
+                $cat->codigo = $request->codigo;
+                $cat->nombre = $request->nombre;            
+                $cat->xstatus ='1';
+                $cat->save();
+
+                return [ 'xstatus'=>true, 'ubicacion' => $cat ];
+            }else{
+                return [ 'xstatus'=>false, 'error' => 'Ya existe la ubicacion' ];
+            }            
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());       
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
+        }                 
+    }
+
+
+    /**
+     * Unifica dos ubicaciones
+     * 
+     * 
+     */
+    public function unificaUbicacion(Request $request){
+        DB::beginTransaction();
+        try{
+            //~Busca que no exista la ubicacion
+            $origen = CatUbicaProducto::where('codigo','=', $request->ubicacionOrigen)->first();
+            if($origen==null){                
+                return [ 'xstatus'=>false, 'error' => 'No existe ubicacion origen' ];
+            }
+
+            $destino = CatUbicaProducto::where('codigo','=', $request->ubicacionDestino)->first();
+            if($destino==null){                
+                return [ 'xstatus'=>false, 'error' => 'No existe ubicacion destino' ];
+            }
+
+            $codigoOrigen = $origen->codigo;
+            $codigoDestino = $destino->codigo;
+
+
+            //~Actualiza el codigo de ubicacion
+            $stockUbicaProductoTotal = StockUbicaProducto::where('codigo_ubica','=',$codigoOrigen) 
+            ->update(['codigo_ubica'=> $codigoDestino]);
+
+            if($stockUbicaProductoTotal > 0){
+                //~Realiza la unificacion
+                $sql= "select id_stock_producto, id_producto, codigo_ubica, sum(stock) stock
+                from stock_ubica_producto
+                where codigo_ubica = '".$codigoDestino."'
+                group by id_stock_producto, id_producto, codigo_ubica";            
+
+                $ubicaciones = DB::select( $sql );
+
+                StockUbicaProducto::where('codigo_ubica','=',$codigoDestino)->delete();
+
+
+                foreach($ubicaciones as $p){                                                
+                    $stockUbicaProducto = new StockUbicaProducto();
+                    $stockUbicaProducto->id_stock_producto=$p->id_stock_producto;
+                    $stockUbicaProducto->id_producto=$p->id_producto;
+                    $stockUbicaProducto->codigo_ubica=$p->codigo_ubica;  
+                    $stockUbicaProducto->stock=$p->stock;
+
+                    $stockUbicaProducto->save();
+                }
+            }
+
+            DB::commit();  
+
+            return [ 'xstatus'=>true, 'totalUnificados' => $stockUbicaProductoTotal ];
+        }catch (\Exception $e) {
+            DB::rollBack();
+
+            \Log::error($e->getTraceAsString());       
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
+        }                 
+    }
+
+
+
+    /**
+     * Consulta el detalle/resumen por ubicacion
+     * 
+     * 
+     * 
+     */
+    public function resumenUbicacion(Request $request){
+        
+        try{
+            $opcion = $request->opcion;
+            $sql= " select 	    p.codigo,
+                                p.nombre,
+                                sup.stock
+                    from stock_ubica_producto sup, producto p
+                    where sup.id_producto = p.id_producto
+                    and sup.codigo_ubica = '".$request->codigoUbicacion."'
+                    order by p.codigo";   
+            $detalle = DB::select( $sql );
+
+            if($opcion=="ticket"){
+
+                $arreglo = [                    
+                    "fecha"             => date("d/m/Y"),
+                    "ubicacion"             => $request->codigoUbicacion,
+                    "tabla"             => $detalle
+                ];              
+                    
+                return \PDF::loadView('exports/ticketDetalleUbicacion', ['datos' => $arreglo])
+                ->stream('archivo.pdf');
+            }else{
+                return [ 'xstatus'=>true, 'detalleUbicacion' => $detalle ];
+            }
+
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());       
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
+        }                 
+    }
+
+
+    /**
+     * Carga el archivo en temporales
+     * 
+     * 
+     */
+    public function cargaTempArchivoXLS(Request $request){        
+        try{
+            $temp = new TempCargaStock();
+            $temp->truncate();
+
+
+            $file = $request->file('file');
+            $resp = Excel::import(new StockMasivaImport, $file);
+
+            //~Procesa la informacion
+            $temp = TempCargaStock::all();
+
+
+            foreach($temp as $t){   
+                try{
+                    $idProducto = intval($t->id_producto);
+                    $codigoProducto = trim($t->codigo_producto);
+                    $idAlmacen = intval($t->id_almacen);
+                    $tipoMovimiento = strtoupper(trim($t->tipo_movimiento));
+                    $codigoUbicacion = trim($t->codigo_ubicacion);
+                    $cantidad = floatval ($t->cantidad);
+                    $loteReferencia = trim ($t->lote_referencia);
+                    $opt1 = trim ($t->opt1);
+                    $opt2 = trim ($t->opt2);
+                    $opt3 = trim ($t->opt3);
+
+                    if($idProducto ==0 && $codigoProducto == null){
+                        throw new Exception('Se requiere especificar el producto');
+                    }
+
+                    //~1 Busca el producto
+                    $producto=null;
+                    if($idProducto>0){
+                        $producto = Producto::where('id_producto','=', $idProducto)
+                        ->where('xstatus','=','1')
+                        ->first();                        
+                    }
+
+                    if($producto==null){                
+                        $producto = Producto::where('codigo','=', $codigoProducto)
+                        ->where('xstatus','=','1')
+                        ->first();
+
+                        if($producto==null){
+                            throw new Exception('Producto no encontrado en catalogo');
+                        }
+                    }
+
+                    $t->id_producto = $producto->id_producto;
+
+
+                    //~2 Busca el almacen
+                    $almacen=null;
+                    if($idAlmacen>0){
+                        $almacen = Almacen::where('id_almacen','=', $idAlmacen)
+                        ->where('xstatus','=','1')
+                        ->first();  
+                        
+                        if($almacen==null){
+                            throw new Exception('Almacen no encontrado en catalogo');
+                        }
+                    }else{
+                        throw new Exception('Se requiere el ID del almacen');
+                    }
+
+                    //~3 Tipo de movimiento
+                    if($tipoMovimiento != 'INGRESO' && $tipoMovimiento != 'RETIRO' && $tipoMovimiento != 'SET_UBICA' && $tipoMovimiento != 'SET_INI'){
+                        throw new Exception('Tipo movimiento invalido, solo se permite INGRESO|RETIRO');
+                    }
+
+
+                    //~4 Busca que no exista la ubicacion
+                    $catUbicaProducto = CatUbicaProducto::where('codigo','=', $codigoUbicacion)->first();
+                    if($catUbicaProducto==null){                
+                        throw new Exception('No existe la ubicacion');
+                    }
+
+                    //~5 Evalua cantidad de piezas
+                    if($cantidad<0){
+                        throw new Exception('El stock no puede ser menor a Cero o negativo');
+                    }
+
+                    //~6 Lote
+                    if($loteReferencia = ''){
+                        throw new Exception('Ingresa un lote de referencia');
+                    }
+
+                    //~7 Calcula el stock actual por ubicacion
+                    $stockUbicaProducto = StockUbicaProducto::where('id_producto','=', $producto->id_producto)
+                    ->where('codigo_ubica','=', $codigoUbicacion)
+                    ->first();
+
+                    if($stockUbicaProducto == null){
+                        $stockUbicaActual = 0;
+                        $idStockUbicaProducto = null;
+                    }else{
+                        $stockUbicaActual = $stockUbicaProducto->stock;
+                        $idStockUbicaProducto = $stockUbicaProducto->id_stock_ubica_producto;                        
+                    }
+ 
+                    
+                    //~8 Calcula stock PRODUCTO actual
+                    $stockProducto =  StockProducto::where('id_producto','=', $producto->id_producto)
+                    ->where('id_almacen','=', $almacen->id_almacen)
+                    ->first();
+
+                    if($stockProducto == null){
+                        $stockActual = 0;
+                        $idStockProducto = null;
+                    }else{
+                        $stockActual = $stockProducto->stock;
+                        $idStockProducto = $stockProducto->id_stock_producto;
+                    }
+
+                    //~9 Determina las piezas en operacion
+                    if($tipoMovimiento == 'INGRESO' || $tipoMovimiento == 'RETIRO'){
+                        $piezasOperar = ($tipoMovimiento == 'RETIRO' ? $cantidad*-1 : $cantidad);
+                        $stockActual = $stockUbicaActual;
+                        $stockNuevo = $stockUbicaActual + ($tipoMovimiento == 'RETIRO' ? $cantidad*-1 : $cantidad);
+
+                        if($stockNuevo < 0){
+                            throw new Exception('Saldo insuficiente Actual = '.$stockActual.', Piezas operar = '.$piezasOperar.', Saldo nuevo = '.$stockNuevo);
+                        }
+                    }else if($tipoMovimiento == 'SET_UBICA' || $tipoMovimiento == 'SET_INI'){
+                        $stockActual = ($tipoMovimiento == 'SET_UBICA' ? $stockUbicaActual : $stockActual);
+
+                        if($stockActual == 0){
+                            $piezasOperar = $cantidad;
+                        }
+                        elseif($stockActual > $cantidad){
+                            $piezasOperar = $cantidad - $stockActual;
+                        }else{
+                            $piezasOperar = $stockActual -$cantidad;
+                        }
+
+                        $stockNuevo= $stockActual +  $piezasOperar;
+
+                    }
+                    
+                 
+                    $t->piezas_operar = $piezasOperar;                    
+                    $t->stock_nuevo = $stockNuevo;                    
+                    $t->stock_actual = $stockActual;                    
+                    
+
+                    $t->estatus = 'ACE';                    
+                    $t->update();
+
+                    
+                }catch (\Exception $e) {                    
+                    $t->estatus = 'ERR';
+                    $t->diagnostico = $e->getMessage();
+                    $t->update();
+                }                      
+                
+            }
+
+            //~Recupera la lista y completa con el producto
+            $tempCargaStock = TempCargaStock::all();
+
+            foreach($tempCargaStock as $t){
+                $t->producto = Producto::findOrFail($t->id_producto);
+                $t->almacen = Almacen::findOrFail($t->id_almacen);
+            }
+
+            
+            return [ 'xstatus'=>true, 'carga' => $tempCargaStock ];
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());       
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
+        }                 
+    }
+
+
+
+
+    /**
+     * Aplica ajustes en stock desde el Excel
+     * 
+     * 
+     */
+    public function aplicaCargaExcel(Request $request){        
+        try{           
+
+            //~Procesa la informacion
+            $temp = TempCargaStock::where('estatus','=','ACE')->get();           
+
+            foreach($temp as $t){   
+                try{                    
+                    $request->idAlmacen=        intval($t->id_almacen);  
+                    $request->idProducto=       intval($t->id_producto);
+                    $tipoMovimiento = $request->tipoMovimiento=   strtoupper(trim($t->tipo_movimiento));
+                    $request->cantidad=         floatval ($t->piezas_operar) < 0 ? floatval ($t->piezas_operar)*-1 : floatval ($t->piezas_operar); 
+                    $request->ubicacion=        trim($t->codigo_ubicacion);  
+                    $request->loteReferencia=   trim ($t->lote_referencia);  
+
+
+                    if( $tipoMovimiento=="SET_UBICA" ){
+                        $piezasOperar = $t->piezas_operar;
+
+                        if($piezasOperar<0){                            
+                            $request->tipoMovimiento = "RETIRO";
+                            $request->cantidad = $piezasOperar *-1;
+                        }else{                            
+                            $request->tipoMovimiento = "INGRESO";
+                            $request->cantidad = $piezasOperar;
+                        }
+
+                    }else if($tipoMovimiento=="SET_INI"){
+                        $stockProducto = StockProducto::where('id_producto','=', $request->idProducto)
+                        ->where('id_almacen','=', $request->idAlmacen)
+                        ->first();
+
+                        //~Libera el saldo actual
+                        StockProducto::where('id_producto','=', $request->idProducto)
+                        ->where('id_almacen','=', $request->idAlmacen)
+                        ->update( ['disponible'=> $stockProducto->stock, 'retenido'=>0] );
+                        
+
+
+                        //~Consulta saldo actual
+                        $stockProducto =  StockProducto::where('id_producto','=', $request->idProducto)
+                        ->where('id_almacen','=', $request->idAlmacen)
+                        ->first();                        
+
+                        //~Aplica un movimiento para dejar en cero el stock     
+                        $reqCero = new Request;
+                        $reqCero->idAlmacen=        intval($t->id_almacen);  
+                        $reqCero->idProducto=       intval($t->id_producto);
+                        $reqCero->tipoMovimiento=   "RETIRO";
+                        $reqCero->cantidad=         $stockProducto->stock;
+                        $reqCero->ubicacion=        trim($t->codigo_ubicacion);
+                        $reqCero->loteReferencia=   trim ($t->lote_referencia);
+
+                        $resultado = $this->movimientoAlmacen($reqCero);
+
+
+                        //~Vacia a cero todas las ubicaciones para dejar en cero el stock general
+                        StockUbicaProducto::where('id_producto','=', $request->idProducto)
+                        ->where('id_stock_producto','=', $stockProducto->id_stock_producto)
+                        ->delete();
+
+
+                        $request->tipoMovimiento = "INGRESO";
+                        $request->cantidad = floatval ($t->cantidad);
+                        
+                    }
+
+
+                    //~Aplica movimiento
+                    $resultado = $this->movimientoAlmacen($request);
+
+                    if($resultado["xstatus"]){
+                        $t->estatus = 'APL';
+                        $t->update();                        
+                        $t->movimiento = $resultado;
+                    }else{
+                        $t->estatus = 'EPL';
+                        $t->diagnostico = $resultado["error"];
+                        $t->update();
+                    }
+
+                }catch (\Exception $e) {                    
+                    $t->estatus = 'ERR';
+                    $t->diagnostico = $e->getMessage();
+                    $t->update();
+                   
+                }                      
+                
+            }
+
+            return [ 'xstatus'=>true, 'carga' => $temp ];
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());       
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
+        }                 
+    }
+    
 
 }

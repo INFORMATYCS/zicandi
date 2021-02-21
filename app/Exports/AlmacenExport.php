@@ -32,7 +32,7 @@ class AlmacenExport implements FromView
                         bita.stock,
                         now() fecha_consulta
                 from producto p
-                left join bita_resumen_almacen bita on p.id_producto = bita.id_producto
+                left join stock_producto bita on p.id_producto = bita.id_producto
                 left join almacen a on bita.id_almacen = a.id_almacen
                 where p.xstatus = 1
                 order by p.id_producto";        

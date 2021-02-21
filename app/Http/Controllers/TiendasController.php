@@ -90,6 +90,8 @@ class TiendasController extends Controller
         $usuarioMELI = $cuenta->usuario;
         $token = $cuenta->att_access_token;        
 
+        
+
         //~Tasas de impuestos
         $parametria = Parametria::where('xstatus','=','1')->where('clave_proceso','=','IMPUESTO')->where('llave','=','TASA_IVA')->select('valor')->first();
         $tasaIva = floatval($parametria->valor);
@@ -117,6 +119,8 @@ class TiendasController extends Controller
                 $estatus        = $publicacion->status;
                 $link           = $publicacion->permalink;
                 $fotoMini       = $publicacion->thumbnail;
+
+                
                 
                 $shipping       = $publicacion->shipping;
                 $envioGratis    = $shipping->free_shipping;
@@ -262,9 +266,14 @@ class TiendasController extends Controller
 
                 $publicacion->save();                    
             }else{
+                if($publicacion->id_publicacion=="MLM826977288"){
+                    $pause=true;
+                }
+
+
                 //~Calcula precio de compra
                 $configPublicacion = ConfigPublicacion::where('id_publicacion','=',$publicacion->id_publicacion)->get();
-
+                $precioCompra = 0;
                 if($configPublicacion->isEmpty()){
                     $precioCompra = 0;
                 }else{                    
