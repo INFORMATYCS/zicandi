@@ -68,7 +68,7 @@ Route::get('/almacenes/map', 'AlmacenController@selectAlmacen');
 Route::get('/almacenes/map_ubicacion', 'AlmacenController@selectAlmacenUbicaciones');
 Route::post('/almacenes/carga_masiva', 'AlmacenController@cargaTempArchivoXLS');
 Route::post('/almacenes/aplica/carga_masiva', 'AlmacenController@aplicaCargaExcel');
-Route::get('/almacenes/exportDetalle', 'AlmacenController@aplicaCargaExcel');
+Route::get('/almacenes/exportDetalle', 'AlmacenController@resumenAlmacenReporte');
 
 Route::post('/almacenes/cat_ubica/store', 'AlmacenController@storeUbicacion');
 Route::post('/almacenes/cat_ubica/unifica', 'AlmacenController@unificaUbicacion');
