@@ -498,12 +498,9 @@ class AlmacenController extends Controller{
             
             $idAlmacen = $request->idAlmacen;
 
-            $almacen = Almacen::findOrFail($idAlmacen);//~Se busca en base al ID entrante
+            $almacen = Almacen::findOrFail($idAlmacen);//~Se busca en base al ID entrante        
 
-            //Multiples hojas
-            //https://www.youtube.com/watch?v=FZZGJ8-0EzU
-
-            $nombreSalida = 'almacen_'.uniqid().'_reporte.xlsx';            
+            $nombreSalida = 'almacen_'.$almacen->nombre."_".uniqid().'_reporte.xlsx';            
             return (new AlmacenDetalleExport)->define($idAlmacen)->download($nombreSalida);
 
         }catch(Exception $e){
@@ -577,8 +574,7 @@ class AlmacenController extends Controller{
 
             $detalle = MovimientoAlmacen::where('id_almacen','=',$idAlmacen) 
             ->where('id_producto', '=', $idProducto)
-            ->select('id_movimiento_almacen','id_almacen','id_producto','tipo_movimiento',DB::raw("DATE_FORMAT(fecha_aplicacion, '%m/%d/%Y') as fecha_aplicacion"), 'cantidad','stock','ubicacion','estatus_movimientos','lote_referencia')
-            ->orderBy('fecha_aplicacion','asc')
+            ->select('id_movimiento_almacen','id_almacen','id_producto','tipo_movimiento',DB::raw("DATE_FORMAT(fecha_aplicacion, '%d/%m/%Y') as fecha_aplicacion"), 'cantidad','stock','ubicacion','estatus_movimientos','lote_referencia')            
             ->orderBy('id_movimiento_almacen','desc')
             ->paginate(30);
 
@@ -865,8 +861,11 @@ class AlmacenController extends Controller{
                     $idAlmacen = intval($t->id_almacen);
                     $tipoMovimiento = strtoupper(trim($t->tipo_movimiento));
                     $codigoUbicacion = trim($t->codigo_ubicacion);
-                    $stock = floatval ($t->stock);
+                    $cantidad = floatval ($t->cantidad);
                     $loteReferencia = trim ($t->lote_referencia);
+                    $opt1 = trim ($t->opt1);
+                    $opt2 = trim ($t->opt2);
+                    $opt3 = trim ($t->opt3);
 
                     if($idProducto ==0 && $codigoProducto == null){
                         throw new Exception('Se requiere especificar el producto');
@@ -890,6 +889,8 @@ class AlmacenController extends Controller{
                         }
                     }
 
+                    $t->id_producto = $producto->id_producto;
+
 
                     //~2 Busca el almacen
                     $almacen=null;
@@ -906,7 +907,7 @@ class AlmacenController extends Controller{
                     }
 
                     //~3 Tipo de movimiento
-                    if($tipoMovimiento != 'INGRESO' && $tipoMovimiento != 'RETIRO'){
+                    if($tipoMovimiento != 'INGRESO' && $tipoMovimiento != 'RETIRO' && $tipoMovimiento != 'SET_UBICA' && $tipoMovimiento != 'SET_INI'){
                         throw new Exception('Tipo movimiento invalido, solo se permite INGRESO|RETIRO');
                     }
 
@@ -917,8 +918,8 @@ class AlmacenController extends Controller{
                         throw new Exception('No existe la ubicacion');
                     }
 
-                    //~5 Evalua Stock a setear
-                    if($stock<0){
+                    //~5 Evalua cantidad de piezas
+                    if($cantidad<0){
                         throw new Exception('El stock no puede ser menor a Cero o negativo');
                     }
 
@@ -927,8 +928,21 @@ class AlmacenController extends Controller{
                         throw new Exception('Ingresa un lote de referencia');
                     }
 
-                    /*
-                    //7 Calcula stock actual
+                    //~7 Calcula el stock actual por ubicacion
+                    $stockUbicaProducto = StockUbicaProducto::where('id_producto','=', $producto->id_producto)
+                    ->where('codigo_ubica','=', $codigoUbicacion)
+                    ->first();
+
+                    if($stockUbicaProducto == null){
+                        $stockUbicaActual = 0;
+                        $idStockUbicaProducto = null;
+                    }else{
+                        $stockUbicaActual = $stockUbicaProducto->stock;
+                        $idStockUbicaProducto = $stockUbicaProducto->id_stock_ubica_producto;                        
+                    }
+ 
+                    
+                    //~8 Calcula stock PRODUCTO actual
                     $stockProducto =  StockProducto::where('id_producto','=', $producto->id_producto)
                     ->where('id_almacen','=', $almacen->id_almacen)
                     ->first();
@@ -941,18 +955,36 @@ class AlmacenController extends Controller{
                         $idStockProducto = $stockProducto->id_stock_producto;
                     }
 
-                    $registroSotck = array(
-                        'idProducto'        => $producto->id_producto,
-                        'idAlmacen'         => $almacen->id_almacen,
-                        'tipoMovimiento'    => $tipoMovimiento,
-                        'codigoUbicacion'   => $catUbicaProducto->codigo,
-                        'nuevoStock'        => $stock,
-                        'actualStock'       => $stockActual,
-                        'idStockProducto'   => $idStockProducto,
-                        'loteReferencia'    => $loteReferencia
-                    );
+                    //~9 Determina las piezas en operacion
+                    if($tipoMovimiento == 'INGRESO' || $tipoMovimiento == 'RETIRO'){
+                        $piezasOperar = ($tipoMovimiento == 'RETIRO' ? $cantidad*-1 : $cantidad);
+                        $stockActual = $stockUbicaActual;
+                        $stockNuevo = $stockUbicaActual + ($tipoMovimiento == 'RETIRO' ? $cantidad*-1 : $cantidad);
 
-                    */
+                        if($stockNuevo < 0){
+                            throw new Exception('Saldo insuficiente Actual = '.$stockActual.', Piezas operar = '.$piezasOperar.', Saldo nuevo = '.$stockNuevo);
+                        }
+                    }else if($tipoMovimiento == 'SET_UBICA' || $tipoMovimiento == 'SET_INI'){
+                        $stockActual = ($tipoMovimiento == 'SET_UBICA' ? $stockUbicaActual : $stockActual);
+
+                        if($stockActual == 0){
+                            $piezasOperar = $cantidad;
+                        }
+                        elseif($stockActual > $cantidad){
+                            $piezasOperar = $cantidad - $stockActual;
+                        }else{
+                            $piezasOperar = $stockActual -$cantidad;
+                        }
+
+                        $stockNuevo= $stockActual +  $piezasOperar;
+
+                    }
+                    
+                 
+                    $t->piezas_operar = $piezasOperar;                    
+                    $t->stock_nuevo = $stockNuevo;                    
+                    $t->stock_actual = $stockActual;                    
+                    
 
                     $t->estatus = 'ACE';                    
                     $t->update();
@@ -962,12 +994,20 @@ class AlmacenController extends Controller{
                     $t->estatus = 'ERR';
                     $t->diagnostico = $e->getMessage();
                     $t->update();
-                }      
+                }                      
                 
             }
 
+            //~Recupera la lista y completa con el producto
+            $tempCargaStock = TempCargaStock::all();
+
+            foreach($tempCargaStock as $t){
+                $t->producto = Producto::findOrFail($t->id_producto);
+                $t->almacen = Almacen::findOrFail($t->id_almacen);
+            }
+
             
-            return [ 'xstatus'=>true, 'carga' => $resp ];
+            return [ 'xstatus'=>true, 'carga' => $tempCargaStock ];
         }catch (\Exception $e) {
             \Log::error($e->getTraceAsString());       
             return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
@@ -975,6 +1015,109 @@ class AlmacenController extends Controller{
     }
 
 
+
+
+    /**
+     * Aplica ajustes en stock desde el Excel
+     * 
+     * 
+     */
+    public function aplicaCargaExcel(Request $request){        
+        try{           
+
+            //~Procesa la informacion
+            $temp = TempCargaStock::where('estatus','=','ACE')->get();           
+
+            foreach($temp as $t){   
+                try{                    
+                    $request->idAlmacen=        intval($t->id_almacen);  
+                    $request->idProducto=       intval($t->id_producto);
+                    $tipoMovimiento = $request->tipoMovimiento=   strtoupper(trim($t->tipo_movimiento));
+                    $request->cantidad=         floatval ($t->piezas_operar) < 0 ? floatval ($t->piezas_operar)*-1 : floatval ($t->piezas_operar); 
+                    $request->ubicacion=        trim($t->codigo_ubicacion);  
+                    $request->loteReferencia=   trim ($t->lote_referencia);  
+
+
+                    if( $tipoMovimiento=="SET_UBICA" ){
+                        $piezasOperar = $t->piezas_operar;
+
+                        if($piezasOperar<0){                            
+                            $request->tipoMovimiento = "RETIRO";
+                            $request->cantidad = $piezasOperar *-1;
+                        }else{                            
+                            $request->tipoMovimiento = "INGRESO";
+                            $request->cantidad = $piezasOperar;
+                        }
+
+                    }else if($tipoMovimiento=="SET_INI"){
+                        $stockProducto = StockProducto::where('id_producto','=', $request->idProducto)
+                        ->where('id_almacen','=', $request->idAlmacen)
+                        ->first();
+
+                        //~Libera el saldo actual
+                        StockProducto::where('id_producto','=', $request->idProducto)
+                        ->where('id_almacen','=', $request->idAlmacen)
+                        ->update( ['disponible'=> $stockProducto->stock, 'retenido'=>0] );
+                        
+
+
+                        //~Consulta saldo actual
+                        $stockProducto =  StockProducto::where('id_producto','=', $request->idProducto)
+                        ->where('id_almacen','=', $request->idAlmacen)
+                        ->first();                        
+
+                        //~Aplica un movimiento para dejar en cero el stock     
+                        $reqCero = new Request;
+                        $reqCero->idAlmacen=        intval($t->id_almacen);  
+                        $reqCero->idProducto=       intval($t->id_producto);
+                        $reqCero->tipoMovimiento=   "RETIRO";
+                        $reqCero->cantidad=         $stockProducto->stock;
+                        $reqCero->ubicacion=        trim($t->codigo_ubicacion);
+                        $reqCero->loteReferencia=   trim ($t->lote_referencia);
+
+                        $resultado = $this->movimientoAlmacen($reqCero);
+
+
+                        //~Vacia a cero todas las ubicaciones para dejar en cero el stock general
+                        StockUbicaProducto::where('id_producto','=', $request->idProducto)
+                        ->where('id_stock_producto','=', $stockProducto->id_stock_producto)
+                        ->delete();
+
+
+                        $request->tipoMovimiento = "INGRESO";
+                        $request->cantidad = floatval ($t->cantidad);
+                        
+                    }
+
+
+                    //~Aplica movimiento
+                    $resultado = $this->movimientoAlmacen($request);
+
+                    if($resultado["xstatus"]){
+                        $t->estatus = 'APL';
+                        $t->update();                        
+                        $t->movimiento = $resultado;
+                    }else{
+                        $t->estatus = 'EPL';
+                        $t->diagnostico = $resultado["error"];
+                        $t->update();
+                    }
+
+                }catch (\Exception $e) {                    
+                    $t->estatus = 'ERR';
+                    $t->diagnostico = $e->getMessage();
+                    $t->update();
+                   
+                }                      
+                
+            }
+
+            return [ 'xstatus'=>true, 'carga' => $temp ];
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());       
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
+        }                 
+    }
     
 
 }

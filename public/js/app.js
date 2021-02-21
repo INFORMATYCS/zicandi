@@ -74784,6 +74784,38 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -74858,7 +74890,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 error: 0,
                 erroresMsjList: [],
                 fileSeleccion: null,
-                fileServidor: ''
+                fileServidor: '',
+                cargaTemporal: []
             }
         };
     },
@@ -75170,6 +75203,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                                     this.modalCargaMasiva.tituloModal = 'Carga masiva de stock';
                                     this.modalCargaMasiva.tipoAccion = 1;
                                     this.modalCargaMasiva.modal = 1;
+                                    this.modalCargaMasiva.fileSeleccion = null;
+                                    this.modalCargaMasiva.fileServidor = '';
+                                    this.modalCargaMasiva.cargaTemporal = [];
+                                    this.modalCargaMasiva.cargaServidorExitosa = false;
 
                                     break;
                                 }
@@ -75548,6 +75585,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             });
         },
         onUploadExcel: function onUploadExcel() {
+            var me = this;
+            this.isLoading = 1;
+
             for (var i = 0; i < event.target.files.length; i++) {
                 this.modalCargaMasiva.fileSeleccion = event.target.files[i];
             }
@@ -75557,10 +75597,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var fd = new FormData();
             fd.append('file', this.modalCargaMasiva.fileSeleccion, nombreArchivo);
 
-            var me = this;
             me.modalCargaMasiva.cargaServidorExitosa = false;
             axios.post('/zicandi/public/almacenes/carga_masiva', fd).then(function (response) {
                 me.modalCargaMasiva.cargaServidorExitosa = true;
+
+                me.modalCargaMasiva.cargaTemporal = response.data.carga;
+
+                me.isLoading = 0;
             }).catch(function (error) {
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
             });
@@ -75574,6 +75617,40 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
          */
         onGenerarDetalleAlmacen: function onGenerarDetalleAlmacen() {
             window.open('/zicandi/public/almacenes/exportDetalle?idAlmacen=' + this.idAlmacenSeleccion);
+        },
+        onAplicarMovimientoTemp: function onAplicarMovimientoTemp() {
+            var me = this;
+
+            this.isLoading = 1;
+            axios.post('/zicandi/public/almacenes/aplica/carga_masiva').then(function (response) {
+                me.isLoading = 0;
+
+                if (response.data.xstatus) {
+                    var respuesta = response.data.carga;
+
+                    for (var x = 0; x < me.modalCargaMasiva.cargaTemporal.length; x++) {
+
+                        for (var i = 0; i < respuesta.length; i++) {
+                            var cargaTemporal = respuesta[i];
+
+                            if (cargaTemporal.id_temp_carga_stock == me.modalCargaMasiva.cargaTemporal[x].id_temp_carga_stock) {
+                                me.modalCargaMasiva.cargaTemporal[x].estatus = cargaTemporal.estatus;
+                                me.modalCargaMasiva.cargaTemporal[x].diagnostico = cargaTemporal.diagnostico;
+                                me.modalCargaMasiva.cargaTemporal[x].movimiento = cargaTemporal.movimiento;
+                            }
+                        }
+                    }
+
+                    console.log(me.modalCargaMasiva.cargaTemporal);
+
+                    console.log('Todo ok');
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
         }
     },
     mounted: function mounted() {
@@ -75809,7 +75886,7 @@ var render = function() {
                       }
                     }
                   },
-                  [_c("i", { staticClass: "icon-printer" })]
+                  [_c("i", { staticClass: "icon-notebook" })]
                 )
               ])
             ])
@@ -77314,43 +77391,50 @@ var render = function() {
             attrs: { role: "document" }
           },
           [
-            _c("div", { staticClass: "modal-content" }, [
-              _c("div", { staticClass: "modal-header" }, [
-                _c("h4", {
-                  staticClass: "modal-title",
-                  domProps: {
-                    textContent: _vm._s(_vm.modalCargaMasiva.tituloModal)
-                  }
-                }),
+            _c(
+              "div",
+              {
+                staticClass: "modal-content",
+                staticStyle: { height: "700px" }
+              },
+              [
+                _c("div", { staticClass: "modal-header" }, [
+                  _c("h4", {
+                    staticClass: "modal-title",
+                    domProps: {
+                      textContent: _vm._s(_vm.modalCargaMasiva.tituloModal)
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "close",
+                      attrs: { type: "button", "aria-label": "Close" },
+                      on: {
+                        click: function($event) {
+                          return _vm.closeModal()
+                        }
+                      }
+                    },
+                    [
+                      _c("span", { attrs: { "aria-hidden": "true" } }, [
+                        _vm._v("×")
+                      ])
+                    ]
+                  )
+                ]),
                 _vm._v(" "),
                 _c(
-                  "button",
+                  "div",
                   {
-                    staticClass: "close",
-                    attrs: { type: "button", "aria-label": "Close" },
-                    on: {
-                      click: function($event) {
-                        return _vm.closeModal()
-                      }
+                    staticClass: "modal-body",
+                    staticStyle: {
+                      "max-height": "calc(100% - 120px)",
+                      "overflow-y": "scroll"
                     }
                   },
                   [
-                    _c("span", { attrs: { "aria-hidden": "true" } }, [
-                      _vm._v("×")
-                    ])
-                  ]
-                )
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "modal-body" }, [
-                _c("div", { staticClass: "row" }, [
-                  _c("div", { staticClass: "col-4" }, [
-                    _vm._v(
-                      "\n                           Archivo:\n                        "
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-4" }, [
                     _c("input", {
                       staticClass: "custom-file-input",
                       attrs: {
@@ -77366,50 +77450,237 @@ var render = function() {
                       }
                     }),
                     _vm._v(" "),
-                    _c(
-                      "label",
-                      {
-                        staticClass: "btn btn-primary custom-file-label",
-                        attrs: { for: "customFileLangLocal" }
-                      },
-                      [_vm._v("Examinar")]
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-2" })
-                ])
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "modal-footer" }, [
-                _c(
-                  "button",
-                  {
-                    staticClass: "btn btn-primary",
-                    attrs: { type: "button" },
-                    on: {
-                      click: function($event) {
-                        return _vm.onUnificarUbicaciones()
-                      }
-                    }
-                  },
-                  [_vm._v("Unificar")]
+                    _vm.modalCargaMasiva.cargaTemporal.length == 0
+                      ? _c("div", { staticClass: "row" }, [
+                          _vm._m(6),
+                          _vm._v(" "),
+                          _vm._m(7)
+                        ])
+                      : _vm._e(),
+                    _vm._v(" "),
+                    _vm._l(_vm.modalCargaMasiva.cargaTemporal, function(temp) {
+                      return _c(
+                        "div",
+                        { key: temp.id_temp_carga_stock, staticClass: "row" },
+                        [
+                          _c("div", { staticClass: "col-2" }, [
+                            _c("img", {
+                              attrs: {
+                                src: temp.producto.url_imagen,
+                                alt: "dog"
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "col-2" }, [
+                            _c("div", [
+                              _c("strong", [
+                                _c("span", {
+                                  domProps: {
+                                    textContent: _vm._s(temp.producto.codigo)
+                                  }
+                                })
+                              ])
+                            ]),
+                            _vm._v(" "),
+                            _c("div", {
+                              domProps: {
+                                textContent: _vm._s(temp.producto.nombre)
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "col-2" }, [
+                            _c("div", [
+                              _c("span", {
+                                domProps: {
+                                  textContent: _vm._s(temp.tipo_movimiento)
+                                }
+                              })
+                            ]),
+                            _vm._v(" "),
+                            _c("div", [
+                              _vm._v("["),
+                              _c("span", {
+                                domProps: {
+                                  textContent: _vm._s(temp.almacen.nombre)
+                                }
+                              }),
+                              _vm._v("] "),
+                              _c("span", {
+                                domProps: {
+                                  textContent: _vm._s(temp.codigo_ubicacion)
+                                }
+                              })
+                            ]),
+                            _vm._v(" "),
+                            _c("div", [
+                              _c("span", {
+                                domProps: { textContent: _vm._s(temp.cantidad) }
+                              }),
+                              _vm._v(" "),
+                              _c("span", { staticClass: "text-muted" }, [
+                                _vm._v("piezas")
+                              ])
+                            ])
+                          ]),
+                          _vm._v(" "),
+                          temp.estatus == "ACE" || temp.estatus == "ERR"
+                            ? _c("div", { staticClass: "col-3" }, [
+                                _c("div", [
+                                  _c("span", { staticClass: "text-muted" }, [
+                                    _vm._v("Actual")
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("span", {
+                                    domProps: {
+                                      textContent: _vm._s(temp.stock_actual)
+                                    }
+                                  })
+                                ]),
+                                _vm._v(" "),
+                                _c("div", [
+                                  _c("span", { staticClass: "text-muted" }, [
+                                    _vm._v("Operar")
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("span", {
+                                    domProps: {
+                                      textContent: _vm._s(temp.piezas_operar)
+                                    }
+                                  })
+                                ]),
+                                _vm._v(" "),
+                                _c("div", [
+                                  _c("span", { staticClass: "text-muted" }, [
+                                    _vm._v("Nuevo")
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("span", {
+                                    domProps: {
+                                      textContent: _vm._s(temp.stock_nuevo)
+                                    }
+                                  })
+                                ])
+                              ])
+                            : _vm._e(),
+                          _vm._v(" "),
+                          temp.estatus == "APL"
+                            ? _c("div", { staticClass: "col-3" }, [
+                                _c("div", [
+                                  _c("span", { staticClass: "text-muted" }, [
+                                    _vm._v("Stock")
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("span", {
+                                    domProps: {
+                                      textContent: _vm._s(
+                                        temp.movimiento.stockUbicacion.stock
+                                      )
+                                    }
+                                  })
+                                ])
+                              ])
+                            : _vm._e(),
+                          _vm._v(" "),
+                          temp.estatus == "EPL"
+                            ? _c("div", { staticClass: "col-3" })
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "col-2" }, [
+                            _c("div", {
+                              staticClass: "blockquote-footer",
+                              domProps: {
+                                textContent: _vm._s(temp.lote_referencia)
+                              }
+                            }),
+                            _vm._v(" "),
+                            temp.estatus == "ACE"
+                              ? _c("div", {
+                                  staticStyle: { color: "green" },
+                                  domProps: {
+                                    textContent: _vm._s(temp.estatus)
+                                  }
+                                })
+                              : _vm._e(),
+                            _vm._v(" "),
+                            temp.estatus == "APL"
+                              ? _c("div", {
+                                  staticStyle: { color: "blue" },
+                                  domProps: {
+                                    textContent: _vm._s(temp.estatus)
+                                  }
+                                })
+                              : _vm._e(),
+                            _vm._v(" "),
+                            temp.estatus == "EPL"
+                              ? _c("div", {
+                                  staticStyle: { color: "red" },
+                                  attrs: {
+                                    "data-toggle": "tooltip",
+                                    "data-placement": "top",
+                                    title: temp.diagnostico
+                                  },
+                                  domProps: {
+                                    textContent: _vm._s(temp.estatus)
+                                  }
+                                })
+                              : _vm._e(),
+                            _vm._v(" "),
+                            temp.estatus == "ERR"
+                              ? _c("div", {
+                                  staticStyle: { color: "red" },
+                                  attrs: {
+                                    "data-toggle": "tooltip",
+                                    "data-placement": "top",
+                                    title: temp.diagnostico
+                                  },
+                                  domProps: {
+                                    textContent: _vm._s(temp.estatus)
+                                  }
+                                })
+                              : _vm._e()
+                          ])
+                        ]
+                      )
+                    })
+                  ],
+                  2
                 ),
                 _vm._v(" "),
-                _c(
-                  "button",
-                  {
-                    staticClass: "btn btn-secondary",
-                    attrs: { type: "button" },
-                    on: {
-                      click: function($event) {
-                        return _vm.closeModal()
+                _c("div", { staticClass: "modal-footer" }, [
+                  _vm.modalCargaMasiva.cargaTemporal.length > 0
+                    ? _c(
+                        "button",
+                        {
+                          staticClass: "btn btn-primary",
+                          attrs: { type: "button" },
+                          on: {
+                            click: function($event) {
+                              return _vm.onAplicarMovimientoTemp()
+                            }
+                          }
+                        },
+                        [_vm._v("Aplicar movimientos")]
+                      )
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-secondary",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.closeModal()
+                        }
                       }
-                    }
-                  },
-                  [_vm._v("Cerrar")]
-                )
-              ])
-            ])
+                    },
+                    [_vm._v("Cerrar")]
+                  )
+                ])
+              ]
+            )
           ]
         )
       ]
@@ -77509,6 +77780,38 @@ var staticRenderFns = [
         _vm._v(" "),
         _c("div", { staticClass: "col-3" }, [_c("strong", [_vm._v("Stock")])])
       ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "col-4" }, [
+      _c(
+        "a",
+        {
+          attrs: {
+            href:
+              "repositorio/sistema/plantillas_excel/PlantillaSetStockUbicacion.xlsx"
+          }
+        },
+        [_vm._v("Descargar plantilla")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "col-4" }, [
+      _c(
+        "label",
+        {
+          staticClass: "btn btn-primary custom-file-label",
+          attrs: { for: "customFileLangLocal" }
+        },
+        [_vm._v("Examinar")]
+      )
     ])
   }
 ]

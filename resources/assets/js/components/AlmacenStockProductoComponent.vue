@@ -84,7 +84,7 @@
                             </div>
                             <div class="col-1">
                                 <button type="button" class="btn btn-info" @click="onGenerarDetalleAlmacen()">
-                                    <i class="icon-printer"></i>
+                                    <i class="icon-notebook"></i>
                                 </button>               
                             </div>
                         </div>        
@@ -462,7 +462,7 @@
         <!--Inicio del modal carga masiva-->
         <div class="modal fade" :class="{'mostrar' : modalCargaMasiva.modal}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true">
             <div class="modal-dialog modal-primary" style="max-width: 70% !important;" role="document">
-                <div class="modal-content">
+                <div class="modal-content" style="height: 700px;">
                     <div class="modal-header">
 
                         <h4 class="modal-title" v-text="modalCargaMasiva.tituloModal"></h4>
@@ -471,26 +471,58 @@
                         </button>
 
                     </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-4">
-                               Archivo:
-                            </div>
-                            <div class="col-4">                                 
-                                <input type="file" class="custom-file-input" id="customFileLangLocal" lang="es" accept=".xls, .xlsx" @change="onUploadExcel()">
+                    <div class="modal-body" style="max-height: calc(100% - 120px); overflow-y: scroll;">
+                        <input type="file" class="custom-file-input" id="customFileLangLocal" lang="es" accept=".xls, .xlsx" @change="onUploadExcel()">
+                        <div class="row" v-if="modalCargaMasiva.cargaTemporal.length==0">                            
+                            <div class="col-4">                                                                 
+                                <a href="repositorio/sistema/plantillas_excel/PlantillaSetStockUbicacion.xlsx">Descargar plantilla</a>
+                            </div>                            
+                            <div class="col-4">                                
                                 <label class="btn btn-primary custom-file-label" for="customFileLangLocal">Examinar</label>                                            
                             </div>
-                            <div class="col-2">
+                            
+                        </div>
+
+                        <div class="row" v-for="temp in modalCargaMasiva.cargaTemporal" :key="temp.id_temp_carga_stock">                            
+                            <div class="col-2">                                                                                                 
+                                <img :src="temp.producto.url_imagen" alt="dog"> 
+                            </div>                            
+                            <div class="col-2">                                
+                                <div><strong><span v-text="temp.producto.codigo"></span></strong></div>
+                                <div v-text="temp.producto.nombre"></div>                                
+                            </div>
+                            <div class="col-2">                                
+                                <div><span v-text="temp.tipo_movimiento"></span></div>
+                                <div >[<span v-text="temp.almacen.nombre"></span>] <span v-text="temp.codigo_ubicacion"></span></div>
+                                <div><span v-text="temp.cantidad"></span> <span class="text-muted">piezas</span></div>                                
+                            </div>                            
+                            <div class="col-3" v-if="temp.estatus=='ACE' || temp.estatus=='ERR'"> 
+                                <div><span class="text-muted">Actual</span> <span v-text="temp.stock_actual"></span></div>  
+                                <div><span class="text-muted">Operar</span> <span v-text="temp.piezas_operar"></span></div>                                  
+                                <div><span class="text-muted">Nuevo</span> <span v-text="temp.stock_nuevo"></span></div>                                 
+                            </div>
+                            <div class="col-3" v-if="temp.estatus=='APL'"> 
+                                <div><span class="text-muted">Stock</span> <span v-text="temp.movimiento.stockUbicacion.stock"></span></div>
+                            </div>
+                            <div class="col-3" v-if="temp.estatus=='EPL'"> 
                                 
                             </div>
-                            
+                            <div class="col-2"> 
+                                <div class="blockquote-footer" v-text="temp.lote_referencia"></div>                               
+
+                                <div v-if="temp.estatus=='ACE'" v-text="temp.estatus" style="color: green;"></div>
+                                <div v-if="temp.estatus=='APL'" v-text="temp.estatus" style="color: blue;"></div>
+                                <div v-if="temp.estatus=='EPL'" v-text="temp.estatus" style="color: red;" data-toggle="tooltip" data-placement="top" :title="temp.diagnostico"></div>
+                                <div v-if="temp.estatus=='ERR'" v-text="temp.estatus" style="color: red;" data-toggle="tooltip" data-placement="top" :title="temp.diagnostico"></div>
+                            </div>                            
+                           
                         </div>
                         
                        
                     </div>
                     
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" @click="onUnificarUbicaciones();">Unificar</button>                        
+                        <button type="button" class="btn btn-primary" v-if="modalCargaMasiva.cargaTemporal.length>0" @click="onAplicarMovimientoTemp();">Aplicar movimientos</button>                        
                         <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>                        
                     </div>
                 </div>
@@ -581,7 +613,8 @@
                     error: 0,
                     erroresMsjList: [],
                     fileSeleccion: null,
-                    fileServidor: ''
+                    fileServidor: '',
+                    cargaTemporal: []
                 },
             }
         },
@@ -900,6 +933,10 @@
                                 this.modalCargaMasiva.tituloModal = 'Carga masiva de stock';
                                 this.modalCargaMasiva.tipoAccion = 1;
                                 this.modalCargaMasiva.modal = 1;   
+                                this.modalCargaMasiva.fileSeleccion = null;   
+                                this.modalCargaMasiva.fileServidor = '';   
+                                this.modalCargaMasiva.cargaTemporal = [];  
+                                this.modalCargaMasiva.cargaServidorExitosa = false;                                 
                                 
                                 break;
                             }
@@ -1320,6 +1357,9 @@
             },
 
             onUploadExcel(){
+                let me = this;
+                this.isLoading = 1;
+
                 for(let i=0; i<event.target.files.length; i++){
                     this.modalCargaMasiva.fileSeleccion = event.target.files[i];
                 }
@@ -1329,11 +1369,16 @@
                 const fd = new FormData();
                 fd.append('file', this.modalCargaMasiva.fileSeleccion, nombreArchivo);                
 
-                let me = this;
+                
                 me.modalCargaMasiva.cargaServidorExitosa = false;
                 axios.post('/zicandi/public/almacenes/carga_masiva', fd)
                 .then(function (response) {                                                                                
                     me.modalCargaMasiva.cargaServidorExitosa = true;
+                    
+                    me.modalCargaMasiva.cargaTemporal = response.data.carga;
+
+                    me.isLoading = 0;
+
                 })
                 .catch(function (error) {       
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
@@ -1348,7 +1393,53 @@
              */
             onGenerarDetalleAlmacen(){
                  window.open('/zicandi/public/almacenes/exportDetalle?idAlmacen='+this.idAlmacenSeleccion);
-            }
+            },
+
+
+            onAplicarMovimientoTemp(){
+                let me = this;                
+                
+
+                this.isLoading = 1;
+                axios.post('/zicandi/public/almacenes/aplica/carga_masiva')
+                .then(function (response) {  
+                    me.isLoading = 0;           
+                    
+                    if(response.data.xstatus){ 
+                        let respuesta = response.data.carga;
+
+                        
+
+                        for(let x=0; x<me.modalCargaMasiva.cargaTemporal.length; x++){
+                            
+                            for(let i=0; i<respuesta.length; i++){
+                                let cargaTemporal = respuesta[i];
+                                
+                                if( cargaTemporal.id_temp_carga_stock == me.modalCargaMasiva.cargaTemporal[x].id_temp_carga_stock ){
+                                    me.modalCargaMasiva.cargaTemporal[x].estatus = cargaTemporal.estatus;
+                                    me.modalCargaMasiva.cargaTemporal[x].diagnostico = cargaTemporal.diagnostico;
+                                    me.modalCargaMasiva.cargaTemporal[x].movimiento = cargaTemporal.movimiento;                                    
+                                }
+                            
+                            }    
+                        }
+
+                        console.log(me.modalCargaMasiva.cargaTemporal);
+
+                        
+                        console.log('Todo ok');
+                       
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+                                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+
+            },
 
         },
         mounted() {

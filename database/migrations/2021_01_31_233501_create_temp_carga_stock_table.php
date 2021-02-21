@@ -20,9 +20,15 @@ class CreateTempCargaStockTable extends Migration
             $table->string('codigo_producto',30)->nullable();
             $table->string('tipo_movimiento',20)->nullable();
             $table->string('codigo_ubicacion',20)->nullable();
-            $table->string('stock', 12)->nullable();
+            $table->string('cantidad', 12)->nullable();
+            $table->decimal('piezas_operar', 8, 2);
+            $table->decimal('stock_actual', 8, 2);
+            $table->decimal('stock_nuevo', 8, 2);
             $table->string('lote_referencia',40)->nullable();
             $table->string('estatus',3)->nullable();
+            $table->string('opt1',30)->nullable();
+            $table->string('opt2',30)->nullable();
+            $table->string('opt3',30)->nullable();
             $table->string('diagnostico',300)->nullable();
             $table->timestamps();
         });

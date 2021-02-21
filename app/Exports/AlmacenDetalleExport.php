@@ -6,48 +6,34 @@ use App\VentaMeli;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
-use DB;
+use App\Exports\sheets\AlmacenDetalleSheet;
+use App\Exports\sheets\AlmacenDetalleUbicaSheet;
+
+
+
 
 class AlmacenDetalleExport implements WithMultipleSheets
 {
     
     use Exportable;
+    
 
-    public function define($idAlmacen)
-    {              
+    private $idAlmacen;
+
+    public function define($idAlmacen){
         $this->idAlmacen = $idAlmacen;
+
         return $this;
     }
 
-    /**
-    * @return \Illuminate\Support\Collection
-    */
-    public function view(): View{
-        $sql="select 	    a.id_almacen,
-                            a.nombre as nombre_almacen,
-                            p.id_producto,
-                            p.codigo,
-                            p.nombre as nombre_producto,
-                            p.ultimo_precio_compra,
-                            p.precio_referenciado,
-                            p.promedio_precio_compra,
-                            sp.stock,
-                            sp.disponible,
-                            sp.retenido
-                from almacen a, producto p, stock_producto sp
-                where sp.id_almacen = a.id_almacen
-                and sp.id_producto = p.id_producto
-                and a.id_almacen = ".$this->idAlmacen;
-     
-
-            return view('exports.detalleAlmacen', [
-                'stock' => DB::select( $sql )
-            ]);
-
-    }
-
-
     public function sheets(): array{
+        $sheet = [];
+
+        $sheet[0] = new AlmacenDetalleSheet($this->idAlmacen);
+        $sheet[1] = new AlmacenDetalleUbicaSheet($this->idAlmacen);
         
+
+        return $sheet;
+
     }
 }
