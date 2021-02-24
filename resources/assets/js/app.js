@@ -47,6 +47,8 @@ Vue.component('saldocuentaconta-component', require('./components/SaldoCuentaCon
 
 Vue.component('almacenstockproducto-component', require('./components/AlmacenStockProductoComponent.vue'));
 
+Vue.component('enviosfullmeli-component', require('./components/EnviosFullMeliComponent.vue'));
+
 
 
 const app = new Vue({

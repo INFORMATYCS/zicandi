@@ -51,6 +51,10 @@
         <almacenstockproducto-component></almacenstockproducto-component>
     </template>
 
+    <template v-if="oppMenuSeleccion==20">
+        <enviosfullmeli-component></enviosfullmeli-component>
+    </template>
+
     <template v-if="oppMenuSeleccion==90">
         <mercadolibre-component></mercadolibre-component>
     </template>

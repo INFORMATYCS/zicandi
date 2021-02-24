@@ -518,8 +518,9 @@ class BetterwareController extends Controller{
                 $precio_oferta = $precio;
             }
 
+			
             //Procesa imagen 1 y mini
-            list ($bandExito, $url_original, $url_imagen) = $this->getImagenBett($imagen, $codigo, $codigo, true);
+            list ($bandExito, $url_original, $url_imagen) = $this->getImagenBett($imagen, $codigo, $codigo, true);			
 
             //~Intenta recuperar la segunda imagen
             if($bandExito){
@@ -531,7 +532,9 @@ class BetterwareController extends Controller{
                     list ($bandExito, $url_original, $url_imagen_aux) = $this->getImagenBett($pathAlterno, $codigo, $codigo."_2", false);
 
                 }
-            }
+            }else{
+				Log::error( 'No fue posible descargar la imagen' );								
+			}
             
 
             $temp->imagen_mini = $url_imagen;
@@ -575,7 +578,11 @@ class BetterwareController extends Controller{
                 $producto->id_categoria = $idCategoria;
                 $producto->codigo = $codigo;
                 $producto->nombre = substr($nombre, 0, 30);
-                $producto->url_imagen = Config::get('zicandi.url_public').$url_imagen;
+				
+				if($bandExito){
+					$producto->url_imagen = Config::get('zicandi.url_public').$url_imagen;
+				}
+				
                 $producto->nota = $descripcion;
                 $producto->id_carpeta_adjuntos = 0;
                 $producto->ultimo_precio_compra = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
@@ -587,18 +594,15 @@ class BetterwareController extends Controller{
                 $producto->proveedores()->attach($idProveedor,['codigo_barras'=>$codigo]);
 
 
-                //~Registra stock
-                $stock = new StockProducto();
-                $stock->id_producto = $producto->id_producto;
-                $stock->stock = 0;
-                $stock->disponible = 0;
-                $stock->retenido = 0;
-                $stock->save();
 
             }else{
                 $producto = Producto::find($producto[0]->id_producto);
                 $producto->nombre = substr($nombre, 0, 30);
-                $producto->url_imagen = Config::get('zicandi.url_public').$url_imagen;
+                
+				if($bandExito){
+					$producto->url_imagen = Config::get('zicandi.url_public').$url_imagen;
+				}
+				
                 $producto->nota = $descripcion;                
                 $ultimoPrecioCompras = $producto->calcularUltimoPrecioCompra();
 
@@ -612,18 +616,7 @@ class BetterwareController extends Controller{
 
 
                 $producto->save();
-
-
-                //~Registra stock
-                $productoStock = StockProducto::where('id_producto','=',$producto->id_producto)->get();
-                if($productoStock->isEmpty()){
-                    $stock = new StockProducto();
-                    $stock->id_producto = $producto->id_producto;
-                    $stock->stock = 0;
-                    $stock->disponible = 0;
-                    $stock->retenido = 0;
-                    $stock->save();
-                }
+              
             }
             
             return [ 'xstatus'=>true ];

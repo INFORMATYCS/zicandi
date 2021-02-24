@@ -68,7 +68,7 @@ Route::get('/almacenes/map', 'AlmacenController@selectAlmacen');
 Route::get('/almacenes/map_ubicacion', 'AlmacenController@selectAlmacenUbicaciones');
 Route::post('/almacenes/carga_masiva', 'AlmacenController@cargaTempArchivoXLS');
 Route::post('/almacenes/aplica/carga_masiva', 'AlmacenController@aplicaCargaExcel');
-Route::get('/almacenes/exportDetalle', 'AlmacenController@aplicaCargaExcel');
+Route::get('/almacenes/exportDetalle', 'AlmacenController@resumenAlmacenReporte');
 
 Route::post('/almacenes/cat_ubica/store', 'AlmacenController@storeUbicacion');
 Route::post('/almacenes/cat_ubica/unifica', 'AlmacenController@unificaUbicacion');
@@ -99,6 +99,13 @@ Route::get('/meli/login', 'MercadoLibreController@login');
 Route::get('/meli/logout', 'MercadoLibreController@logout');
 Route::get('/meli/me', 'MercadoLibreController@me');
 Route::get('/meli/refresh', 'MercadoLibreController@refreshToken');
+
+Route::get('/meli/envios/get', 'MercadoLibreController@get30FoliosEnviosMeli');
+Route::post('/meli/envios/crear', 'MercadoLibreController@creaFolioEnvioMeli');
+Route::get('/meli/envios/deta', 'MercadoLibreController@getDetalleFolioEnvioMeli');
+Route::post('/meli/envios/print', 'MercadoLibreController@imprimeEtiquetaEnvioFull');
+Route::post('/meli/envios/reprint', 'MercadoLibreController@reimprimeEtiquetaEnvioFull');
+Route::get('/meli/envios/socket', 'MercadoLibreController@socketPortPrint');
 
 
 // - Rutas API betterware

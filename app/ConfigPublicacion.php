@@ -16,7 +16,7 @@ class ConfigPublicacion extends Model{
 
     //~Relacion inversa One To Many Producto
     public function productos(){
-        return $this->belongsTo('App\Producto');
+        return $this->belongsTo('App\Producto','id_producto','id_producto');
 
     }
 

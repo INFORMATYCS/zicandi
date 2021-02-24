@@ -5090,6 +5090,8 @@ Vue.component('saldocuentaconta-component', __webpack_require__(145));
 
 Vue.component('almacenstockproducto-component', __webpack_require__(148));
 
+Vue.component('enviosfullmeli-component', __webpack_require__(151));
+
 var app = new Vue({
   el: '#app',
   data: {
@@ -77821,6 +77823,2043 @@ if (false) {
   module.hot.accept()
   if (module.hot.data) {
     require("vue-hot-reload-api")      .rerender("data-v-4980d7ad", module.exports)
+  }
+}
+
+/***/ }),
+/* 151 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__(0)
+/* script */
+var __vue_script__ = __webpack_require__(152)
+/* template */
+var __vue_template__ = __webpack_require__(153)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/EnviosFullMeliComponent.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-950272dc", Component.options)
+  } else {
+    hotAPI.reload("data-v-950272dc", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 152 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vuejs_datepicker__ = __webpack_require__(143);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    data: function data() {
+        return {
+            enviosList: {
+                envios30: []
+            },
+            modalNuevoFolioEnvio: {
+                modal: 0,
+                tituloModal: '',
+                tipoAccion: 0,
+                idCuentaTienda: 0,
+                folioFull: 0,
+                referencia: '',
+                fechaCita: '',
+                horaCita: '',
+                estatus: 'REG',
+                CuentasTiendaList: [],
+                fileSeleccion: '',
+                nombreArchivo: '',
+                error: 0,
+                erroresMsjList: []
+            },
+            modalDetalleNuevoFolioEnvio: {
+                modal: 0,
+                tituloModal: '',
+                tipoAccion: 0,
+                folioFull: 0,
+                detalleEnvioFull: [],
+                filtro: '',
+                opcionFiltro: 'TODO',
+                error: 0,
+                erroresMsjList: []
+            },
+            modalPrinter: {
+                modal: 0,
+                tituloModal: '',
+                tipoAccion: 0,
+                etiquetasImprimir: 0,
+                foto_mini: '',
+                titulo: '',
+                idPublicacion: '',
+                idDetaMeliEnvioFull: 0,
+                reimpresion: 0,
+                error: 0,
+                erroresMsjList: []
+            },
+            isLoading: 0
+
+        };
+    },
+
+    computed: {},
+    components: {
+        Datepicker: __WEBPACK_IMPORTED_MODULE_0_vuejs_datepicker__["a" /* default */]
+    },
+    methods: {
+        listaFoliosEnvio: function listaFoliosEnvio() {
+            var aplLoading = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
+
+            if (aplLoading) {
+                this.isLoading = 1;
+            }
+
+            var me = this;
+            var url = '/zicandi/public/meli/envios/get';
+            axios.get(url).then(function (response) {
+                var respuesta = response.data;
+                me.isLoading = 0;
+                me.enviosList.envios30 = respuesta.envios;
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        showModal: function showModal(modelo, accion) {
+            var data = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+            switch (modelo) {
+                case 'envios':
+                    {
+                        switch (accion) {
+                            case 'registrar':
+                                {
+                                    this.modalNuevoFolioEnvio.modal = 1;
+                                    this.modalNuevoFolioEnvio.tituloModal = 'Registrar nuevo folio de envio';
+                                    this.modalNuevoFolioEnvio.tipoAccion = 1;
+
+                                    this.modalNuevoFolioEnvio.fileSeleccion = null;
+                                    this.modalNuevoFolioEnvio.nombreArchivo = '';
+                                    this.modalNuevoFolioEnvio.idCuentaTienda = 0;
+                                    this.modalNuevoFolioEnvio.folioFull = null;
+                                    this.modalNuevoFolioEnvio.referencia = null;
+                                    this.modalNuevoFolioEnvio.fechaCita = new Date();
+                                    this.modalNuevoFolioEnvio.horaCita = null;
+
+                                    this.modalNuevoFolioEnvio.error = 0;
+                                    this.modalNuevoFolioEnvio.erroresMsjList = [];
+
+                                    break;
+                                }
+
+                            case 'detalle':
+                                {
+                                    this.modalDetalleNuevoFolioEnvio.modal = 1;
+                                    this.modalDetalleNuevoFolioEnvio.tituloModal = 'Detalle envio full ' + data.folio_full;
+                                    this.modalDetalleNuevoFolioEnvio.tipoAccion = 1;
+                                    this.modalDetalleNuevoFolioEnvio.folioFull = data.folio_full;
+
+                                    this.modalDetalleNuevoFolioEnvio.error = 0;
+                                    this.modalDetalleNuevoFolioEnvio.erroresMsjList = [];
+
+                                    this.onGetDetalleEnvioFull(data.folio_full);
+                                    break;
+                                }
+
+                            case 'printer':
+                                {
+                                    this.modalPrinter.modal = 1;
+                                    this.modalPrinter.tituloModal = 'Imprimir etiqueta';
+                                    this.modalPrinter.tipoAccion = 1;
+                                    this.modalPrinter.error = 0;
+                                    this.modalPrinter.erroresMsjList = [];
+                                    this.modalPrinter.etiquetasImprimir = data.etiquetas_pendientes;
+                                    this.modalPrinter.foto_mini = data.publicacion[0].foto_mini;
+                                    this.modalPrinter.titulo = data.publicacion[0].titulo;
+                                    this.modalPrinter.idPublicacion = data.publicacion[0].id_publicacion_tienda;
+                                    this.modalPrinter.idPublicacion = data.publicacion[0].id_publicacion_tienda;
+                                    this.modalPrinter.idDetaMeliEnvioFull = data.id_deta_meli_envio_full;
+                                    this.modalPrinter.reimpresion = 0;
+
+                                    break;
+                                }
+
+                            case 'reprinter':
+                                {
+                                    this.modalPrinter.modal = 1;
+                                    this.modalPrinter.tituloModal = 'Reimprimir etiqueta';
+                                    this.modalPrinter.tipoAccion = 1;
+                                    this.modalPrinter.error = 0;
+                                    this.modalPrinter.erroresMsjList = [];
+                                    this.modalPrinter.etiquetasImprimir = data.etiquetas_pendientes;
+                                    this.modalPrinter.foto_mini = data.publicacion[0].foto_mini;
+                                    this.modalPrinter.titulo = data.publicacion[0].titulo;
+                                    this.modalPrinter.idPublicacion = data.publicacion[0].id_publicacion_tienda;
+                                    this.modalPrinter.idPublicacion = data.publicacion[0].id_publicacion_tienda;
+                                    this.modalPrinter.idDetaMeliEnvioFull = data.id_deta_meli_envio_full;
+                                    this.modalPrinter.reimpresion = 1;
+
+                                    break;
+                                }
+                        }
+                    }
+            }
+        },
+        closeModal: function closeModal() {
+            this.modalNuevoFolioEnvio.modal = 0;
+            this.modalNuevoFolioEnvio.tituloModal = '';
+            this.modalDetalleNuevoFolioEnvio.modal = 0;
+            this.modalDetalleNuevoFolioEnvio.tituloModal = '';
+        },
+        selectTienda: function selectTienda() {
+            var me = this;
+            var url = '/zicandi/public/tienda/getSelectCuentaTiendas';
+            axios.get(url).then(function (response) {
+                var respuesta = response.data;
+
+                me.modalNuevoFolioEnvio.CuentasTiendaList = respuesta.tiendas;
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onUploadZpl: function onUploadZpl() {
+            var me = this;
+
+            for (var i = 0; i < event.target.files.length; i++) {
+                this.modalNuevoFolioEnvio.fileSeleccion = event.target.files[i];
+            }
+
+            var nombreArchivo = this.modalNuevoFolioEnvio.fileSeleccion.name;
+            this.modalNuevoFolioEnvio.nombreArchivo = nombreArchivo;
+        },
+        onCreaNuevoFolioEnvio: function onCreaNuevoFolioEnvio() {
+            var me = this;
+
+            if (this.validaRegistroFolio()) {
+                return;
+            }
+
+            var nombreArchivo = this.modalNuevoFolioEnvio.fileSeleccion.name;
+
+            var fechaCita = this.modalNuevoFolioEnvio.fechaCita.getFullYear() + "-" + (this.modalNuevoFolioEnvio.fechaCita.getMonth() + 1) + "-" + this.modalNuevoFolioEnvio.fechaCita.getDate();
+
+            var fd = new FormData();
+            fd.append('archivo_zpl', this.modalNuevoFolioEnvio.fileSeleccion, nombreArchivo);
+            fd.append('id_cuenta_tienda', this.modalNuevoFolioEnvio.idCuentaTienda);
+            fd.append('folio_full', this.modalNuevoFolioEnvio.folioFull);
+            fd.append('referencia', this.modalNuevoFolioEnvio.referencia);
+            fd.append('fecha_cita', fechaCita);
+            fd.append('hora_cita', this.modalNuevoFolioEnvio.horaCita);
+
+            this.isLoading = 1;
+            axios.post('/zicandi/public/meli/envios/crear', fd).then(function (response) {
+                me.isLoading = 0;
+                var bandExito = true;
+
+                if (response.data.xstatus) {
+                    me.modalNuevoFolioEnvio.erroresMsjList = [];
+                    me.modalNuevoFolioEnvio.error = 0;
+                    for (var i = 0; i < response.data.zpl.length; i++) {
+                        var msg = response.data.zpl[i];
+
+                        if (msg.xstatus == false) {
+                            me.modalNuevoFolioEnvio.error = 1;
+                            me.modalNuevoFolioEnvio.erroresMsjList.push(msg.codigoBarrasFull + '=> ' + msg.error);
+                            bandExito = false;
+                        }
+                    }
+
+                    if (bandExito) {
+                        util.AVISO('Perfecto, registro correcto', util.tipoOk);
+
+                        me.closeModal();
+                    }
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        validaRegistroFolio: function validaRegistroFolio() {
+            this.modalNuevoFolioEnvio.error = 0;
+            this.modalNuevoFolioEnvio.erroresMsjList = [];
+
+            if (this.modalNuevoFolioEnvio.idCuentaTienda <= 0) this.modalNuevoFolioEnvio.erroresMsjList.push("Eliga la cuenta o tienda");
+
+            if (!this.modalNuevoFolioEnvio.folioFull) this.modalNuevoFolioEnvio.erroresMsjList.push("Defina folio de envio");
+
+            if (!this.modalNuevoFolioEnvio.horaCita) this.modalNuevoFolioEnvio.erroresMsjList.push("Defina hora de cita");
+
+            if (!this.modalNuevoFolioEnvio.nombreArchivo) this.modalNuevoFolioEnvio.erroresMsjList.push("Debe subir un archivo ZPL valido");
+
+            if (this.modalNuevoFolioEnvio.erroresMsjList.length) this.modalNuevoFolioEnvio.error = 1;
+
+            return this.modalNuevoFolioEnvio.error;
+        },
+        onGetDetalleEnvioFull: function onGetDetalleEnvioFull(folioFull) {
+            var me = this;
+            this.isLoading = 1;
+
+            var filtro = this.modalDetalleNuevoFolioEnvio.filtro;
+            var opcionFiltro = this.modalDetalleNuevoFolioEnvio.opcionFiltro;
+
+            axios.get('/zicandi/public/meli/envios/deta?folio_full=' + folioFull + '&filtro=' + filtro + '&opcion_filtro=' + opcionFiltro).then(function (response) {
+                me.isLoading = 0;
+                if (response.data.xstatus) {
+
+                    me.modalDetalleNuevoFolioEnvio.detalleEnvioFull = response.data.detalle;
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onVerDetalleProductos: function onVerDetalleProductos(deta) {
+            console.log(deta);
+            if (deta.mostrarDetalle == 1) {
+                deta.mostrarDetalle = 0;
+            } else {
+                deta.mostrarDetalle = 1;
+            }
+
+            this.$forceUpdate();
+        },
+        onImprimirEtiquetas: function onImprimirEtiquetas() {
+            var me = this;
+            var reimpresion = this.modalPrinter.reimpresion;
+
+            var url = '/zicandi/public/meli/envios/print';
+            if (reimpresion == 1) {
+                url = '/zicandi/public/meli/envios/reprint';
+            }
+
+            this.isLoading = 1;
+            axios.post(url, {
+                'id_deta_meli_envio_full': this.modalPrinter.idDetaMeliEnvioFull,
+                'total_etiqueta_imprime': this.modalPrinter.etiquetasImprimir
+            }).then(function (response) {
+                me.isLoading = 0;
+
+                console.log(response);
+                if (response.data.xstatus) {
+
+                    util.AVISO('Perfecto, se envio impresion', util.tipoOk);
+                    me.modalPrinter.modal = 0;
+
+                    if (reimpresion == 0) {
+                        var resp = response.data.detalle;
+                        for (var i = 0; i < me.modalDetalleNuevoFolioEnvio.detalleEnvioFull.length; i++) {
+                            var deta = me.modalDetalleNuevoFolioEnvio.detalleEnvioFull[i];
+
+                            if (deta.id_deta_meli_envio_full == resp.id_deta_meli_envio_full) {
+                                me.modalDetalleNuevoFolioEnvio.detalleEnvioFull[i].etiquetas_impresas = resp.etiquetas_impresas;
+                                me.modalDetalleNuevoFolioEnvio.detalleEnvioFull[i].etiquetas_pendientes = resp.etiquetas_pendientes;
+                                me.modalDetalleNuevoFolioEnvio.detalleEnvioFull[i].estatus = resp.estatus;
+                            }
+                        }
+                    }
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        }
+    },
+    mounted: function mounted() {
+        this.modalNuevoFolioEnvio.fechaCita = new Date();
+        this.selectTienda();
+        this.listaFoliosEnvio(true);
+    }
+});
+
+/***/ }),
+/* 153 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("main", { staticClass: "main" }, [
+    _c("div", {
+      staticClass: "sbl-circ-ripple",
+      class: { "abrir-load-sbl": _vm.isLoading },
+      staticStyle: { display: "none" }
+    }),
+    _vm._v(" "),
+    _vm._m(0),
+    _vm._v(" "),
+    _c("div", { staticClass: "container-fluid" }, [
+      _c("div", { staticClass: "card" }, [
+        _c("div", { staticClass: "card-header" }, [
+          _c("i", { staticClass: "fa fa-align-justify" }),
+          _vm._v(" Tareas:\n                "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary",
+              attrs: { type: "button" },
+              on: {
+                click: function($event) {
+                  return _vm.showModal("envios", "registrar")
+                }
+              }
+            },
+            [
+              _c("i", { staticClass: "icon-plus" }),
+              _vm._v(" Nuevo\n                ")
+            ]
+          )
+        ])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "card-body" }, [
+        _c(
+          "table",
+          { staticClass: "table table-bordered table-striped table-sm" },
+          [
+            _vm._m(1),
+            _vm._v(" "),
+            _c(
+              "tbody",
+              _vm._l(_vm.enviosList.envios30, function(envio) {
+                return _c("tr", { key: envio.id_meli_envio_full }, [
+                  _c("td", [
+                    _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-warning btn-sm",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.showModal(
+                              "proveedor",
+                              "actualizar",
+                              _vm.proveedor
+                            )
+                          }
+                        }
+                      },
+                      [_c("i", { staticClass: "icon-pencil" })]
+                    ),
+                    _vm._v(
+                      "                                  \n                        "
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("td", {
+                    domProps: {
+                      textContent: _vm._s(envio.cuentatienda.usuario)
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c("td", [
+                    _c("a", {
+                      attrs: { href: "#" },
+                      domProps: { textContent: _vm._s(envio.folio_full) },
+                      on: {
+                        click: function($event) {
+                          return _vm.showModal("envios", "detalle", envio)
+                        }
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("td", {
+                    domProps: { textContent: _vm._s(envio.referencia) }
+                  }),
+                  _vm._v(" "),
+                  _c("td", {
+                    domProps: { textContent: _vm._s(envio.fecha_cita) }
+                  }),
+                  _vm._v(" "),
+                  _c("td", {
+                    domProps: { textContent: _vm._s(envio.hora_cita) }
+                  }),
+                  _vm._v(" "),
+                  _c("td", { domProps: { textContent: _vm._s(envio.estatus) } })
+                ])
+              }),
+              0
+            )
+          ]
+        )
+      ])
+    ]),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.modalNuevoFolioEnvio.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-primary modal-lg",
+            attrs: { role: "document" }
+          },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c("div", { staticClass: "modal-header" }, [
+                _c("h4", {
+                  staticClass: "modal-title",
+                  domProps: {
+                    textContent: _vm._s(_vm.modalNuevoFolioEnvio.tituloModal)
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "close",
+                    attrs: { type: "button", "aria-label": "Close" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeModal()
+                      }
+                    }
+                  },
+                  [
+                    _c("span", { attrs: { "aria-hidden": "true" } }, [
+                      _vm._v("×")
+                    ])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-body" }, [
+                _c(
+                  "form",
+                  {
+                    staticClass: "form-horizontal",
+                    attrs: {
+                      action: "",
+                      method: "post",
+                      enctype: "multipart/form-data"
+                    }
+                  },
+                  [
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Tienda")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.modalNuevoFolioEnvio.idCuentaTienda,
+                                expression:
+                                  "modalNuevoFolioEnvio.idCuentaTienda"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.$set(
+                                  _vm.modalNuevoFolioEnvio,
+                                  "idCuentaTienda",
+                                  $event.target.multiple
+                                    ? $$selectedVal
+                                    : $$selectedVal[0]
+                                )
+                              }
+                            }
+                          },
+                          [
+                            _c(
+                              "option",
+                              { attrs: { value: "0", disabled: "" } },
+                              [_vm._v("Seleccione...")]
+                            ),
+                            _vm._v(" "),
+                            _vm._l(
+                              _vm.modalNuevoFolioEnvio.CuentasTiendaList,
+                              function(cuenta) {
+                                return _c("option", {
+                                  key: cuenta.id_cuenta_tienda,
+                                  domProps: {
+                                    value: cuenta.id_cuenta_tienda,
+                                    textContent: _vm._s(cuenta.usuario)
+                                  }
+                                })
+                              }
+                            )
+                          ],
+                          2
+                        )
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Folio Envio")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.modalNuevoFolioEnvio.folioFull,
+                              expression: "modalNuevoFolioEnvio.folioFull"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: {
+                            type: "text",
+                            placeholder: "Folio envio Full"
+                          },
+                          domProps: {
+                            value: _vm.modalNuevoFolioEnvio.folioFull
+                          },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.modalNuevoFolioEnvio,
+                                "folioFull",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Referencia")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.modalNuevoFolioEnvio.referencia,
+                              expression: "modalNuevoFolioEnvio.referencia"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: { type: "text", placeholder: "Referencia" },
+                          domProps: {
+                            value: _vm.modalNuevoFolioEnvio.referencia
+                          },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.modalNuevoFolioEnvio,
+                                "referencia",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Fecha Cita")]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        { staticClass: "col-md-9" },
+                        [
+                          _c("datepicker", {
+                            model: {
+                              value: _vm.modalNuevoFolioEnvio.fechaCita,
+                              callback: function($$v) {
+                                _vm.$set(
+                                  _vm.modalNuevoFolioEnvio,
+                                  "fechaCita",
+                                  $$v
+                                )
+                              },
+                              expression: "modalNuevoFolioEnvio.fechaCita"
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Hora Cita")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.modalNuevoFolioEnvio.horaCita,
+                              expression: "modalNuevoFolioEnvio.horaCita"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: { type: "text", placeholder: "Hora cita" },
+                          domProps: {
+                            value: _vm.modalNuevoFolioEnvio.horaCita
+                          },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.modalNuevoFolioEnvio,
+                                "horaCita",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Archivo ZPL")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c(
+                          "label",
+                          {
+                            staticClass: "btn btn-primary custom-file-label",
+                            attrs: { for: "customFileLangLocal" }
+                          },
+                          [_vm._v("Examinar")]
+                        ),
+                        _vm._v(" "),
+                        _c("span", {
+                          domProps: {
+                            textContent: _vm._s(
+                              _vm.modalNuevoFolioEnvio.nombreArchivo
+                            )
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("input", {
+                          staticClass: "custom-file-input",
+                          attrs: {
+                            type: "file",
+                            id: "customFileLangLocal",
+                            lang: "es",
+                            accept: ".txt"
+                          },
+                          on: {
+                            change: function($event) {
+                              return _vm.onUploadZpl()
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      {
+                        directives: [
+                          {
+                            name: "show",
+                            rawName: "v-show",
+                            value: _vm.modalNuevoFolioEnvio.error,
+                            expression: "modalNuevoFolioEnvio.error"
+                          }
+                        ],
+                        staticClass: "form-group row div-error"
+                      },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "text-center text-error" },
+                          _vm._l(
+                            _vm.modalNuevoFolioEnvio.erroresMsjList,
+                            function(error) {
+                              return _c("div", {
+                                key: error,
+                                domProps: { textContent: _vm._s(error) }
+                              })
+                            }
+                          ),
+                          0
+                        )
+                      ]
+                    )
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeModal()
+                      }
+                    }
+                  },
+                  [_vm._v("Cerrar")]
+                ),
+                _vm._v(" "),
+                _vm.modalNuevoFolioEnvio.tipoAccion == 1
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-primary",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.onCreaNuevoFolioEnvio()
+                          }
+                        }
+                      },
+                      [_vm._v("Guardar")]
+                    )
+                  : _vm._e()
+              ])
+            ])
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.modalDetalleNuevoFolioEnvio.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-primary",
+            staticStyle: { "max-width": "90% !important" },
+            attrs: { role: "document" }
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "modal-content",
+                staticStyle: { height: "700px" }
+              },
+              [
+                _c("div", { staticClass: "modal-header" }, [
+                  _c("h4", {
+                    staticClass: "modal-title",
+                    domProps: {
+                      textContent: _vm._s(
+                        _vm.modalDetalleNuevoFolioEnvio.tituloModal
+                      )
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "close",
+                      attrs: { type: "button", "aria-label": "Close" },
+                      on: {
+                        click: function($event) {
+                          return _vm.closeModal()
+                        }
+                      }
+                    },
+                    [
+                      _c("span", { attrs: { "aria-hidden": "true" } }, [
+                        _vm._v("×")
+                      ])
+                    ]
+                  )
+                ]),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass: "modal-body",
+                    staticStyle: {
+                      "max-height": "calc(100% - 120px)",
+                      "overflow-y": "scroll"
+                    }
+                  },
+                  [
+                    _c("div", { staticClass: "row" }, [
+                      _c("div", { staticClass: "col-md-8" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.modalDetalleNuevoFolioEnvio.filtro,
+                              expression: "modalDetalleNuevoFolioEnvio.filtro"
+                            }
+                          ],
+                          staticClass: "form-control form-control-lg",
+                          attrs: { type: "text", maxlength: "30" },
+                          domProps: {
+                            value: _vm.modalDetalleNuevoFolioEnvio.filtro
+                          },
+                          on: {
+                            focus: function($event) {
+                              return $event.target.select()
+                            },
+                            keyup: function($event) {
+                              if (
+                                !$event.type.indexOf("key") &&
+                                _vm._k(
+                                  $event.keyCode,
+                                  "enter",
+                                  13,
+                                  $event.key,
+                                  "Enter"
+                                )
+                              ) {
+                                return null
+                              }
+                              return _vm.onGetDetalleEnvioFull(
+                                _vm.modalDetalleNuevoFolioEnvio.folioFull
+                              )
+                            },
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.modalDetalleNuevoFolioEnvio,
+                                "filtro",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-3" }, [
+                        _c("div", { staticClass: "form-check" }, [
+                          _c("div", [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value:
+                                    _vm.modalDetalleNuevoFolioEnvio
+                                      .opcionFiltro,
+                                  expression:
+                                    "modalDetalleNuevoFolioEnvio.opcionFiltro"
+                                }
+                              ],
+                              staticClass: "form-check-input",
+                              attrs: {
+                                type: "radio",
+                                id: "exampleRadios1",
+                                value: "TODO",
+                                checked: ""
+                              },
+                              domProps: {
+                                checked: _vm._q(
+                                  _vm.modalDetalleNuevoFolioEnvio.opcionFiltro,
+                                  "TODO"
+                                )
+                              },
+                              on: {
+                                change: function($event) {
+                                  return _vm.$set(
+                                    _vm.modalDetalleNuevoFolioEnvio,
+                                    "opcionFiltro",
+                                    "TODO"
+                                  )
+                                }
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c(
+                              "label",
+                              {
+                                staticClass: "form-check-label",
+                                attrs: { for: "exampleRadios1" }
+                              },
+                              [
+                                _vm._v(
+                                  "\n                                    Todos\n                                "
+                                )
+                              ]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value:
+                                  _vm.modalDetalleNuevoFolioEnvio.opcionFiltro,
+                                expression:
+                                  "modalDetalleNuevoFolioEnvio.opcionFiltro"
+                              }
+                            ],
+                            staticClass: "form-check-input",
+                            attrs: {
+                              type: "radio",
+                              id: "exampleRadios2",
+                              value: "PENDIENTE"
+                            },
+                            domProps: {
+                              checked: _vm._q(
+                                _vm.modalDetalleNuevoFolioEnvio.opcionFiltro,
+                                "PENDIENTE"
+                              )
+                            },
+                            on: {
+                              change: function($event) {
+                                return _vm.$set(
+                                  _vm.modalDetalleNuevoFolioEnvio,
+                                  "opcionFiltro",
+                                  "PENDIENTE"
+                                )
+                              }
+                            }
+                          }),
+                          _vm._v(" "),
+                          _c(
+                            "label",
+                            {
+                              staticClass: "form-check-label",
+                              attrs: { for: "exampleRadios2" }
+                            },
+                            [
+                              _vm._v(
+                                "\n                                    Pendientes\n                                "
+                              )
+                            ]
+                          ),
+                          _vm._v(
+                            "\n                                       \n                                "
+                          ),
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value:
+                                  _vm.modalDetalleNuevoFolioEnvio.opcionFiltro,
+                                expression:
+                                  "modalDetalleNuevoFolioEnvio.opcionFiltro"
+                              }
+                            ],
+                            staticClass: "form-check-input",
+                            attrs: {
+                              type: "radio",
+                              id: "exampleRadios3",
+                              value: "COMPLETO"
+                            },
+                            domProps: {
+                              checked: _vm._q(
+                                _vm.modalDetalleNuevoFolioEnvio.opcionFiltro,
+                                "COMPLETO"
+                              )
+                            },
+                            on: {
+                              change: function($event) {
+                                return _vm.$set(
+                                  _vm.modalDetalleNuevoFolioEnvio,
+                                  "opcionFiltro",
+                                  "COMPLETO"
+                                )
+                              }
+                            }
+                          }),
+                          _vm._v(" "),
+                          _c(
+                            "label",
+                            {
+                              staticClass: "form-check-label",
+                              attrs: { for: "exampleRadios3" }
+                            },
+                            [
+                              _vm._v(
+                                "\n                                    Terminados\n                                "
+                              )
+                            ]
+                          )
+                        ])
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-1" }, [
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn btn-primary",
+                            attrs: { type: "button" },
+                            on: {
+                              click: function($event) {
+                                return _vm.onGetDetalleEnvioFull(
+                                  _vm.modalDetalleNuevoFolioEnvio.folioFull
+                                )
+                              }
+                            }
+                          },
+                          [_vm._v("Buscar")]
+                        )
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _vm._m(2),
+                    _vm._v(" "),
+                    _vm._l(
+                      _vm.modalDetalleNuevoFolioEnvio.detalleEnvioFull,
+                      function(deta) {
+                        return _c(
+                          "div",
+                          { key: deta.id_deta_meli_envio_full },
+                          [
+                            deta.visible
+                              ? _c("div", { staticClass: "card-header row" }, [
+                                  _c("div", { staticClass: "col-md-2" }, [
+                                    _c("img", {
+                                      attrs: {
+                                        src: deta.publicacion[0].foto_mini,
+                                        alt: "dog"
+                                      }
+                                    })
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("div", { staticClass: "col-md-2" }, [
+                                    _c("span", {
+                                      domProps: {
+                                        textContent: _vm._s(
+                                          deta.codigo_barras_full
+                                        )
+                                      }
+                                    }),
+                                    _vm._v(" "),
+                                    _c("p", [
+                                      _c("small", {
+                                        domProps: {
+                                          textContent: _vm._s(
+                                            deta.publicacion[0].titulo
+                                          )
+                                        }
+                                      })
+                                    ])
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("div", { staticClass: "col-md-2" }, [
+                                    _c("span", {
+                                      domProps: {
+                                        textContent: _vm._s(
+                                          deta.id_publicacion_tienda
+                                        )
+                                      }
+                                    }),
+                                    _vm._v(" "),
+                                    _c("p", [
+                                      _c(
+                                        "a",
+                                        {
+                                          attrs: { href: "#" },
+                                          on: {
+                                            click: function($event) {
+                                              return _vm.onVerDetalleProductos(
+                                                deta
+                                              )
+                                            }
+                                          }
+                                        },
+                                        [_vm._v("Ver Productos")]
+                                      )
+                                    ])
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("div", { staticClass: "col-md-1" }, [
+                                    _c("span", {
+                                      domProps: {
+                                        textContent: _vm._s(
+                                          deta.total_etiquetas
+                                        )
+                                      }
+                                    })
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("div", { staticClass: "col-md-1" }, [
+                                    _c("span", {
+                                      domProps: {
+                                        textContent: _vm._s(
+                                          deta.etiquetas_impresas
+                                        )
+                                      }
+                                    })
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("div", { staticClass: "col-md-2" }, [
+                                    _c(
+                                      "div",
+                                      {
+                                        staticStyle: {
+                                          width: "50px",
+                                          border: "1px solid",
+                                          height: "50px",
+                                          "text-align": "center"
+                                        }
+                                      },
+                                      [
+                                        _c("h2", {
+                                          domProps: {
+                                            textContent: _vm._s(
+                                              deta.etiquetas_pendientes
+                                            )
+                                          }
+                                        })
+                                      ]
+                                    )
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("div", { staticClass: "col-md-1" }, [
+                                    _c(
+                                      "button",
+                                      {
+                                        staticClass: "btn btn-info",
+                                        attrs: { type: "button" },
+                                        on: {
+                                          click: function($event) {
+                                            return _vm.showModal(
+                                              "envios",
+                                              "printer",
+                                              deta
+                                            )
+                                          }
+                                        }
+                                      },
+                                      [_c("i", { staticClass: "icon-printer" })]
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "a",
+                                      {
+                                        attrs: { href: "#" },
+                                        on: {
+                                          click: function($event) {
+                                            return _vm.showModal(
+                                              "envios",
+                                              "reprinter",
+                                              deta
+                                            )
+                                          }
+                                        }
+                                      },
+                                      [_vm._v("Reimprimir")]
+                                    )
+                                  ])
+                                ])
+                              : _vm._e(),
+                            _vm._v(" "),
+                            _c(
+                              "div",
+                              {
+                                directives: [
+                                  {
+                                    name: "show",
+                                    rawName: "v-show",
+                                    value: deta.mostrarDetalle == 1,
+                                    expression: "deta.mostrarDetalle==1"
+                                  }
+                                ]
+                              },
+                              _vm._l(deta.config, function(config) {
+                                return _c(
+                                  "div",
+                                  {
+                                    key: config.id_config_meli_envio_full,
+                                    staticClass: "form-group row"
+                                  },
+                                  [
+                                    _c("div", { staticClass: "col-md-2" }),
+                                    _vm._v(" "),
+                                    _c("div", { staticClass: "col-md-2" }, [
+                                      _c("img", {
+                                        attrs: {
+                                          src: config.producto.url_imagen,
+                                          alt: "dog",
+                                          width: "50"
+                                        }
+                                      })
+                                    ]),
+                                    _vm._v(" "),
+                                    _c("div", { staticClass: "col-md-3" }, [
+                                      _c("strong", [
+                                        _c("span", {
+                                          domProps: {
+                                            textContent: _vm._s(
+                                              config.codigo_producto
+                                            )
+                                          }
+                                        })
+                                      ])
+                                    ]),
+                                    _vm._v(" "),
+                                    _c("div", { staticClass: "col-md-3" }, [
+                                      _c("span", {
+                                        domProps: {
+                                          textContent: _vm._s(
+                                            config.producto.nombre
+                                          )
+                                        }
+                                      })
+                                    ]),
+                                    _vm._v(" "),
+                                    _c("div", { staticClass: "col-md-2" }, [
+                                      _vm._v(
+                                        "\n                                    x "
+                                      ),
+                                      _c("span", {
+                                        domProps: {
+                                          textContent: _vm._s(
+                                            config.total_piezas
+                                          )
+                                        }
+                                      })
+                                    ])
+                                  ]
+                                )
+                              }),
+                              0
+                            )
+                          ]
+                        )
+                      }
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      {
+                        directives: [
+                          {
+                            name: "show",
+                            rawName: "v-show",
+                            value: _vm.modalDetalleNuevoFolioEnvio.error,
+                            expression: "modalDetalleNuevoFolioEnvio.error"
+                          }
+                        ],
+                        staticClass: "form-group row div-error"
+                      },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "text-center text-error" },
+                          _vm._l(
+                            _vm.modalDetalleNuevoFolioEnvio.erroresMsjList,
+                            function(error) {
+                              return _c("div", {
+                                key: error,
+                                domProps: { textContent: _vm._s(error) }
+                              })
+                            }
+                          ),
+                          0
+                        )
+                      ]
+                    )
+                  ],
+                  2
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "modal-footer" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-secondary",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.closeModal()
+                        }
+                      }
+                    },
+                    [_vm._v("Cerrar")]
+                  ),
+                  _vm._v(" "),
+                  _vm.modalNuevoFolioEnvio.tipoAccion == 1
+                    ? _c(
+                        "button",
+                        {
+                          staticClass: "btn btn-primary",
+                          attrs: { type: "button" },
+                          on: {
+                            click: function($event) {
+                              return _vm.onCreaNuevoFolioEnvio()
+                            }
+                          }
+                        },
+                        [_vm._v("Guardar")]
+                      )
+                    : _vm._e()
+                ])
+              ]
+            )
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.modalPrinter.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-primary modal-dialog-centered",
+            staticStyle: { margin: "20vh auto 0px auto" },
+            attrs: { role: "document" }
+          },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c("div", { staticClass: "modal-header" }, [
+                _c("h4", {
+                  staticClass: "modal-title",
+                  domProps: {
+                    textContent: _vm._s(_vm.modalPrinter.tituloModal)
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "close",
+                    attrs: { type: "button", "aria-label": "Close" },
+                    on: {
+                      click: function($event) {
+                        _vm.modalPrinter.modal = 0
+                      }
+                    }
+                  },
+                  [
+                    _c("span", { attrs: { "aria-hidden": "true" } }, [
+                      _vm._v("×")
+                    ])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-body" }, [
+                _c("div", { staticClass: "row" }, [
+                  _c("div", { staticClass: "col-md-3" }, [
+                    _c("img", {
+                      attrs: { src: _vm.modalPrinter.foto_mini, alt: "dog" }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-md-6" }, [
+                    _c("span", {
+                      domProps: { textContent: _vm._s(_vm.modalPrinter.titulo) }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-md-3" }, [
+                    _c("strong", [
+                      _c("span", {
+                        domProps: {
+                          textContent: _vm._s(_vm.modalPrinter.idPublicacion)
+                        }
+                      })
+                    ])
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.modalPrinter.etiquetasImprimir,
+                      expression: "modalPrinter.etiquetasImprimir"
+                    }
+                  ],
+                  staticClass: "form-control form-control-lg",
+                  attrs: { type: "text", maxlength: "5" },
+                  domProps: { value: _vm.modalPrinter.etiquetasImprimir },
+                  on: {
+                    focus: function($event) {
+                      return $event.target.select()
+                    },
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.$set(
+                        _vm.modalPrinter,
+                        "etiquetasImprimir",
+                        $event.target.value
+                      )
+                    }
+                  }
+                })
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        _vm.modalPrinter.modal = 0
+                      }
+                    }
+                  },
+                  [_vm._v("Cerrar")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-primary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.onImprimirEtiquetas()
+                      }
+                    }
+                  },
+                  [_vm._v("Imprimir")]
+                )
+              ])
+            ])
+          ]
+        )
+      ]
+    )
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("ol", { staticClass: "breadcrumb" }, [
+      _c("li", { staticClass: "breadcrumb-item" }, [_vm._v("Home")]),
+      _vm._v(" "),
+      _c("li", { staticClass: "breadcrumb-item" }, [_vm._v("Tiendas")]),
+      _vm._v(" "),
+      _c("li", { staticClass: "breadcrumb-item active" }, [
+        _vm._v("Envios Full")
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("thead", [
+      _c("tr", [
+        _c("th", [_vm._v("Opciones")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Cuenta Meli")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Folio Envio")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Referencia")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Fecha Cita")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Hora Cita")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Estado")])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "row" }, [
+      _c("div", { staticClass: "col-md-2" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("PUBLICACION")])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-2" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("CODIGO FULL")])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-2" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("ID PUBLICACION")])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-1" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("TOTAL")])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-1" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("IMPRESAS")])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-2" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("PENDIENTES")])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-1" })
+    ])
+  }
+]
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-950272dc", module.exports)
   }
 }
 

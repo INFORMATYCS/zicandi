@@ -5,10 +5,24 @@ use Config;
 Use Log;
 use View;
 use Session;
+Use Exception;
+use DB;
 use Illuminate\Http\Request;
 use App\Http\Lib\Meli;
 use App\CuentaTienda;
 use App\Parametria;
+use App\MeliEnvioFull;
+use App\MeliDetaEnvioFull;
+use App\MeliConfigEnvioFull;
+use App\MeliSocketEnvioFull;
+use App\Publicacion;
+use App\ConfigPublicacion;
+use App\Producto;
+
+
+
+
+
 
 class MercadoLibreController extends Controller
 {
@@ -418,6 +432,424 @@ class MercadoLibreController extends Controller
         }
         
         return $costo;
+    }
+
+
+    /**
+     * Recupera listado con los ultimo 30 folios de envio registrados
+     * 
+     * 
+     */
+    public function get30FoliosEnviosMeli(Request $request){
+        try{
+
+            $envios = MeliEnvioFull::with('cuentatienda')
+            ->latest()
+            ->take(30)
+            ->get();
+        
+            return [ 'xstatus'=>true, 'envios' => $envios ];
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());       
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
+        }
+    }
+
+    /**
+     * Recupera informacion de la publicacion
+     * 
+     * 
+     * 
+     */
+    public function getIdPublicacionByInventoryId($token, $inventoryID){
+        $appId = Config::get('zicandi.meli.appId');
+        $secretKey = Config::get('zicandi.meli.secretKey');
+        $redirectURI = Config::get('zicandi.meli.redirectURI');
+        $siteId = Config::get('zicandi.meli.siteId');
+
+        if($token!=null){
+            $meli = new Meli($appId, $secretKey);
+
+            $params = array('access_token' => $token);
+            $result = $meli->get('/inventories/'.$inventoryID.'/stock/fulfillment', $params);
+
+            
+        }else{
+            $result = array('httpCode'=>'NO_SESSION');
+        }
+        
+        return $result;
+    }
+
+
+    /***
+     * Registra nuevo folio de envio a MELI
+     * 
+     * 
+     */
+    public function creaFolioEnvioMeli(Request $request){
+        try{       
+
+            $idCuentaTienda = $request->id_cuenta_tienda;
+            $cuenta = CuentaTienda::findOrFail($idCuentaTienda);
+            $token = $cuenta->att_access_token;
+
+            $folioFull = $request->folio_full;
+            $referencia = $request->referencia;
+            $fechaCita = $request->fecha_cita;
+            $horaCita = $request->hora_cita; 
+            $archivoZPL = $request->file('archivo_zpl');
+
+            $contenidoZPL = \File::get($archivoZPL);
+            
+            //~Valida que no exista el folio
+            $envio = MeliEnvioFull::where('folio_full','=',$folioFull)->first();
+
+            if($envio!=null){                        
+                MeliConfigEnvioFull::where('id_meli_envio_full','=',$envio->id_meli_envio_full)->delete();
+                MeliDetaEnvioFull::where('id_meli_envio_full','=',$envio->id_meli_envio_full)->delete();
+                MeliEnvioFull::where('folio_full','=',$folioFull)->delete();
+            }
+            
+            //~Registra folio envio
+            $meliEnvioFull = new MeliEnvioFull();
+            $meliEnvioFull->id_cuenta_tienda = $idCuentaTienda;
+            $meliEnvioFull->folio_full = $folioFull;
+            $meliEnvioFull->referencia = $referencia;
+            $meliEnvioFull->fecha_cita = $fechaCita;
+            $meliEnvioFull->hora_cita = $horaCita;
+
+            $meliEnvioFull->save();
+            
+            
+            $codigoBarrasFull= false;
+
+            $bloquesZPL = explode("^XA", $contenidoZPL);
+            $zplList = Array();
+
+            foreach($bloquesZPL as $zpl){
+                try{
+                    $zpl= "^XA".$zpl;
+
+                    $ft = strpos($zpl, '^FT');
+                    $fd = strpos($zpl, '^FD',$ft);
+                    $fs = strpos($zpl, '^FS', $fd);
+
+                    $codigoBarrasFull = substr($zpl, $fd + 3, ($fs-$fd)-3);
+
+                    $pq = strpos($zpl, '^PQ', $fs);
+                    $pqf = strpos($zpl, ',', $pq);                
+
+                    $totalEtiquetas = substr($zpl, $pq + 3, ($pqf - $pq)-3);
+
+                    $zplFinal = substr($zpl, 0, $pq + 3) . "$$$" . substr($zpl, $pqf);
+
+                    if($codigoBarrasFull){                    
+                        /** Recupera informacion de mercadolibre API */
+                        $respMeli = $this->getIdPublicacionByInventoryId($token, $codigoBarrasFull);
+
+                        $idPublicacion= "";
+                        $idVariacion= "";
+
+                        if($respMeli['httpCode'] == '200'){
+                            $referencias = $respMeli['body']->external_references;
+
+                            if( count($referencias) > 0 ){
+                                $idPublicacion = $referencias[0]->id;
+                                if(isset($referencias[0]->variation_id)){
+                                    $idVariacion = $referencias[0]->variation_id;
+                                }
+                            }
+                        }else{
+                            throw new Exception('Error al conectar con MELI. '. $respMeli['httpCode']. ' '. $respMeli['body']->message);
+                        }
+
+                        //~Busca publicacion
+                        if($idVariacion!=""){
+                            $publicacion = Publicacion::where('id_publicacion_tienda','=', $idPublicacion)
+                            ->where('id_variante_publicacion','=', $idVariacion)
+                            ->where('id_cuenta_tienda','=', $idCuentaTienda)
+                            ->first();
+                        }else{
+                            $publicacion = Publicacion::where('id_publicacion_tienda','=', $idPublicacion)
+                            ->where('id_cuenta_tienda','=', $idCuentaTienda)
+                            ->first();
+                        }
+
+                        if($publicacion == null){
+                            throw new Exception('No fue posible localizar la publicacion');
+                        }
+
+                        //~Configuracion de la publicacion
+                        $configPublicacion = ConfigPublicacion::with('productos')
+                        ->where('id_publicacion','=',$publicacion->id_publicacion)
+                        ->get();                    
+                        
+                        if($configPublicacion == null){
+                            throw new Exception('Ningun producto ligado a la publicacion');
+                        }
+
+                        array_push($zplList, array( "codigoBarrasFull"=>$codigoBarrasFull, "xstatus"=>true));
+
+                        //~Inserta detalle
+                        $meliDetaEnvioFull = new MeliDetaEnvioFull();
+                        $meliDetaEnvioFull->id_meli_envio_full = $meliEnvioFull->id_meli_envio_full;                        
+                        $meliDetaEnvioFull->id_publicacion = $publicacion->id_publicacion;                        
+                        $meliDetaEnvioFull->codigo_barras_full = $codigoBarrasFull;                        
+                        $meliDetaEnvioFull->id_publicacion_tienda = $publicacion->id_publicacion_tienda;
+                        $meliDetaEnvioFull->total_etiquetas = $totalEtiquetas;
+                        $meliDetaEnvioFull->etiquetas_impresas = 0;
+                        $meliDetaEnvioFull->etiquetas_pendientes = $totalEtiquetas;
+                        $meliDetaEnvioFull->zpl_cadena = $zplFinal;
+                        $meliDetaEnvioFull->estatus = 'REG';
+                        $meliDetaEnvioFull->save();
+
+
+                        foreach ($configPublicacion as $c) {
+                            $meliConfigEnvioFull = new MeliConfigEnvioFull();
+
+                            $meliConfigEnvioFull->id_meli_envio_full = $meliEnvioFull->id_meli_envio_full;    
+                            $meliConfigEnvioFull->id_deta_meli_envio_full = $meliDetaEnvioFull->id_deta_meli_envio_full;
+                            $meliConfigEnvioFull->id_producto = $c->productos->id_producto;
+                            $meliConfigEnvioFull->id_config_publicacion = $c->id_config_publicacion;
+                            $meliConfigEnvioFull->codigo_producto = $c->productos->codigo;
+                            $meliConfigEnvioFull->nombre_producto = $c->productos->nombre;
+                            $meliConfigEnvioFull->total_piezas = $c->cantidad;                                                        
+
+                            $meliConfigEnvioFull->save();
+
+                        }                        
+
+                    }
+                }catch (\Exception $e) {
+                    \Log::error($e->getTraceAsString());       
+                    array_push($zplList, array( "codigoBarrasFull"=>$codigoBarrasFull,
+                                                "xstatus"=>false,
+                                                "error"=>$e->getMessage()));
+                }
+
+            }                        
+
+        
+            return [ 'xstatus'=>true, 'zpl' => $zplList ];
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());       
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
+        }
+    }
+
+
+
+    /**
+     * Recupera el detalle actual del folio de envio
+     * 
+     * 
+     * 
+     */
+    public function getDetalleFolioEnvioMeli(Request $request){
+        try{
+
+            $folioFull      = $request->folio_full;
+            $filtro         = $request->filtro;            
+            /**
+             * Codigo Producto
+             * Nombre Producto
+             * Titulo Publicacion
+             * ID publicacion tienda
+             * Codigo Barras Full
+             * 
+             */
+
+            $opcionFiltro   = $request->opcion_filtro;
+            /**
+             * TODO: Muestra todos los registros
+             * PENDIENTE: Solo los que tengan etiquetas pendientes de imprimir
+             * COMPLETO: Solo las que ya estan con etiquetas completas
+             */
+
+
+            $envio = MeliEnvioFull::where('folio_full','=',$folioFull)
+            ->first();
+
+            $deta = MeliDetaEnvioFull::with('config')                        
+            ->with('publicacion')            
+            ->where('id_meli_envio_full','=',$envio->id_meli_envio_full);
+            if( $opcionFiltro == "PENDIENTE" ){
+                $deta = $deta->where('etiquetas_pendientes','>', 0);
+            }elseif( $opcionFiltro == "COMPLETO" ){
+                $deta = $deta->whereColumn('total_etiquetas','etiquetas_impresas');
+            }
+            $deta = $deta->get();
+
+            
+            foreach($deta as $d){       
+                $d->visible = true;         
+                foreach($d->config as $c){                                        
+                    $c->producto = Producto::findOrFail($c->id_producto);
+                }
+            }
+
+            //~Aplica los filtros
+            if($filtro!=null){
+                foreach($deta as $d){            
+                    $d->visible = false;    
+
+                    if( !(strpos(strtoupper($d->id_publicacion_tienda), strtoupper($filtro)) ===false) ){
+                        $d->visible = true;
+                    }
+
+                    if( strtoupper($d->codigo_barras_full) == strtoupper($filtro) ){
+                        $d->visible = true;
+                    }
+
+                    foreach($d->config as $c){                                        
+                        if($filtro == $c->producto->codigo){
+                            $d->visible = true;
+                        }
+
+                        if( !(strpos(strtoupper($c->producto->nombre), strtoupper($filtro)) ===false) ){
+                            $d->visible = true;
+                        }
+                        
+                    }
+
+
+                    if( !(strpos(strtoupper($d->publicacion[0]->titulo), strtoupper($filtro)) ===false) ){
+                        $d->visible = true;
+                    }
+
+                    
+                }
+            }
+
+       
+        
+            return [    'xstatus'=>true, 
+                        'envio'=>$envio, 
+                        'detalle' => $deta ];
+
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());       
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
+        }
+    }
+
+
+
+    /**
+     * Realiza la impresa y contabilidad de las etiquetas
+     * 
+     * 
+     * 
+     */
+    public function imprimeEtiquetaEnvioFull(Request $request){
+        try{
+
+            $idDetaMeliEnvioFull      = $request->id_deta_meli_envio_full;
+            $totalEtiquetasImprime    = $request->total_etiqueta_imprime;
+
+            $deta = MeliDetaEnvioFull::findOrFail($idDetaMeliEnvioFull);
+            
+
+            if($totalEtiquetasImprime > $deta->etiquetas_pendientes){
+                throw new Exception('Excede el numero de etiquetas pendientes');
+            }
+
+            $zpl = str_replace("$$$", $totalEtiquetasImprime, $deta->zpl_cadena );
+        
+            $deta->etiquetas_impresas = $deta->etiquetas_impresas + $totalEtiquetasImprime;
+            $deta->etiquetas_pendientes = $deta->etiquetas_pendientes - $totalEtiquetasImprime;
+            
+            if($deta->etiquetas_pendientes == 0){
+                $deta->estatus = 'TER';
+            }else{
+                $deta->estatus = 'IMP';
+            }
+
+
+            $deta->update();
+
+
+            //~Inserta en el socket
+            $meliSocketEnvioFull = new MeliSocketEnvioFull();
+            $meliSocketEnvioFull->zpl_cadena = $zpl;
+            $meliSocketEnvioFull->estatus = 'PEN';
+            $meliSocketEnvioFull->save();
+
+
+
+
+        
+            return [    'xstatus'=>true,                         
+                        'detalle' => $deta ];
+                        
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());       
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
+        }
+    }
+
+
+    /**
+     * Imprime sin contabilizar la etiqueta
+     * 
+     * 
+     * 
+     */
+    public function reimprimeEtiquetaEnvioFull(Request $request){
+        try{
+
+            $idDetaMeliEnvioFull      = $request->id_deta_meli_envio_full;
+            $totalEtiquetasImprime    = $request->total_etiqueta_imprime;
+
+            $deta = MeliDetaEnvioFull::findOrFail($idDetaMeliEnvioFull);
+            
+
+            $zpl = str_replace("$$$", $totalEtiquetasImprime, $deta->zpl_cadena );
+
+            //~Inserta en el socket
+            $meliSocketEnvioFull = new MeliSocketEnvioFull();
+            $meliSocketEnvioFull->zpl_cadena = $zpl;
+            $meliSocketEnvioFull->estatus = 'PEN';
+            $meliSocketEnvioFull->save();
+        
+        
+            return [    'xstatus'=>true,                         
+                        'detalle' => $deta ];
+                        
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());       
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
+        }
+    }
+
+
+    /**
+     * Servicio con la cadena disponible para imprimir
+     * 
+     * 
+     */
+    public function socketPortPrint(){
+        try{
+
+            $meliSocketEnvioFull = MeliSocketEnvioFull::where('estatus','=','PEN')
+            ->first();
+
+            if($meliSocketEnvioFull==null){
+                return [    'xstatus' => 0 ];
+            }
+
+            $zpl = $meliSocketEnvioFull->zpl_cadena;
+
+            $meliSocketEnvioFull->estatus = 'TER';
+            $meliSocketEnvioFull->update();
+        
+            return [  'xstatus' => 1,  'zpl'=> $zpl  ];
+                        
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());       
+            return [ 'xstatus'=>0, 'error' => $e->getMessage() ];                 
+        }
     }
 
 
