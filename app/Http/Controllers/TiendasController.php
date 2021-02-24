@@ -602,7 +602,11 @@ class TiendasController extends Controller
                         $nombreCliente = substr($venta->buyer->first_name.' '.$venta->buyer->last_name.'['.$venta->buyer->nickname.']',0,40);
                         $idEnvio = $venta->shipping->id;                        
                         
-                        $nota = $venta->comments;
+                        if(isset($venta->comments)){
+                            $nota = $venta->comments;
+                        }else{
+                            $nota = "";
+                        }
                         $statusMeli = $venta->status;
 
                         //~Valida si ya existe la orden

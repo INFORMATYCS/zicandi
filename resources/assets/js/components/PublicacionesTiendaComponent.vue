@@ -132,7 +132,7 @@
                     <tbody>
                         <tr v-for="publicacion in listaPublicaciones" :key="publicacion.id_publicacion">
                             
-                            <td v-if="(chkEstatusSinLigar && publicacion.config.length == 0) || (chkEstatusSinLigar==false) || (onValidaVisibleUtilidad(publicacion.p_neto) == 1)">
+                            <td v-if="(chkEstatusSinLigar && publicacion.config.length == 0) || (chkEstatusSinLigar==false)">
                                 <button type="button" class="btn btn-info btn-sm" @click="abrirPublicacion(publicacion.link,'popup')">
                                     <i class="icon-screen-desktop"></i>
                                 </button> &nbsp;
@@ -467,7 +467,12 @@
                             'activas': this.chkEstatusActivas,
                             'pausadas': this.chkEstatusPausadas,
                             'sinligar': this.chkEstatusSinLigar,
-                            'orden': this.orden
+                            'orden': this.orden,
+                            'utilidad': {
+                                'verde': this.chkUtilidadEstatusVerde,
+                                'amarilla': this.chkUtilidadEstatusAmarilla,
+                                'roja': this.chkUtilidadEstatusRoja
+                            }
                         }
                     }
                 })

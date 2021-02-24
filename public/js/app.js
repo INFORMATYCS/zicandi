@@ -63272,7 +63272,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                         'activas': this.chkEstatusActivas,
                         'pausadas': this.chkEstatusPausadas,
                         'sinligar': this.chkEstatusSinLigar,
-                        'orden': this.orden
+                        'orden': this.orden,
+                        'utilidad': {
+                            'verde': this.chkUtilidadEstatusVerde,
+                            'amarilla': this.chkUtilidadEstatusAmarilla,
+                            'roja': this.chkUtilidadEstatusRoja
+                        }
                     }
                 }
             }).then(function (response) {
@@ -64109,8 +64114,7 @@ var render = function() {
             _vm._l(_vm.listaPublicaciones, function(publicacion) {
               return _c("tr", { key: publicacion.id_publicacion }, [
                 (_vm.chkEstatusSinLigar && publicacion.config.length == 0) ||
-                _vm.chkEstatusSinLigar == false ||
-                _vm.onValidaVisibleUtilidad(publicacion.p_neto) == 1
+                _vm.chkEstatusSinLigar == false
                   ? _c("td", [
                       _c(
                         "button",
