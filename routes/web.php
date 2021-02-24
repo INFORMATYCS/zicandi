@@ -100,6 +100,13 @@ Route::get('/meli/logout', 'MercadoLibreController@logout');
 Route::get('/meli/me', 'MercadoLibreController@me');
 Route::get('/meli/refresh', 'MercadoLibreController@refreshToken');
 
+Route::get('/meli/envios/get', 'MercadoLibreController@get30FoliosEnviosMeli');
+Route::post('/meli/envios/crear', 'MercadoLibreController@creaFolioEnvioMeli');
+Route::get('/meli/envios/deta', 'MercadoLibreController@getDetalleFolioEnvioMeli');
+Route::post('/meli/envios/print', 'MercadoLibreController@imprimeEtiquetaEnvioFull');
+Route::post('/meli/envios/reprint', 'MercadoLibreController@reimprimeEtiquetaEnvioFull');
+Route::get('/meli/envios/socket', 'MercadoLibreController@socketPortPrint');
+
 
 // - Rutas API betterware
 Route::get('/bett/get', 'BetterwareController@getPage');

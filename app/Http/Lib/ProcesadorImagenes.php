@@ -68,13 +68,23 @@ class ProcesadorImagenes{
      * 
      * 
      */
-    public function publicaImagenMini100Bett($configImagen){           
-        $repositorio = Config::get('zicandi.repositorio.entrada.producto_mini');
+    public function publicaImagenMini100Bett($configImagen){ 
+        try{
+            
+            $repositorio = Config::get('zicandi.repositorio.entrada.producto_mini');
         
-        $base64_string = $configImagen['b64'];
-        $nombre_archivo = $configImagen['nombre'];
+            $base64_string = $configImagen['b64'];
+            $nombre_archivo = $configImagen['nombre'];
 
-        return $this->creaImagen("mini_prod_c_", $nombre_archivo, $base64_string, $repositorio, 100, 100, false);
+            return $this->creaImagen("mini_prod_c_", $nombre_archivo, $base64_string, $repositorio, 100, 100, false);
+
+        }catch(\Exception $e){
+            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+        
+
+        
         
     }
 
@@ -83,7 +93,7 @@ class ProcesadorImagenes{
      * 
      * 
      */
-    private function creaImagen($prefijo, $nombre_archivo, $base64_string, $destino, $ancho, $alto, $isNombreAuto){
+    private function creaImagen($prefijo, $nombre_archivo, $base64_string, $destino, $ancho, $alto, $isNombreAuto){        
         $tmp = Config::get('zicandi.repositorio.img.tmp');
 
         if($isNombreAuto){
@@ -116,6 +126,7 @@ class ProcesadorImagenes{
         
 
         return $destino.$nombreDestino;
+        
     }
 
 
@@ -125,33 +136,46 @@ class ProcesadorImagenes{
     private function redimensionar_imagen($nombreimg, $rutaimg, $xmax, $ymax){  
         $ext = explode(".", $nombreimg);  
         $ext = $ext[count($ext)-1];  
-      
-        if($ext == "jpg" || $ext == "jpeg")  
-            $imagen = imagecreatefromjpeg($rutaimg);  
-        elseif($ext == "png")  
-            $imagen = imagecreatefrompng($rutaimg);  
-        elseif($ext == "gif")  
-            $imagen = imagecreatefromgif($rutaimg);  
-          
-        $x = imagesx($imagen);  
-        $y = imagesy($imagen);  
-          
-        if($x <= $xmax && $y <= $ymax){            
-            return $imagen;  
+        try{
+            ini_set('memory_limit', -1);
+
+            if($ext == "jpg" || $ext == "jpeg")  
+                $imagen = imagecreatefromjpeg($rutaimg);  
+            elseif($ext == "png")  
+                $imagen = imagecreatefrompng($rutaimg);  
+            elseif($ext == "gif")  
+                $imagen = imagecreatefromgif($rutaimg);  
+            
+            $x = imagesx($imagen);  
+            $y = imagesy($imagen);  
+            
+            if($x <= $xmax && $y <= $ymax){            
+                return $imagen;  
+            }
+        
+            if($x >= $y) {  
+                $nuevax = $xmax;  
+                $nuevay = $nuevax * $y / $x;  
+            }  
+            else {  
+                $nuevay = $ymax;  
+                $nuevax = $x / $y * $nuevay;  
+            } 
+        
+        
+            $img2 = imagecreatetruecolor($nuevax, $nuevay);  
+            imagecopyresized($img2, $imagen, 0, 0, 0, 0, floor($nuevax), floor($nuevay), $x, $y);          
+
+
+            ini_restore('memory_limit');
+            return $img2;   
+        
+        }catch(\Exception $e){
+                
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
         }
-      
-        if($x >= $y) {  
-            $nuevax = $xmax;  
-            $nuevay = $nuevax * $y / $x;  
-        }  
-        else {  
-            $nuevay = $ymax;  
-            $nuevax = $x / $y * $nuevay;  
-        }  
           
-        $img2 = imagecreatetruecolor($nuevax, $nuevay);  
-        imagecopyresized($img2, $imagen, 0, 0, 0, 0, floor($nuevax), floor($nuevay), $x, $y);          
-        return $img2;   
+        
     }
 
 
