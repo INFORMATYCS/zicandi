@@ -107,6 +107,12 @@ Route::post('/meli/envios/print', 'MercadoLibreController@imprimeEtiquetaEnvioFu
 Route::post('/meli/envios/reprint', 'MercadoLibreController@reimprimeEtiquetaEnvioFull');
 Route::get('/meli/envios/socket', 'MercadoLibreController@socketPortPrint');
 
+Route::get('/meli/metricas/visor', 'MercadoLibreController@getPublicacionMetricaVisor');
+Route::get('/meli/metricas/visor/detalle', 'MercadoLibreController@getDetalleMetricaVisor');
+Route::post('/meli/metricas/visor/save', 'MercadoLibreController@registraPublicacionVisor');
+Route::get('/meli/metricas/visor/metrica', 'MercadoLibreController@metricaPublicacionVisor');
+Route::post('/meli/metricas/visor/edit_estatus', 'MercadoLibreController@cambiaEstatusMetricaVisor');
+
 
 // - Rutas API betterware
 Route::get('/bett/get', 'BetterwareController@getPage');

@@ -247,7 +247,7 @@ class TiendasController extends Controller
                 $publicacion->precio = (isset($pub['precio']) ? $pub['precio'] : null);
                 $publicacion->stock = (isset($pub['stock']) ? $pub['stock'] : null);
                 $publicacion->ventas = (isset($pub['ventas']) ? $pub['ventas'] : null);
-                $publicacion->visitas = (isset($pub['visitas']) ? $pub['visitas'] : null);
+                $publicacion->visitas = (isset($pub['visitas']) ? $pub['visitas'] : 0);
                 $publicacion->envio_gratis = (isset($pub['envioGratis']) ? $pub['envioGratis'] : null);
                 $publicacion->full = ($pub['tipoEnvio'] == 'fulfillment' ? true : false);
                 $publicacion->link = (isset($pub['link']) ? $pub['link'] : null);
@@ -589,6 +589,12 @@ class TiendasController extends Controller
                         
                         $comision = ($venta->order_items[0]->sale_fee) * $cantidad;
 
+                        $idPago = 0;
+                        $precioVenta = 0;
+                        $montoPagado = 0;
+                        $iva = 0;
+                        $fechaPago = date('Y-m-d');
+
                         foreach ($venta->payments as $pago) {
                             if($pago->status == "approved"){
                                 $idPago = $pago->id;
@@ -596,6 +602,10 @@ class TiendasController extends Controller
                                 $montoPagado = $pago->total_paid_amount;                                
                                 $iva = ($precioVenta / 1.16)*.08;
                                 $fechaPago = substr($pago->date_approved, 0, 10);
+
+                                $statusMeli = $venta->status;
+                            }else{
+                                $statusMeli = $pago->status;
                             }
                         }
 
@@ -607,7 +617,7 @@ class TiendasController extends Controller
                         }else{
                             $nota = "";
                         }
-                        $statusMeli = $venta->status;
+                        
 
                         //~Valida si ya existe la orden
                         $ventaMeli = VentaMeli::where('id_orden_meli','=',$id)->get();  
@@ -639,7 +649,7 @@ class TiendasController extends Controller
                         $ventaMeli->id_envio=$idEnvio;
                         $venta->costo_envio_cliente=0;
                         $venta->costo_envio_empresa=0;
-                        $ventaMeli->nombre_cliente=$nombreCliente;                        
+                        $ventaMeli->nombre_cliente=preg_replace('([^A-Za-z0-9 ])', '', $nombreCliente);
                         $ventaMeli->nota=$nota;
                         $ventaMeli->estatus_meli=$statusMeli;
                         $ventaMeli->estatus='PEN';
@@ -728,47 +738,55 @@ class TiendasController extends Controller
                     $idPago = $venta->id_pago;
                     $pago = app(MercadoLibreController::class)->pagoDetalle($idPago, $cuentaTienda->att_access_token);
 
-                    $detalleTransaccion = $pago->transaction_details;
-                                        
-                    $neto = $detalleTransaccion->net_received_amount - (($venta->monto_pagado - $venta->precio_venta) + ($costoEnvioCargoEmpresa-$costoEnvioCargoCliente));
-            
-                    $isr = ($venta->precio_venta - ($costoEnvioCargoEmpresa-$costoEnvioCargoCliente)- $venta->comision - $venta->iva) - $neto;
-                    
-                    if($idVariante!=null){
-                        $publicacion = Publicacion::where('id_publicacion_tienda','=',$idPublicacion)->where('id_variante_publicacion','=',$idVariante)->get();
-                    }else{
-                        $publicacion = Publicacion::where('id_publicacion_tienda','=',$idPublicacion)->get();
-                    }
+                    if($pago->status == "approved"){
 
-                    if($publicacion->isEmpty()){
-                        $precioCompra = 0;
-                    }else{
-                        $idPub = $publicacion[0]->id_publicacion;
-                        $configPublicacion = ConfigPublicacion::where('id_publicacion','=',$publicacion[0]->id_publicacion)->get();
+                        $detalleTransaccion = $pago->transaction_details;
+                                            
+                        $neto = $detalleTransaccion->net_received_amount - (($venta->monto_pagado - $venta->precio_venta) + ($costoEnvioCargoEmpresa-$costoEnvioCargoCliente));
+                
+                        $isr = ($venta->precio_venta - ($costoEnvioCargoEmpresa-$costoEnvioCargoCliente)- $venta->comision - $venta->iva) - $neto;
+                        
+                        if($idVariante!=null){
+                            $publicacion = Publicacion::where('id_publicacion_tienda','=',$idPublicacion)->where('id_variante_publicacion','=',$idVariante)->get();
+                        }else{
+                            $publicacion = Publicacion::where('id_publicacion_tienda','=',$idPublicacion)->get();
+                        }
 
-                        if($configPublicacion->isEmpty()){
+                        if($publicacion->isEmpty()){
                             $precioCompra = 0;
                         }else{
-                            $precioCompra=0;                        
-                            foreach ($configPublicacion as $config) {
-                                $producto = Producto::findOrFail($config->id_producto);
-                                $cantidad = $config->cantidad;
-                                $precioCompra+= ($producto->ultimo_precio_compra)*$cantidad;
+                            $idPub = $publicacion[0]->id_publicacion;
+                            $configPublicacion = ConfigPublicacion::where('id_publicacion','=',$publicacion[0]->id_publicacion)->get();
+
+                            if($configPublicacion->isEmpty()){
+                                $precioCompra = 0;
+                            }else{
+                                $precioCompra=0;                        
+                                foreach ($configPublicacion as $config) {
+                                    $producto = Producto::findOrFail($config->id_producto);
+                                    $cantidad = $config->cantidad;
+                                    $precioCompra+= ($producto->ultimo_precio_compra)*$cantidad;
+                                }
+                                
                             }
-                            
                         }
-                    }
 
-                    //~Multiplica por la cantidad de piezas vendidas
-                    $precioCompra = $precioCompra * $venta->cantidad;
+                        //~Multiplica por la cantidad de piezas vendidas
+                        $precioCompra = $precioCompra * $venta->cantidad;
 
-                    $utilidadMonto = $neto - $precioCompra;
-                    if($precioCompra==0){
-                        $utilidadPorcentaje = 0;
+                        $utilidadMonto = $neto - $precioCompra;
+                        if($precioCompra==0){
+                            $utilidadPorcentaje = 0;
+                        }else{
+                            $utilidadPorcentaje = $utilidadMonto / $precioCompra;
+                        }
                     }else{
-                        $utilidadPorcentaje = $utilidadMonto / $precioCompra;
+                        $neto = 0;
+                        $isr = 0;
+                        $precioCompra = 0;
+                        $utilidadMonto = 0;
+                        $utilidadPorcentaje = 0;                        
                     }
-
 
                     $venta->isr=$isr;
                     $venta->neto=$neto;

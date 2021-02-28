@@ -7,6 +7,7 @@ use View;
 use Session;
 Use Exception;
 use DB;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Lib\Meli;
 use App\CuentaTienda;
@@ -18,6 +19,8 @@ use App\MeliSocketEnvioFull;
 use App\Publicacion;
 use App\ConfigPublicacion;
 use App\Producto;
+use App\MeliMetricaVisor;
+use App\MeliDetaMetricaVisor;
 
 
 
@@ -852,5 +855,442 @@ class MercadoLibreController extends Controller
         }
     }
 
+
+    /**
+     * 
+     * 
+     * 
+     * 
+     */
+    public function getMeliVisitasNoToken($item_id, $fecha){
+        $appId = Config::get('zicandi.meli.appId');
+        $secretKey = Config::get('zicandi.meli.secretKey');
+        $redirectURI = Config::get('zicandi.meli.redirectURI');
+        $siteId = Config::get('zicandi.meli.siteId');
+
+        
+        $meli = new Meli($appId, $secretKey);
+
+        $params = array(    'item_id' => $item_id);
+        $result = $meli->get('/items/visits?ids='.$item_id.'&date_from='.$fecha.'T00:00:00.000-00:00&date_to='.$fecha.'T23:59:00.000-00:00');
+        
+        
+        if($result['httpCode']=="200"){
+            $resultMeli = $result['body'];
+            $visitas = $resultMeli[0]->total_visits;
+        }else{
+            $visitas = 0;
+        }
+        
+        return $visitas;
+    }
+
+
+    /**
+     * Registra publicacion
+     * 
+     * 
+     */
+    public function registraPublicacionVisor(Request $request){        
+        try{
+            $url = $request->url;
+
+            // create curl resource
+            $ch = curl_init();
+
+            // set url
+            curl_setopt($ch, CURLOPT_URL, $url);
+
+            //return the transfer as a string
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+            // $output contains the output string
+            $output = curl_exec($ch);            
+
+            // close curl resource to free up system resources
+            curl_close($ch);
+
+           
+
+            //~Estatus de la publicacion            
+            $textPausada = strpos($output, 'Publicación pausada</div>');
+
+            if($textPausada == false){
+
+                $iFoto = strpos($output, 'class="ui-pdp-gallery__figure"');
+                $iFoto = strpos($output, 'https:', $iFoto);
+                $fFoto = strpos($output, '" width="', $iFoto);
+                $foto = trim(substr($output, $iFoto, ($fFoto - $iFoto)));
+
+                $inicial = strpos($output, "vendidos</span>") -100;
+                $final = strpos($output, '<span class="andes-button__content">Comprar ahora');
+
+                $html = substr($output, $inicial, $final - $inicial);
+
+
+                $iTitulo = strpos($html, "ui-pdp-title");
+                $fTitulo = strpos($html, "</h1>", $iTitulo);
+                $titulo = trim(substr($html, $iTitulo + 14, ($fTitulo - $iTitulo)-14));
+
+                
+                $textVendidoPor = strpos($html, '<span class="ui-pdp-seller__label-sold">');
+                $iVendedor = strpos($html, '<span class="ui-pdp-color--BLUE">', $textVendidoPor);
+                $fVendedor = strpos($html, '</span>', $iVendedor);
+                $vendedor = trim(substr($html, $iVendedor + 33, ($fVendedor - $iVendedor)-33));
+                
+                $iIdPublicacion = strpos($url, 'MLM');
+                $fIdPublicacion = strpos($url, '-', $iIdPublicacion + 4);
+                $idPublicacion = trim(str_replace('-', '', substr($url, $iIdPublicacion, ($fIdPublicacion - $iIdPublicacion))));
+
+                $isCatalogo = false;
+                if(strlen($idPublicacion) > 12){
+                    $isCatalogo = true;
+                    $idPublicacion = substr($idPublicacion, 0, 11);
+                }
+
+                $publicacion = array(
+                    "titulo"        => $titulo,
+                    "vendedor"      => $vendedor,
+                    "idPublicacion" => $idPublicacion
+                );
+
+                $meliMetricaVisor = MeliMetricaVisor::where('id_publicacion_tienda','=',$idPublicacion)
+                ->first();
+
+                //~Inserta
+                if($meliMetricaVisor==null){
+                    $meliMetricaVisor = new MeliMetricaVisor();
+                    $meliMetricaVisor->url = $url;
+                    $meliMetricaVisor->foto = $foto;
+                    $meliMetricaVisor->titulo = $titulo;
+                    $meliMetricaVisor->id_publicacion_tienda = $idPublicacion;
+                    $meliMetricaVisor->vendedor = $vendedor;
+                    $meliMetricaVisor->estatus_publicacion = 'PEN';
+                    $meliMetricaVisor->estatus = 'ACT';
+                    $meliMetricaVisor->save();
+                }
+
+                $request->html = $html;
+                $request->output = $output;
+                $request->id_meli_metrica_visor = $meliMetricaVisor->id_meli_metrica_visor;
+                $metrica = $this->metricaPublicacionVisor($request);
+                
+                if($metrica["xstatus"]){
+                    $respMetricas = $metrica["metrica"];
+                }
+
+                return [ 'xstatus'=>true, 'metrica' => $respMetricas, 'publicacion' => $publicacion];
+            }else{
+                throw new Exception('Publicacion pausada, no es posible registrarla');
+            }
+                        
+        }catch (\Exception $e) {
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }        
+        
+    }
+
+    /**
+     * Obtiene metricas de la publicacion
+     * 
+     * 
+     * 
+     */
+    public function metricaPublicacionVisor(Request $request){        
+        try{
+            $url = $request->url;
+            $idMeliMetricaVisor = $request->id_meli_metrica_visor;
+            
+            if(isset($request->html)){
+                $html = $request->html;
+                $output = $request->output;
+            }else{
+                // create curl resource
+                $ch = curl_init();
+
+                // set url
+                curl_setopt($ch, CURLOPT_URL, $url);
+
+                //return the transfer as a string
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+                // $output contains the output string
+                $output = curl_exec($ch);            
+
+                // close curl resource to free up system resources
+                curl_close($ch);
+
+                $inicial = strpos($output, "vendidos</span>") -100;
+                $final = strpos($output, '<span class="andes-button__content">Comprar ahora');
+
+                $html = substr($output, $inicial, $final - $inicial);
+            }
+
+            //~Estatus de la publicacion            
+            $textPausada = strpos($output, 'Publicación pausada</div>');
+            if($textPausada == false){
+
+                $iVendidos = strpos($html, "|");
+                $fVendidos = strpos($html, "vendidos</span>", $iVendidos);
+                $vendidos = trim(substr($html, $iVendidos + 1, ($fVendidos - $iVendidos)-1));
+
+
+                $iPrecio = strpos($html, '<span class="price-tag-fraction">');
+                $fPrecio = strpos($html, "</span>", $iPrecio);
+                $precio = floatval( str_replace(',', '', trim(substr($html, $iPrecio + 33, ($fPrecio - $iPrecio)-33))) );
+
+                $icoFull = strpos($html, 'class="ui-pdp-icon ui-pdp-icon--full"');
+                if($icoFull>0){
+                    $full = 1;
+                }else{
+                    $full = 0;
+                }
+
+
+                $textSinInteres = strpos($html, 'span> sin inter');
+                if($textSinInteres>0){
+                    $msi = 1;
+                }else{
+                    $msi = 0;
+                }
+
+                $iDisponible = strpos($html, '<span class="ui-pdp-buybox__quantity__available">');
+
+                if($iDisponible ==false){
+                    $textUltimoDisponible = strpos($html, '¡Última disponible!</p>');
+                    if($textUltimoDisponible>0){
+                        $disponible = 1;
+                    }else{
+                        $disponible = 0;
+                    }
+                }else{
+                    $fDisponible = strpos($html, "disponibles)</span>", $iDisponible);
+                    $disponible = trim(substr($html, $iDisponible + 50, ($fDisponible - $iDisponible)-50));
+                }
+    
+                
+                $iIdPublicacion = strpos($url, 'MLM');
+                $fIdPublicacion = strpos($url, '-', $iIdPublicacion + 4);
+                $idPublicacion = trim(str_replace('-', '', substr($url, $iIdPublicacion, ($fIdPublicacion - $iIdPublicacion))));
+
+                $isCatalogo = 0;
+                if(strlen($idPublicacion) > 12){
+                    $isCatalogo = 1;
+                    $idPublicacion = substr($idPublicacion, 0, 11);
+                }
+
+                $visitas = 0;
+                if($isCatalogo!=1){
+                    $visitas = $this->getMeliVisitasNoToken( $idPublicacion, date("Y-m-d") );
+                }
+
+
+                $metrica = array(
+                    "vendidos"  => $vendidos,
+                    "precio"  => $precio,
+                    "full"  => $full,
+                    "msi"  => $msi,
+                    "disponible"  => $disponible,
+                    "isCatalogo"  => $isCatalogo,
+                    "visitas"  => $visitas                
+                );
+                
+                $hoy = Carbon::today();
+                $meliDetaMetricaVisor = MeliDetaMetricaVisor::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)
+                ->whereDate('fecha_consulta', '=', $hoy)
+                ->first();
+
+                $bandExiste = true;
+                if($meliDetaMetricaVisor == null){
+                    $meliDetaMetricaVisor = new MeliDetaMetricaVisor();
+                    $bandExiste = false;
+                }
+
+                $meliDetaMetricaVisor->id_meli_metrica_visor = $idMeliMetricaVisor;
+                $meliDetaMetricaVisor->fecha_consulta = date("Y-m-d");
+                $meliDetaMetricaVisor->precio = $precio;
+                $meliDetaMetricaVisor->ventas = $vendidos;
+                $meliDetaMetricaVisor->visitas = $visitas;
+                $meliDetaMetricaVisor->full = $full;
+                $meliDetaMetricaVisor->msi = $msi;
+                $meliDetaMetricaVisor->disponibles = $disponible;
+                $meliDetaMetricaVisor->isCatalogo = $isCatalogo;
+                $meliDetaMetricaVisor->estatus_publicacion = 'ACTIVA';
+                    
+                if( $bandExiste ==false ){
+                    $meliDetaMetricaVisor->save();
+                }else{                                       
+                    $meliDetaMetricaVisor->update();
+                }
+
+                MeliMetricaVisor::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)
+                ->update(['estatus_publicacion'=>'ACTIVA']);
+
+            }else{
+                $meliDetaMetricaVisorUltimo = MeliDetaMetricaVisor::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)
+                ->latest()                
+                ->take(1)
+                ->first();
+
+                $metrica = array(
+                    "vendidos"  => $meliDetaMetricaVisorUltimo->ventas,
+                    "precio"  => $meliDetaMetricaVisorUltimo->precio,
+                    "full"  => $meliDetaMetricaVisorUltimo->full,
+                    "msi"  => $meliDetaMetricaVisorUltimo->msi,
+                    "disponible"  => $meliDetaMetricaVisorUltimo->disponibles,
+                    "isCatalogo"  => $meliDetaMetricaVisorUltimo->isCatalogo,
+                    "visitas"  => $meliDetaMetricaVisorUltimo->visitas,
+                    'estatusPublicacion' => 'PAUSADA'
+                );
+
+                
+                $hoy = Carbon::today();
+                $meliDetaMetricaVisorHoy = MeliDetaMetricaVisor::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)
+                ->whereDate('fecha_consulta', '=', $hoy)
+                ->first();
+            
+                
+                if($meliDetaMetricaVisorHoy == null){
+                    $meliDetaMetricaVisor = new MeliDetaMetricaVisor();     
+                    
+                    $meliDetaMetricaVisor->id_meli_metrica_visor = $idMeliMetricaVisor;
+                    $meliDetaMetricaVisor->fecha_consulta = date("Y-m-d");
+                    $meliDetaMetricaVisor->precio = $meliDetaMetricaVisorUltimo->precio;
+                    $meliDetaMetricaVisor->ventas = $meliDetaMetricaVisorUltimo->ventas;
+                    $meliDetaMetricaVisor->visitas = $meliDetaMetricaVisorUltimo->visitas;
+                    $meliDetaMetricaVisor->full = $meliDetaMetricaVisorUltimo->full;
+                    $meliDetaMetricaVisor->msi = $meliDetaMetricaVisorUltimo->msi;
+                    $meliDetaMetricaVisor->disponibles = $meliDetaMetricaVisorUltimo->disponibles;
+                    $meliDetaMetricaVisor->isCatalogo = $meliDetaMetricaVisorUltimo->isCatalogo;
+                    $meliDetaMetricaVisor->estatus_publicacion = 'PAUSADA';
+
+                    $meliDetaMetricaVisor->save();                        
+                }               
+
+                MeliMetricaVisor::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)
+                ->update(['estatus_publicacion'=>'PAUSADA']);
+            }
+
+            
+            return [ 'xstatus'=>true, 'metrica' => $metrica ];
+        }catch (\Exception $e) {
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }        
+        
+    }
+
+
+
+    /**
+     * Obtiene las metricas por publicacion
+     * 
+     * 
+     * 
+     */
+    public function getPublicacionMetricaVisor(Request $request){        
+        try{
+            $estatus = $request->estatus;
+            $filtro = $request->filtro;
+
+            $tipoRespuesta = null;
+            if(isset($request->tipo)){
+                $tipoRespuesta = $request->tipo;
+            }
+
+
+
+            $meliMetricaVisor = MeliMetricaVisor::where('estatus','=',$estatus);
+
+            if($filtro!=null){
+                $meliMetricaVisor = $meliMetricaVisor->where('titulo','like', '%' . $filtro . '%')
+                ->orWhere('id_publicacion_tienda','like','%' . $filtro . '%')
+                ->orWhere('vendedor','like','%' . $filtro . '%');
+            }
+
+            $meliMetricaVisor = $meliMetricaVisor->orderBy('id_meli_metrica_visor', 'desc');
+
+            if($tipoRespuesta==null){
+                $meliMetricaVisor = $meliMetricaVisor->paginate(30);
+            
+
+                return [
+                    'xstatus'=>true,
+                    'pagination' => [
+                        'total'         => $meliMetricaVisor->total(),
+                        'current_page'         => $meliMetricaVisor->currentPage(),
+                        'per_page'         => $meliMetricaVisor->perPage(),
+                        'last_page'         => $meliMetricaVisor->lastPage(),
+                        'from'         => $meliMetricaVisor->firstItem(),
+                        'to'         => $meliMetricaVisor->lastItem()
+                    ],
+                    'metricas'=> $meliMetricaVisor
+                ];   
+            }else{
+                $meliMetricaVisor = $meliMetricaVisor->get();
+                return [
+                    'xstatus'=>true,                    
+                    'metricas'=> $meliMetricaVisor
+                ];
+            }         
+        }catch (\Exception $e) {
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }        
+        
+    }
+
+
+    /**
+     * 
+     * 
+     * 
+     * 
+     */
+    public function cambiaEstatusMetricaVisor(Request $request){        
+        try{
+            $estatus = $request->estatus;
+            $idMeliMetricaVisor = $request->idMeliMetricaVisor;
+            $meliMetricaVisor = MeliMetricaVisor::findOrFail($idMeliMetricaVisor);
+
+            $meliMetricaVisor->update(['estatus'=> $estatus]);
+
+            return [ 'xstatus'=>true ];
+        }catch (\Exception $e) {
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }        
+        
+    }
+
+
+    public function getDetalleMetricaVisor(Request $request){        
+        try{
+            $idMeliMetricaVisor = $request->idMeliMetricaVisor;
+            $fechaInicial = $request->fechaInicial;
+            $fechaFinal = $request->fechaFinal;
+            
+            $diff = date_diff(date_create($fechaInicial), date_create($fechaFinal));
+            if($diff->format('%a') > 90){
+                throw new Exception('No es posible consultar mas de 90 dias');
+            }
+
+
+            $meliDetaMetricaVisor = MeliDetaMetricaVisor::where('id_meli_metrica_visor','=',$idMeliMetricaVisor)
+            ->whereDate('fecha_consulta', '>=', $fechaInicial)
+            ->whereDate('fecha_consulta', '<=', $fechaFinal)
+            ->get();
+
+            return [
+                'xstatus'=>true,              
+                'metricas'=> $meliDetaMetricaVisor
+            ];            
+        }catch (\Exception $e) {
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }        
+        
+    }
 
 }

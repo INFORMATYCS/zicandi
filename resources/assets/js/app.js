@@ -49,6 +49,9 @@ Vue.component('almacenstockproducto-component', require('./components/AlmacenSto
 
 Vue.component('enviosfullmeli-component', require('./components/EnviosFullMeliComponent.vue'));
 
+Vue.component('metrica-visor-component', require('./components/MetricasVisorComponent.vue'));
+
+
 
 
 const app = new Vue({
