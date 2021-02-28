@@ -49,6 +49,9 @@
                     <li class="nav-item">
                         <a @click="oppMenuSeleccion=20" class="nav-link" href="#"><i class="icon-bag"></i> Envios Full</a>
                     </li>
+                    <li class="nav-item">
+                        <a @click="oppMenuSeleccion=21" class="nav-link" href="#"><i class="icon-bag"></i> Visor Metricas</a>
+                    </li>
                     
                     
                 </ul>

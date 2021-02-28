@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class MeliDetaEnvioFull extends Model{
     //~Nombre de la tabla
-    protected $table = 'meli_Deta_envio_full';
+    protected $table = 'meli_deta_envio_full';
     
     //~Llave primaria
     protected $primaryKey = 'id_deta_meli_envio_full'; 

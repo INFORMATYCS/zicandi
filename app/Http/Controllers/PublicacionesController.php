@@ -26,7 +26,10 @@ class PublicacionesController extends Controller
         $criterio = $request->criterio;
         $idCuentaTienda = $request->idCuentaTienda;
         
+        
         $filtros = json_decode($request->filtros);
+
+        $utilidad = $filtros->utilidad;
 
         list($campoOrden, $direccionOrden) = explode('|', $filtros->orden);
     
@@ -49,20 +52,48 @@ class PublicacionesController extends Controller
             $publicaciones = Publicacion::with('config')            
             ->select('publicacion.id_publicacion' ,'publicacion.id_tienda' ,'publicacion.id_cuenta_tienda' ,'publicacion.id_publicacion_tienda' ,'publicacion.id_variante_publicacion' ,'publicacion.titulo' ,'publicacion.nombre_variante' ,'publicacion.precio' ,'publicacion.stock' ,'publicacion.ventas' ,'publicacion.visitas', 'publicacion.envio_gratis' ,'publicacion.full' ,'publicacion.link' ,'publicacion.foto_mini' ,'publicacion.fecha_consulta' ,'publicacion.estatus', 'publicacion.tipo_listing','publicacion.costo_envio','publicacion.comision_venta','publicacion.iva','publicacion.isr','publicacion.neto_venta_final','publicacion.ultimo_precio_compra',DB::raw('publicacion.neto_venta_final - publicacion.ultimo_precio_compra as neto'), DB::raw('round(((publicacion.neto_venta_final - publicacion.ultimo_precio_compra)/publicacion.ultimo_precio_compra)*100,0) as p_neto') )
             ->where('publicacion.id_cuenta_tienda', '=', $idCuentaTienda)            
-            ->whereIn('publicacion.estatus', $estatusPublicacion)                        
-            ->orderBy($campoOrden, $direccionOrden)
-            ->paginate(100);
+            ->whereIn('publicacion.estatus', $estatusPublicacion);
+            
         }else{
             $publicaciones = Publicacion::with('config')            
             ->select('publicacion.id_publicacion' ,'publicacion.id_tienda' ,'publicacion.id_cuenta_tienda' ,'publicacion.id_publicacion_tienda' ,'publicacion.id_variante_publicacion' ,'publicacion.titulo' ,'publicacion.nombre_variante' ,'publicacion.precio' ,'publicacion.stock' ,'publicacion.ventas' ,'publicacion.visitas', 'publicacion.envio_gratis' ,'publicacion.full' ,'publicacion.link' ,'publicacion.foto_mini' ,'publicacion.fecha_consulta' ,'publicacion.estatus', 'publicacion.tipo_listing','publicacion.costo_envio','publicacion.comision_venta','publicacion.iva','publicacion.isr','publicacion.neto_venta_final','publicacion.ultimo_precio_compra',DB::raw('publicacion.neto_venta_final - publicacion.ultimo_precio_compra as neto'), DB::raw('round(((publicacion.neto_venta_final - publicacion.ultimo_precio_compra)/publicacion.ultimo_precio_compra)*100,0) as p_neto') )
             ->where('publicacion.id_cuenta_tienda', '=', $idCuentaTienda)
             ->where('publicacion.'.$criterio, 'like', '%' . $buscar . '%')            
-            ->whereIn('publicacion.estatus', $estatusPublicacion)
-            ->orderBy($campoOrden, $direccionOrden)
-            ->paginate(100);
+            ->whereIn('publicacion.estatus', $estatusPublicacion);
+                      
         }
 
+        if(!($utilidad->verde && $utilidad->amarilla && $utilidad->roja)){
+            $limiteInferior = 0;
+            $limiteSuperior = 0;
+
+            if($utilidad->verde){
+                $limiteInferior = 20;
+                $limiteSuperior = 1000;
+            }
+            
+            if($utilidad->amarilla){
+                $limiteInferior = 5;
+
+                if($limiteSuperior==0)
+                $limiteSuperior = 19;
+            }
+            
+            if($utilidad->roja){
+                $limiteInferior = -1000;
+
+                if($limiteSuperior==0)
+                $limiteSuperior = 4;
+            }
+            
+
+            
+            $publicaciones = $publicaciones->whereRaw("round(((publicacion.neto_venta_final - publicacion.ultimo_precio_compra)/publicacion.ultimo_precio_compra)*100,0) BETWEEN ".$limiteInferior." and ".$limiteSuperior);
+        }
         
+
+        $publicaciones = $publicaciones->orderBy($campoOrden, $direccionOrden)
+        ->paginate(100);
 
         return [
             'pagination' => [

@@ -55,6 +55,10 @@
         <enviosfullmeli-component></enviosfullmeli-component>
     </template>
 
+    <template v-if="oppMenuSeleccion==21">
+        <metrica-visor-component></metrica-visor-component>
+    </template>
+
     <template v-if="oppMenuSeleccion==90">
         <mercadolibre-component></mercadolibre-component>
     </template>
