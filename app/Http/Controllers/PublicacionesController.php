@@ -7,6 +7,7 @@ Use Config;
 Use Exception;
 Use Log;
 use App\Publicacion;
+use App\ConfigPublicacion;
 use App\Exports\PublicacionesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use DB;
@@ -55,12 +56,22 @@ class PublicacionesController extends Controller
             ->whereIn('publicacion.estatus', $estatusPublicacion);
             
         }else{
+            $configPublicacion = ConfigPublicacion::join('producto','producto.id_producto','=','config_publicacion.id_producto')
+            ->select('config_publicacion.id_publicacion')
+            ->where('producto.codigo', '=', $buscar)
+            ->get();
+
+
+
             $publicaciones = Publicacion::with('config')            
             ->select('publicacion.id_publicacion' ,'publicacion.id_tienda' ,'publicacion.id_cuenta_tienda' ,'publicacion.id_publicacion_tienda' ,'publicacion.id_variante_publicacion' ,'publicacion.titulo' ,'publicacion.nombre_variante' ,'publicacion.precio' ,'publicacion.stock' ,'publicacion.ventas' ,'publicacion.visitas', 'publicacion.envio_gratis' ,'publicacion.full' ,'publicacion.link' ,'publicacion.foto_mini' ,'publicacion.fecha_consulta' ,'publicacion.estatus', 'publicacion.tipo_listing','publicacion.costo_envio','publicacion.comision_venta','publicacion.iva','publicacion.isr','publicacion.neto_venta_final','publicacion.ultimo_precio_compra',DB::raw('publicacion.neto_venta_final - publicacion.ultimo_precio_compra as neto'), DB::raw('round(((publicacion.neto_venta_final - publicacion.ultimo_precio_compra)/publicacion.ultimo_precio_compra)*100,0) as p_neto') )
             ->where('publicacion.id_cuenta_tienda', '=', $idCuentaTienda)
-            ->where('publicacion.'.$criterio, 'like', '%' . $buscar . '%')            
+            ->where(function ($query) use ($criterio, $buscar, $configPublicacion){
+                $query->where('publicacion.'.$criterio, 'like', '%' . $buscar . '%') 
+                ->orWhereIn('publicacion.id_publicacion', $configPublicacion);
+            })            
             ->whereIn('publicacion.estatus', $estatusPublicacion);
-                      
+                    
         }
 
         if(!($utilidad->verde && $utilidad->amarilla && $utilidad->roja)){

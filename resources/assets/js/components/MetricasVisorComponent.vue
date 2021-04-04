@@ -217,8 +217,7 @@
                                                     <th>Fecha</th>
                                                     <th>Ventas</th>
                                                     <th>Ventas Dia</th>
-                                                    <th>Visitas</th>
-                                                    <th>Incapacidad</th>
+                                                    <th>Visitas</th>                                                    
                                                     <th>Precio</th>
                                                     <th>Disponibles</th>
                                                     <th>Full</th>
@@ -233,8 +232,7 @@
                                                     <td v-text="metrica.fecha_consulta"></td>
                                                     <td v-text="metrica.ventas"></td>
                                                     <td v-text="metrica.ventasDia"></td>
-                                                    <td v-text="metrica.visitas"></td>
-                                                    <td><span v-text="metrica.porcentaje"></span>%</td>
+                                                    <td v-text="metrica.visitas"></td>                                                    
                                                     <td v-text="metrica.precio"></td>
                                                     <td v-text="metrica.disponibles"></td>
 
@@ -510,8 +508,9 @@
 
             onGenerarGraficoVentas(){
                 let varTotalVentas = [];
+                let varTotalDiaVentas = [];
                 let varDiaVentas = [];
-                let varPorVisitas = [];
+                let varPorVisitas = [];                
 
 
                 
@@ -520,11 +519,16 @@
 
                 for(let i=0; i<this.modalDetalleMetrica.historicoMetricas.length;i++){
                     let metrica = this.modalDetalleMetrica.historicoMetricas[i];
+
+                    if(i>=1){
+                        varTotalDiaVentas.push(metrica.ventas - this.modalDetalleMetrica.historicoMetricas[i-1].ventas);   
+                    }else{                        
+                        varTotalDiaVentas.push(0);   
+                    }
                     varDiaVentas.push(metrica.fecha_consulta);
                     varTotalVentas.push(metrica.ventas);
-                    varPorVisitas.push(metrica.porcentajeVentas);                    
-                }
-
+                    varPorVisitas.push(metrica.porcentajeVentas);
+                }               
 
                 let ctx = document.getElementById('canvasGrafico').getContext('2d');
 
@@ -541,14 +545,7 @@
                         fill: false,
                         pointRadius: 5,
                         pointHoverRadius: 15,
-                        data: varTotalVentas
-                    }, {
-                        type: 'bar',
-                        label: 'VISITAS',
-                        backgroundColor: 'rgba(162, 227, 22, 1)',
-                        data: varPorVisitas,
-                        borderColor: 'white',
-                        borderWidth: 2
+                        data: varTotalDiaVentas
                     }]
 
                 };
@@ -650,6 +647,7 @@
                             
 
                             if(i>=1){
+                                
                                 let anterior = me.modalDetalleMetrica.historicoMetricas[i-1];
                                 let ventasDia = metrica.ventas - anterior.ventas;
                                 let visitasDia = metrica.visitas;

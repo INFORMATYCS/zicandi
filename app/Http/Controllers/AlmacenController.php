@@ -794,7 +794,29 @@ class AlmacenController extends Controller{
         }                 
     }
 
+    public function removeUbicacion(Request $request){
+        DB::beginTransaction();
+        try{
+            //~Determina si hay detalle para la ubicacion
+            $detalle = StockUbicaProducto::where('codigo_ubica','=', $request->ubicacion)->first();
 
+            if($detalle!=null){                
+                return [ 'xstatus'=>false, 'error' => 'No puedes borrar la ubicacion mientras tenga productos' ];
+            }
+
+            $ubica = CatUbicaProducto::where('codigo','=', $request->ubicacion)->first();
+            $ubica->delete();
+
+            DB::commit();  
+
+            return [ 'xstatus'=>true];
+        }catch (\Exception $e) {
+            DB::rollBack();
+
+            \Log::error($e->getTraceAsString());       
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
+        }                 
+    }
 
     /**
      * Consulta el detalle/resumen por ubicacion
@@ -1002,8 +1024,12 @@ class AlmacenController extends Controller{
             $tempCargaStock = TempCargaStock::all();
 
             foreach($tempCargaStock as $t){
-                $t->producto = Producto::findOrFail($t->id_producto);
-                $t->almacen = Almacen::findOrFail($t->id_almacen);
+                $t->producto = Producto::find($t->id_producto);
+                if($t->producto == null){
+                    $t->producto = array('url_imagen'=>'','codigo'=>$t->codigo_producto,'nombre'=>'No localizado');
+                }
+
+                $t->almacen = Almacen::find($t->id_almacen);
             }
 
             
