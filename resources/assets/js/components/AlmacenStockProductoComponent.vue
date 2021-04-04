@@ -251,86 +251,152 @@
 
                     </div>
                     <div class="modal-body">
-                        <div class="row">
-                            <div class="col-1">
-                                <button type="button" class="btn btn-warning btn-sm" @click="onCargaDetalleUbicacion('origen','ticket')">
-                                    <i class="icon-printer"></i>
-                                </button>
-                            </div>
-                            <div class="col-4"> 
-                                <select class="form-control" v-model="modalTareasUbicacion.codigoOrigen" @change="onCargaDetalleUbicacion('origen','consulta')">
-                                    <option value="0" disabled>Seleccione...</option>
-                                    <option v-for="newUbica in mapUbicaciones" :key="newUbica.codigo" :value="newUbica.codigo" v-text="newUbica.nombre"></option>                                    
-                                </select>
-                            </div>
-                            <div class="col-2">
-                                <h1>=></h1>
-                            </div>
-                            <div class="col-1">
-                                <button type="button" class="btn btn-warning btn-sm" @click="onCargaDetalleUbicacion('destino','ticket')">
-                                    <i class="icon-printer"></i>
-                                </button>
-                            </div>
-                            <div class="col-4">
-                                <select class="form-control" v-model="modalTareasUbicacion.codigoDestino" @change="onCargaDetalleUbicacion('destino', 'consulta')">
-                                    <option value="0" disabled>Seleccione...</option>
-                                    <option v-for="newUbica in mapUbicaciones" :key="newUbica.codigo" :value="newUbica.codigo" v-text="newUbica.nombre"></option>                                    
-                                </select>
+                        <ul class="nav nav-tabs nav-justified">
+                            <li class="nav-item">
+                                <a class="nav-link" @click="setActive('cat_ubica')" :class="{ active: isActive('cat_ubica') }" href="#cat_ubica">Catalogo</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" @click="setActive('unificacion')" :class="{ active: isActive('unificacion') }" href="#unificacion">Unificar</a>
+                            </li>
+                        </ul>
 
+                        <div class="tab-content py-3" id="myTabContent">
+                    
+                            <div class="tab-pane fade" :class="{ 'active show': isActive('cat_ubica') }" id="cat_ubica">
+                                <div class="row">
+                                    <div class="col-2">
+                                        <button type="button" class="btn btn-warning btn-sm" @click="onCargaDetalleUbicacion('origen','ticket')">
+                                            <i class="icon-printer"></i>
+                                        </button>
+
+                                        <button type="button" class="btn btn-danger btn-sm" @click="onEliminarUbicacion()">
+                                            <i class="icon-trash"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-primary btn-sm" @click="showModal('cat_ubicacion','mostrar')">
+                                            <i class="icon-plus"></i>
+                                        </button>
+                                    </div>
+                                    <div class="col-3"> 
+                                        <select class="form-control" v-model="modalTareasUbicacion.codigoOrigen" @change="onCargaDetalleUbicacion('origen','consulta')">
+                                            <option value="0" disabled>Seleccione...</option>
+                                            <option v-for="newUbica in mapUbicaciones" :key="newUbica.codigo" :value="newUbica.codigo" v-text="newUbica.nombre"></option>                                    
+                                        </select>
+                                    </div>
+                                    <div class="col-7">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <ul class="list-group">
+                                                    <li class="list-group-item">
+                                                        <div class="row">
+                                                            <div class="col-3"><strong>Codigo</strong></div>
+                                                            <div class="col-6"><strong>Producto</strong></div>
+                                                            <div class="col-3"><strong>Stock</strong></div>
+                                                        </div>
+                                                    </li>                                
+
+                                                    <li class="list-group-item" v-for="detalle in modalTareasUbicacion.detalleOrigen" :key="detalle.codigo">                                    
+                                                        <div class="row">
+                                                            <div class="col-3" v-text="detalle.codigo"></div>
+                                                            <div class="col-6" v-text="detalle.nombre"></div>
+                                                            <div class="col-3" v-text="detalle.stock"></div>
+                                                        </div>
+                                                    </li>                                                               
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                                                        
+                                </div>
                             </div>
+
+                            <div class="tab-pane fade" :class="{ 'active show': isActive('unificacion') }" id="unificacion">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-1">
+                                            <button type="button" class="btn btn-warning btn-sm" @click="onCargaDetalleUbicacion('origen','ticket')">
+                                                <i class="icon-printer"></i>
+                                            </button>
+                                        </div>
+                                        <div class="col-4"> 
+                                            <select class="form-control" v-model="modalTareasUbicacion.codigoOrigen" @change="onCargaDetalleUbicacion('origen','consulta')">
+                                                <option value="0" disabled>Seleccione...</option>
+                                                <option v-for="newUbica in mapUbicaciones" :key="newUbica.codigo" :value="newUbica.codigo" v-text="newUbica.nombre"></option>                                    
+                                            </select>
+                                        </div>
+                                        <div class="col-2">
+                                            <h1>=></h1>
+                                        </div>
+                                        <div class="col-1">
+                                            <button type="button" class="btn btn-warning btn-sm" @click="onCargaDetalleUbicacion('destino','ticket')">
+                                                <i class="icon-printer"></i>
+                                            </button>
+                                        </div>
+                                        <div class="col-4">
+                                            <select class="form-control" v-model="modalTareasUbicacion.codigoDestino" @change="onCargaDetalleUbicacion('destino', 'consulta')">
+                                                <option value="0" disabled>Seleccione...</option>
+                                                <option v-for="newUbica in mapUbicaciones" :key="newUbica.codigo" :value="newUbica.codigo" v-text="newUbica.nombre"></option>                                    
+                                            </select>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <ul class="list-group">
+                                                <li class="list-group-item">
+                                                    <div class="row">
+                                                        <div class="col-3"><strong>Codigo</strong></div>
+                                                        <div class="col-6"><strong>Producto</strong></div>
+                                                        <div class="col-3"><strong>Stock</strong></div>
+                                                    </div>
+                                                </li>                                
+
+                                                <li class="list-group-item" v-for="detalle in modalTareasUbicacion.detalleOrigen" :key="detalle.codigo">                                    
+                                                    <div class="row">
+                                                        <div class="col-3" v-text="detalle.codigo"></div>
+                                                        <div class="col-6" v-text="detalle.nombre"></div>
+                                                        <div class="col-3" v-text="detalle.stock"></div>
+                                                    </div>
+                                                </li>                                                               
+                                            </ul>
+                                        </div>
+                                    
+                                        <div class="col-md-2">
+                                        
+                                        </div>
+                                        <div class="col-md-5">
+                                            <ul class="list-group">
+                                                <li class="list-group-item">
+                                                    <div class="row">
+                                                        <div class="col-3"><strong>Codigo</strong></div>
+                                                        <div class="col-6"><strong>Producto</strong></div>
+                                                        <div class="col-3"><strong>Stock</strong></div>
+                                                    </div>
+                                                </li>                                
+
+                                                <li class="list-group-item" v-for="detalle in modalTareasUbicacion.detalleDestino" :key="detalle.codigo">                                    
+                                                    <div class="row">
+                                                        <div class="col-3" v-text="detalle.codigo"></div>
+                                                        <div class="col-6" v-text="detalle.nombre"></div>
+                                                        <div class="col-3" v-text="detalle.stock"></div>
+                                                    </div>
+                                                </li>                                                               
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <button type="button" class="btn btn-primary" @click="onUnificarUbicaciones();">Unificar</button>                                            
+                                </div>    
+                            </div>
+
+
+                            
                         </div>
 
-
-                        <div class="row">
-                            <div class="col-md-5">
-                                <ul class="list-group">
-                                    <li class="list-group-item">
-                                        <div class="row">
-                                            <div class="col-3"><strong>Codigo</strong></div>
-                                            <div class="col-6"><strong>Producto</strong></div>
-                                            <div class="col-3"><strong>Stock</strong></div>
-                                        </div>
-                                    </li>                                
-
-                                    <li class="list-group-item" v-for="detalle in modalTareasUbicacion.detalleOrigen" :key="detalle.codigo">                                    
-                                        <div class="row">
-                                            <div class="col-3" v-text="detalle.codigo"></div>
-                                            <div class="col-6" v-text="detalle.nombre"></div>
-                                            <div class="col-3" v-text="detalle.stock"></div>
-                                        </div>
-                                    </li>                                                               
-                                </ul>
-                            </div>
-                        
-                            <div class="col-md-2">
-                               
-                            </div>
-                            <div class="col-md-5">
-                                <ul class="list-group">
-                                    <li class="list-group-item">
-                                        <div class="row">
-                                            <div class="col-3"><strong>Codigo</strong></div>
-                                            <div class="col-6"><strong>Producto</strong></div>
-                                            <div class="col-3"><strong>Stock</strong></div>
-                                        </div>
-                                    </li>                                
-
-                                    <li class="list-group-item" v-for="detalle in modalTareasUbicacion.detalleDestino" :key="detalle.codigo">                                    
-                                        <div class="row">
-                                            <div class="col-3" v-text="detalle.codigo"></div>
-                                            <div class="col-6" v-text="detalle.nombre"></div>
-                                            <div class="col-3" v-text="detalle.stock"></div>
-                                        </div>
-                                    </li>                                                               
-                                </ul>
-                            </div>
-                        </div>
-                        
-                       
                     </div>
                     
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" @click="onUnificarUbicaciones();">Unificar</button>                        
+                    <div class="modal-footer">                        
                         <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>                        
                     </div>
                 </div>
@@ -356,17 +422,23 @@
                         <div class="list-group">                            
                             <div class="list-group-item list-group-item-action" v-for="orden in detalleSeleccion" :key="orden.id_stock_producto">
                                 <div class="row">                    
-                                    <div class="col-md-2">
-                                        <img :src="orden.url_imagen" alt="dog">
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <img :src="orden.url_imagen" alt="dog">
+                                            </div>
+                                            <div class="col-md-5">
+                                                <div v-text="orden.nombre"></div>
+                                                <div><strong v-text="orden.codigo"></strong></div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <span v-text="orden.disponible"></span>&nbsp;/&nbsp;<span class="text-muted" v-text="orden.retenido"></span>
+                                            </div>
+                                        </div>
+                                        
                                     </div>
-                                    <div class="col-md-4">
-                                        <div v-text="orden.nombre"></div>
-                                        <div><strong v-text="orden.codigo"></strong></div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <span v-text="orden.disponible"></span>&nbsp;/&nbsp;<span class="text-muted" v-text="orden.retenido"></span>
-                                    </div>
-                                    <div class="col-md-4">
+                                    
+                                    <div class="col-md-6">
                                         
                                             <div v-for="ubica in orden.ubicacion_stock" :key="ubica.codigo_ubica">
                                                 <div class="row">
@@ -378,11 +450,15 @@
                                                     <div class="col-3">
                                                         <strong v-text="ubica.codigo_ubica"></strong>&nbsp;<span class="text-muted" v-text="ubica.stock"></span>
                                                     </div>
-                                                    <div class="col-4">                                                        
+                                                    <div class="col-3">                                                        
                                                         <input type="text" style="width:100%;" class="form-control" v-model="ubica.nuevoStock">
                                                     </div>
                                                     <div class="col-3">
                                                         <input type="text" style="width:100%;" class="form-control" v-model="ubica.setStock" v-if="chkModoSet" @keyup.enter="onCaculaNuevoStock(ubica)">
+                                                    </div>
+                                                    <div class="col-2">
+                                                        <div class="badge badge-pill badge-danger" v-if="ubica.nuevoStock<0">RETIRO</div>
+                                                        <div class="badge badge-pill badge-success" v-if="ubica.nuevoStock>0">INGRESO</div>
                                                     </div>
                                                 </div>
                                                 
@@ -444,7 +520,7 @@
                 <form>
                 <div class="form-group">
                     <label for="recipient-name" class="col-form-label">Codigo:</label>
-                    <input type="text" class="form-control" v-model="modalCatUbicacion.codigo">
+                    <input type="text" class="form-control" v-model="modalCatUbicacion.codigo" @keyup="modalCatUbicacion.nombre=modalCatUbicacion.codigo">
                 </div>
                 <div class="form-group">
                     <label for="message-text" class="col-form-label">Nombre:</label>
@@ -543,6 +619,7 @@
     export default {
         data(){
             return{       
+                activeItem: 'cat_ubica',
                 isLoading: 0,        
                 mapAlmacen:[],
                 mapUbicaciones:[],
@@ -1001,8 +1078,6 @@
 
             //~Crea nueva ubicacion
             onNuevaUbicacionOrden(orden){     
-                console.log(orden);
-                console.log(orden.nuevaUbicacionSelect);
 
                 if(orden.nuevaUbicacionSelect=="_new_"){
                     this.showModal('cat_ubicacion','mostrar');
@@ -1034,7 +1109,7 @@
             //~Reinicia todos los componentes
             onReiniciarCapturaOrden(){
                 
-                this.idAlmacenSeleccion=  0;
+                //this.idAlmacenSeleccion=  0;
                 this.buscador= '';                
                 this.resumenAlmacenSeleccion.totalProductos= 0;
                 this.resumenAlmacenSeleccion.totalStock=0;
@@ -1061,6 +1136,7 @@
                 this.onGetMapAlmacen();
                 this.onGetMapAlmacenUbicacion();
                 this.onGeneraLoteReferencia();
+                this.onResumenAlmacen();
 
 
             },
@@ -1322,6 +1398,37 @@
 
             },
 
+            onEliminarUbicacion(){
+                let me = this;                
+                let codigoOrigen = this.modalTareasUbicacion.codigoOrigen;                
+
+                if(me.modalTareasUbicacion.detalleOrigen.length > 0){
+                    util.MSG('Algo salio Mal!', 'La ubicacion no esta vacia', util.tipoErr);
+                    return;
+                }
+
+
+                this.isLoading = 1;
+                axios.post('/zicandi/public/almacenes/cat_ubica/remove',{
+                        'ubicacion': codigoOrigen                      
+                })
+                .then(function (response) {  
+                    me.isLoading = 0;           
+                    console.log(response);                
+                    if(response.data.xstatus){ 
+                        me.onGetMapAlmacenUbicacion();
+                        util.AVISO('Perfecto, se borro la ubicacion', util.tipoOk);                       
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+                                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+
+            },
 
             onStoreUbicacionAlmacen(){
                 let me = this;                
@@ -1439,6 +1546,20 @@
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
 
+            },
+            isActive (menuItem) {
+                return this.activeItem === menuItem
+            },
+            setActive (menuItem) {
+                this.activeItem = menuItem
+
+                if(menuItem=="cat_ubica"){
+                    //this.onResumenMigracionBett();
+                }
+
+                if(menuItem=="unificacion"){
+                    //this.onGetProcesosBatch();
+                }
             },
 
         },
