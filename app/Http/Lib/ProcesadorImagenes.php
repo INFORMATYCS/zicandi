@@ -224,4 +224,22 @@ class ProcesadorImagenes{
 
         return $destinationPath."/".$nombreSalida;
     }
+
+    /***
+     * Publica imagen mini proyecto metricas
+     * 
+     * 
+     * 
+     */
+    public function publicaImagenMiniMetrica($configImagen){           
+        $repositorio = Config::get('zicandi.repositorio.entrada.metricas');
+
+        
+        
+        $base64_string = $configImagen['b64'];
+        $nombre_archivo = $configImagen['nombre'];
+
+        return $_SERVER["HTTP_REFERER"].$this->creaImagen("mini_metrica_", $nombre_archivo, $base64_string, $repositorio, 200, 200, true);
+        
+    }
 }

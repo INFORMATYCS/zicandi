@@ -19,9 +19,13 @@
             <div class="card">
                 <div class="card-header">
                     <i class="fa fa-align-justify"></i> Tareas:
-                    <button type="button" class="btn btn-secondary" @click="showModal('metrica','registrar')">
-                        <i class="icon-plus"></i>&nbsp;Nuevo
-                    </button>                    
+                    <button type="button" class="btn btn-primary" @click="showModal('metrica','registrar')">
+                        <i class="icon-plus"></i>&nbsp;Nueva metrica
+                    </button>             
+                    &nbsp;&nbsp;   
+                    <button type="button" class="btn btn-secondary" @click="showModal('metrica','proyecto')">
+                        <i class="icon-plus"></i>&nbsp;Nuevo Proyecto
+                    </button>     
                 </div>   
             </div>
             
@@ -32,11 +36,11 @@
                     <div class="col-md-6">
                         <div class="input-group">   
                             <select class="form-control col-md-3" v-model="buscadorGrid.criterio">
-                                <option value="ACT">Activas</option>
-                                <option value="CAN">Canceladas</option>                                
+                                <option value="1">Activas</option>
+                                <option value="0">Canceladas</option>                                
                             </select>                         
-                            <input type="text" v-model="buscadorGrid.textoBuscar" @keyup.enter="buscarPublicaciones(1, buscadorGrid.textoBuscar, buscadorGrid.criterio, true)" class="form-control" placeholder="Texto a buscar">
-                            <button type="submit" class="btn btn-primary" @click="buscarPublicaciones(1, buscadorGrid.textoBuscar, buscadorGrid.criterio, true)"><i class="fa fa-search"></i> Buscar</button>
+                            <input type="text" v-model="buscadorGrid.textoBuscar" @keyup.enter="buscarProyectos(1, buscadorGrid.textoBuscar, buscadorGrid.criterio, true)" class="form-control" placeholder="Texto a buscar">
+                            <button type="submit" class="btn btn-primary" @click="buscarProyectos(1, buscadorGrid.textoBuscar, buscadorGrid.criterio, true)"><i class="fa fa-search"></i> Buscar proyecto</button>
                         </div>
                     </div>
                 </div>
@@ -46,22 +50,16 @@
                 <table class="table table-bordered table-striped table-sm">
                     <thead>
                         <tr>
-                            <th>Opciones</th>
-                            <th>Alias</th>
-                            <th>Nombre</th>
-                            <th>Pagina Web</th>
-                            <th>Contacto</th>
-                            <th>Estado</th>
+                            <th>Opciones</th>                            
+                            <th>Proyecto</th>
+                            <th>Metrica</th>                            
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="publicacion in buscadorGrid.publicaciones" :key="publicacion.id_meli_metrica_visor">
+                        <tr v-for="proyectos in buscadorGrid.proyectos" :key="proyectos.id_meli_metrica_proyecto">
                             <td>
-                                <button type="button" class="btn btn-primary btn-sm" @click="showModal('metrica','grafico', publicacion)">
-                                    <i class="icon-graph"></i>
-                                </button>
-
-                                <template v-if="publicacion.estatus=='ACT'">
+                               
+                                <template v-if="proyectos.estatus=='1'">
                                     <button type="button" class="btn btn-danger btn-sm" @click="onActivaDesactivaPublicacion(publicacion.id_meli_metrica_visor, publicacion.estatus)">
                                         <i class="icon-trash"></i>
                                     </button>
@@ -74,21 +72,13 @@
                                 </template>
                             </td>                            
                             <td>
-                                <a href="#" @click="onAbrirPublicacionML(publicacion.url)"><img :src="publicacion.foto" alt="dog" width="50px" height="50px"></a>
-                            </td>
-                            <td v-text="publicacion.titulo"></td>
-                            <td>
-                                    <a href="#"  v-text="publicacion.id_publicacion_tienda"></a>
-                            </td>                            
-                            <td>
-                                <div v-if="publicacion.estatus_publicacion=='ACTIVA'">
-                                    <span class="badge badge-success">Activa</span>
+                                <div>
+                                    <img :src="proyectos.foto" alt="dog" width="50px" height="50px">
                                 </div>
-                                <div v-else>
-                                    <span class="badge badge-danger">Pausada</span>
-                                </div>
-                                
+                                <span v-text="proyectos.nombre"></span>
                             </td>
+                            <td>Aqui va la metrica</td>
+                            
                         </tr>                            
                     </tbody>
                 </table>
@@ -272,6 +262,62 @@
         <!--Fin del modal-->
 
 
+        <!--Inicio del modal agregar/actualizar PROYECTO METRICA-->
+        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true" :class="{'mostrar' : modalRegistraProyecto.modal}">
+            <div class="modal-dialog modal-primary modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" v-text="modalRegistraProyecto.tituloModal"></h4>
+                        <button type="button" class="close" aria-label="Close" @click="closeModal();">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="" method="post" enctype="multipart/form-data" class="form-horizontal">
+                            <div class="form-group row">
+                                <label class="col-md-3 form-control-label" for="text-input">Nombre</label>
+                                <div class="col-md-9">                                                                        
+                                    <input type="text" class="form-control" placeholder="Nombre del proyecto" maxlength="30" v-model="modalRegistraProyecto.nombre">                                    
+                                </div>
+                            </div>
+
+                            <div class="form-group">                                                 
+                               
+                                <div class="row">
+                                    <label class="col-md-3 form-control-label" for="text-input">Avatar</label>                                    
+                                    <div class="col-md-3">
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" id="customFileLangLocal" lang="es" accept="image/png, .jpeg, .jpg, image/gif" @change="getImagenLocal">
+                                            <label class="btn btn-primary custom-file-label" for="customFileLangLocal">Seleccionar Archivo</label>                                            
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-3"><img :src="modalRegistraProyecto.imagen.local" alt="Imagen del producto" contain height="100px" width="100px"></div>
+                                </div>
+
+                            </div> 
+
+                            
+
+                            <div v-show="modalRegistraProyecto.errorProveedor" class="form-group row div-error">
+                                <div class="text-center text-error">
+                                    <div v-for="error in modalRegistraProyecto.erroresProveedorMsjList" :key="error" v-text="error"></div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>
+                        <button type="button" class="btn btn-primary" v-if="modalRegistraProyecto.tipoAccion==1" @click="onRegistrarProyecto();">Guardar</button>                        
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!--Fin del modal--> 
+
+
     </main>    
 </template>
 
@@ -281,9 +327,9 @@
         data(){
             return{               
                 buscadorGrid: {
-                     publicaciones: [],
+                     proyectos: [],
                      textoBuscar: '',
-                     criterio: 'ACT'
+                     criterio: '1'
                 },  
 
                 modalRegistraPublicacion   : {
@@ -307,6 +353,21 @@
                     idMeliMetricaVisor:0,
                     fechaInicial: '',
                     fechaFinal: ''
+                },
+
+                modalRegistraProyecto: {
+                    modal: 0,
+                    tituloModal: '',
+                    tipoAccion: 0,
+                    error: 0,
+                    erroresMsjList: [],
+                    nombre: '',
+                    imagen: {
+                        local: '',
+                        nombre: '',
+                        size: 0,
+                        type: ''
+                    },
                 },
 
                 pagination: {
@@ -333,6 +394,40 @@
             Datepicker      
         },
         methods:{
+            buscarProyectos(page, buscar, criterio, aplLoading=false){
+
+                if(aplLoading){
+                    this.isLoading = 1;
+                }
+
+                let me=this;                
+                let url= '/zicandi/public/meli/metricas/proyecto/buscar?page=' + page +'&filtro=' + buscar + '&estatus=' + criterio;
+                axios.get(url)
+                .then(function (response) {       
+                    me.isLoading = 0
+                    console.log(response.data);
+                    if(response.data.xstatus){   
+                        me.buscadorGrid.proyectos = response.data.proyectos.data;
+                        me.pagination = response.data.pagination; 
+                        
+                        
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+              
+                })
+                .catch(function (error) {                    
+                    me.isLoading = 0;
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+
+            /**
+             * Busca publicaciones
+             * 
+             * 
+             * 
+             */
             buscarPublicaciones(page, buscar, criterio, aplLoading=false){
 
                 if(aplLoading){
@@ -400,6 +495,16 @@
 
                                 break;
                             }
+
+                            case 'proyecto':
+                            {
+                                this.modalRegistraProyecto.modal = 1;
+                                this.modalRegistraProyecto.url = '';                                
+                                this.modalRegistraProyecto.tituloModal = 'Registrar proyecto';
+                                this.modalRegistraProyecto.tipoAccion = 1;
+
+                                break;
+                            }
                             
 
 
@@ -415,6 +520,10 @@
 
                 this.modalDetalleMetrica.modal = 0;                
                 this.modalDetalleMetrica.tituloModal = '';
+
+                this.modalRegistraProyecto.modal = 0;                
+                this.modalRegistraProyecto.tituloModal = '';
+
             },
 
             validarProveedor(){
@@ -674,7 +783,44 @@
                     me.isLoading = 0;
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
-            }
+            },
+
+            getImagenLocal(e){                       
+                let file = e.target.files[0];
+                this.modalRegistraProyecto.imagen.nombre = file.name;
+                this.modalRegistraProyecto.imagen.size = file.size;
+                this.modalRegistraProyecto.imagen.type = file.type;                
+                            
+                let reader = new FileReader();
+
+                reader.onload = (e) => {
+                    this.modalRegistraProyecto.imagen.local = e.target.result;                    
+                }
+                reader.readAsDataURL(file);
+            },
+
+
+            onRegistrarProyecto(){                
+                let me = this;
+                this.isLoading = 1;
+                axios.post('/zicandi/public/meli/metricas/proyecto/save',{                    
+                    'nombre': this.modalRegistraProyecto.nombre,                                        
+                    'imagen_local': this.modalRegistraProyecto.imagen.local,
+                    'imagen_nombre': this.modalRegistraProyecto.imagen.nombre,
+                    'imagen_size': this.modalRegistraProyecto.imagen.size,
+                    'imagen_type': this.modalRegistraProyecto.imagen.type                    
+                })
+                .then(function (response) {                    
+                    me.buscar = '';
+                    me.isLoading = 0;
+                    me.closeModal();
+                    util.AVISO('Perfecto, registro correcto', util.tipoOk);                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
             
         },
         mounted() {
@@ -684,7 +830,8 @@
             this.modalDetalleMetrica.fechaFinal = new Date();
             this.modalDetalleMetrica.fechaInicial = hoy30;
 
-            this.buscarPublicaciones(1, this.buscadorGrid.textoBuscar, this.buscadorGrid.criterio, true);
+            //this.buscarPublicaciones(1, this.buscadorGrid.textoBuscar, this.buscadorGrid.criterio, true);
+            this.buscarProyectos(1, this.buscadorGrid.textoBuscar, this.buscadorGrid.criterio, true);
         }
     }
 </script>

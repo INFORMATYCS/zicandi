@@ -51,6 +51,8 @@ Vue.component('enviosfullmeli-component', require('./components/EnviosFullMeliCo
 
 Vue.component('metrica-visor-component', require('./components/MetricasVisorComponent.vue'));
 
+Vue.component('buscar-meli-metrica-component', require('./components/MetricasBuscadorMeliComponent.vue'));
+
 
 
 

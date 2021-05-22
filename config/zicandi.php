@@ -10,7 +10,7 @@ return [
     | 
     |
     */
-    'version'       => 'BETA',
+    'version'       => 'BETA-0.111',
     'entorno'       => 'pruebas', //pruebas | produccion
     'url_public'    => 'http://localhost/zicandi/public/',
 
@@ -48,6 +48,7 @@ return [
             'log_batch'         => 'repositorio/entrada/log_batch/',
             'bettimg'           => 'repositorio/entrada/productos/better_alta_resolucion/',
             'tmp'               => 'repositorio/entrada/tmp/',
+            'metricas'         => 'repositorio/entrada/metrica/proyectos/',
         ],
         'salida'    => [
 

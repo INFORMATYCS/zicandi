@@ -59,6 +59,10 @@
         <metrica-visor-component></metrica-visor-component>
     </template>
 
+    <template v-if="oppMenuSeleccion==22">
+        <buscar-meli-metrica-component></buscar-meli-metrica-component>
+    </template>
+
     <template v-if="oppMenuSeleccion==90">
         <mercadolibre-component></mercadolibre-component>
     </template>
