@@ -80692,6 +80692,100 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -80732,6 +80826,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 tipoAccion: 0,
                 error: 0,
                 erroresMsjList: [],
+                idMeliMetricaProyecto: 0,
                 nombre: '',
                 imagen: {
                     local: '',
@@ -80741,7 +80836,25 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 }
             },
 
+            modalDetalleVisorProyecto: {
+                modal: 0,
+                tituloModal: '',
+                tipoAccion: 0,
+                error: 0,
+                erroresMsjList: [],
+                publicaciones: []
+            },
+
             pagination: {
+                total: 0,
+                current_page: 0,
+                per_page: 0,
+                last_page: 0,
+                from: 0,
+                to: 0
+            },
+
+            paginationPubli: {
                 total: 0,
                 current_page: 0,
                 per_page: 0,
@@ -80760,7 +80873,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         },
         pagesNumber: function pagesNumber() {
             return paginador.getPagesNumber(this.pagination);
+        },
+        isActivedPubli: function isActivedPubli() {
+            return this.paginationPubli.current_page;
+        },
+        pagesNumberPubli: function pagesNumberPubli() {
+            return paginationPubli.getPagesNumber(this.pagination);
         }
+
     },
     components: {
         Datepicker: __WEBPACK_IMPORTED_MODULE_0_vuejs_datepicker__["a" /* default */]
@@ -80812,8 +80932,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 me.isLoading = 0;
 
                 if (response.data.xstatus) {
-                    me.buscadorGrid.publicaciones = response.data.metricas.data;
-                    me.pagination = response.data.pagination;
+                    me.modalDetalleVisorProyecto.publicaciones = response.data.metricas.data;
+                    me.paginationPubli = response.data.pagination;
                 } else {
                     throw new Error(response.data.error);
                 }
@@ -80865,9 +80985,31 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                             case 'proyecto':
                                 {
                                     this.modalRegistraProyecto.modal = 1;
-                                    this.modalRegistraProyecto.url = '';
+                                    this.modalRegistraProyecto.nombre = '';
                                     this.modalRegistraProyecto.tituloModal = 'Registrar proyecto';
                                     this.modalRegistraProyecto.tipoAccion = 1;
+                                    this.modalRegistraProyecto.idMeliMetricaProyecto = 0;
+                                    this.modalRegistraProyecto.imagen.local = null;
+
+                                    break;
+                                }
+
+                            case 'proyecto_edit':
+                                {
+                                    this.modalRegistraProyecto.modal = 1;
+                                    this.modalRegistraProyecto.nombre = data.nombre;
+                                    this.modalRegistraProyecto.tituloModal = 'Modificar proyecto';
+                                    this.modalRegistraProyecto.tipoAccion = 2;
+                                    this.modalRegistraProyecto.idMeliMetricaProyecto = data.id_meli_metrica_proyecto;
+                                    this.modalRegistraProyecto.imagen.local = data.foto;
+
+                                    break;
+                                }
+
+                            case 'deta_publicacion_proyecto':
+                                {
+                                    this.modalDetalleVisorProyecto.modal = 1;
+                                    this.modalDetalleVisorProyecto.tituloModal = 'Publicaciones monitoreadas';
 
                                     break;
                                 }
@@ -80886,6 +81028,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             this.modalRegistraProyecto.modal = 0;
             this.modalRegistraProyecto.tituloModal = '';
+
+            this.modalDetalleVisorProyecto.modal = 0;
+            this.modalDetalleVisorProyecto.tituloModal = '';
         },
         validarProveedor: function validarProveedor() {
             this.modalRegistraPublicacion.error = 0;
@@ -80901,6 +81046,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var me = this;
 
             me.pagination.current_page = page;
+
+            me.buscarPublicaciones(page, buscar, criterio, true);
+        },
+        cambiarPaginaPubli: function cambiarPaginaPubli(page, buscar, criterio) {
+            var me = this;
+
+            me.paginationPubli.current_page = page;
 
             me.buscarPublicaciones(page, buscar, criterio, true);
         },
@@ -81122,6 +81274,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             this.isLoading = 1;
             axios.post('/zicandi/public/meli/metricas/proyecto/save', {
                 'nombre': this.modalRegistraProyecto.nombre,
+                'idMeliMetricaProyecto': this.modalRegistraProyecto.idMeliMetricaProyecto,
                 'imagen_local': this.modalRegistraProyecto.imagen.local,
                 'imagen_nombre': this.modalRegistraProyecto.imagen.nombre,
                 'imagen_size': this.modalRegistraProyecto.imagen.size,
@@ -81131,6 +81284,44 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 me.isLoading = 0;
                 me.closeModal();
                 util.AVISO('Perfecto, registro correcto', util.tipoOk);
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+
+
+        /**
+         * Activa / desactiva proyecto
+         * 
+         * 
+         */
+        onActivaDesactivaProyecto: function onActivaDesactivaProyecto(idMeliMetricaProyecto, estatusActual) {
+            var me = this;
+
+            var estatusNuevo = '';
+
+            if (estatusActual == "1") {
+                estatusNuevo = "0";
+            } else {
+                estatusNuevo = "1";
+            }
+
+            this.isLoading = 1;
+            axios.post('/zicandi/public/meli/metricas/proyecto/xstatus', {
+                'idMeliMetricaProyecto': idMeliMetricaProyecto,
+                'xstatus': estatusNuevo
+            }).then(function (response) {
+                me.isLoading = 0;
+
+                if (response.data.xstatus) {
+
+                    util.AVISO('Se realizo el cambio correctamente', util.tipoOk);
+
+                    me.buscarProyectos(1, me.buscadorGrid.textoBuscar, me.buscadorGrid.criterio, true);
+                } else {
+                    throw new Error(response.data.error);
+                }
             }).catch(function (error) {
                 me.isLoading = 0;
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
@@ -81330,7 +81521,7 @@ var render = function() {
                   _c(
                     "td",
                     [
-                      proyectos.estatus == "1"
+                      proyectos.xstatus == "1"
                         ? [
                             _c(
                               "button",
@@ -81339,9 +81530,9 @@ var render = function() {
                                 attrs: { type: "button" },
                                 on: {
                                   click: function($event) {
-                                    return _vm.onActivaDesactivaPublicacion(
-                                      _vm.publicacion.id_meli_metrica_visor,
-                                      _vm.publicacion.estatus
+                                    return _vm.onActivaDesactivaProyecto(
+                                      proyectos.id_meli_metrica_proyecto,
+                                      proyectos.xstatus
                                     )
                                   }
                                 }
@@ -81357,30 +81548,66 @@ var render = function() {
                                 attrs: { type: "button" },
                                 on: {
                                   click: function($event) {
-                                    return _vm.onActivaDesactivaPublicacion(
-                                      _vm.publicacion.id_meli_metrica_visor,
-                                      _vm.publicacion.estatus
+                                    return _vm.onActivaDesactivaProyecto(
+                                      proyectos.id_meli_metrica_proyecto,
+                                      proyectos.xstatus
                                     )
                                   }
                                 }
                               },
                               [_c("i", { staticClass: "icon-check" })]
                             )
-                          ]
+                          ],
+                      _vm._v(" "),
+                      _c(
+                        "button",
+                        {
+                          staticClass: "btn btn-warning btn-sm",
+                          attrs: { type: "button" },
+                          on: {
+                            click: function($event) {
+                              return _vm.showModal(
+                                "metrica",
+                                "proyecto_edit",
+                                proyectos
+                              )
+                            }
+                          }
+                        },
+                        [_c("i", { staticClass: "icon-pencil" })]
+                      ),
+                      _vm._v("  \n                        ")
                     ],
                     2
                   ),
                   _vm._v(" "),
                   _c("td", [
                     _c("div", [
-                      _c("img", {
-                        attrs: {
-                          src: proyectos.foto,
-                          alt: "dog",
-                          width: "50px",
-                          height: "50px"
-                        }
-                      })
+                      _c(
+                        "a",
+                        {
+                          attrs: { href: "#" },
+                          on: {
+                            click: function($event) {
+                              return _vm.showModal(
+                                "metrica",
+                                "deta_publicacion_proyecto",
+                                proyectos
+                              )
+                            }
+                          }
+                        },
+                        [
+                          _c("img", {
+                            attrs: {
+                              src: proyectos.foto,
+                              alt: "dog",
+                              width: "50px",
+                              height: "50px"
+                            }
+                          })
+                        ]
+                      )
                     ]),
                     _vm._v(" "),
                     _c("span", {
@@ -82165,6 +82392,370 @@ var render = function() {
                       },
                       [_vm._v("Guardar")]
                     )
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.modalRegistraProyecto.tipoAccion == 2
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-primary",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.onRegistrarProyecto()
+                          }
+                        }
+                      },
+                      [_vm._v("Modificar")]
+                    )
+                  : _vm._e()
+              ])
+            ])
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.modalDetalleVisorProyecto.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-primary modal-lg",
+            attrs: { role: "document" }
+          },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c("div", { staticClass: "modal-header" }, [
+                _c("h4", {
+                  staticClass: "modal-title",
+                  domProps: {
+                    textContent: _vm._s(
+                      _vm.modalDetalleVisorProyecto.tituloModal
+                    )
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "close",
+                    attrs: { type: "button", "aria-label": "Close" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeModal()
+                      }
+                    }
+                  },
+                  [
+                    _c("span", { attrs: { "aria-hidden": "true" } }, [
+                      _vm._v("×")
+                    ])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-body" }, [
+                _c(
+                  "form",
+                  {
+                    staticClass: "form-horizontal",
+                    attrs: {
+                      action: "",
+                      method: "post",
+                      enctype: "multipart/form-data"
+                    }
+                  },
+                  [
+                    _c(
+                      "table",
+                      {
+                        staticClass:
+                          "table table-bordered table-striped table-sm"
+                      },
+                      [
+                        _vm._m(4),
+                        _vm._v(" "),
+                        _c(
+                          "tbody",
+                          _vm._l(
+                            _vm.modalDetalleVisorProyecto.publicaciones,
+                            function(publicacion) {
+                              return _c(
+                                "tr",
+                                { key: publicacion.id_meli_metrica_visor },
+                                [
+                                  _c(
+                                    "td",
+                                    [
+                                      _c(
+                                        "button",
+                                        {
+                                          staticClass: "btn btn-warning btn-sm",
+                                          attrs: { type: "button" },
+                                          on: {
+                                            click: function($event) {
+                                              return _vm.showModal(
+                                                "producto",
+                                                "actualizar",
+                                                publicacion
+                                              )
+                                            }
+                                          }
+                                        },
+                                        [
+                                          _c("i", {
+                                            staticClass: "icon-pencil"
+                                          })
+                                        ]
+                                      ),
+                                      _vm._v(
+                                        "  \n                                        "
+                                      ),
+                                      publicacion.estatus
+                                        ? [
+                                            _c(
+                                              "button",
+                                              {
+                                                staticClass:
+                                                  "btn btn-danger btn-sm",
+                                                attrs: { type: "button" },
+                                                on: {
+                                                  click: function($event) {
+                                                    return _vm.desactivarProveedor(
+                                                      publicacion.id_meli_metrica_visor
+                                                    )
+                                                  }
+                                                }
+                                              },
+                                              [
+                                                _c("i", {
+                                                  staticClass: "icon-trash"
+                                                })
+                                              ]
+                                            )
+                                          ]
+                                        : _vm._e()
+                                    ],
+                                    2
+                                  ),
+                                  _vm._v(" "),
+                                  _c("td", [
+                                    _c("div", { staticClass: "row" }, [
+                                      _c("div", { staticClass: "col-3" }, [
+                                        _c("img", {
+                                          attrs: {
+                                            src: publicacion.foto,
+                                            alt: "dog"
+                                          }
+                                        })
+                                      ]),
+                                      _vm._v(" "),
+                                      _c("div", { staticClass: "col-9" }, [
+                                        _c("h6", {
+                                          domProps: {
+                                            textContent: _vm._s(
+                                              publicacion.nombre
+                                            )
+                                          }
+                                        }),
+                                        _vm._v(" "),
+                                        _c("small", {
+                                          staticClass: "text-muted",
+                                          domProps: {
+                                            textContent: _vm._s(
+                                              publicacion.codigo
+                                            )
+                                          }
+                                        })
+                                      ])
+                                    ])
+                                  ])
+                                ]
+                              )
+                            }
+                          ),
+                          0
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c("nav", [
+                      _c(
+                        "ul",
+                        { staticClass: "pagination" },
+                        [
+                          _vm.pagination.current_page > 1
+                            ? _c("li", { staticClass: "page-item" }, [
+                                _c(
+                                  "a",
+                                  {
+                                    staticClass: "page-link",
+                                    attrs: { href: "#" },
+                                    on: {
+                                      click: function($event) {
+                                        $event.preventDefault()
+                                        return _vm.cambiarPagina(
+                                          _vm.pagination.current_page - 1,
+                                          _vm.buscar,
+                                          _vm.criterio
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("Ant")]
+                                )
+                              ])
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _vm._l(_vm.pagesNumber, function(page) {
+                            return _c(
+                              "li",
+                              {
+                                key: page,
+                                staticClass: "page-item",
+                                class: [page == _vm.isActived ? "active" : ""]
+                              },
+                              [
+                                _c("a", {
+                                  staticClass: "page-link",
+                                  attrs: { href: "#" },
+                                  domProps: { textContent: _vm._s(page) },
+                                  on: {
+                                    click: function($event) {
+                                      $event.preventDefault()
+                                      return _vm.cambiarPagina(
+                                        page,
+                                        _vm.buscar,
+                                        _vm.criterio
+                                      )
+                                    }
+                                  }
+                                })
+                              ]
+                            )
+                          }),
+                          _vm._v(" "),
+                          _vm.pagination.current_page < _vm.pagination.last_page
+                            ? _c("li", { staticClass: "page-item" }, [
+                                _c(
+                                  "a",
+                                  {
+                                    staticClass: "page-link",
+                                    attrs: { href: "#" },
+                                    on: {
+                                      click: function($event) {
+                                        $event.preventDefault()
+                                        return _vm.cambiarPagina(
+                                          _vm.pagination.current_page + 1,
+                                          _vm.buscar,
+                                          _vm.criterio
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("Sig")]
+                                )
+                              ])
+                            : _vm._e()
+                        ],
+                        2
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      {
+                        directives: [
+                          {
+                            name: "show",
+                            rawName: "v-show",
+                            value: _vm.modalDetalleVisorProyecto.errorProveedor,
+                            expression:
+                              "modalDetalleVisorProyecto.errorProveedor"
+                          }
+                        ],
+                        staticClass: "form-group row div-error"
+                      },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "text-center text-error" },
+                          _vm._l(
+                            _vm.modalDetalleVisorProyecto
+                              .erroresProveedorMsjList,
+                            function(error) {
+                              return _c("div", {
+                                key: error,
+                                domProps: { textContent: _vm._s(error) }
+                              })
+                            }
+                          ),
+                          0
+                        )
+                      ]
+                    )
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeModal()
+                      }
+                    }
+                  },
+                  [_vm._v("Cerrar")]
+                ),
+                _vm._v(" "),
+                _vm.modalDetalleVisorProyecto.tipoAccion == 1
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-primary",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.onRegistrarProyecto()
+                          }
+                        }
+                      },
+                      [_vm._v("Guardar")]
+                    )
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.modalDetalleVisorProyecto.tipoAccion == 2
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-primary",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.onRegistrarProyecto()
+                          }
+                        }
+                      },
+                      [_vm._v("Modificar")]
+                    )
                   : _vm._e()
               ])
             ])
@@ -82195,7 +82786,7 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c("thead", [
       _c("tr", [
-        _c("th", [_vm._v("Opciones")]),
+        _c("th", { staticStyle: { width: "10px" } }, [_vm._v("Opciones")]),
         _vm._v(" "),
         _c("th", [_vm._v("Proyecto")]),
         _vm._v(" "),
@@ -82252,6 +82843,24 @@ var staticRenderFns = [
         _c("th", [_vm._v("Catalogo")]),
         _vm._v(" "),
         _c("th", [_vm._v("Estatus")])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("thead", [
+      _c("tr", [
+        _c("th", { attrs: { width: "10%;" } }, [_vm._v("Opciones")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Producto")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Precios Compra")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Especificaciones")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Estado")])
       ])
     ])
   }

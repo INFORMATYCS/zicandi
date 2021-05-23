@@ -49,6 +49,7 @@ return [
             'bettimg'           => 'repositorio/entrada/productos/better_alta_resolucion/',
             'tmp'               => 'repositorio/entrada/tmp/',
             'metricas'         => 'repositorio/entrada/metrica/proyectos/',
+            'grafico_metricas' => 'repositorio/entrada/metrica/graficos/',
         ],
         'salida'    => [
 

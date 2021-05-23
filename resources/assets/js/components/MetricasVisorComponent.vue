@@ -50,7 +50,7 @@
                 <table class="table table-bordered table-striped table-sm">
                     <thead>
                         <tr>
-                            <th>Opciones</th>                            
+                            <th style="width:10px">Opciones</th>                            
                             <th>Proyecto</th>
                             <th>Metrica</th>                            
                         </tr>
@@ -59,21 +59,26 @@
                         <tr v-for="proyectos in buscadorGrid.proyectos" :key="proyectos.id_meli_metrica_proyecto">
                             <td>
                                
-                                <template v-if="proyectos.estatus=='1'">
-                                    <button type="button" class="btn btn-danger btn-sm" @click="onActivaDesactivaPublicacion(publicacion.id_meli_metrica_visor, publicacion.estatus)">
+                                <template v-if="proyectos.xstatus=='1'">
+                                    <button type="button" class="btn btn-danger btn-sm" @click="onActivaDesactivaProyecto(proyectos.id_meli_metrica_proyecto, proyectos.xstatus)">
                                         <i class="icon-trash"></i>
                                     </button>
                                 </template>
 
                                 <template v-else>
-                                    <button type="button" class="btn btn-info btn-sm" @click="onActivaDesactivaPublicacion(publicacion.id_meli_metrica_visor, publicacion.estatus)">
+                                    <button type="button" class="btn btn-info btn-sm" @click="onActivaDesactivaProyecto(proyectos.id_meli_metrica_proyecto, proyectos.xstatus)">
                                         <i class="icon-check"></i>
                                     </button>
                                 </template>
+
+                                <button type="button" class="btn btn-warning btn-sm" @click="showModal('metrica','proyecto_edit', proyectos)">
+                                    <i class="icon-pencil"></i>
+                                </button> &nbsp;
                             </td>                            
                             <td>
-                                <div>
-                                    <img :src="proyectos.foto" alt="dog" width="50px" height="50px">
+                                <div>                                
+                                    <a href="#" @click="showModal('metrica','deta_publicacion_proyecto', proyectos)"><img :src="proyectos.foto" alt="dog" width="50px" height="50px"></a>                                
+
                                 </div>
                                 <span v-text="proyectos.nombre"></span>
                             </td>
@@ -308,7 +313,96 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>
-                        <button type="button" class="btn btn-primary" v-if="modalRegistraProyecto.tipoAccion==1" @click="onRegistrarProyecto();">Guardar</button>                        
+                        <button type="button" class="btn btn-primary" v-if="modalRegistraProyecto.tipoAccion==1" @click="onRegistrarProyecto();">Guardar</button>
+                        <button type="button" class="btn btn-primary" v-if="modalRegistraProyecto.tipoAccion==2" @click="onRegistrarProyecto();">Modificar</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!--Fin del modal--> 
+
+
+         <!--Inicio del modal publicaciones dentro del proyecto-->
+        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true" :class="{'mostrar' : modalDetalleVisorProyecto.modal}">
+            <div class="modal-dialog modal-primary modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" v-text="modalDetalleVisorProyecto.tituloModal"></h4>
+                        <button type="button" class="close" aria-label="Close" @click="closeModal();">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="" method="post" enctype="multipart/form-data" class="form-horizontal">
+                            
+                            <!-- Grid -->
+                            <table class="table table-bordered table-striped table-sm">
+                                <thead>
+                                    <tr>
+                                        <th width="10%;">Opciones</th>
+                                        <th>Producto</th>                            
+                                        <th>Precios Compra</th>
+                                        <th>Especificaciones</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="publicacion in modalDetalleVisorProyecto.publicaciones" :key="publicacion.id_meli_metrica_visor">
+                                        <td>
+                                            
+                                            <button type="button" class="btn btn-warning btn-sm" @click="showModal('producto','actualizar', publicacion)">
+                                                <i class="icon-pencil"></i>
+                                            </button> &nbsp;
+                                            <template v-if="publicacion.estatus">
+                                                <button type="button" class="btn btn-danger btn-sm" @click="desactivarProveedor(publicacion.id_meli_metrica_visor)">
+                                                    <i class="icon-trash"></i>
+                                                </button>
+                                            </template>
+
+                                        </td>
+                                        <td>               
+                                            <div class="row">                 
+                                                <div class="col-3">
+                                                    <img :src="publicacion.foto" alt="dog"> 
+                                                </div>
+                                                <div class="col-9">
+                                                    <h6 v-text="publicacion.nombre"></h6>
+                                                    <small class="text-muted" v-text="publicacion.codigo"></small>                                    
+                                                </div>          
+                                            </div>
+                                        </td>                            
+                                        
+                                    </tr>                            
+                                </tbody>
+                            </table>
+                            <nav>
+                                <ul class="pagination">
+                                    <li class="page-item" v-if="pagination.current_page > 1">
+                                        <a class="page-link" href="#" @click.prevent="cambiarPagina(pagination.current_page-1, buscar, criterio)">Ant</a>
+                                    </li>
+                                    <li class="page-item" v-for="page in pagesNumber" :key="page" :class="[page == isActived ? 'active' : '']">
+                                        <a class="page-link" href="#" @click.prevent="cambiarPagina(page, buscar, criterio)" v-text="page"></a>
+                                    </li>                           
+                                    <li class="page-item" v-if="pagination.current_page < pagination.last_page">
+                                        <a class="page-link" href="#" @click.prevent="cambiarPagina(pagination.current_page+1, buscar, criterio)">Sig</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                            
+
+                            <div v-show="modalDetalleVisorProyecto.errorProveedor" class="form-group row div-error">
+                                <div class="text-center text-error">
+                                    <div v-for="error in modalDetalleVisorProyecto.erroresProveedorMsjList" :key="error" v-text="error"></div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>
+                        <button type="button" class="btn btn-primary" v-if="modalDetalleVisorProyecto.tipoAccion==1" @click="onRegistrarProyecto();">Guardar</button>
+                        <button type="button" class="btn btn-primary" v-if="modalDetalleVisorProyecto.tipoAccion==2" @click="onRegistrarProyecto();">Modificar</button>
                     </div>
                 </div>
                 <!-- /.modal-content -->
@@ -361,6 +455,7 @@
                     tipoAccion: 0,
                     error: 0,
                     erroresMsjList: [],
+                    idMeliMetricaProyecto:0,
                     nombre: '',
                     imagen: {
                         local: '',
@@ -370,7 +465,25 @@
                     },
                 },
 
+                modalDetalleVisorProyecto   : {
+                    modal: 0,
+                    tituloModal: '',
+                    tipoAccion: 0,
+                    error: 0,
+                    erroresMsjList: [],
+                    publicaciones:[]
+                },
+
                 pagination: {
+                    total : 0,
+                    current_page  : 0,
+                    per_page : 0,
+                    last_page : 0,
+                    from : 0,
+                    to : 0                    
+                },
+
+                paginationPubli: {
                     total : 0,
                     current_page  : 0,
                     per_page : 0,
@@ -388,7 +501,16 @@
             },
             pagesNumber: function(){
                return  paginador.getPagesNumber(this.pagination);                
+            },
+            isActivedPubli: function(){
+                return this.paginationPubli.current_page;
+            },
+            pagesNumberPubli: function(){
+               return  paginationPubli.getPagesNumber(this.pagination);                
             }
+
+
+            
         },
         components: {      
             Datepicker      
@@ -441,9 +563,9 @@
                     me.isLoading = 0
 
                     if(response.data.xstatus){   
-                        me.buscadorGrid.publicaciones = response.data.metricas.data;
-                        me.pagination = response.data.pagination; 
-                        
+                        me.modalDetalleVisorProyecto.publicaciones = response.data.metricas.data;
+                        me.paginationPubli = response.data.pagination; 
+
                         
                     }else{
                         throw new Error(response.data.error);
@@ -499,12 +621,38 @@
                             case 'proyecto':
                             {
                                 this.modalRegistraProyecto.modal = 1;
-                                this.modalRegistraProyecto.url = '';                                
+                                this.modalRegistraProyecto.nombre = '';                                
                                 this.modalRegistraProyecto.tituloModal = 'Registrar proyecto';
                                 this.modalRegistraProyecto.tipoAccion = 1;
+                                this.modalRegistraProyecto.idMeliMetricaProyecto = 0;
+                                this.modalRegistraProyecto.imagen.local = null;
 
                                 break;
                             }
+
+                            case 'proyecto_edit':
+                            {
+                                this.modalRegistraProyecto.modal = 1;
+                                this.modalRegistraProyecto.nombre = data.nombre;
+                                this.modalRegistraProyecto.tituloModal = 'Modificar proyecto';
+                                this.modalRegistraProyecto.tipoAccion = 2;
+                                this.modalRegistraProyecto.idMeliMetricaProyecto = data.id_meli_metrica_proyecto;
+                                this.modalRegistraProyecto.imagen.local = data.foto;
+
+                                break;
+                            }
+
+                            case 'deta_publicacion_proyecto':
+                            {
+                                this.modalDetalleVisorProyecto.modal = 1;                                
+                                this.modalDetalleVisorProyecto.tituloModal = 'Publicaciones monitoreadas';
+                                
+
+                                break;
+                            }
+
+
+                            
                             
 
 
@@ -524,6 +672,8 @@
                 this.modalRegistraProyecto.modal = 0;                
                 this.modalRegistraProyecto.tituloModal = '';
 
+                this.modalDetalleVisorProyecto.modal = 0;                
+                this.modalDetalleVisorProyecto.tituloModal = '';
             },
 
             validarProveedor(){
@@ -541,6 +691,14 @@
                 let me = this;
 
                 me.pagination.current_page = page;
+
+                me.buscarPublicaciones(page, buscar, criterio, true);
+            },
+
+            cambiarPaginaPubli(page, buscar, criterio){
+                let me = this;
+
+                me.paginationPubli.current_page = page;
 
                 me.buscarPublicaciones(page, buscar, criterio, true);
             },
@@ -804,7 +962,8 @@
                 let me = this;
                 this.isLoading = 1;
                 axios.post('/zicandi/public/meli/metricas/proyecto/save',{                    
-                    'nombre': this.modalRegistraProyecto.nombre,                                        
+                    'nombre': this.modalRegistraProyecto.nombre, 
+                    'idMeliMetricaProyecto': this.modalRegistraProyecto.idMeliMetricaProyecto,                                       
                     'imagen_local': this.modalRegistraProyecto.imagen.local,
                     'imagen_nombre': this.modalRegistraProyecto.imagen.nombre,
                     'imagen_size': this.modalRegistraProyecto.imagen.size,
@@ -821,6 +980,49 @@
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
             },
+            
+            /**
+             * Activa / desactiva proyecto
+             * 
+             * 
+             */
+            onActivaDesactivaProyecto(idMeliMetricaProyecto, estatusActual){
+                let me = this;                
+                
+                let estatusNuevo = '';
+
+                if(estatusActual == "1"){
+                    estatusNuevo = "0";
+                }else{
+                    estatusNuevo = "1";
+                }
+
+
+                this.isLoading = 1;
+                axios.post('/zicandi/public/meli/metricas/proyecto/xstatus',{
+                        'idMeliMetricaProyecto': idMeliMetricaProyecto,
+                        'xstatus': estatusNuevo
+                })
+                .then(function (response) {  
+                    me.isLoading = 0;           
+                    
+                    if(response.data.xstatus){ 
+                        
+                        util.AVISO('Se realizo el cambio correctamente', util.tipoOk);
+                        
+                        me.buscarProyectos(1, me.buscadorGrid.textoBuscar, me.buscadorGrid.criterio, true);
+                       
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+                                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+
+            }
             
         },
         mounted() {

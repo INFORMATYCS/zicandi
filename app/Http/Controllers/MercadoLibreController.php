@@ -23,6 +23,7 @@ use App\Producto;
 use App\MeliMetricaVisor;
 use App\MeliDetaMetricaVisor;
 use App\MeliMetricaProyecto;
+use App\MeliMetricaVisorProyecto;
 
 class MercadoLibreController extends Controller
 {
@@ -895,6 +896,7 @@ class MercadoLibreController extends Controller
         try{            
 
             $url = $request->url;
+            $idMeliMetricaProyecto = $request->idMeliMetricaProyecto;
 
             // create curl resource
             $ch = curl_init();
@@ -936,6 +938,10 @@ class MercadoLibreController extends Controller
                 }
 
                 $final = strpos($output, '<span class="andes-button__content">Comprar ahora');
+		        if($final == false){
+                    $final = strpos($output, '<span class="andes-button__content">Agregar al carrito');
+                }
+		
 
                 $html = substr($output, $inicial, $final - $inicial);
 
@@ -998,6 +1004,20 @@ class MercadoLibreController extends Controller
                     $respMetricas = $metrica["metrica"];
                 }
 
+                //~Liga la publicacion al proyecto
+                $meliMetricaVisorProyecto = MeliMetricaVisorProyecto::where('id_meli_metrica_proyecto','=', $idMeliMetricaProyecto)
+                ->where('id_meli_metrica_visor','=', $meliMetricaVisor->id_meli_metrica_visor)
+                ->first();
+                                
+                if($meliMetricaVisorProyecto == null){
+                    $meliMetricaVisorProyecto = new MeliMetricaVisorProyecto();
+                    $meliMetricaVisorProyecto->id_meli_metrica_proyecto = $idMeliMetricaProyecto;
+                    $meliMetricaVisorProyecto->id_meli_metrica_visor = $meliMetricaVisor->id_meli_metrica_visor;
+                    $meliMetricaVisorProyecto->save();
+                }
+
+                
+
                 return [ 'xstatus'=>true, 'metrica' => $respMetricas, 'publicacion' => $publicacion];
             }else{
                 throw new Exception('Publicacion pausada, no es posible registrarla');
@@ -1017,7 +1037,7 @@ class MercadoLibreController extends Controller
      * 
      */
     public function metricaPublicacionVisor(Request $request){        
-        try{
+        try{                                   
             $url = $request->url;
             $idMeliMetricaVisor = $request->id_meli_metrica_visor;
             
@@ -1046,6 +1066,9 @@ class MercadoLibreController extends Controller
                 }
 
                 $final = strpos($output, '<span class="andes-button__content">Comprar ahora');
+		        if($final == false){
+                    $final = strpos($output, '<span class="andes-button__content">Agregar al carrito');
+                }
 
                 $html = substr($output, $inicial, $final - $inicial);
             }
@@ -1198,6 +1221,34 @@ class MercadoLibreController extends Controller
                 ->update(['estatus_publicacion'=>'PAUSADA']);
             }
 
+            //~Genera el gafico rapido
+            $sql= " select fecha_consulta, ventas, visitas from (
+                select fecha_consulta, ventas, visitas from meli_deta_metrica_visor
+                where id_meli_metrica_visor = ".$idMeliMetricaVisor."
+                order by fecha_consulta desc
+                limit 30) x
+                order by fecha_consulta asc";
+
+
+            $rs = DB::select( $sql );
+
+            //~Crea array de ventas y visitas
+            $ventasValues = array();
+            $visitasValues = array();
+            foreach($rs as $venta){                
+                array_push($ventasValues, $venta->ventas + 1);
+                array_push($visitasValues, $venta->visitas + 1);
+            }            
+
+            $procesadorImagenes = new ProcesadorImagenes();
+
+            $graphVentas = $procesadorImagenes->creaGraficaPlanaMetricas($ventasValues, "g_ventas_".$idMeliMetricaVisor);
+            $graphVisitas = $procesadorImagenes->creaGraficaPlanaMetricas($visitasValues, "g_visita_".$idMeliMetricaVisor);
+
+
+            MeliMetricaVisor::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)
+            ->update(['url_graph_visitas'=>$graphVisitas,'url_graph_ventas'=>$graphVentas]);
+
             
             return [ 'xstatus'=>true, 'metrica' => $metrica ];
         }catch (\Exception $e) {
@@ -1333,6 +1384,7 @@ class MercadoLibreController extends Controller
 
         $q = urlencode($request->q);
         $page = urlencode($request->page);
+        $idMeliMetricaProyecto = $request->idMeliMetricaProyecto;
 
         
         $limit = 50;
@@ -1388,9 +1440,18 @@ class MercadoLibreController extends Controller
                     ->first();
 
                     $idMeliMetricaVisor = 0;
+                    $meliMetricaVisorProyecto = null;
                     if($metricaVisor!=null){
                         $idMeliMetricaVisor = $metricaVisor->id_meli_metrica_visor;
+
+
+                        //~Determina si pertenece al proyecto                
+                        $meliMetricaVisorProyecto = MeliMetricaVisorProyecto::where('id_meli_metrica_proyecto','=', $idMeliMetricaProyecto)
+                        ->where('id_meli_metrica_visor','=', $metricaVisor->id_meli_metrica_visor)
+                        ->first();
                     }
+
+                    
 
                     //~Determina si el producto pertenece a una tienda local (nunduva / conecta2)
                     $publicacionLocal = Publicacion::with('getCuentaTienda')
@@ -1407,7 +1468,8 @@ class MercadoLibreController extends Controller
                                                 'tipoLogistica'=>$publicacion->shipping->logistic_type,
                                                 'idMeliMetricaVisor'=> $idMeliMetricaVisor,
                                                 'check'=> $idMeliMetricaVisor > 0 ? true: false,
-                                                'publicacionLocal' => $publicacionLocal == null ? '': 'LOCAL'
+                                                'publicacionLocal' => $publicacionLocal == null ? '': 'LOCAL',
+                                                'perteneceProyecto' => $meliMetricaVisorProyecto == null ? 'N' : 'S'
                     ));
                 }
             }
@@ -1438,19 +1500,37 @@ class MercadoLibreController extends Controller
 
 
             $nombre = $request->nombre;
+            $idMeliMetricaProyecto = $request->idMeliMetricaProyecto;
 
-            $procesadorImagenes = new ProcesadorImagenes();
-            $url_imagen = $procesadorImagenes->publicaImagenMiniMetrica($imagen); 
+            $url_imagen= null;
+            try{
+                $procesadorImagenes = new ProcesadorImagenes();
+                $url_imagen = $procesadorImagenes->publicaImagenMiniMetrica($imagen); 
+            }catch (\Exception $e) {
+                Log::error( 'No fue posible cargar/publicar la imagen' );
+                Log::error( $e->getTraceAsString() );
+            }
             
-            $meliMetricaProyecto = new MeliMetricaProyecto();
-            $meliMetricaProyecto->nombre = $nombre;
-            $meliMetricaProyecto->foto = $url_imagen;
-            $meliMetricaProyecto->promedio_visitas = 0;
-            $meliMetricaProyecto->promedio_ventas = 0;
-            $meliMetricaProyecto->tendencia = 0;
-            $meliMetricaProyecto->xstatus ='1';
+            if($idMeliMetricaProyecto>0){
+                $meliMetricaProyecto = MeliMetricaProyecto::findOrFail($idMeliMetricaProyecto);
+                $meliMetricaProyecto->nombre = $nombre;
 
-            $meliMetricaProyecto->save();
+                if($url_imagen!=null){
+                    $meliMetricaProyecto->foto = $url_imagen;
+                }
+
+                $meliMetricaProyecto->update();
+            }else{
+                $meliMetricaProyecto = new MeliMetricaProyecto();
+                $meliMetricaProyecto->nombre = $nombre;
+                $meliMetricaProyecto->foto = $url_imagen;
+                $meliMetricaProyecto->promedio_visitas = 0;
+                $meliMetricaProyecto->promedio_ventas = 0;
+                $meliMetricaProyecto->tendencia = 0;
+                $meliMetricaProyecto->xstatus ='1';
+                $meliMetricaProyecto->save();
+            }                    
+            
                 
             return [ 'xstatus'=>true ];
         }catch (\Exception $e) {
@@ -1514,6 +1594,70 @@ class MercadoLibreController extends Controller
             return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
         }        
         
+    }
+
+
+    /**
+     * Cambia el estatus del proyecto metrica
+     * 
+     * 
+     * 
+     */
+    public function cambiaEstatusProyectoMetrica(Request $request){        
+        try{
+            $xstatus = $request->xstatus;
+            $idMeliMetricaProyecto = $request->idMeliMetricaProyecto;
+            $meliMetricaProyecto = MeliMetricaProyecto::findOrFail($idMeliMetricaProyecto);
+
+            $meliMetricaProyecto->update(['xstatus'=> $xstatus]);
+
+            return [ 'xstatus'=>true ];
+        }catch (\Exception $e) {
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }        
+        
+    }
+
+    /**
+     * Lista todas los proyectos
+     */
+    public function selectProyecto(Request $request){
+        if(!$request->ajax())return redirect('/');
+
+        $proyectos = MeliMetricaProyecto::where('xstatus','=','1')
+        ->select('id_meli_metrica_proyecto','nombre')
+        ->orderBy('nombre', 'asc')
+        ->get();
+
+        return ['proyectos' => $proyectos];
+    }
+
+    public function ligarPublicacionConProyecto(Request $request){
+        try{
+            $accion = $request->accion;
+
+            //~Determina si pertenece al proyecto                
+            $meliMetricaVisorProyecto = MeliMetricaVisorProyecto::where('id_meli_metrica_proyecto','=', $request->idMeliMetricaProyecto)
+            ->where('id_meli_metrica_visor','=', $request->idMeliMetricaVisor)
+            ->first();
+
+            if($meliMetricaVisorProyecto == null && $accion == "+"){
+                $meliMetricaVisorProyecto = new MeliMetricaVisorProyecto();
+                $meliMetricaVisorProyecto->id_meli_metrica_proyecto = $request->idMeliMetricaProyecto;
+                $meliMetricaVisorProyecto->id_meli_metrica_visor = $request->idMeliMetricaVisor;
+                $meliMetricaVisorProyecto->save();
+            }else if($meliMetricaVisorProyecto != null && $accion == "-"){
+                $meliMetricaVisorProyecto->delete();
+            }
+            
+
+            return ['xstatus' => true];
+        }catch (\Exception $e) {
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }      
+
     }
 
 }
