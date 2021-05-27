@@ -897,6 +897,7 @@ class MercadoLibreController extends Controller
 
             $url = $request->url;
             $idMeliMetricaProyecto = $request->idMeliMetricaProyecto;
+            $idPublicacionTienda = $request->idPublicacionTienda;
 
             // create curl resource
             $ch = curl_init();
@@ -960,14 +961,21 @@ class MercadoLibreController extends Controller
                     $vendedor = "NO DEF";
                 }
                 
-                $iIdPublicacion = strpos($url, 'MLM');
-                $fIdPublicacion = strpos($url, '-', $iIdPublicacion + 4);
-                $idPublicacion = trim(str_replace('-', '', substr($url, $iIdPublicacion, ($fIdPublicacion - $iIdPublicacion))));
+                if($idPublicacionTienda == null){
+                    $iIdPublicacion = strpos($url, 'MLM');
+                    $fIdPublicacion = strpos($url, '-', $iIdPublicacion + 4);
+                    if($fIdPublicacion==false){
+                        $fIdPublicacion = strlen($url);
+                    }
+                    $idPublicacion = trim(str_replace('-', '', substr($url, $iIdPublicacion, ($fIdPublicacion - $iIdPublicacion))));
 
-                $isCatalogo = false;
-                if(strlen($idPublicacion) > 12){
-                    $isCatalogo = true;
-                    $idPublicacion = substr($idPublicacion, 0, 11);
+                    $isCatalogo = false;
+                    if(strlen($idPublicacion) > 12){
+                        $isCatalogo = true;
+                        $idPublicacion = substr($idPublicacion, 0, 11);
+                    }
+                }else{
+                    $idPublicacion= $idPublicacionTienda;
                 }
 
                 $publicacion = array(
@@ -1039,7 +1047,10 @@ class MercadoLibreController extends Controller
     public function metricaPublicacionVisor(Request $request){        
         try{                                   
             $url = $request->url;
-            $idMeliMetricaVisor = $request->id_meli_metrica_visor;
+            $idMeliMetricaVisor = $request->idMeliMetricaVisor;
+                  
+            $meliMetricaVisor = MeliMetricaVisor::findOrFail($idMeliMetricaVisor);            
+            $idPublicacion = $meliMetricaVisor->id_publicacion_tienda;    
             
             if(isset($request->html)){
                 $html = $request->html;
@@ -1118,15 +1129,16 @@ class MercadoLibreController extends Controller
                     $disponible = trim(substr($html, $iDisponible + 50, ($fDisponible - $iDisponible)-50));
                 }
     
-                
-                $iIdPublicacion = strpos($url, 'MLM');
-                $fIdPublicacion = strpos($url, '-', $iIdPublicacion + 4);
-                $idPublicacion = trim(str_replace('-', '', substr($url, $iIdPublicacion, ($fIdPublicacion - $iIdPublicacion))));
-
                 $isCatalogo = 0;
-                if(strlen($idPublicacion) > 12){
-                    $isCatalogo = 1;
-                    $idPublicacion = substr($idPublicacion, 0, 11);
+                if($idPublicacion == null){
+                    $iIdPublicacion = strpos($url, 'MLM');
+                    $fIdPublicacion = strpos($url, '-', $iIdPublicacion + 4);
+                    $idPublicacion = trim(str_replace('-', '', substr($url, $iIdPublicacion, ($fIdPublicacion - $iIdPublicacion))));
+                    
+                    if(strlen($idPublicacion) > 12){
+                        $isCatalogo = 1;
+                        $idPublicacion = substr($idPublicacion, 0, 11);
+                    }
                 }
 
                 $visitas = 0;
@@ -1235,15 +1247,25 @@ class MercadoLibreController extends Controller
             //~Crea array de ventas y visitas
             $ventasValues = array();
             $visitasValues = array();
-            foreach($rs as $venta){                
-                array_push($ventasValues, $venta->ventas + 1);
+            $ind = 0;
+            $ventasDiaAntes = 0;
+            foreach($rs as $venta){  
+                if($ind >=1){
+                    array_push($ventasValues, ($venta->ventas + 1)-$ventasDiaAntes);
+                }else{
+                    array_push($ventasValues, 1);
+                }                                
+                
+                $ventasDiaAntes= $venta->ventas;
+                $ind++;
+
                 array_push($visitasValues, $venta->visitas + 1);
             }            
 
             $procesadorImagenes = new ProcesadorImagenes();
 
-            $graphVentas = $procesadorImagenes->creaGraficaPlanaMetricas($ventasValues, "g_ventas_".$idMeliMetricaVisor);
-            $graphVisitas = $procesadorImagenes->creaGraficaPlanaMetricas($visitasValues, "g_visita_".$idMeliMetricaVisor);
+            $graphVentas = $procesadorImagenes->creaGraficaPlanaMetricas($ventasValues, "g_ventas_".$idMeliMetricaVisor, "VENTA");
+            $graphVisitas = $procesadorImagenes->creaGraficaPlanaMetricas($visitasValues, "g_visita_".$idMeliMetricaVisor, "VISITA");
 
 
             MeliMetricaVisor::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)
@@ -1270,6 +1292,7 @@ class MercadoLibreController extends Controller
         try{
             $estatus = $request->estatus;
             $filtro = $request->filtro;
+            $idMeliMetricaProyecto= $request->idMeliMetricaProyecto;
 
             $tipoRespuesta = null;
             if(isset($request->tipo)){
@@ -1278,15 +1301,17 @@ class MercadoLibreController extends Controller
 
 
 
-            $meliMetricaVisor = MeliMetricaVisor::where('estatus','=',$estatus);
+            $meliMetricaVisor = MeliMetricaVisor::join('meli_metrica_visor_proyecto','meli_metrica_visor.id_meli_metrica_visor','=','meli_metrica_visor_proyecto.id_meli_metrica_visor')
+            ->where('meli_metrica_visor_proyecto.id_meli_metrica_proyecto','=',$idMeliMetricaProyecto)
+            ->where('meli_metrica_visor.estatus','=',$estatus);
 
             if($filtro!=null){
-                $meliMetricaVisor = $meliMetricaVisor->where('titulo','like', '%' . $filtro . '%')
-                ->orWhere('id_publicacion_tienda','like','%' . $filtro . '%')
-                ->orWhere('vendedor','like','%' . $filtro . '%');
+                $meliMetricaVisor = $meliMetricaVisor->where('meli_metrica_visor.titulo','like', '%' . $filtro . '%')
+                ->orWhere('meli_metrica_visor.id_publicacion_tienda','like','%' . $filtro . '%')
+                ->orWhere('meli_metrica_visor.vendedor','like','%' . $filtro . '%');
             }
 
-            $meliMetricaVisor = $meliMetricaVisor->orderBy('id_meli_metrica_visor', 'desc');
+            $meliMetricaVisor = $meliMetricaVisor->orderBy('meli_metrica_visor.id_meli_metrica_visor', 'desc');
 
             if($tipoRespuesta==null){
                 $meliMetricaVisor = $meliMetricaVisor->paginate(30);
@@ -1305,7 +1330,8 @@ class MercadoLibreController extends Controller
                     'metricas'=> $meliMetricaVisor
                 ];   
             }else{
-                $meliMetricaVisor = $meliMetricaVisor->get();
+                $meliMetricaVisor = MeliMetricaVisor::where('estatus','=','ACT')->get();
+                
                 return [
                     'xstatus'=>true,                    
                     'metricas'=> $meliMetricaVisor
@@ -1633,6 +1659,11 @@ class MercadoLibreController extends Controller
         return ['proyectos' => $proyectos];
     }
 
+    /**
+     * Liga el proyecto con la publicacion uno a uno
+     * 
+     * 
+     */
     public function ligarPublicacionConProyecto(Request $request){
         try{
             $accion = $request->accion;

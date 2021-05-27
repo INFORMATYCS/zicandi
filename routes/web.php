@@ -115,6 +115,8 @@ Route::get('/meli/metricas/visor/metrica', 'MercadoLibreController@metricaPublic
 Route::post('/meli/metricas/visor/edit_estatus', 'MercadoLibreController@cambiaEstatusMetricaVisor');
 Route::post('/meli/metricas/proyecto/save', 'MercadoLibreController@registrarNuevoProyecto');
 Route::get('/meli/metricas/proyecto/buscar', 'MercadoLibreController@getProyectoMetricaVisor');
+Route::post('/meli/metricas/proyecto/ligar', 'MercadoLibreController@ligarPublicacionConProyecto');
+Route::get('/meli/metricas/proyecto/select', 'MercadoLibreController@selectProyecto');
 
 
 Route::get('/meli/buscador', 'MercadoLibreController@busquedaMeli');

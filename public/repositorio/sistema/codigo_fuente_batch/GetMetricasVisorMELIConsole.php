@@ -15,7 +15,7 @@ if($publicaciones->xstatus){
     Console::log('Total de publicaciones a procesar '.$totalPublicaciones, 'white', true, 'black', $logFisico);
 
     foreach ($publicaciones->metricas as $pub){
-        $resp = json_decode(Restfull::sendGet(Param::$_BASE_PATH_API.'zicandi/public/meli/metricas/visor/metrica?id_meli_metrica_visor='.$pub->id_meli_metrica_visor.'&url='.$pub->url));
+        $resp = json_decode(Restfull::sendGet(Param::$_BASE_PATH_API.'zicandi/public/meli/metricas/visor/metrica?idMeliMetricaVisor='.$pub->id_meli_metrica_visor.'&url='.$pub->url));
 
         if($resp->xstatus){            
             Console::log($pub->id_publicacion_tienda.' [', 'green', false, 'black', $logFisico);

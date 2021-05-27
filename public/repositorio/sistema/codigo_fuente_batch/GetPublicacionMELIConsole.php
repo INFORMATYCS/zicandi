@@ -19,6 +19,7 @@ foreach ($cuentas as $cuenta){
     $usuario = $cuenta->usuario;
     $estatus = $cuenta->estatus;
     $httpCode = $cuenta->httpCode;
+    $bloqSize = 10;
 
     Console::log('Comieza... Recuperando publicaciones para '.$usuario, 'yellow', true, 'black', $logFisico);
     $publicaciones = json_decode(Restfull::sendGet(Param::$_BASE_PATH_API.'zicandi/public/tienda/getPublicaciones?idCuentaTienda='.$idCuentaTienda));
@@ -26,10 +27,10 @@ foreach ($cuentas as $cuenta){
     if($publicaciones->httpCode==200){
         Console::log('Publicaciones recuperadas: '.count($publicaciones->lista), 'red', true, 'black', $logFisico);
         $listaPub = $publicaciones->lista;
-        $fragmentos = array_chunk($listaPub, 20);
+        $fragmentos = array_chunk($listaPub, $bloqSize);
 
         foreach ($fragmentos as $bloque){
-            Console::log('Procesando bloque (20 pub)', 'green', false, 'black', $logFisico);
+            Console::log('Procesando bloque ('.$bloqSize.' pub)', 'green', false, 'black', $logFisico);
             $cadenaProcesa = implode (",", $bloque);
             $resp = json_decode(Restfull::sendGet(Param::$_BASE_PATH_API.'zicandi/public/tienda/getDetallePublicacion?idCuentaTienda='.$idCuentaTienda.'&publicaciones20='.$cadenaProcesa));
             if(isset($resp->resultado)){

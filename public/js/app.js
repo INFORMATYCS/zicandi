@@ -80786,6 +80786,41 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -80841,6 +80876,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 tituloModal: '',
                 tipoAccion: 0,
                 error: 0,
+                criterio: 'ACT',
+                textoBuscar: '',
+                idMeliMetricaProyecto: 0,
                 erroresMsjList: [],
                 publicaciones: []
             },
@@ -80878,9 +80916,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             return this.paginationPubli.current_page;
         },
         pagesNumberPubli: function pagesNumberPubli() {
-            return paginationPubli.getPagesNumber(this.pagination);
+            return paginador.getPagesNumber(this.paginationPubli);
         }
-
     },
     components: {
         Datepicker: __WEBPACK_IMPORTED_MODULE_0_vuejs_datepicker__["a" /* default */]
@@ -80927,7 +80964,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }
 
             var me = this;
-            var url = '/zicandi/public/meli/metricas/visor?page=' + page + '&filtro=' + buscar + '&estatus=' + criterio;
+            var idMeliMetricaProyecto = this.modalDetalleVisorProyecto.idMeliMetricaProyecto;
+            var url = '/zicandi/public/meli/metricas/visor?page=' + page + '&filtro=' + buscar + '&estatus=' + criterio + '&idMeliMetricaProyecto=' + idMeliMetricaProyecto;
+
+            console.log(url);
+
             axios.get(url).then(function (response) {
                 me.isLoading = 0;
 
@@ -81010,7 +81051,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                                 {
                                     this.modalDetalleVisorProyecto.modal = 1;
                                     this.modalDetalleVisorProyecto.tituloModal = 'Publicaciones monitoreadas';
-
+                                    this.modalDetalleVisorProyecto.idMeliMetricaProyecto = data.id_meli_metrica_proyecto;
+                                    this.buscarPublicaciones(1, '', 'ACT', true);
                                     break;
                                 }
 
@@ -81031,6 +81073,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             this.modalDetalleVisorProyecto.modal = 0;
             this.modalDetalleVisorProyecto.tituloModal = '';
+        },
+        closeModalGrafico: function closeModalGrafico() {
+            this.modalDetalleMetrica.modal = 0;
+            this.modalDetalleMetrica.url = '';
+            this.modalDetalleMetrica.tituloModal = '';
         },
         validarProveedor: function validarProveedor() {
             this.modalRegistraPublicacion.error = 0;
@@ -81101,7 +81148,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
                     util.AVISO('Se realizo el cambio correctamente', util.tipoOk);
 
-                    me.buscarPublicaciones(1, me.buscadorGrid.textoBuscar, me.buscadorGrid.criterio, true);
+                    me.buscarPublicaciones(1, me.modalDetalleVisorProyecto.textoBuscar, me.modalDetalleVisorProyecto.criterio, true);
                 } else {
                     throw new Error(response.data.error);
                 }
@@ -81319,6 +81366,28 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     util.AVISO('Se realizo el cambio correctamente', util.tipoOk);
 
                     me.buscarProyectos(1, me.buscadorGrid.textoBuscar, me.buscadorGrid.criterio, true);
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onCalcularEstadistica: function onCalcularEstadistica(url, idMeliMetricaVisor) {
+            var me = this;
+
+            this.isLoading = 1;
+
+            console.log('/zicandi/public/meli/metricas/visor/metrica?url=' + url + '&idMeliMetricaVisor=' + idMeliMetricaVisor);
+            axios.get('/zicandi/public/meli/metricas/visor/metrica?url=' + url + '&idMeliMetricaVisor=' + idMeliMetricaVisor).then(function (response) {
+                me.isLoading = 0;
+
+                if (response.data.xstatus) {
+
+                    util.AVISO('Metricas actualizadas', util.tipoOk);
+
+                    me.buscarPublicaciones(1, me.modalDetalleVisorProyecto.textoBuscar, me.modalDetalleVisorProyecto.criterio, true);
                 } else {
                     throw new Error(response.data.error);
                 }
@@ -81887,298 +81956,6 @@ var render = function() {
       "div",
       {
         staticClass: "modal fade",
-        class: { mostrar: _vm.modalDetalleMetrica.modal },
-        staticStyle: { display: "none" },
-        attrs: {
-          tabindex: "-1",
-          role: "dialog",
-          "aria-labelledby": "myModalLabel",
-          "aria-hidden": "true"
-        }
-      },
-      [
-        _c(
-          "div",
-          {
-            staticClass: "modal-dialog modal-primary",
-            staticStyle: { "max-width": "90% !important" },
-            attrs: { role: "document" }
-          },
-          [
-            _c(
-              "div",
-              {
-                staticClass: "modal-content",
-                staticStyle: { height: "700px" }
-              },
-              [
-                _c("div", { staticClass: "modal-header" }, [
-                  _c("h4", {
-                    staticClass: "modal-title",
-                    domProps: {
-                      textContent: _vm._s(_vm.modalDetalleMetrica.tituloModal)
-                    }
-                  }),
-                  _vm._v(" "),
-                  _c(
-                    "button",
-                    {
-                      staticClass: "close",
-                      attrs: { type: "button", "aria-label": "Close" },
-                      on: {
-                        click: function($event) {
-                          return _vm.closeModal()
-                        }
-                      }
-                    },
-                    [
-                      _c("span", { attrs: { "aria-hidden": "true" } }, [
-                        _vm._v("×")
-                      ])
-                    ]
-                  )
-                ]),
-                _vm._v(" "),
-                _c(
-                  "div",
-                  {
-                    staticClass: "modal-body",
-                    staticStyle: {
-                      "max-height": "calc(100% - 120px)",
-                      "overflow-y": "scroll"
-                    }
-                  },
-                  [
-                    _c("div", { staticClass: "list-group" }, [
-                      _c("div", { staticClass: "row" }, [
-                        _c("div", { staticClass: "col-md-2" }, [
-                          _vm._v(
-                            "\n                                Fecha inicial:\n                            "
-                          )
-                        ]),
-                        _vm._v(" "),
-                        _c(
-                          "div",
-                          { staticClass: "col-md-3" },
-                          [
-                            _c("datepicker", {
-                              model: {
-                                value: _vm.modalDetalleMetrica.fechaInicial,
-                                callback: function($$v) {
-                                  _vm.$set(
-                                    _vm.modalDetalleMetrica,
-                                    "fechaInicial",
-                                    $$v
-                                  )
-                                },
-                                expression: "modalDetalleMetrica.fechaInicial"
-                              }
-                            })
-                          ],
-                          1
-                        ),
-                        _vm._v(" "),
-                        _c("div", { staticClass: "col-md-2" }, [
-                          _vm._v(
-                            "\n                                Fecha final:\n                            "
-                          )
-                        ]),
-                        _vm._v(" "),
-                        _c(
-                          "div",
-                          { staticClass: "col-md-3" },
-                          [
-                            _c("datepicker", {
-                              model: {
-                                value: _vm.modalDetalleMetrica.fechaFinal,
-                                callback: function($$v) {
-                                  _vm.$set(
-                                    _vm.modalDetalleMetrica,
-                                    "fechaFinal",
-                                    $$v
-                                  )
-                                },
-                                expression: "modalDetalleMetrica.fechaFinal"
-                              }
-                            })
-                          ],
-                          1
-                        ),
-                        _vm._v(" "),
-                        _c("div", { staticClass: "col-md-2" }, [
-                          _c(
-                            "button",
-                            {
-                              attrs: { type: "button" },
-                              on: {
-                                click: function($event) {
-                                  return _vm.getDetalleMetrica(
-                                    _vm.modalDetalleMetrica.idMeliMetricaVisor
-                                  )
-                                }
-                              }
-                            },
-                            [
-                              _c("span", { attrs: { "aria-hidden": "true" } }, [
-                                _vm._v("Buscar")
-                              ])
-                            ]
-                          )
-                        ])
-                      ]),
-                      _vm._v(" "),
-                      _c("br"),
-                      _vm._v(" "),
-                      _c(
-                        "div",
-                        { staticClass: "card", staticStyle: { width: "100%" } },
-                        [
-                          _vm._m(2),
-                          _vm._v(" "),
-                          _c("div", { staticClass: "ror" }, [
-                            _c("div", { staticClass: "col-md-12" }, [
-                              _c(
-                                "table",
-                                {
-                                  staticClass:
-                                    "table table-bordered table-striped table-sm"
-                                },
-                                [
-                                  _vm._m(3),
-                                  _vm._v(" "),
-                                  _c(
-                                    "tbody",
-                                    _vm._l(
-                                      _vm.modalDetalleMetrica.historicoMetricas,
-                                      function(metrica) {
-                                        return _c(
-                                          "tr",
-                                          {
-                                            key:
-                                              metrica.id_meli_deta_metrica_visor
-                                          },
-                                          [
-                                            _c("td", {
-                                              domProps: {
-                                                textContent: _vm._s(
-                                                  metrica.fecha_consulta
-                                                )
-                                              }
-                                            }),
-                                            _vm._v(" "),
-                                            _c("td", {
-                                              domProps: {
-                                                textContent: _vm._s(
-                                                  metrica.ventas
-                                                )
-                                              }
-                                            }),
-                                            _vm._v(" "),
-                                            _c("td", {
-                                              domProps: {
-                                                textContent: _vm._s(
-                                                  metrica.ventasDia
-                                                )
-                                              }
-                                            }),
-                                            _vm._v(" "),
-                                            _c("td", {
-                                              domProps: {
-                                                textContent: _vm._s(
-                                                  metrica.visitas
-                                                )
-                                              }
-                                            }),
-                                            _vm._v(" "),
-                                            _c("td", {
-                                              domProps: {
-                                                textContent: _vm._s(
-                                                  metrica.precio
-                                                )
-                                              }
-                                            }),
-                                            _vm._v(" "),
-                                            _c("td", {
-                                              domProps: {
-                                                textContent: _vm._s(
-                                                  metrica.disponibles
-                                                )
-                                              }
-                                            }),
-                                            _vm._v(" "),
-                                            metrica.full == 1
-                                              ? _c("td", [_vm._v("Si")])
-                                              : _vm._e(),
-                                            _vm._v(" "),
-                                            metrica.full == 0
-                                              ? _c("td", [_vm._v("No")])
-                                              : _vm._e(),
-                                            _vm._v(" "),
-                                            metrica.msi == 1
-                                              ? _c("td", [_vm._v("Si")])
-                                              : _vm._e(),
-                                            _vm._v(" "),
-                                            metrica.msi == 0
-                                              ? _c("td", [_vm._v("No")])
-                                              : _vm._e(),
-                                            _vm._v(" "),
-                                            metrica.isCatalogo == 1
-                                              ? _c("td", [_vm._v("Si")])
-                                              : _vm._e(),
-                                            _vm._v(" "),
-                                            metrica.isCatalogo == 0
-                                              ? _c("td", [_vm._v("No")])
-                                              : _vm._e(),
-                                            _vm._v(" "),
-                                            _c("td", {
-                                              domProps: {
-                                                textContent: _vm._s(
-                                                  metrica.estatus_publicacion
-                                                )
-                                              }
-                                            })
-                                          ]
-                                        )
-                                      }
-                                    ),
-                                    0
-                                  )
-                                ]
-                              )
-                            ])
-                          ])
-                        ]
-                      )
-                    ])
-                  ]
-                ),
-                _vm._v(" "),
-                _c("div", { staticClass: "modal-footer" }, [
-                  _c(
-                    "button",
-                    {
-                      staticClass: "btn btn-secondary",
-                      attrs: { type: "button" },
-                      on: {
-                        click: function($event) {
-                          return _vm.closeModal()
-                        }
-                      }
-                    },
-                    [_vm._v("Cerrar")]
-                  )
-                ])
-              ]
-            )
-          ]
-        )
-      ]
-    ),
-    _vm._v(" "),
-    _c(
-      "div",
-      {
-        staticClass: "modal fade",
         class: { mostrar: _vm.modalRegistraProyecto.modal },
         staticStyle: { display: "none" },
         attrs: {
@@ -82433,52 +82210,183 @@ var render = function() {
         _c(
           "div",
           {
-            staticClass: "modal-dialog modal-primary modal-lg",
+            staticClass: "modal-dialog modal-primary",
+            staticStyle: { "max-width": "90% !important" },
             attrs: { role: "document" }
           },
           [
-            _c("div", { staticClass: "modal-content" }, [
-              _c("div", { staticClass: "modal-header" }, [
-                _c("h4", {
-                  staticClass: "modal-title",
-                  domProps: {
-                    textContent: _vm._s(
-                      _vm.modalDetalleVisorProyecto.tituloModal
-                    )
-                  }
-                }),
+            _c(
+              "div",
+              {
+                staticClass: "modal-content",
+                staticStyle: { height: "700px" }
+              },
+              [
+                _c("div", { staticClass: "modal-header" }, [
+                  _c("h4", {
+                    staticClass: "modal-title",
+                    domProps: {
+                      textContent: _vm._s(
+                        _vm.modalDetalleVisorProyecto.tituloModal
+                      )
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "close",
+                      attrs: { type: "button", "aria-label": "Close" },
+                      on: {
+                        click: function($event) {
+                          return _vm.closeModal()
+                        }
+                      }
+                    },
+                    [
+                      _c("span", { attrs: { "aria-hidden": "true" } }, [
+                        _vm._v("×")
+                      ])
+                    ]
+                  )
+                ]),
                 _vm._v(" "),
                 _c(
-                  "button",
+                  "div",
                   {
-                    staticClass: "close",
-                    attrs: { type: "button", "aria-label": "Close" },
-                    on: {
-                      click: function($event) {
-                        return _vm.closeModal()
-                      }
+                    staticClass: "modal-body",
+                    staticStyle: {
+                      "max-height": "calc(100% - 120px)",
+                      "overflow-y": "scroll"
                     }
                   },
                   [
-                    _c("span", { attrs: { "aria-hidden": "true" } }, [
-                      _vm._v("×")
-                    ])
-                  ]
-                )
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "modal-body" }, [
-                _c(
-                  "form",
-                  {
-                    staticClass: "form-horizontal",
-                    attrs: {
-                      action: "",
-                      method: "post",
-                      enctype: "multipart/form-data"
-                    }
-                  },
-                  [
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c("div", { staticClass: "col-md-6" }, [
+                        _c("div", { staticClass: "input-group" }, [
+                          _c(
+                            "select",
+                            {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.modalDetalleVisorProyecto.criterio,
+                                  expression:
+                                    "modalDetalleVisorProyecto.criterio"
+                                }
+                              ],
+                              staticClass: "form-control col-md-3",
+                              on: {
+                                change: function($event) {
+                                  var $$selectedVal = Array.prototype.filter
+                                    .call($event.target.options, function(o) {
+                                      return o.selected
+                                    })
+                                    .map(function(o) {
+                                      var val =
+                                        "_value" in o ? o._value : o.value
+                                      return val
+                                    })
+                                  _vm.$set(
+                                    _vm.modalDetalleVisorProyecto,
+                                    "criterio",
+                                    $event.target.multiple
+                                      ? $$selectedVal
+                                      : $$selectedVal[0]
+                                  )
+                                }
+                              }
+                            },
+                            [
+                              _c("option", { attrs: { value: "ACT" } }, [
+                                _vm._v("Activas")
+                              ]),
+                              _vm._v(" "),
+                              _c("option", { attrs: { value: "CAN" } }, [
+                                _vm._v("Canceladas")
+                              ])
+                            ]
+                          ),
+                          _vm._v(" "),
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value:
+                                  _vm.modalDetalleVisorProyecto.textoBuscar,
+                                expression:
+                                  "modalDetalleVisorProyecto.textoBuscar"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            attrs: {
+                              type: "text",
+                              placeholder: "Texto a buscar"
+                            },
+                            domProps: {
+                              value: _vm.modalDetalleVisorProyecto.textoBuscar
+                            },
+                            on: {
+                              keyup: function($event) {
+                                if (
+                                  !$event.type.indexOf("key") &&
+                                  _vm._k(
+                                    $event.keyCode,
+                                    "enter",
+                                    13,
+                                    $event.key,
+                                    "Enter"
+                                  )
+                                ) {
+                                  return null
+                                }
+                                return _vm.buscarPublicaciones(
+                                  1,
+                                  _vm.modalDetalleVisorProyecto.textoBuscar,
+                                  _vm.modalDetalleVisorProyecto.criterio,
+                                  true
+                                )
+                              },
+                              input: function($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.$set(
+                                  _vm.modalDetalleVisorProyecto,
+                                  "textoBuscar",
+                                  $event.target.value
+                                )
+                              }
+                            }
+                          }),
+                          _vm._v(" "),
+                          _c(
+                            "button",
+                            {
+                              staticClass: "btn btn-primary",
+                              attrs: { type: "submit" },
+                              on: {
+                                click: function($event) {
+                                  return _vm.buscarPublicaciones(
+                                    1,
+                                    _vm.modalDetalleVisorProyecto.textoBuscar,
+                                    _vm.modalDetalleVisorProyecto.criterio,
+                                    true
+                                  )
+                                }
+                              }
+                            },
+                            [
+                              _c("i", { staticClass: "fa fa-search" }),
+                              _vm._v(" Buscar")
+                            ]
+                          )
+                        ])
+                      ])
+                    ]),
+                    _vm._v(" "),
                     _c(
                       "table",
                       {
@@ -82486,7 +82394,7 @@ var render = function() {
                           "table table-bordered table-striped table-sm"
                       },
                       [
-                        _vm._m(4),
+                        _vm._m(2),
                         _vm._v(" "),
                         _c(
                           "tbody",
@@ -82500,31 +82408,7 @@ var render = function() {
                                   _c(
                                     "td",
                                     [
-                                      _c(
-                                        "button",
-                                        {
-                                          staticClass: "btn btn-warning btn-sm",
-                                          attrs: { type: "button" },
-                                          on: {
-                                            click: function($event) {
-                                              return _vm.showModal(
-                                                "producto",
-                                                "actualizar",
-                                                publicacion
-                                              )
-                                            }
-                                          }
-                                        },
-                                        [
-                                          _c("i", {
-                                            staticClass: "icon-pencil"
-                                          })
-                                        ]
-                                      ),
-                                      _vm._v(
-                                        "  \n                                        "
-                                      ),
-                                      publicacion.estatus
+                                      publicacion.estatus == "ACT"
                                         ? [
                                             _c(
                                               "button",
@@ -82534,8 +82418,9 @@ var render = function() {
                                                 attrs: { type: "button" },
                                                 on: {
                                                   click: function($event) {
-                                                    return _vm.desactivarProveedor(
-                                                      publicacion.id_meli_metrica_visor
+                                                    return _vm.onActivaDesactivaPublicacion(
+                                                      publicacion.id_meli_metrica_visor,
+                                                      publicacion.estatus
                                                     )
                                                   }
                                                 }
@@ -82547,7 +82432,68 @@ var render = function() {
                                               ]
                                             )
                                           ]
-                                        : _vm._e()
+                                        : [
+                                            _c(
+                                              "button",
+                                              {
+                                                staticClass:
+                                                  "btn btn-info btn-sm",
+                                                attrs: { type: "button" },
+                                                on: {
+                                                  click: function($event) {
+                                                    return _vm.onActivaDesactivaPublicacion(
+                                                      publicacion.id_meli_metrica_visor,
+                                                      publicacion.estatus
+                                                    )
+                                                  }
+                                                }
+                                              },
+                                              [
+                                                _c("i", {
+                                                  staticClass: "icon-check"
+                                                })
+                                              ]
+                                            )
+                                          ],
+                                      _vm._v(" "),
+                                      _c(
+                                        "button",
+                                        {
+                                          staticClass: "btn btn-warning btn-sm",
+                                          attrs: { type: "button" },
+                                          on: {
+                                            click: function($event) {
+                                              return _vm.onCalcularEstadistica(
+                                                publicacion.url,
+                                                publicacion.id_meli_metrica_visor
+                                              )
+                                            }
+                                          }
+                                        },
+                                        [
+                                          _c("i", {
+                                            staticClass: "icon-calculator"
+                                          })
+                                        ]
+                                      ),
+                                      _vm._v(" "),
+                                      _c(
+                                        "button",
+                                        {
+                                          staticClass: "btn btn-primary btn-sm",
+                                          attrs: { type: "button" },
+                                          on: {
+                                            click: function($event) {
+                                              return _vm.showModal(
+                                                "metrica",
+                                                "grafico",
+                                                publicacion
+                                              )
+                                            }
+                                          }
+                                        },
+                                        [_c("i", { staticClass: "icon-graph" })]
+                                      )
                                     ],
                                     2
                                   ),
@@ -82555,19 +82501,36 @@ var render = function() {
                                   _c("td", [
                                     _c("div", { staticClass: "row" }, [
                                       _c("div", { staticClass: "col-3" }, [
-                                        _c("img", {
-                                          attrs: {
-                                            src: publicacion.foto,
-                                            alt: "dog"
-                                          }
-                                        })
+                                        _c(
+                                          "a",
+                                          {
+                                            attrs: { href: "#" },
+                                            on: {
+                                              click: function($event) {
+                                                return _vm.onAbrirPublicacionML(
+                                                  publicacion.url
+                                                )
+                                              }
+                                            }
+                                          },
+                                          [
+                                            _c("img", {
+                                              attrs: {
+                                                src: publicacion.foto,
+                                                alt: "dog",
+                                                width: "100px",
+                                                height: "100px"
+                                              }
+                                            })
+                                          ]
+                                        )
                                       ]),
                                       _vm._v(" "),
                                       _c("div", { staticClass: "col-9" }, [
                                         _c("h6", {
                                           domProps: {
                                             textContent: _vm._s(
-                                              publicacion.nombre
+                                              publicacion.titulo
                                             )
                                           }
                                         }),
@@ -82576,12 +82539,40 @@ var render = function() {
                                           staticClass: "text-muted",
                                           domProps: {
                                             textContent: _vm._s(
-                                              publicacion.codigo
+                                              publicacion.id_publicacion_tienda
+                                            )
+                                          }
+                                        }),
+                                        _vm._v(" "),
+                                        _c("span", {
+                                          domProps: {
+                                            textContent: _vm._s(
+                                              publicacion.estatus_publicacion
                                             )
                                           }
                                         })
                                       ])
                                     ])
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("td", [
+                                    _c("img", {
+                                      attrs: {
+                                        src: publicacion.url_graph_ventas,
+                                        alt: "dog",
+                                        height: "100px"
+                                      }
+                                    })
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("td", [
+                                    _c("img", {
+                                      attrs: {
+                                        src: publicacion.url_graph_visitas,
+                                        alt: "dog",
+                                        height: "100px"
+                                      }
+                                    })
                                   ])
                                 ]
                               )
@@ -82597,7 +82588,7 @@ var render = function() {
                         "ul",
                         { staticClass: "pagination" },
                         [
-                          _vm.pagination.current_page > 1
+                          _vm.paginationPubli.current_page > 1
                             ? _c("li", { staticClass: "page-item" }, [
                                 _c(
                                   "a",
@@ -82607,10 +82598,11 @@ var render = function() {
                                     on: {
                                       click: function($event) {
                                         $event.preventDefault()
-                                        return _vm.cambiarPagina(
-                                          _vm.pagination.current_page - 1,
-                                          _vm.buscar,
-                                          _vm.criterio
+                                        return _vm.cambiarPaginaPubli(
+                                          _vm.paginationPubli.current_page - 1,
+                                          _vm.modalDetalleVisorProyecto
+                                            .textoBuscar,
+                                          _vm.modalDetalleVisorProyecto.criterio
                                         )
                                       }
                                     }
@@ -82620,13 +82612,15 @@ var render = function() {
                               ])
                             : _vm._e(),
                           _vm._v(" "),
-                          _vm._l(_vm.pagesNumber, function(page) {
+                          _vm._l(_vm.pagesNumberPubli, function(page) {
                             return _c(
                               "li",
                               {
                                 key: page,
                                 staticClass: "page-item",
-                                class: [page == _vm.isActived ? "active" : ""]
+                                class: [
+                                  page == _vm.isActivedPubli ? "active" : ""
+                                ]
                               },
                               [
                                 _c("a", {
@@ -82636,10 +82630,11 @@ var render = function() {
                                   on: {
                                     click: function($event) {
                                       $event.preventDefault()
-                                      return _vm.cambiarPagina(
+                                      return _vm.cambiarPaginaPubli(
                                         page,
-                                        _vm.buscar,
-                                        _vm.criterio
+                                        _vm.modalDetalleVisorProyecto
+                                          .textoBuscar,
+                                        _vm.modalDetalleVisorProyecto.criterio
                                       )
                                     }
                                   }
@@ -82648,7 +82643,8 @@ var render = function() {
                             )
                           }),
                           _vm._v(" "),
-                          _vm.pagination.current_page < _vm.pagination.last_page
+                          _vm.paginationPubli.current_page <
+                          _vm.paginationPubli.last_page
                             ? _c("li", { staticClass: "page-item" }, [
                                 _c(
                                   "a",
@@ -82658,10 +82654,11 @@ var render = function() {
                                     on: {
                                       click: function($event) {
                                         $event.preventDefault()
-                                        return _vm.cambiarPagina(
-                                          _vm.pagination.current_page + 1,
-                                          _vm.buscar,
-                                          _vm.criterio
+                                        return _vm.cambiarPaginaPubli(
+                                          _vm.paginationPubli.current_page + 1,
+                                          _vm.modalDetalleVisorProyecto
+                                            .textoBuscar,
+                                          _vm.modalDetalleVisorProyecto.criterio
                                         )
                                       }
                                     }
@@ -82708,57 +82705,333 @@ var render = function() {
                       ]
                     )
                   ]
-                )
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "modal-footer" }, [
-                _c(
-                  "button",
-                  {
-                    staticClass: "btn btn-secondary",
-                    attrs: { type: "button" },
-                    on: {
-                      click: function($event) {
-                        return _vm.closeModal()
-                      }
-                    }
-                  },
-                  [_vm._v("Cerrar")]
                 ),
                 _vm._v(" "),
-                _vm.modalDetalleVisorProyecto.tipoAccion == 1
-                  ? _c(
-                      "button",
-                      {
-                        staticClass: "btn btn-primary",
-                        attrs: { type: "button" },
-                        on: {
-                          click: function($event) {
-                            return _vm.onRegistrarProyecto()
-                          }
+                _c("div", { staticClass: "modal-footer" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-secondary",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.closeModal()
                         }
-                      },
-                      [_vm._v("Guardar")]
-                    )
-                  : _vm._e(),
+                      }
+                    },
+                    [_vm._v("Cerrar")]
+                  ),
+                  _vm._v(" "),
+                  _vm.modalDetalleVisorProyecto.tipoAccion == 1
+                    ? _c(
+                        "button",
+                        {
+                          staticClass: "btn btn-primary",
+                          attrs: { type: "button" },
+                          on: {
+                            click: function($event) {
+                              return _vm.onCreaNuevoFolioEnvio()
+                            }
+                          }
+                        },
+                        [_vm._v("Guardar")]
+                      )
+                    : _vm._e()
+                ])
+              ]
+            )
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.modalDetalleMetrica.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-primary",
+            staticStyle: { "max-width": "90% !important" },
+            attrs: { role: "document" }
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "modal-content",
+                staticStyle: { height: "700px" }
+              },
+              [
+                _c("div", { staticClass: "modal-header" }, [
+                  _c("h4", {
+                    staticClass: "modal-title",
+                    domProps: {
+                      textContent: _vm._s(_vm.modalDetalleMetrica.tituloModal)
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "close",
+                      attrs: { type: "button", "aria-label": "Close" },
+                      on: {
+                        click: function($event) {
+                          return _vm.closeModalGrafico()
+                        }
+                      }
+                    },
+                    [
+                      _c("span", { attrs: { "aria-hidden": "true" } }, [
+                        _vm._v("×")
+                      ])
+                    ]
+                  )
+                ]),
                 _vm._v(" "),
-                _vm.modalDetalleVisorProyecto.tipoAccion == 2
-                  ? _c(
-                      "button",
-                      {
-                        staticClass: "btn btn-primary",
-                        attrs: { type: "button" },
-                        on: {
-                          click: function($event) {
-                            return _vm.onRegistrarProyecto()
-                          }
+                _c(
+                  "div",
+                  {
+                    staticClass: "modal-body",
+                    staticStyle: {
+                      "max-height": "calc(100% - 120px)",
+                      "overflow-y": "scroll"
+                    }
+                  },
+                  [
+                    _c("div", { staticClass: "list-group" }, [
+                      _c("div", { staticClass: "row" }, [
+                        _c("div", { staticClass: "col-md-2" }, [
+                          _vm._v(
+                            "\n                                Fecha inicial:\n                            "
+                          )
+                        ]),
+                        _vm._v(" "),
+                        _c(
+                          "div",
+                          { staticClass: "col-md-3" },
+                          [
+                            _c("datepicker", {
+                              model: {
+                                value: _vm.modalDetalleMetrica.fechaInicial,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.modalDetalleMetrica,
+                                    "fechaInicial",
+                                    $$v
+                                  )
+                                },
+                                expression: "modalDetalleMetrica.fechaInicial"
+                              }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "col-md-2" }, [
+                          _vm._v(
+                            "\n                                Fecha final:\n                            "
+                          )
+                        ]),
+                        _vm._v(" "),
+                        _c(
+                          "div",
+                          { staticClass: "col-md-3" },
+                          [
+                            _c("datepicker", {
+                              model: {
+                                value: _vm.modalDetalleMetrica.fechaFinal,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.modalDetalleMetrica,
+                                    "fechaFinal",
+                                    $$v
+                                  )
+                                },
+                                expression: "modalDetalleMetrica.fechaFinal"
+                              }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "col-md-2" }, [
+                          _c(
+                            "button",
+                            {
+                              attrs: { type: "button" },
+                              on: {
+                                click: function($event) {
+                                  return _vm.getDetalleMetrica(
+                                    _vm.modalDetalleMetrica.idMeliMetricaVisor
+                                  )
+                                }
+                              }
+                            },
+                            [
+                              _c("span", { attrs: { "aria-hidden": "true" } }, [
+                                _vm._v("Buscar")
+                              ])
+                            ]
+                          )
+                        ])
+                      ]),
+                      _vm._v(" "),
+                      _c("br"),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        { staticClass: "card", staticStyle: { width: "100%" } },
+                        [
+                          _vm._m(3),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "ror" }, [
+                            _c("div", { staticClass: "col-md-12" }, [
+                              _c(
+                                "table",
+                                {
+                                  staticClass:
+                                    "table table-bordered table-striped table-sm"
+                                },
+                                [
+                                  _vm._m(4),
+                                  _vm._v(" "),
+                                  _c(
+                                    "tbody",
+                                    _vm._l(
+                                      _vm.modalDetalleMetrica.historicoMetricas,
+                                      function(metrica) {
+                                        return _c(
+                                          "tr",
+                                          {
+                                            key:
+                                              metrica.id_meli_deta_metrica_visor
+                                          },
+                                          [
+                                            _c("td", {
+                                              domProps: {
+                                                textContent: _vm._s(
+                                                  metrica.fecha_consulta
+                                                )
+                                              }
+                                            }),
+                                            _vm._v(" "),
+                                            _c("td", {
+                                              domProps: {
+                                                textContent: _vm._s(
+                                                  metrica.ventas
+                                                )
+                                              }
+                                            }),
+                                            _vm._v(" "),
+                                            _c("td", {
+                                              domProps: {
+                                                textContent: _vm._s(
+                                                  metrica.ventasDia
+                                                )
+                                              }
+                                            }),
+                                            _vm._v(" "),
+                                            _c("td", {
+                                              domProps: {
+                                                textContent: _vm._s(
+                                                  metrica.visitas
+                                                )
+                                              }
+                                            }),
+                                            _vm._v(" "),
+                                            _c("td", {
+                                              domProps: {
+                                                textContent: _vm._s(
+                                                  metrica.precio
+                                                )
+                                              }
+                                            }),
+                                            _vm._v(" "),
+                                            _c("td", {
+                                              domProps: {
+                                                textContent: _vm._s(
+                                                  metrica.disponibles
+                                                )
+                                              }
+                                            }),
+                                            _vm._v(" "),
+                                            metrica.full == 1
+                                              ? _c("td", [_vm._v("Si")])
+                                              : _vm._e(),
+                                            _vm._v(" "),
+                                            metrica.full == 0
+                                              ? _c("td", [_vm._v("No")])
+                                              : _vm._e(),
+                                            _vm._v(" "),
+                                            metrica.msi == 1
+                                              ? _c("td", [_vm._v("Si")])
+                                              : _vm._e(),
+                                            _vm._v(" "),
+                                            metrica.msi == 0
+                                              ? _c("td", [_vm._v("No")])
+                                              : _vm._e(),
+                                            _vm._v(" "),
+                                            metrica.isCatalogo == 1
+                                              ? _c("td", [_vm._v("Si")])
+                                              : _vm._e(),
+                                            _vm._v(" "),
+                                            metrica.isCatalogo == 0
+                                              ? _c("td", [_vm._v("No")])
+                                              : _vm._e(),
+                                            _vm._v(" "),
+                                            _c("td", {
+                                              domProps: {
+                                                textContent: _vm._s(
+                                                  metrica.estatus_publicacion
+                                                )
+                                              }
+                                            })
+                                          ]
+                                        )
+                                      }
+                                    ),
+                                    0
+                                  )
+                                ]
+                              )
+                            ])
+                          ])
+                        ]
+                      )
+                    ])
+                  ]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "modal-footer" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-secondary",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.closeModalGrafico()
                         }
-                      },
-                      [_vm._v("Modificar")]
-                    )
-                  : _vm._e()
-              ])
-            ])
+                      }
+                    },
+                    [_vm._v("Cerrar")]
+                  )
+                ])
+              ]
+            )
           ]
         )
       ]
@@ -82791,6 +83064,22 @@ var staticRenderFns = [
         _c("th", [_vm._v("Proyecto")]),
         _vm._v(" "),
         _c("th", [_vm._v("Metrica")])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("thead", [
+      _c("tr", [
+        _c("th", { attrs: { width: "10%;" } }, [_vm._v("Opciones")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Producto")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Ventas")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Visitas")])
       ])
     ])
   },
@@ -82843,24 +83132,6 @@ var staticRenderFns = [
         _c("th", [_vm._v("Catalogo")]),
         _vm._v(" "),
         _c("th", [_vm._v("Estatus")])
-      ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("thead", [
-      _c("tr", [
-        _c("th", { attrs: { width: "10%;" } }, [_vm._v("Opciones")]),
-        _vm._v(" "),
-        _c("th", [_vm._v("Producto")]),
-        _vm._v(" "),
-        _c("th", [_vm._v("Precios Compra")]),
-        _vm._v(" "),
-        _c("th", [_vm._v("Especificaciones")]),
-        _vm._v(" "),
-        _c("th", [_vm._v("Estado")])
       ])
     ])
   }
@@ -83037,6 +83308,29 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -83049,8 +83343,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             paginaBuscadorMeli: 1,
             totalPaginaBuscadorMeli: 1,
             mostrarSoloSeleccionado: false,
-            isLoading: 0
-
+            isLoading: 0,
+            selectProyecto: [],
+            idMeliMetricaProyecto: 0
         };
     },
 
@@ -83061,7 +83356,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var aplLoading = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
             var cambioPagina = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
-
+            if (this.idMeliMetricaProyecto == 0) {
+                util.MSG('Falta!', 'Selecciona el proyecto', util.tipoErr);
+                return;
+            }
             if (aplLoading) {
                 this.isLoading = 1;
             }
@@ -83073,7 +83371,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var page = this.paginaBuscadorMeli;
 
             var me = this;
-            var url = '/zicandi/public/meli/buscador?q=' + q + '&page=' + page;
+            var url = '/zicandi/public/meli/buscador?q=' + q + '&page=' + page + '&idMeliMetricaProyecto=' + this.idMeliMetricaProyecto;
             axios.get(url).then(function (response) {
                 var respuesta = response.data;
                 me.isLoading = 0;
@@ -83135,10 +83433,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
          * Agrega la publicacion al visor
          * 
          */
-        onAddMetricaVisor: function onAddMetricaVisor(publicacion) {
+        onAddMetricaVisor: function onAddMetricaVisor(publicacion, idMeliMetricaProyecto) {
             return new Promise(function (resolve, reject) {
                 axios.post('/zicandi/public/meli/metricas/visor/save', {
-                    'url': publicacion.url
+                    'url': publicacion.url,
+                    'idMeliMetricaProyecto': idMeliMetricaProyecto,
+                    'idPublicacionTienda': publicacion.idPublicacionTienda
                 }).then(function (response) {
                     resolve(response.data);
                 }).catch(function (error) {
@@ -83199,12 +83499,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             //~Procesa pila para agregar
             var procesaOk = 0;
             var procesaErr = 0;
+            var idMeliMetricaProyecto = this.idMeliMetricaProyecto;
             //~Procesa la pila de trabajo
             pilaProcesaAdd.reduce(function (sequence, datosVO) {
                 return sequence.then(function () {
                     //~Proceso a ejecutar       
                     if (datosVO.tarea == 'add') {
-                        return me.onAddMetricaVisor(datosVO);
+                        return me.onAddMetricaVisor(datosVO, idMeliMetricaProyecto);
                     } else if (datosVO.tarea == 'remove') {
                         return me.onRemoveMetricaVisor(datosVO);
                     }
@@ -83233,9 +83534,48 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     me.onBuscadorMeli(true, false);
                 }
             });
+        },
+        onLigarProyecto: function onLigarProyecto(registro, accion) {
+            var me = this;
+
+            var idMeliMetricaProyecto = this.idMeliMetricaProyecto;
+            var idMeliMetricaVisor = registro.idMeliMetricaVisor;
+
+            this.isLoading = 1;
+            axios.post('/zicandi/public/meli/metricas/proyecto/ligar', {
+                'idMeliMetricaProyecto': idMeliMetricaProyecto,
+                'idMeliMetricaVisor': idMeliMetricaVisor,
+                'accion': accion
+            }).then(function (response) {
+                me.isLoading = 0;
+
+                if (response.data.xstatus) {
+                    registro.perteneceProyecto = 'S';
+                    me.$forceUpdate();
+                    util.AVISO('Se realizo el cambio correctamente', util.tipoOk);
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        selectProyectos: function selectProyectos() {
+            var me = this;
+            var url = '/zicandi/public/meli/metricas/proyecto/select';
+            axios.get(url).then(function (response) {
+                var respuesta = response.data;
+
+                me.selectProyecto = respuesta.proyectos;
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
         }
     },
-    mounted: function mounted() {}
+    mounted: function mounted() {
+        this.selectProyectos();
+    }
 });
 
 /***/ }),
@@ -83334,6 +83674,79 @@ var render = function() {
                 }
               }
             })
+          ])
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "row" }, [
+          _c("div", { staticClass: "col-md-1" }, [
+            _vm._v("\n                    Proyecto\n                ")
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-md-8" }, [
+            _c(
+              "select",
+              {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.idMeliMetricaProyecto,
+                    expression: "idMeliMetricaProyecto"
+                  }
+                ],
+                staticClass: "form-control",
+                on: {
+                  change: function($event) {
+                    var $$selectedVal = Array.prototype.filter
+                      .call($event.target.options, function(o) {
+                        return o.selected
+                      })
+                      .map(function(o) {
+                        var val = "_value" in o ? o._value : o.value
+                        return val
+                      })
+                    _vm.idMeliMetricaProyecto = $event.target.multiple
+                      ? $$selectedVal
+                      : $$selectedVal[0]
+                  }
+                }
+              },
+              [
+                _c("option", { attrs: { value: "0", disabled: "" } }, [
+                  _vm._v("Seleccione...")
+                ]),
+                _vm._v(" "),
+                _vm._l(_vm.selectProyecto, function(proyecto) {
+                  return _c("option", {
+                    key: proyecto.id_meli_metrica_proyecto,
+                    domProps: {
+                      value: proyecto.id_meli_metrica_proyecto,
+                      textContent: _vm._s(proyecto.nombre)
+                    }
+                  })
+                })
+              ],
+              2
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-md-3" }, [
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-primary",
+                attrs: { type: "button" },
+                on: {
+                  click: function($event) {
+                    return _vm.onBuscadorMeli(true, false)
+                  }
+                }
+              },
+              [
+                _c("i", { staticClass: "icon-magnifier" }),
+                _vm._v(" Buscar en Mercadolibre\n                    ")
+              ]
+            )
           ])
         ]),
         _vm._v(" "),
@@ -83514,6 +83927,48 @@ var render = function() {
                                       "cite",
                                       { attrs: { title: "Source Title" } },
                                       [_vm._v("Quitar")]
+                                    )
+                                  ])
+                                : _vm._e(),
+                              _vm._v(" "),
+                              resultado.perteneceProyecto == "S"
+                                ? _c("div", [
+                                    _c(
+                                      "span",
+                                      {
+                                        staticClass:
+                                          "badge badge-pill badge-info",
+                                        on: {
+                                          click: function($event) {
+                                            return _vm.onLigarProyecto(
+                                              resultado,
+                                              "-"
+                                            )
+                                          }
+                                        }
+                                      },
+                                      [_vm._v("Proyecto")]
+                                    )
+                                  ])
+                                : _vm._e(),
+                              _vm._v(" "),
+                              resultado.perteneceProyecto == "N"
+                                ? _c("div", [
+                                    _c(
+                                      "span",
+                                      {
+                                        staticClass:
+                                          "badge badge-pill badge-light",
+                                        on: {
+                                          click: function($event) {
+                                            return _vm.onLigarProyecto(
+                                              resultado,
+                                              "+"
+                                            )
+                                          }
+                                        }
+                                      },
+                                      [_vm._v("+ proyecto")]
                                     )
                                   ])
                                 : _vm._e()

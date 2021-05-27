@@ -36,6 +36,24 @@
                         <input type="text" class="form-control form-control-lg" maxlength="30"  @focus="$event.target.select()" v-model="buscadorMeli" @keyup.enter="onBuscadorMeli(true, false);">
                     </div>
                 </div>
+
+                <div class="row">
+                    <div class="col-md-1">
+                        Proyecto
+                    </div>
+                    <div class="col-md-8">
+                        <select class="form-control" v-model="idMeliMetricaProyecto">
+                            <option value="0" disabled>Seleccione...</option>
+                            <option v-for="proyecto in selectProyecto" :key="proyecto.id_meli_metrica_proyecto" :value="proyecto.id_meli_metrica_proyecto" v-text="proyecto.nombre"></option>
+                        </select> 
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-primary" @click="onBuscadorMeli(true, false);">
+                        <i class="icon-magnifier"></i>&nbsp;Buscar en Mercadolibre
+                        </button>
+                    </div>
+                </div>
+
                 <br>
                 <div class="row">
                     <div class="col-md-8">
@@ -73,6 +91,11 @@
                                 <div v-if="resultado.idMeliMetricaVisor > 0">
                                     <strong><span v-text="resultado.idPublicacionTienda"></span></strong>
                                     <div v-if="resultado.check==false"><cite title="Source Title">Quitar</cite></div>                                    
+
+                                    <div v-if="resultado.perteneceProyecto=='S'"><span class="badge badge-pill badge-info" @click="onLigarProyecto(resultado, '-')">Proyecto</span></div>
+                                    <div v-if="resultado.perteneceProyecto=='N'"><span class="badge badge-pill badge-light" @click="onLigarProyecto(resultado, '+')">+ proyecto</span></div>
+
+                                    
                                 </div>
                                 <div v-else><span v-text="resultado.idPublicacionTienda"></span></div>
                             </td>                                                        
@@ -119,8 +142,9 @@
                 paginaBuscadorMeli: 1,
                 totalPaginaBuscadorMeli: 1,
                 mostrarSoloSeleccionado: false,
-                isLoading: 0
-                
+                isLoading: 0,
+                selectProyecto:[],
+                idMeliMetricaProyecto: 0                                
             }
         },
         computed:{
@@ -131,7 +155,10 @@
         },
         methods:{
             onBuscadorMeli(aplLoading=false, cambioPagina=false){
-
+                if(this.idMeliMetricaProyecto==0){
+                    util.MSG('Falta!','Selecciona el proyecto', util.tipoErr);
+                    return;
+                }
                 if(aplLoading){
                     this.isLoading = 1;
                 }
@@ -143,7 +170,7 @@
                 let page = this.paginaBuscadorMeli;
 
                 let me=this;                
-                let url= '/zicandi/public/meli/buscador?q='+q+'&page='+page;
+                let url= '/zicandi/public/meli/buscador?q='+q+'&page='+page+'&idMeliMetricaProyecto='+this.idMeliMetricaProyecto;
                 axios.get(url)
                 .then(function (response) {                    
                     let respuesta = response.data;  
@@ -216,10 +243,12 @@
              * Agrega la publicacion al visor
              * 
              */
-            onAddMetricaVisor(publicacion){                
+            onAddMetricaVisor(publicacion, idMeliMetricaProyecto){                
                 return new Promise(function (resolve, reject) {                    
                     axios.post('/zicandi/public/meli/metricas/visor/save',{
-                        'url': publicacion.url
+                        'url': publicacion.url,
+                        'idMeliMetricaProyecto': idMeliMetricaProyecto,
+                        'idPublicacionTienda': publicacion.idPublicacionTienda
                     })
                     .then(function (response) {                         
                         resolve(response.data);
@@ -279,15 +308,10 @@
                         publicacion.indice = i;
                         pilaProcesaAdd.push(publicacion);
 
-                        
-
-
-
                     }
 
                     
                 }
-
 
                 console.log('Add');
                 console.log(pilaProcesaAdd);
@@ -295,13 +319,14 @@
                 //~Procesa pila para agregar
                 let procesaOk = 0;
                 let procesaErr = 0;
+                let idMeliMetricaProyecto = this.idMeliMetricaProyecto;
                 //~Procesa la pila de trabajo
                 pilaProcesaAdd.reduce(
                     function (sequence, datosVO) {
                         return sequence.then(function() {
                             //~Proceso a ejecutar       
                             if(datosVO.tarea == 'add'){
-                                return me.onAddMetricaVisor(datosVO);
+                                return me.onAddMetricaVisor(datosVO, idMeliMetricaProyecto);
                             }else if(datosVO.tarea == 'remove'){
                                 return me.onRemoveMetricaVisor(datosVO);
                             }
@@ -342,10 +367,56 @@
 
             },
 
+
+            onLigarProyecto(registro, accion){
+                let me = this;                
+                
+                let idMeliMetricaProyecto = this.idMeliMetricaProyecto;
+                let idMeliMetricaVisor = registro.idMeliMetricaVisor;
+
+                this.isLoading = 1;
+                axios.post('/zicandi/public/meli/metricas/proyecto/ligar',{
+                        'idMeliMetricaProyecto': idMeliMetricaProyecto,
+                        'idMeliMetricaVisor': idMeliMetricaVisor,
+                        'accion': accion
+                })
+                .then(function (response) {  
+                    me.isLoading = 0;           
+                    
+                    if(response.data.xstatus){ 
+                        registro.perteneceProyecto = 'S';
+                        me.$forceUpdate();
+                        util.AVISO('Se realizo el cambio correctamente', util.tipoOk);                                                                       
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+                                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+
+            },
+
+            selectProyectos(){                
+                let me=this;                
+                var url= '/zicandi/public/meli/metricas/proyecto/select';
+                axios.get(url)
+                .then(function (response) {                    
+                    var respuesta = response.data;  
+
+                    me.selectProyecto = respuesta.proyectos;                    
+                })
+                .catch(function (error) {                                        
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+
             
         },
         mounted() {
-                      
+            this.selectProyectos();
         }
     }
 </script>
