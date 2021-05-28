@@ -12,18 +12,42 @@ $publicaciones = json_decode(Restfull::sendGet(Param::$_BASE_PATH_API.'zicandi/p
 
 if($publicaciones->xstatus){
     $totalPublicaciones = count($publicaciones->metricas);
+    $cadenaProcesa = "";
+    $bloqSize = 100;
+    $contadorBloqSize = 0;
+    $contadorEjecucion = 1;
+    $contadorTotal = 0;
+    
     Console::log('Total de publicaciones a procesar '.$totalPublicaciones, 'white', true, 'black', $logFisico);
+    
 
     foreach ($publicaciones->metricas as $pub){
-        $resp = json_decode(Restfull::sendGet(Param::$_BASE_PATH_API.'zicandi/public/meli/metricas/visor/metrica?idMeliMetricaVisor='.$pub->id_meli_metrica_visor.'&url='.$pub->url));
 
-        if($resp->xstatus){            
-            Console::log($pub->id_publicacion_tienda.' [', 'green', false, 'black', $logFisico);
-            Console::log('OK', 'yellow', false, 'black', $logFisico);
-            Console::log(']', 'green', true, 'black', $logFisico);
-        }else{
-            Console::log($pub->id_publicacion_tienda.' [ERR]: '.$resp->error, 'red', true, 'black', $logFisico);
-        }
+        $cadenaProcesa= $cadenaProcesa . $pub->id_meli_metrica_visor . ",";        
+        $contadorBloqSize++;
+        $contadorTotal++;
+
+        if($contadorBloqSize >= $bloqSize || $contadorTotal == count($publicaciones->metricas)){
+
+            if($contadorTotal == count($publicaciones->metricas)){
+                $final = 1;
+            }else{
+                $final = 0;
+            }
+
+            Console::log('Se envia bloque num '.$contadorEjecucion.' con '.$bloqSize.' publicaciones a procesar: ', 'yellow', false, 'black', $logFisico);            
+            $resp = json_decode(Restfull::sendGet(Param::$_BASE_PATH_API.'zicandi/public/meli/metricas/visor/metrica?ListMeliMetricaVisor='.$cadenaProcesa . '&ultimoBloque='.$final.'&bloque='.$contadorEjecucion));
+            $contadorEjecucion++;
+
+            if($resp->xstatus){                            
+                Console::log('OK', 'yellow', false, 'black', $logFisico);                
+            }else{
+                Console::log($resp->error, 'red', true, 'black', $logFisico);
+            }
+
+            $cadenaProcesa="";
+            $contadorBloqSize = 0;
+        }        
     }
 }else{
     Console::log('[SE DETIENE PROCESO] '.$publicaciones->error, 'red', true, 'black', $logFisico);        

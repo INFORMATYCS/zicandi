@@ -88,7 +88,11 @@ class TiendasController extends Controller
         $idTienda = $cuenta->id_tienda;
         $idUsuarioMELI = $cuenta->att_id;
         $usuarioMELI = $cuenta->usuario;
-        $token = $cuenta->att_access_token;        
+        $token = $cuenta->att_access_token; 
+        
+        $publicaciones = explode(",", $publicaciones20);
+
+        
 
         
 
@@ -99,76 +103,101 @@ class TiendasController extends Controller
         $parametria = Parametria::where('xstatus','=','1')->where('clave_proceso','=','IMPUESTO')->where('llave','=','TASA_ISR')->select('valor')->first();
         $tasaIsr = floatval($parametria->valor);
 
+        foreach($publicaciones as $publicacionProcesa){
+           
 
-        //********* Consulta detalle de la publicacion **********
-        $p = app(MercadoLibreController::class)->items($publicaciones20, $token);
 
-        $offset = 0;
-        $limit = 100;
-        $listaPublicacionesDeta = array();
-        if($p['httpCode']=="200"){
-            $listaPublicaciones = $p['body'];
+            //********* Consulta detalle de la publicacion **********
+            $p = app(MercadoLibreController::class)->items($publicacionProcesa, $token);
 
-            for($b=0; $b<count($listaPublicaciones); $b++){
-                $publicacion    = $listaPublicaciones[$b]->body;
-                $id             = $publicacion->id;
-                $titulo         = $publicacion->title;
-                $precio         = $publicacion->price;
-                $stock          = $publicacion->available_quantity;
-                $ventas         = $publicacion->sold_quantity;
-                $estatus        = $publicacion->status;
-                $link           = $publicacion->permalink;
-                $fotoMini       = $publicacion->thumbnail;
+            $offset = 0;
+            $limit = 100;
+            $listaPublicacionesDeta = array();
+            if($p['httpCode']=="200"){
+                $listaPublicaciones = $p['body'];
 
-                
-                
-                $shipping       = $publicacion->shipping;
-                $envioGratis    = $shipping->free_shipping;
-                $tipoEnvio      = $shipping->logistic_type;  
-                $idCategoria    = $publicacion->category_id;
-                $tipoListing    = $publicacion->listing_type_id;
-                $envioGratis    = $publicacion->shipping->free_shipping;
+                for($b=0; $b<count($listaPublicaciones); $b++){
+                    $publicacion    = $listaPublicaciones[$b]->body;
+                    $id             = $publicacion->id;
+                    $titulo         = $publicacion->title;
+                    $precio         = $publicacion->price;
+                    $stock          = $publicacion->available_quantity;
+                    $ventas         = $publicacion->sold_quantity;
+                    $estatus        = $publicacion->status;
+                    $link           = $publicacion->permalink;
+                    $fotoMini       = $publicacion->thumbnail;
 
-                //~Calcula la comision por venta del producto
-                $comisionVenta = app(MercadoLibreController::class)->precioVentaCategoria($idCategoria, $tipoListing, $precio);                
-                
-                //~Calcula impuestos aplicables
-                $baseGravable = $precio / 1.16;
-                $iva = $baseGravable * $tasaIva;
-                $isr = $baseGravable * $tasaIsr;
+                    
+                    
+                    $shipping       = $publicacion->shipping;
+                    $envioGratis    = $shipping->free_shipping;
+                    $tipoEnvio      = $shipping->logistic_type;  
+                    $idCategoria    = $publicacion->category_id;
+                    $tipoListing    = $publicacion->listing_type_id;
+                    $envioGratis    = $publicacion->shipping->free_shipping;
 
-                //~Precio del envio en caso de aplicar
-                if($envioGratis){
-                    $costoEnvio = app(MercadoLibreController::class)->costoEnvioGratis($id, $idUsuarioMELI);
-                }else{
-                    $costoEnvio = 0;
-                }
+                    //~Calcula la comision por venta del producto
+                    $comisionVenta = app(MercadoLibreController::class)->precioVentaCategoria($idCategoria, $tipoListing, $precio);                
+                    
+                    //~Calcula impuestos aplicables
+                    $baseGravable = $precio / 1.16;
+                    $iva = $baseGravable * $tasaIva;
+                    $isr = $baseGravable * $tasaIsr;
 
-                $final = $precio - $comisionVenta - $iva - $isr - $costoEnvio;                
+                    //~Precio del envio en caso de aplicar
+                    if($envioGratis){
+                        $costoEnvio = app(MercadoLibreController::class)->costoEnvioGratis($id, $idUsuarioMELI);
+                    }else{
+                        $costoEnvio = 0;
+                    }
 
-                $variations     = $publicacion->variations;
-                if(count($variations)>0){
-                    for($v=0; $v<count($variations); $v++){
-                        $variante = $variations[$v];
-                        $idVariante     = $variante->id;
-                        $stockVariante  = $variante->available_quantity;
-                        $ventasVariante = $variante->sold_quantity;
-                        $atributos      = $variante->attribute_combinations;
-                        $nombreVariante = $atributos[0]->name.':'.$atributos[0]->value_name;
+                    $final = $precio - $comisionVenta - $iva - $isr - $costoEnvio;                
 
+                    $variations     = $publicacion->variations;
+                    if(count($variations)>0){
+                        for($v=0; $v<count($variations); $v++){
+                            $variante = $variations[$v];
+                            $idVariante     = $variante->id;
+                            $stockVariante  = $variante->available_quantity;
+                            $ventasVariante = $variante->sold_quantity;
+                            $atributos      = $variante->attribute_combinations;
+                            $nombreVariante = $atributos[0]->name.':'.$atributos[0]->value_name;
+
+                            $publicacionSalida = array(
+                                'id'=>$id,
+                                'titulo'=>$titulo,
+                                'precio'=>$precio,
+                                'stock'=>$stockVariante,
+                                'ventas'=>$ventasVariante,
+                                'estatus'=>$estatus,
+                                'link'=>$link,
+                                'fotoMini'=>$fotoMini,
+                                'envioGratis'=>$envioGratis,
+                                'tipoEnvio'=>$tipoEnvio,
+                                'idVariante'=>$idVariante,
+                                'nombreVariante'=>$nombreVariante,
+                                'comisionVenta'=>$comisionVenta,
+                                'tipoListing'=>$tipoListing,
+                                'iva'=>$iva,
+                                'isr'=>$isr,
+                                'costoEnvio'=>$costoEnvio,
+                                'final'=>$final
+                            );
+
+                            array_push($listaPublicacionesDeta, $publicacionSalida);
+                        }
+                    }else{
                         $publicacionSalida = array(
                             'id'=>$id,
                             'titulo'=>$titulo,
                             'precio'=>$precio,
-                            'stock'=>$stockVariante,
-                            'ventas'=>$ventasVariante,
+                            'stock'=>$stock,
+                            'ventas'=>$ventas,
                             'estatus'=>$estatus,
                             'link'=>$link,
                             'fotoMini'=>$fotoMini,
                             'envioGratis'=>$envioGratis,
                             'tipoEnvio'=>$tipoEnvio,
-                            'idVariante'=>$idVariante,
-                            'nombreVariante'=>$nombreVariante,
                             'comisionVenta'=>$comisionVenta,
                             'tipoListing'=>$tipoListing,
                             'iva'=>$iva,
@@ -179,152 +208,126 @@ class TiendasController extends Controller
 
                         array_push($listaPublicacionesDeta, $publicacionSalida);
                     }
-                }else{
-                    $publicacionSalida = array(
-                        'id'=>$id,
-                        'titulo'=>$titulo,
-                        'precio'=>$precio,
-                        'stock'=>$stock,
-                        'ventas'=>$ventas,
-                        'estatus'=>$estatus,
-                        'link'=>$link,
-                        'fotoMini'=>$fotoMini,
-                        'envioGratis'=>$envioGratis,
-                        'tipoEnvio'=>$tipoEnvio,
-                        'comisionVenta'=>$comisionVenta,
-                        'tipoListing'=>$tipoListing,
-                        'iva'=>$iva,
-                        'isr'=>$isr,
-                        'costoEnvio'=>$costoEnvio,
-                        'final'=>$final
-                    );
 
-                    array_push($listaPublicacionesDeta, $publicacionSalida);
                 }
-
             }
-        }
 
 
-        //********* Consulta VISITAS de la publicacion **********
-        $v = app(MercadoLibreController::class)->visitas($publicaciones20, $token);
-        if($v['httpCode']=="200"){                
-            
-            foreach ($v['body'] as $id => $visitas) {
-                for($g=0; $g<count($listaPublicacionesDeta); $g++){
-                    if($listaPublicacionesDeta[$g]['id'] == $id){
-                        $listaPublicacionesDeta[$g]['visitas'] = $visitas;
+            //********* Consulta VISITAS de la publicacion **********
+            $v = app(MercadoLibreController::class)->visitas($publicacionProcesa, $token);
+            if($v['httpCode']=="200"){                
+                
+                foreach ($v['body'] as $id => $visitas) {
+                    for($g=0; $g<count($listaPublicacionesDeta); $g++){
+                        if($listaPublicacionesDeta[$g]['id'] == $id){
+                            $listaPublicacionesDeta[$g]['visitas'] = $visitas;
+                        }
                     }
                 }
             }
-        }
 
 
-        //~Persiste en BD
-        foreach ($listaPublicacionesDeta as $pub) {
-            $idPublicacion = $pub['id'];            
+            //~Persiste en BD
+            foreach ($listaPublicacionesDeta as $pub) {
+                $idPublicacion = $pub['id'];            
 
-            if(isset($pub['idVariante'])){
-                $publicacion = Publicacion::where('id_publicacion_tienda','=',$pub['id'])
-                ->where('id_variante_publicacion','=',$pub['idVariante'])
-                ->get()->first();
-            }else{
-                $publicacion = Publicacion::where('id_publicacion_tienda','=',$pub['id'])                    
-                ->get()->first();
-            }
-
-            $visitas = 0;
-            //~Inserta
-            if($publicacion==null){
-                $publicacion = new Publicacion();
-
-                $publicacion->id_tienda = $idTienda;
-                $publicacion->id_cuenta_tienda = $idCuentaTienda;
-                $publicacion->id_publicacion_tienda = $pub['id'];
-                $publicacion->id_variante_publicacion = (isset($pub['idVariante']) ? $pub['idVariante'] : null);
-                $publicacion->titulo = (isset($pub['titulo']) ? $pub['titulo'] : null);
-                $publicacion->nombre_variante = (isset($pub['nombreVariante']) ? $pub['nombreVariante'] : null);
-                $publicacion->precio = (isset($pub['precio']) ? $pub['precio'] : null);
-                $publicacion->stock = (isset($pub['stock']) ? $pub['stock'] : null);
-                $publicacion->ventas = (isset($pub['ventas']) ? $pub['ventas'] : null);
-                $publicacion->visitas = (isset($pub['visitas']) ? $pub['visitas'] : 0);
-                $publicacion->envio_gratis = (isset($pub['envioGratis']) ? $pub['envioGratis'] : null);
-                $publicacion->full = ($pub['tipoEnvio'] == 'fulfillment' ? true : false);
-                $publicacion->link = (isset($pub['link']) ? $pub['link'] : null);
-                $publicacion->foto_mini = (isset($pub['fotoMini']) ? $pub['fotoMini'] : null);
-                $publicacion->fecha_consulta = new \DateTime();
-                $publicacion->estatus = (isset($pub['estatus']) ? $pub['estatus'] : null);
-
-                $publicacion->tipo_listing = (isset($pub['tipoListing']) ? $pub['tipoListing'] : null);
-                $publicacion->costo_envio = 0;
-                $publicacion->comision_venta = 0;
-                $publicacion->iva = 0;
-                $publicacion->isr = 0;
-                $publicacion->neto_venta_final = 0;
-                $publicacion->ultimo_precio_compra = 0;
-
-
-                $publicacion->save();                    
-            }else{
-                if($publicacion->id_publicacion=="MLM826977288"){
-                    $pause=true;
+                if(isset($pub['idVariante'])){
+                    $publicacion = Publicacion::where('id_publicacion_tienda','=',$pub['id'])
+                    ->where('id_variante_publicacion','=',$pub['idVariante'])
+                    ->get()->first();
+                }else{
+                    $publicacion = Publicacion::where('id_publicacion_tienda','=',$pub['id'])                    
+                    ->get()->first();
                 }
 
+                $visitas = 0;
+                //~Inserta
+                if($publicacion==null){
+                    $publicacion = new Publicacion();
 
-                //~Calcula precio de compra
-                $configPublicacion = ConfigPublicacion::where('id_publicacion','=',$publicacion->id_publicacion)->get();
-                $precioCompra = 0;
-                if($configPublicacion->isEmpty()){
+                    $publicacion->id_tienda = $idTienda;
+                    $publicacion->id_cuenta_tienda = $idCuentaTienda;
+                    $publicacion->id_publicacion_tienda = $pub['id'];
+                    $publicacion->id_variante_publicacion = (isset($pub['idVariante']) ? $pub['idVariante'] : null);
+                    $publicacion->titulo = (isset($pub['titulo']) ? $pub['titulo'] : null);
+                    $publicacion->nombre_variante = (isset($pub['nombreVariante']) ? $pub['nombreVariante'] : null);
+                    $publicacion->precio = (isset($pub['precio']) ? $pub['precio'] : null);
+                    $publicacion->stock = (isset($pub['stock']) ? $pub['stock'] : null);
+                    $publicacion->ventas = (isset($pub['ventas']) ? $pub['ventas'] : null);
+                    $publicacion->visitas = (isset($pub['visitas']) ? $pub['visitas'] : 0);
+                    $publicacion->envio_gratis = (isset($pub['envioGratis']) ? $pub['envioGratis'] : null);
+                    $publicacion->full = ($pub['tipoEnvio'] == 'fulfillment' ? true : false);
+                    $publicacion->link = (isset($pub['link']) ? $pub['link'] : null);
+                    $publicacion->foto_mini = (isset($pub['fotoMini']) ? $pub['fotoMini'] : null);
+                    $publicacion->fecha_consulta = new \DateTime();
+                    $publicacion->estatus = (isset($pub['estatus']) ? $pub['estatus'] : null);
+
+                    $publicacion->tipo_listing = (isset($pub['tipoListing']) ? $pub['tipoListing'] : null);
+                    $publicacion->costo_envio = 0;
+                    $publicacion->comision_venta = 0;
+                    $publicacion->iva = 0;
+                    $publicacion->isr = 0;
+                    $publicacion->neto_venta_final = 0;
+                    $publicacion->ultimo_precio_compra = 0;
+
+
+                    $publicacion->save();                    
+                }else{
+                    //~Calcula precio de compra
+                    $configPublicacion = ConfigPublicacion::where('id_publicacion','=',$publicacion->id_publicacion)->get();
                     $precioCompra = 0;
-                }else{                    
-                    foreach ($configPublicacion as $config) {
-                        $producto = Producto::findOrFail($config->id_producto);
-                        $cantidad = $config->cantidad;
-                        $precioCompra+= ($producto->ultimo_precio_compra)*$cantidad;
+                    if($configPublicacion->isEmpty()){
+                        $precioCompra = 0;
+                    }else{                    
+                        foreach ($configPublicacion as $config) {
+                            $producto = Producto::findOrFail($config->id_producto);
+                            $cantidad = $config->cantidad;
+                            $precioCompra+= ($producto->ultimo_precio_compra)*$cantidad;
+                        }
+                        
                     }
                     
+
+                    $visitas = $publicacion->visitas;              
+                    $publicacion->titulo = (isset($pub['titulo']) ? $pub['titulo'] : null);
+                    $publicacion->nombre_variante = (isset($pub['nombreVariante']) ? $pub['nombreVariante'] : null);
+                    $publicacion->precio = (isset($pub['precio']) ? $pub['precio'] : null);
+                    $publicacion->stock = (isset($pub['stock']) ? $pub['stock'] : null);
+                    $publicacion->ventas = (isset($pub['ventas']) ? $pub['ventas'] : null);
+                    $publicacion->envio_gratis = (isset($pub['envioGratis']) ? $pub['envioGratis'] : null);
+                    $publicacion->full = ($pub['tipoEnvio'] == 'fulfillment' ? true : false);
+                    $publicacion->link = (isset($pub['link']) ? $pub['link'] : null);
+                    $publicacion->foto_mini = (isset($pub['fotoMini']) ? $pub['fotoMini'] : null);
+                    $publicacion->fecha_consulta = new \DateTime();
+                    $publicacion->estatus = (isset($pub['estatus']) ? $pub['estatus'] : null);
+                    $publicacion->visitas = (isset($pub['visitas']) ? $pub['visitas'] : $visitas);   
+                    
+                    $publicacion->tipo_listing = (isset($pub['tipoListing']) ? $pub['tipoListing'] : null);
+                    $publicacion->costo_envio = (isset($pub['costoEnvio']) ? $pub['costoEnvio'] : 0);
+                    $publicacion->comision_venta = (isset($pub['comisionVenta']) ? $pub['comisionVenta'] : 0);
+                    $publicacion->iva = (isset($pub['iva']) ? $pub['iva'] : 0);
+                    $publicacion->isr = (isset($pub['isr']) ? $pub['isr'] : 0);
+                    $publicacion->neto_venta_final = (isset($pub['final']) ? $pub['final'] : 0);
+                    $publicacion->ultimo_precio_compra = $precioCompra;
+
+                    $publicacion->update();
                 }
+
+                //~Agrega estadisticas
+                $estadisticaPublicacion = new EstadisticaPublicacion();
+                $estadisticaPublicacion->id_publicacion = $publicacion->id_publicacion;
+                $estadisticaPublicacion->stock = (isset($pub['stock']) ? $pub['stock'] : null);
+                $estadisticaPublicacion->ventas = (isset($pub['ventas']) ? $pub['ventas'] : null);
+                $estadisticaPublicacion->visitas = (isset($pub['visitas']) ? $pub['visitas'] : $visitas); 
+                $estadisticaPublicacion->fecha_consulta = new \DateTime();
+
+                $estadisticaPublicacion->save();
                 
 
-                $visitas = $publicacion->visitas;              
-                $publicacion->titulo = (isset($pub['titulo']) ? $pub['titulo'] : null);
-                $publicacion->nombre_variante = (isset($pub['nombreVariante']) ? $pub['nombreVariante'] : null);
-                $publicacion->precio = (isset($pub['precio']) ? $pub['precio'] : null);
-                $publicacion->stock = (isset($pub['stock']) ? $pub['stock'] : null);
-                $publicacion->ventas = (isset($pub['ventas']) ? $pub['ventas'] : null);
-                $publicacion->envio_gratis = (isset($pub['envioGratis']) ? $pub['envioGratis'] : null);
-                $publicacion->full = ($pub['tipoEnvio'] == 'fulfillment' ? true : false);
-                $publicacion->link = (isset($pub['link']) ? $pub['link'] : null);
-                $publicacion->foto_mini = (isset($pub['fotoMini']) ? $pub['fotoMini'] : null);
-                $publicacion->fecha_consulta = new \DateTime();
-                $publicacion->estatus = (isset($pub['estatus']) ? $pub['estatus'] : null);
-                $publicacion->visitas = (isset($pub['visitas']) ? $pub['visitas'] : $visitas);   
-                
-                $publicacion->tipo_listing = (isset($pub['tipoListing']) ? $pub['tipoListing'] : null);
-                $publicacion->costo_envio = (isset($pub['costoEnvio']) ? $pub['costoEnvio'] : 0);
-                $publicacion->comision_venta = (isset($pub['comisionVenta']) ? $pub['comisionVenta'] : 0);
-                $publicacion->iva = (isset($pub['iva']) ? $pub['iva'] : 0);
-                $publicacion->isr = (isset($pub['isr']) ? $pub['isr'] : 0);
-                $publicacion->neto_venta_final = (isset($pub['final']) ? $pub['final'] : 0);
-                $publicacion->ultimo_precio_compra = $precioCompra;
 
-                $publicacion->update();
             }
 
-            //~Agrega estadisticas
-            $estadisticaPublicacion = new EstadisticaPublicacion();
-            $estadisticaPublicacion->id_publicacion = $publicacion->id_publicacion;
-            $estadisticaPublicacion->stock = (isset($pub['stock']) ? $pub['stock'] : null);
-            $estadisticaPublicacion->ventas = (isset($pub['ventas']) ? $pub['ventas'] : null);
-            $estadisticaPublicacion->visitas = (isset($pub['visitas']) ? $pub['visitas'] : $visitas); 
-            $estadisticaPublicacion->fecha_consulta = new \DateTime();
-
-            $estadisticaPublicacion->save();
-            
-
-
         }
-
         return ['resultado'=>'OK'];    
     }catch (\Exception $e) {
         $ERROR = $e->getMessage();

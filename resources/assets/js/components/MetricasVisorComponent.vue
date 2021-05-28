@@ -52,7 +52,9 @@
                         <tr>
                             <th style="width:10px">Opciones</th>                            
                             <th>Proyecto</th>
-                            <th>Metrica</th>                            
+                            <th>Ventas</th>
+                            <th>Visitas</th>
+                            <th>Tendencia</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -82,7 +84,20 @@
                                 </div>
                                 <span v-text="proyectos.nombre"></span>
                             </td>
-                            <td>Aqui va la metrica</td>
+                            <td>               
+                                <img :src="proyectos.graph_ventas" alt="dog" height="100px"> 
+                            </td>   
+                            <td>               
+                                <img :src="proyectos.graph_visitas" alt="dog" height="100px"> 
+                            </td>
+                            <td>               
+                                <button type="button" class="btn btn-success" v-if="proyectos.tendencia=='UP'">
+                                    <i class="icon-like"></i>
+                                </button> 
+                                <button type="button" class="btn btn-danger" v-else>
+                                    <i class="icon-dislike"></i>
+                                </button> 
+                            </td>
                             
                         </tr>                            
                     </tbody>
@@ -1078,8 +1093,8 @@
                 
                 this.isLoading = 1;
           
-                console.log('/zicandi/public/meli/metricas/visor/metrica?url=' + url + '&idMeliMetricaVisor='+idMeliMetricaVisor);
-                axios.get('/zicandi/public/meli/metricas/visor/metrica?url=' + url + '&idMeliMetricaVisor='+idMeliMetricaVisor)
+                console.log('/zicandi/public/meli/metricas/visor/metrica?url=' + url + '&ListMeliMetricaVisor='+idMeliMetricaVisor+'&ultimoBloque=0&bloque=0');
+                axios.get('/zicandi/public/meli/metricas/visor/metrica?url=' + url + '&ListMeliMetricaVisor='+idMeliMetricaVisor+'&ultimoBloque=0&bloque=0')
                 .then(function (response) {  
                     me.isLoading = 0;           
                     

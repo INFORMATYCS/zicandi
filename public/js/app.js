@@ -80821,6 +80821,21 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -81379,8 +81394,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             this.isLoading = 1;
 
-            console.log('/zicandi/public/meli/metricas/visor/metrica?url=' + url + '&idMeliMetricaVisor=' + idMeliMetricaVisor);
-            axios.get('/zicandi/public/meli/metricas/visor/metrica?url=' + url + '&idMeliMetricaVisor=' + idMeliMetricaVisor).then(function (response) {
+            console.log('/zicandi/public/meli/metricas/visor/metrica?url=' + url + '&ListMeliMetricaVisor=' + idMeliMetricaVisor + '&ultimoBloque=0&bloque=0');
+            axios.get('/zicandi/public/meli/metricas/visor/metrica?url=' + url + '&ListMeliMetricaVisor=' + idMeliMetricaVisor + '&ultimoBloque=0&bloque=0').then(function (response) {
                 me.isLoading = 0;
 
                 if (response.data.xstatus) {
@@ -81684,7 +81699,45 @@ var render = function() {
                     })
                   ]),
                   _vm._v(" "),
-                  _c("td", [_vm._v("Aqui va la metrica")])
+                  _c("td", [
+                    _c("img", {
+                      attrs: {
+                        src: proyectos.graph_ventas,
+                        alt: "dog",
+                        height: "100px"
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("td", [
+                    _c("img", {
+                      attrs: {
+                        src: proyectos.graph_visitas,
+                        alt: "dog",
+                        height: "100px"
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("td", [
+                    proyectos.tendencia == "UP"
+                      ? _c(
+                          "button",
+                          {
+                            staticClass: "btn btn-success",
+                            attrs: { type: "button" }
+                          },
+                          [_c("i", { staticClass: "icon-like" })]
+                        )
+                      : _c(
+                          "button",
+                          {
+                            staticClass: "btn btn-danger",
+                            attrs: { type: "button" }
+                          },
+                          [_c("i", { staticClass: "icon-dislike" })]
+                        )
+                  ])
                 ])
               }),
               0
@@ -83063,7 +83116,11 @@ var staticRenderFns = [
         _vm._v(" "),
         _c("th", [_vm._v("Proyecto")]),
         _vm._v(" "),
-        _c("th", [_vm._v("Metrica")])
+        _c("th", [_vm._v("Ventas")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Visitas")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Tendencia")])
       ])
     ])
   },

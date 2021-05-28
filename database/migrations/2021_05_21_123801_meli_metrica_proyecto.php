@@ -17,8 +17,8 @@ class MeliMetricaProyecto extends Migration
             $table->increments('id_meli_metrica_proyecto');      
             $table->string('nombre',50);
             $table->string('foto',250);
-            $table->decimal('promedio_visitas', 8, 2); 
-            $table->decimal('promedio_ventas', 8, 2); 
+            $table->string('graph_visitas', 250); 
+            $table->string('graph_ventas', 250); 
             $table->string('tendencia',3);
             $table->boolean('xstatus')->default(1);
             $table->timestamps();         

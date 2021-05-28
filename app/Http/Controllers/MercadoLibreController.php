@@ -19,6 +19,7 @@ use App\MeliSocketEnvioFull;
 use App\Publicacion;
 use App\ConfigPublicacion;
 use App\Http\Lib\ProcesadorImagenes;
+use App\MeliDetaMetricaProyecto;
 use App\Producto;
 use App\MeliMetricaVisor;
 use App\MeliDetaMetricaVisor;
@@ -1045,239 +1046,370 @@ class MercadoLibreController extends Controller
      * 
      */
     public function metricaPublicacionVisor(Request $request){        
-        try{                                   
-            $url = $request->url;
-            $idMeliMetricaVisor = $request->idMeliMetricaVisor;
-                  
-            $meliMetricaVisor = MeliMetricaVisor::findOrFail($idMeliMetricaVisor);            
-            $idPublicacion = $meliMetricaVisor->id_publicacion_tienda;    
+        try{    
+        
+            $cadenaProcesa = $request->ListMeliMetricaVisor;
+            $ultimoBloque = $request->ultimoBloque;
+            $bloque = $request->bloque;
             
-            if(isset($request->html)){
-                $html = $request->html;
-                $output = $request->output;
-            }else{
-                // create curl resource
-                $ch = curl_init();
+            if($bloque == 1){
+                //~Reinicia estadisticas de proyectos
+                $hoy = Carbon::today();
+                MeliDetaMetricaProyecto::whereDate('fecha_metrica', '=', $hoy)
+                ->update(['promedio_visitas'=>'0','promedio_ventas'=>'0']);                
+            }
+                
+            $idMeliMetricaVisorList = explode(",", $cadenaProcesa);
+            $mensajeErrSalida = "";
 
-                // set url
-                curl_setopt($ch, CURLOPT_URL, $url);
+            foreach($idMeliMetricaVisorList as $idMeliMetricaVisor){
+                if(intval($idMeliMetricaVisor)>0){
+                    //~-------------------Procesamiento individual
+                    try{                                                          
+                        $meliMetricaVisor = MeliMetricaVisor::findOrFail($idMeliMetricaVisor);            
+                        $url = $meliMetricaVisor->url;    
+                        $idPublicacion = $meliMetricaVisor->id_publicacion_tienda;    
+                        
+                        if(isset($request->html)){
+                            $html = $request->html;
+                            $output = $request->output;
+                        }else{
+                            // create curl resource
+                            $ch = curl_init();
 
-                //return the transfer as a string
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                            // set url
+                            curl_setopt($ch, CURLOPT_URL, $url);
 
-                // $output contains the output string
-                $output = curl_exec($ch);            
+                            //return the transfer as a string
+                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-                // close curl resource to free up system resources
-                curl_close($ch);
+                            // $output contains the output string
+                            $output = curl_exec($ch);            
 
-                $inicial = strpos($output, "vendidos</span>") -100;
-                if($inicial==-100){
-                    $inicial = strpos($output, "vendido</span>") -100;
+                            // close curl resource to free up system resources
+                            curl_close($ch);
+
+                            $inicial = strpos($output, "vendidos</span>") -100;
+                            if($inicial==-100){
+                                $inicial = strpos($output, "vendido</span>") -100;
+                            }
+
+                            $final = strpos($output, '<span class="andes-button__content">Comprar ahora');
+                            if($final == false){
+                                $final = strpos($output, '<span class="andes-button__content">Agregar al carrito');
+                            }
+                            
+                            //~En caso de no existir la pagina continua con la siguiente publicacion
+                            if($final==false && $inicial ==-100 && strpos($output, 'Parece que esta página no existe') > 0){
+                                continue;
+                            }
+
+                            
+                            $html = substr($output, $inicial, $final - $inicial);
+                        }
+
+                        //~Estatus de la publicacion            
+                        $textPausada = strpos($output, 'Publicación pausada</div>');
+                        if($textPausada == false){
+
+                            $iVendidos = strpos($html, "|");
+                            $fVendidos = strpos($html, "vendidos</span>", $iVendidos);
+                            if(!$fVendidos){
+                                $fVendidos = strpos($html, "vendido</span>", $iVendidos);
+                            }
+                            $vendidos = trim(substr($html, $iVendidos + 1, ($fVendidos - $iVendidos)-1));
+
+
+                            $iPrecio = strpos($html, '<span class="price-tag-fraction">');
+                            $fPrecio = strpos($html, "</span>", $iPrecio);
+                            $precio = floatval( str_replace(',', '', trim(substr($html, $iPrecio + 33, ($fPrecio - $iPrecio)-33))) );
+
+                            $icoFull = strpos($html, 'class="ui-pdp-icon ui-pdp-icon--full"');
+                            if($icoFull>0){
+                                $full = 1;
+                            }else{
+                                $full = 0;
+                            }
+
+
+                            $textSinInteres = strpos($html, 'span> sin inter');
+                            if($textSinInteres>0){
+                                $msi = 1;
+                            }else{
+                                $msi = 0;
+                            }
+
+                            $iDisponible = strpos($html, '<span class="ui-pdp-buybox__quantity__available">');
+
+                            if($iDisponible ==false){
+                                $textUltimoDisponible = strpos($html, '¡Última disponible!</p>');
+                                if($textUltimoDisponible>0){
+                                    $disponible = 1;
+                                }else{
+                                    $disponible = 0;
+                                }
+                            }else{
+                                $fDisponible = strpos($html, "disponibles)</span>", $iDisponible);
+                                $disponible = trim(substr($html, $iDisponible + 50, ($fDisponible - $iDisponible)-50));
+                            }
+                
+                            $isCatalogo = 0;
+                            if($idPublicacion == null){
+                                $iIdPublicacion = strpos($url, 'MLM');
+                                $fIdPublicacion = strpos($url, '-', $iIdPublicacion + 4);
+                                $idPublicacion = trim(str_replace('-', '', substr($url, $iIdPublicacion, ($fIdPublicacion - $iIdPublicacion))));
+                                
+                                if(strlen($idPublicacion) > 12){
+                                    $isCatalogo = 1;
+                                    $idPublicacion = substr($idPublicacion, 0, 11);
+                                }
+                            }
+
+                            $visitas = 0;
+                            if($isCatalogo!=1){
+                                $visitas = $this->getMeliVisitasNoToken( $idPublicacion, date("Y-m-d") );
+                            }
+
+
+                            $metrica = array(
+                                "vendidos"  => $vendidos,
+                                "precio"  => $precio,
+                                "full"  => $full,
+                                "msi"  => $msi,
+                                "disponible"  => $disponible,
+                                "isCatalogo"  => $isCatalogo,
+                                "visitas"  => $visitas                
+                            );
+                            
+                            $hoy = Carbon::today();
+                            $meliDetaMetricaVisor = MeliDetaMetricaVisor::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)
+                            ->whereDate('fecha_consulta', '=', $hoy)
+                            ->first();
+
+                            $bandExiste = true;
+                            if($meliDetaMetricaVisor == null){
+                                $meliDetaMetricaVisor = new MeliDetaMetricaVisor();
+                                $bandExiste = false;
+                            }
+
+                            $meliDetaMetricaVisor->id_meli_metrica_visor = $idMeliMetricaVisor;
+                            $meliDetaMetricaVisor->fecha_consulta = date("Y-m-d");
+                            $meliDetaMetricaVisor->precio = $precio;
+                            $meliDetaMetricaVisor->ventas = $vendidos;
+                            $meliDetaMetricaVisor->visitas = $visitas;
+                            $meliDetaMetricaVisor->full = $full;
+                            $meliDetaMetricaVisor->msi = $msi;
+                            $meliDetaMetricaVisor->disponibles = $disponible;
+                            $meliDetaMetricaVisor->isCatalogo = $isCatalogo;
+                            $meliDetaMetricaVisor->estatus_publicacion = 'ACTIVA';
+                                
+                            if( $bandExiste ==false ){
+                                $meliDetaMetricaVisor->save();
+                            }else{                                       
+                                $meliDetaMetricaVisor->update();
+                            }
+
+                            MeliMetricaVisor::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)
+                            ->update(['estatus_publicacion'=>'ACTIVA']);
+
+                        }else{
+                            $meliDetaMetricaVisorUltimo = MeliDetaMetricaVisor::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)
+                            ->latest()                
+                            ->take(1)
+                            ->first();
+
+                            $metrica = array(
+                                "vendidos"  => $meliDetaMetricaVisorUltimo->ventas,
+                                "precio"  => $meliDetaMetricaVisorUltimo->precio,
+                                "full"  => $meliDetaMetricaVisorUltimo->full,
+                                "msi"  => $meliDetaMetricaVisorUltimo->msi,
+                                "disponible"  => $meliDetaMetricaVisorUltimo->disponibles,
+                                "isCatalogo"  => $meliDetaMetricaVisorUltimo->isCatalogo,
+                                "visitas"  => $meliDetaMetricaVisorUltimo->visitas,
+                                'estatusPublicacion' => 'PAUSADA'
+                            );
+
+                            
+                            $hoy = Carbon::today();
+                            $meliDetaMetricaVisorHoy = MeliDetaMetricaVisor::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)
+                            ->whereDate('fecha_consulta', '=', $hoy)
+                            ->first();
+                        
+                            
+                            if($meliDetaMetricaVisorHoy == null){
+                                $meliDetaMetricaVisor = new MeliDetaMetricaVisor();     
+                                
+                                $meliDetaMetricaVisor->id_meli_metrica_visor = $idMeliMetricaVisor;
+                                $meliDetaMetricaVisor->fecha_consulta = date("Y-m-d");
+                                $meliDetaMetricaVisor->precio = $meliDetaMetricaVisorUltimo->precio;
+                                $meliDetaMetricaVisor->ventas = $meliDetaMetricaVisorUltimo->ventas;
+                                $meliDetaMetricaVisor->visitas = $meliDetaMetricaVisorUltimo->visitas;
+                                $meliDetaMetricaVisor->full = $meliDetaMetricaVisorUltimo->full;
+                                $meliDetaMetricaVisor->msi = $meliDetaMetricaVisorUltimo->msi;
+                                $meliDetaMetricaVisor->disponibles = $meliDetaMetricaVisorUltimo->disponibles;
+                                $meliDetaMetricaVisor->isCatalogo = $meliDetaMetricaVisorUltimo->isCatalogo;
+                                $meliDetaMetricaVisor->estatus_publicacion = 'PAUSADA';
+
+                                $meliDetaMetricaVisor->save();                        
+                            }               
+
+                            MeliMetricaVisor::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)
+                            ->update(['estatus_publicacion'=>'PAUSADA']);
+                        }
+
+                        //~Genera el gafico rapido
+                        $sql= " select fecha_consulta, ventas, visitas from (
+                            select fecha_consulta, ventas, visitas from meli_deta_metrica_visor
+                            where id_meli_metrica_visor = ".$idMeliMetricaVisor."
+                            order by fecha_consulta desc
+                            limit 30) x
+                            order by fecha_consulta asc";
+
+
+                        $rs = DB::select( $sql );
+
+                        //~Crea array de ventas y visitas
+                        $ventasValues = array();
+                        $visitasValues = array();
+                        $ind = 0;
+                        $ventasDiaAntes = 0;
+                        $ultimaVenta = 0;
+                        $ultimaVisita = 0;
+
+                        foreach($rs as $venta){  
+                            if($ind >=1){
+                                array_push($ventasValues, ($venta->ventas + 1)-$ventasDiaAntes);
+                                $ultimaVenta= ($venta->ventas + 1)-$ventasDiaAntes;
+                            }else{
+                                array_push($ventasValues, 1);
+                            }                                
+                            
+                            $ventasDiaAntes= $venta->ventas;
+                            $ind++;
+
+                            array_push($visitasValues, $venta->visitas + 1);
+                            $ultimaVisita= $venta->visitas;
+                        }            
+
+                        $procesadorImagenes = new ProcesadorImagenes();
+
+                        $graphVentas = $procesadorImagenes->creaGraficaPlanaMetricas($ventasValues, "g_ventas_".$idMeliMetricaVisor, "VENTA");
+                        $graphVisitas = $procesadorImagenes->creaGraficaPlanaMetricas($visitasValues, "g_visita_".$idMeliMetricaVisor, "VISITA");
+
+
+                        MeliMetricaVisor::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)
+                        ->update(['url_graph_visitas'=>$graphVisitas,'url_graph_ventas'=>$graphVentas]);
+
+                        //~------ Metricas proyecto
+                        $meliMetricaVisorProyecto = MeliMetricaVisorProyecto::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)->get();
+
+                        if($meliMetricaVisorProyecto!=null){
+                            foreach($meliMetricaVisorProyecto as $proyectos){
+                                $idMeliMetricaProyecto = $proyectos->id_meli_metrica_proyecto;
+                                $hoy = Carbon::today();
+
+                                $meliDetaMetricaProyecto = MeliDetaMetricaProyecto::where('id_meli_metrica_proyecto','=',$idMeliMetricaProyecto)                                
+                                ->whereDate('fecha_metrica', '=', $hoy)
+                                ->first();
+
+
+                                if($meliDetaMetricaProyecto==null){
+                                    $meliDetaMetricaProyecto = new MeliDetaMetricaProyecto();
+                                    $meliDetaMetricaProyecto->id_meli_metrica_proyecto = $idMeliMetricaProyecto;
+                                    $meliDetaMetricaProyecto->fecha_metrica = $hoy;
+                                    $meliDetaMetricaProyecto->promedio_ventas = $ultimaVenta;
+                                    $meliDetaMetricaProyecto->promedio_visitas = $ultimaVisita;
+
+                                    $meliDetaMetricaProyecto->save();
+                                }else{
+                                    $sumVentas = $meliDetaMetricaProyecto->promedio_ventas;
+                                    $sumVisitas = $meliDetaMetricaProyecto->promedio_visitas;
+
+                                    $meliDetaMetricaProyecto->promedio_ventas = $sumVentas + $ultimaVenta;
+                                    $meliDetaMetricaProyecto->promedio_visitas = $sumVisitas + $ultimaVisita;
+
+                                    $meliDetaMetricaProyecto->update();
+                                }
+                            }
+                        }
+
+
+                        //~------ Metricas proyecto
+                                                
+                    }catch (\Exception $e) {
+                        Log::error( $e->getMessage() );            
+                        Log::error( $e->getTraceAsString() );            
+                        $mensajeErrSalida.= $idMeliMetricaVisor . '=>' . substr($e->getMessage(),0 , 100);      
+                    } 
+                    //~-------------------Procesamiento individual  
+            
+            
                 }
-
-                $final = strpos($output, '<span class="andes-button__content">Comprar ahora');
-		        if($final == false){
-                    $final = strpos($output, '<span class="andes-button__content">Agregar al carrito');
-                }
-
-                $html = substr($output, $inicial, $final - $inicial);
             }
 
-            //~Estatus de la publicacion            
-            $textPausada = strpos($output, 'Publicación pausada</div>');
-            if($textPausada == false){
-
-                $iVendidos = strpos($html, "|");
-                $fVendidos = strpos($html, "vendidos</span>", $iVendidos);
-                if(!$fVendidos){
-                    $fVendidos = strpos($html, "vendido</span>", $iVendidos);
-                }
-                $vendidos = trim(substr($html, $iVendidos + 1, ($fVendidos - $iVendidos)-1));
-
-
-                $iPrecio = strpos($html, '<span class="price-tag-fraction">');
-                $fPrecio = strpos($html, "</span>", $iPrecio);
-                $precio = floatval( str_replace(',', '', trim(substr($html, $iPrecio + 33, ($fPrecio - $iPrecio)-33))) );
-
-                $icoFull = strpos($html, 'class="ui-pdp-icon ui-pdp-icon--full"');
-                if($icoFull>0){
-                    $full = 1;
-                }else{
-                    $full = 0;
-                }
+            if($ultimoBloque=='1'){
+                //~Calcula metricas por proyecto
+                $proyectos = MeliMetricaProyecto::all();
+                foreach($proyectos as $proyecto){
+                    $sql= " select fecha_metrica, ventas, visitas from (
+                                select fecha_metrica, promedio_ventas ventas, promedio_visitas visitas from meli_deta_metrica_proyecto
+                                where id_meli_metrica_proyecto = ".$proyecto->id_meli_metrica_proyecto."
+                                order by fecha_metrica desc
+                                limit 30) x
+                            order by fecha_metrica asc";
 
 
-                $textSinInteres = strpos($html, 'span> sin inter');
-                if($textSinInteres>0){
-                    $msi = 1;
-                }else{
-                    $msi = 0;
-                }
+                    $rs = DB::select( $sql );
 
-                $iDisponible = strpos($html, '<span class="ui-pdp-buybox__quantity__available">');
+                    $ventasValues = array();
+                    $visitasValues = array();
+                    $puntero = "UP";
+                    $tendenciaUp=0;
+                    $tendenciaDown=0;
+                    $ventasDiaAntes = 0;
+                    foreach($rs as $metricas){
+                        array_push($ventasValues, $metricas->ventas+1);
+                        array_push($visitasValues, $metricas->visitas+1);
+                        
+                        if($metricas->ventas > $ventasDiaAntes){                            
+                            $tendenciaUp++;
+                            $tendenciaDown=0;
 
-                if($iDisponible ==false){
-                    $textUltimoDisponible = strpos($html, '¡Última disponible!</p>');
-                    if($textUltimoDisponible>0){
-                        $disponible = 1;
-                    }else{
-                        $disponible = 0;
+                            if($tendenciaUp>=3){
+                                $puntero = "UP";                             
+                            }
+                        }else{
+                            $tendenciaDown++;
+                            $tendenciaUp=0;
+
+                            if($tendenciaDown>=3){
+                                $puntero = "DOW";                                
+                            }
+                        }
+
+                        $ventasDiaAntes= $metricas->ventas;
                     }
-                }else{
-                    $fDisponible = strpos($html, "disponibles)</span>", $iDisponible);
-                    $disponible = trim(substr($html, $iDisponible + 50, ($fDisponible - $iDisponible)-50));
+                    $graphVentas = $procesadorImagenes->creaGraficaPlanaMetricas($ventasValues, "g_p_ventas_".$proyecto->id_meli_metrica_proyecto, "VENTA");
+                    $graphVisitas = $procesadorImagenes->creaGraficaPlanaMetricas($visitasValues, "g_p_visita_".$proyecto->id_meli_metrica_proyecto, "VISITA");
+
+                    $proyecto->graph_ventas = $graphVentas; 
+                    $proyecto->graph_visitas = $graphVisitas; 
+                    $proyecto->tendencia = $puntero; 
+                    $proyecto->update();
                 }
-    
-                $isCatalogo = 0;
-                if($idPublicacion == null){
-                    $iIdPublicacion = strpos($url, 'MLM');
-                    $fIdPublicacion = strpos($url, '-', $iIdPublicacion + 4);
-                    $idPublicacion = trim(str_replace('-', '', substr($url, $iIdPublicacion, ($fIdPublicacion - $iIdPublicacion))));
-                    
-                    if(strlen($idPublicacion) > 12){
-                        $isCatalogo = 1;
-                        $idPublicacion = substr($idPublicacion, 0, 11);
-                    }
-                }
-
-                $visitas = 0;
-                if($isCatalogo!=1){
-                    $visitas = $this->getMeliVisitasNoToken( $idPublicacion, date("Y-m-d") );
-                }
-
-
-                $metrica = array(
-                    "vendidos"  => $vendidos,
-                    "precio"  => $precio,
-                    "full"  => $full,
-                    "msi"  => $msi,
-                    "disponible"  => $disponible,
-                    "isCatalogo"  => $isCatalogo,
-                    "visitas"  => $visitas                
-                );
-                
-                $hoy = Carbon::today();
-                $meliDetaMetricaVisor = MeliDetaMetricaVisor::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)
-                ->whereDate('fecha_consulta', '=', $hoy)
-                ->first();
-
-                $bandExiste = true;
-                if($meliDetaMetricaVisor == null){
-                    $meliDetaMetricaVisor = new MeliDetaMetricaVisor();
-                    $bandExiste = false;
-                }
-
-                $meliDetaMetricaVisor->id_meli_metrica_visor = $idMeliMetricaVisor;
-                $meliDetaMetricaVisor->fecha_consulta = date("Y-m-d");
-                $meliDetaMetricaVisor->precio = $precio;
-                $meliDetaMetricaVisor->ventas = $vendidos;
-                $meliDetaMetricaVisor->visitas = $visitas;
-                $meliDetaMetricaVisor->full = $full;
-                $meliDetaMetricaVisor->msi = $msi;
-                $meliDetaMetricaVisor->disponibles = $disponible;
-                $meliDetaMetricaVisor->isCatalogo = $isCatalogo;
-                $meliDetaMetricaVisor->estatus_publicacion = 'ACTIVA';
-                    
-                if( $bandExiste ==false ){
-                    $meliDetaMetricaVisor->save();
-                }else{                                       
-                    $meliDetaMetricaVisor->update();
-                }
-
-                MeliMetricaVisor::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)
-                ->update(['estatus_publicacion'=>'ACTIVA']);
-
-            }else{
-                $meliDetaMetricaVisorUltimo = MeliDetaMetricaVisor::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)
-                ->latest()                
-                ->take(1)
-                ->first();
-
-                $metrica = array(
-                    "vendidos"  => $meliDetaMetricaVisorUltimo->ventas,
-                    "precio"  => $meliDetaMetricaVisorUltimo->precio,
-                    "full"  => $meliDetaMetricaVisorUltimo->full,
-                    "msi"  => $meliDetaMetricaVisorUltimo->msi,
-                    "disponible"  => $meliDetaMetricaVisorUltimo->disponibles,
-                    "isCatalogo"  => $meliDetaMetricaVisorUltimo->isCatalogo,
-                    "visitas"  => $meliDetaMetricaVisorUltimo->visitas,
-                    'estatusPublicacion' => 'PAUSADA'
-                );
-
-                
-                $hoy = Carbon::today();
-                $meliDetaMetricaVisorHoy = MeliDetaMetricaVisor::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)
-                ->whereDate('fecha_consulta', '=', $hoy)
-                ->first();
-            
-                
-                if($meliDetaMetricaVisorHoy == null){
-                    $meliDetaMetricaVisor = new MeliDetaMetricaVisor();     
-                    
-                    $meliDetaMetricaVisor->id_meli_metrica_visor = $idMeliMetricaVisor;
-                    $meliDetaMetricaVisor->fecha_consulta = date("Y-m-d");
-                    $meliDetaMetricaVisor->precio = $meliDetaMetricaVisorUltimo->precio;
-                    $meliDetaMetricaVisor->ventas = $meliDetaMetricaVisorUltimo->ventas;
-                    $meliDetaMetricaVisor->visitas = $meliDetaMetricaVisorUltimo->visitas;
-                    $meliDetaMetricaVisor->full = $meliDetaMetricaVisorUltimo->full;
-                    $meliDetaMetricaVisor->msi = $meliDetaMetricaVisorUltimo->msi;
-                    $meliDetaMetricaVisor->disponibles = $meliDetaMetricaVisorUltimo->disponibles;
-                    $meliDetaMetricaVisor->isCatalogo = $meliDetaMetricaVisorUltimo->isCatalogo;
-                    $meliDetaMetricaVisor->estatus_publicacion = 'PAUSADA';
-
-                    $meliDetaMetricaVisor->save();                        
-                }               
-
-                MeliMetricaVisor::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)
-                ->update(['estatus_publicacion'=>'PAUSADA']);
             }
 
-            //~Genera el gafico rapido
-            $sql= " select fecha_consulta, ventas, visitas from (
-                select fecha_consulta, ventas, visitas from meli_deta_metrica_visor
-                where id_meli_metrica_visor = ".$idMeliMetricaVisor."
-                order by fecha_consulta desc
-                limit 30) x
-                order by fecha_consulta asc";
+            if($mensajeErrSalida!=""){
+                throw new Exception($mensajeErrSalida);
+            }
 
-
-            $rs = DB::select( $sql );
-
-            //~Crea array de ventas y visitas
-            $ventasValues = array();
-            $visitasValues = array();
-            $ind = 0;
-            $ventasDiaAntes = 0;
-            foreach($rs as $venta){  
-                if($ind >=1){
-                    array_push($ventasValues, ($venta->ventas + 1)-$ventasDiaAntes);
-                }else{
-                    array_push($ventasValues, 1);
-                }                                
-                
-                $ventasDiaAntes= $venta->ventas;
-                $ind++;
-
-                array_push($visitasValues, $venta->visitas + 1);
-            }            
-
-            $procesadorImagenes = new ProcesadorImagenes();
-
-            $graphVentas = $procesadorImagenes->creaGraficaPlanaMetricas($ventasValues, "g_ventas_".$idMeliMetricaVisor, "VENTA");
-            $graphVisitas = $procesadorImagenes->creaGraficaPlanaMetricas($visitasValues, "g_visita_".$idMeliMetricaVisor, "VISITA");
-
-
-            MeliMetricaVisor::where('id_meli_metrica_visor', '=', $idMeliMetricaVisor)
-            ->update(['url_graph_visitas'=>$graphVisitas,'url_graph_ventas'=>$graphVentas]);
-
-            
-            return [ 'xstatus'=>true, 'metrica' => $metrica ];
+            return [ 'xstatus'=>true ];
+        
         }catch (\Exception $e) {
             Log::error( $e->getTraceAsString() );            
             return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
-        }        
-        
+        }     
+
     }
 
 

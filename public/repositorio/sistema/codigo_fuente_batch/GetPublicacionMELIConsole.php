@@ -19,7 +19,7 @@ foreach ($cuentas as $cuenta){
     $usuario = $cuenta->usuario;
     $estatus = $cuenta->estatus;
     $httpCode = $cuenta->httpCode;
-    $bloqSize = 10;
+    $bloqSize = 100;
 
     Console::log('Comieza... Recuperando publicaciones para '.$usuario, 'yellow', true, 'black', $logFisico);
     $publicaciones = json_decode(Restfull::sendGet(Param::$_BASE_PATH_API.'zicandi/public/tienda/getPublicaciones?idCuentaTienda='.$idCuentaTienda));
