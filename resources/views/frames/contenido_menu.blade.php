@@ -49,8 +49,17 @@
                     <li class="nav-item">
                         <a @click="oppMenuSeleccion=20" class="nav-link" href="#"><i class="icon-bag"></i> Envios Full</a>
                     </li>
-                    <li class="nav-item">
-                        <a @click="oppMenuSeleccion=21" class="nav-link" href="#"><i class="icon-bag"></i> Visor Metricas</a>
+                    <li class="nav-item nav-dropdown">
+                        
+                        <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-wallet"></i> Metricas</a>
+                        <ul class="nav-dropdown-items">
+                            <li class="nav-item">
+                                <a @click="oppMenuSeleccion=22" class="nav-link" href="#"><i class="icon-bag"></i> Buscar en Meli</a>
+                            </li>    
+                            <li class="nav-item">
+                                <a @click="oppMenuSeleccion=21" class="nav-link" href="#"><i class="icon-bag"></i> Visor Metricas</a>
+                            </li>    
+                        </ul>                            
                     </li>
                     
                     

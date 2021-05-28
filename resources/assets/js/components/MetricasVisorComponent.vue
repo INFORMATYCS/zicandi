@@ -19,9 +19,13 @@
             <div class="card">
                 <div class="card-header">
                     <i class="fa fa-align-justify"></i> Tareas:
-                    <button type="button" class="btn btn-secondary" @click="showModal('metrica','registrar')">
-                        <i class="icon-plus"></i>&nbsp;Nuevo
-                    </button>                    
+                    <button type="button" class="btn btn-primary" @click="showModal('metrica','registrar')">
+                        <i class="icon-plus"></i>&nbsp;Nueva metrica
+                    </button>             
+                    &nbsp;&nbsp;   
+                    <button type="button" class="btn btn-secondary" @click="showModal('metrica','proyecto')">
+                        <i class="icon-plus"></i>&nbsp;Nuevo Proyecto
+                    </button>     
                 </div>   
             </div>
             
@@ -32,11 +36,11 @@
                     <div class="col-md-6">
                         <div class="input-group">   
                             <select class="form-control col-md-3" v-model="buscadorGrid.criterio">
-                                <option value="ACT">Activas</option>
-                                <option value="CAN">Canceladas</option>                                
+                                <option value="1">Activas</option>
+                                <option value="0">Canceladas</option>                                
                             </select>                         
-                            <input type="text" v-model="buscadorGrid.textoBuscar" @keyup.enter="buscarPublicaciones(1, buscadorGrid.textoBuscar, buscadorGrid.criterio, true)" class="form-control" placeholder="Texto a buscar">
-                            <button type="submit" class="btn btn-primary" @click="buscarPublicaciones(1, buscadorGrid.textoBuscar, buscadorGrid.criterio, true)"><i class="fa fa-search"></i> Buscar</button>
+                            <input type="text" v-model="buscadorGrid.textoBuscar" @keyup.enter="buscarProyectos(1, buscadorGrid.textoBuscar, buscadorGrid.criterio, true)" class="form-control" placeholder="Texto a buscar">
+                            <button type="submit" class="btn btn-primary" @click="buscarProyectos(1, buscadorGrid.textoBuscar, buscadorGrid.criterio, true)"><i class="fa fa-search"></i> Buscar proyecto</button>
                         </div>
                     </div>
                 </div>
@@ -46,49 +50,55 @@
                 <table class="table table-bordered table-striped table-sm">
                     <thead>
                         <tr>
-                            <th>Opciones</th>
-                            <th>Alias</th>
-                            <th>Nombre</th>
-                            <th>Pagina Web</th>
-                            <th>Contacto</th>
-                            <th>Estado</th>
+                            <th style="width:10px">Opciones</th>                            
+                            <th>Proyecto</th>
+                            <th>Ventas</th>
+                            <th>Visitas</th>
+                            <th>Tendencia</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="publicacion in buscadorGrid.publicaciones" :key="publicacion.id_meli_metrica_visor">
+                        <tr v-for="proyectos in buscadorGrid.proyectos" :key="proyectos.id_meli_metrica_proyecto">
                             <td>
-                                <button type="button" class="btn btn-primary btn-sm" @click="showModal('metrica','grafico', publicacion)">
-                                    <i class="icon-graph"></i>
-                                </button>
-
-                                <template v-if="publicacion.estatus=='ACT'">
-                                    <button type="button" class="btn btn-danger btn-sm" @click="onActivaDesactivaPublicacion(publicacion.id_meli_metrica_visor, publicacion.estatus)">
+                               
+                                <template v-if="proyectos.xstatus=='1'">
+                                    <button type="button" class="btn btn-danger btn-sm" @click="onActivaDesactivaProyecto(proyectos.id_meli_metrica_proyecto, proyectos.xstatus)">
                                         <i class="icon-trash"></i>
                                     </button>
                                 </template>
 
                                 <template v-else>
-                                    <button type="button" class="btn btn-info btn-sm" @click="onActivaDesactivaPublicacion(publicacion.id_meli_metrica_visor, publicacion.estatus)">
+                                    <button type="button" class="btn btn-info btn-sm" @click="onActivaDesactivaProyecto(proyectos.id_meli_metrica_proyecto, proyectos.xstatus)">
                                         <i class="icon-check"></i>
                                     </button>
                                 </template>
+
+                                <button type="button" class="btn btn-warning btn-sm" @click="showModal('metrica','proyecto_edit', proyectos)">
+                                    <i class="icon-pencil"></i>
+                                </button> &nbsp;
                             </td>                            
                             <td>
-                                <a href="#" @click="onAbrirPublicacionML(publicacion.url)"><img :src="publicacion.foto" alt="dog" width="50px" height="50px"></a>
-                            </td>
-                            <td v-text="publicacion.titulo"></td>
-                            <td>
-                                    <a href="#"  v-text="publicacion.id_publicacion_tienda"></a>
-                            </td>                            
-                            <td>
-                                <div v-if="publicacion.estatus_publicacion=='ACTIVA'">
-                                    <span class="badge badge-success">Activa</span>
+                                <div>                                
+                                    <a href="#" @click="showModal('metrica','deta_publicacion_proyecto', proyectos)"><img :src="proyectos.foto" alt="dog" width="50px" height="50px"></a>                                
+
                                 </div>
-                                <div v-else>
-                                    <span class="badge badge-danger">Pausada</span>
-                                </div>
-                                
+                                <span v-text="proyectos.nombre"></span>
                             </td>
+                            <td>               
+                                <img :src="proyectos.graph_ventas" alt="dog" height="100px"> 
+                            </td>   
+                            <td>               
+                                <img :src="proyectos.graph_visitas" alt="dog" height="100px"> 
+                            </td>
+                            <td>               
+                                <button type="button" class="btn btn-success" v-if="proyectos.tendencia=='UP'">
+                                    <i class="icon-like"></i>
+                                </button> 
+                                <button type="button" class="btn btn-danger" v-else>
+                                    <i class="icon-dislike"></i>
+                                </button> 
+                            </td>
+                            
                         </tr>                            
                     </tbody>
                 </table>
@@ -150,6 +160,184 @@
         <!--Fin del modal-->    
 
 
+        <!--Inicio del modal agregar/actualizar PROYECTO METRICA-->
+        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true" :class="{'mostrar' : modalRegistraProyecto.modal}">
+            <div class="modal-dialog modal-primary modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" v-text="modalRegistraProyecto.tituloModal"></h4>
+                        <button type="button" class="close" aria-label="Close" @click="closeModal();">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="" method="post" enctype="multipart/form-data" class="form-horizontal">
+                            <div class="form-group row">
+                                <label class="col-md-3 form-control-label" for="text-input">Nombre</label>
+                                <div class="col-md-9">                                                                        
+                                    <input type="text" class="form-control" placeholder="Nombre del proyecto" maxlength="30" v-model="modalRegistraProyecto.nombre">                                    
+                                </div>
+                            </div>
+
+                            <div class="form-group">                                                 
+                               
+                                <div class="row">
+                                    <label class="col-md-3 form-control-label" for="text-input">Avatar</label>                                    
+                                    <div class="col-md-3">
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" id="customFileLangLocal" lang="es" accept="image/png, .jpeg, .jpg, image/gif" @change="getImagenLocal">
+                                            <label class="btn btn-primary custom-file-label" for="customFileLangLocal">Seleccionar Archivo</label>                                            
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-3"><img :src="modalRegistraProyecto.imagen.local" alt="Imagen del producto" contain height="100px" width="100px"></div>
+                                </div>
+
+                            </div> 
+
+                            
+
+                            <div v-show="modalRegistraProyecto.errorProveedor" class="form-group row div-error">
+                                <div class="text-center text-error">
+                                    <div v-for="error in modalRegistraProyecto.erroresProveedorMsjList" :key="error" v-text="error"></div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>
+                        <button type="button" class="btn btn-primary" v-if="modalRegistraProyecto.tipoAccion==1" @click="onRegistrarProyecto();">Guardar</button>
+                        <button type="button" class="btn btn-primary" v-if="modalRegistraProyecto.tipoAccion==2" @click="onRegistrarProyecto();">Modificar</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!--Fin del modal--> 
+
+        <!-- Inicio del modal publicaciones dentro del proyecto -->
+        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true" :class="{'mostrar' : modalDetalleVisorProyecto.modal}">
+            <div class="modal-dialog modal-primary" style="max-width: 90% !important;" role="document">
+                <div class="modal-content" style="height: 700px;">
+                    <div class="modal-header">
+                        <h4 class="modal-title" v-text="modalDetalleVisorProyecto.tituloModal"></h4>
+                        <button type="button" class="close" aria-label="Close" @click="closeModal();">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="max-height: calc(100% - 120px); overflow-y: scroll;">
+                        
+
+                        
+
+                            <div class="form-group row">
+                                <div class="col-md-6">
+                                    <div class="input-group">   
+                                        <select class="form-control col-md-3" v-model="modalDetalleVisorProyecto.criterio">
+                                            <option value="ACT">Activas</option>
+                                            <option value="CAN">Canceladas</option>                                
+                                        </select>                         
+                                        <input type="text" v-model="modalDetalleVisorProyecto.textoBuscar" @keyup.enter="buscarPublicaciones(1, modalDetalleVisorProyecto.textoBuscar, modalDetalleVisorProyecto.criterio, true)" class="form-control" placeholder="Texto a buscar">
+                                        <button type="submit" class="btn btn-primary" @click="buscarPublicaciones(1, modalDetalleVisorProyecto.textoBuscar, modalDetalleVisorProyecto.criterio, true)"><i class="fa fa-search"></i> Buscar</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Grid -->
+                            <table class="table table-bordered table-striped table-sm">
+                                <thead>
+                                    <tr>
+                                        <th width="10%;">Opciones</th>
+                                        <th>Producto</th>                            
+                                        <th>Ventas</th>
+                                        <th>Visitas</th>                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="publicacion in modalDetalleVisorProyecto.publicaciones" :key="publicacion.id_meli_metrica_visor">
+                                        <td>
+                                                                                                                                   
+                                          
+                                            
+                                            <template v-if="publicacion.estatus=='ACT'">
+                                                <button type="button" class="btn btn-danger btn-sm" @click="onActivaDesactivaPublicacion(publicacion.id_meli_metrica_visor, publicacion.estatus)">
+                                                    <i class="icon-trash"></i>
+                                                </button>
+                                            </template>
+
+                                            <template v-else>
+                                                <button type="button" class="btn btn-info btn-sm" @click="onActivaDesactivaPublicacion(publicacion.id_meli_metrica_visor, publicacion.estatus)">
+                                                    <i class="icon-check"></i>
+                                                </button>
+                                            </template>
+
+                                            <button type="button" class="btn btn-warning btn-sm" @click="onCalcularEstadistica(publicacion.url, publicacion.id_meli_metrica_visor)">
+                                                <i class="icon-calculator"></i>
+                                            </button>
+
+                                            <button type="button" class="btn btn-primary btn-sm" @click="showModal('metrica','grafico', publicacion)">
+                                                <i class="icon-graph"></i>
+                                            </button>
+
+
+                                        </td>
+                                        <td>               
+                                            <div class="row">                 
+                                                <div class="col-3">                                                
+                                                    <a href="#" @click="onAbrirPublicacionML(publicacion.url)"><img :src="publicacion.foto" alt="dog" width="100px" height="100px"> </a>
+                                                </div>
+                                                <div class="col-9">
+                                                    <h6 v-text="publicacion.titulo"></h6>
+                                                    <small class="text-muted" v-text="publicacion.id_publicacion_tienda"></small>                                    
+                                                    <span v-text="publicacion.estatus_publicacion"></span>
+                                                </div>          
+                                            </div>
+                                        </td>                            
+                                        <td>               
+                                            <img :src="publicacion.url_graph_ventas" alt="dog" height="100px"> 
+                                        </td>   
+                                        <td>               
+                                            <img :src="publicacion.url_graph_visitas" alt="dog" height="100px"> 
+                                        </td>
+                                        
+                                    </tr>                            
+                                </tbody>
+                            </table>
+                            <nav>
+                                <ul class="pagination">
+                                    <li class="page-item" v-if="paginationPubli.current_page > 1">
+                                        <a class="page-link" href="#" @click.prevent="cambiarPaginaPubli(paginationPubli.current_page-1, modalDetalleVisorProyecto.textoBuscar, modalDetalleVisorProyecto.criterio)">Ant</a>
+                                    </li>
+                                    <li class="page-item" v-for="page in pagesNumberPubli" :key="page" :class="[page == isActivedPubli ? 'active' : '']">
+                                        <a class="page-link" href="#" @click.prevent="cambiarPaginaPubli(page, modalDetalleVisorProyecto.textoBuscar, modalDetalleVisorProyecto.criterio)" v-text="page"></a>
+                                    </li>                           
+                                    <li class="page-item" v-if="paginationPubli.current_page < paginationPubli.last_page">
+                                        <a class="page-link" href="#" @click.prevent="cambiarPaginaPubli(paginationPubli.current_page+1, modalDetalleVisorProyecto.textoBuscar, modalDetalleVisorProyecto.criterio)">Sig</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                            
+
+                            <div v-show="modalDetalleVisorProyecto.errorProveedor" class="form-group row div-error">
+                                <div class="text-center text-error">
+                                    <div v-for="error in modalDetalleVisorProyecto.erroresProveedorMsjList" :key="error" v-text="error"></div>
+                                </div>
+                            </div>                        
+
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>
+                        <button type="button" class="btn btn-primary" v-if="modalDetalleVisorProyecto.tipoAccion==1" @click="onCreaNuevoFolioEnvio();">Guardar</button>                        
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!--Fin del modal-->    
+
 
         <!--Inicio del modal Detalle metricas-->
         <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true" :class="{'mostrar' : modalDetalleMetrica.modal}">
@@ -158,7 +346,7 @@
                     <div class="modal-header">
 
                         <h4 class="modal-title" v-text="modalDetalleMetrica.tituloModal"></h4>
-                        <button type="button" class="close" aria-label="Close" @click="closeModal();">
+                        <button type="button" class="close" aria-label="Close" @click="closeModalGrafico();">
                             <span aria-hidden="true">×</span>
                         </button>
 
@@ -261,7 +449,7 @@
                                                         
                     <div class="modal-footer">
                                                 
-                        <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>                            
+                        <button type="button" class="btn btn-secondary" @click="closeModalGrafico();">Cerrar</button>                            
                                     
                     </div>
                 </div>
@@ -270,6 +458,8 @@
             <!-- /.modal-dialog -->
         </div>
         <!--Fin del modal-->
+
+
 
 
     </main>    
@@ -281,9 +471,9 @@
         data(){
             return{               
                 buscadorGrid: {
-                     publicaciones: [],
+                     proyectos: [],
                      textoBuscar: '',
-                     criterio: 'ACT'
+                     criterio: '1'
                 },  
 
                 modalRegistraPublicacion   : {
@@ -309,7 +499,44 @@
                     fechaFinal: ''
                 },
 
+                modalRegistraProyecto: {
+                    modal: 0,
+                    tituloModal: '',
+                    tipoAccion: 0,
+                    error: 0,
+                    erroresMsjList: [],
+                    idMeliMetricaProyecto:0,
+                    nombre: '',
+                    imagen: {
+                        local: '',
+                        nombre: '',
+                        size: 0,
+                        type: ''
+                    },
+                },
+
+                modalDetalleVisorProyecto   : {
+                    modal: 0,
+                    tituloModal: '',
+                    tipoAccion: 0,
+                    error: 0,
+                    criterio: 'ACT',
+                    textoBuscar: '',
+                    idMeliMetricaProyecto: 0,                    
+                    erroresMsjList: [],
+                    publicaciones:[]
+                },
+
                 pagination: {
+                    total : 0,
+                    current_page  : 0,
+                    per_page : 0,
+                    last_page : 0,
+                    from : 0,
+                    to : 0                    
+                },
+
+                paginationPubli: {
                     total : 0,
                     current_page  : 0,
                     per_page : 0,
@@ -327,12 +554,52 @@
             },
             pagesNumber: function(){
                return  paginador.getPagesNumber(this.pagination);                
+            },
+            isActivedPubli: function(){
+                return this.paginationPubli.current_page;
+            },
+            pagesNumberPubli: function(){
+               return  paginador.getPagesNumber(this.paginationPubli);                
             }
         },
         components: {      
             Datepicker      
         },
         methods:{
+            buscarProyectos(page, buscar, criterio, aplLoading=false){
+
+                if(aplLoading){
+                    this.isLoading = 1;
+                }
+
+                let me=this;                
+                let url= '/zicandi/public/meli/metricas/proyecto/buscar?page=' + page +'&filtro=' + buscar + '&estatus=' + criterio;
+                axios.get(url)
+                .then(function (response) {       
+                    me.isLoading = 0
+                    console.log(response.data);
+                    if(response.data.xstatus){   
+                        me.buscadorGrid.proyectos = response.data.proyectos.data;
+                        me.pagination = response.data.pagination; 
+                        
+                        
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+              
+                })
+                .catch(function (error) {                    
+                    me.isLoading = 0;
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+
+            /**
+             * Busca publicaciones
+             * 
+             * 
+             * 
+             */
             buscarPublicaciones(page, buscar, criterio, aplLoading=false){
 
                 if(aplLoading){
@@ -340,15 +607,19 @@
                 }
 
                 let me=this;                
-                let url= '/zicandi/public/meli/metricas/visor?page=' + page +'&filtro=' + buscar + '&estatus=' + criterio;
+                let idMeliMetricaProyecto = this.modalDetalleVisorProyecto.idMeliMetricaProyecto;
+                let url= '/zicandi/public/meli/metricas/visor?page=' + page +'&filtro=' + buscar + '&estatus=' + criterio +'&idMeliMetricaProyecto=' + idMeliMetricaProyecto;
+
+                console.log(url);
+
                 axios.get(url)
                 .then(function (response) {       
                     me.isLoading = 0
 
                     if(response.data.xstatus){   
-                        me.buscadorGrid.publicaciones = response.data.metricas.data;
-                        me.pagination = response.data.pagination; 
-                        
+                        me.modalDetalleVisorProyecto.publicaciones = response.data.metricas.data;
+                        me.paginationPubli = response.data.pagination; 
+
                         
                     }else{
                         throw new Error(response.data.error);
@@ -400,6 +671,42 @@
 
                                 break;
                             }
+
+                            case 'proyecto':
+                            {
+                                this.modalRegistraProyecto.modal = 1;
+                                this.modalRegistraProyecto.nombre = '';                                
+                                this.modalRegistraProyecto.tituloModal = 'Registrar proyecto';
+                                this.modalRegistraProyecto.tipoAccion = 1;
+                                this.modalRegistraProyecto.idMeliMetricaProyecto = 0;
+                                this.modalRegistraProyecto.imagen.local = null;
+
+                                break;
+                            }
+
+                            case 'proyecto_edit':
+                            {
+                                this.modalRegistraProyecto.modal = 1;
+                                this.modalRegistraProyecto.nombre = data.nombre;
+                                this.modalRegistraProyecto.tituloModal = 'Modificar proyecto';
+                                this.modalRegistraProyecto.tipoAccion = 2;
+                                this.modalRegistraProyecto.idMeliMetricaProyecto = data.id_meli_metrica_proyecto;
+                                this.modalRegistraProyecto.imagen.local = data.foto;
+
+                                break;
+                            }
+
+                            case 'deta_publicacion_proyecto':
+                            {
+                                this.modalDetalleVisorProyecto.modal = 1;                                
+                                this.modalDetalleVisorProyecto.tituloModal = 'Publicaciones monitoreadas';
+                                this.modalDetalleVisorProyecto.idMeliMetricaProyecto = data.id_meli_metrica_proyecto;
+                                this.buscarPublicaciones(1, '', 'ACT', true);
+                                break;
+                            }
+
+
+                            
                             
 
 
@@ -415,7 +722,22 @@
 
                 this.modalDetalleMetrica.modal = 0;                
                 this.modalDetalleMetrica.tituloModal = '';
+
+                this.modalRegistraProyecto.modal = 0;                
+                this.modalRegistraProyecto.tituloModal = '';
+
+                this.modalDetalleVisorProyecto.modal = 0;                
+                this.modalDetalleVisorProyecto.tituloModal = '';
             },
+            closeModalGrafico(){
+                this.modalDetalleMetrica.modal = 0;
+                this.modalDetalleMetrica.url = '';                
+                this.modalDetalleMetrica.tituloModal = '';
+
+            },
+
+
+            
 
             validarProveedor(){
                 this.modalRegistraPublicacion.error = 0;
@@ -432,6 +754,14 @@
                 let me = this;
 
                 me.pagination.current_page = page;
+
+                me.buscarPublicaciones(page, buscar, criterio, true);
+            },
+
+            cambiarPaginaPubli(page, buscar, criterio){
+                let me = this;
+
+                me.paginationPubli.current_page = page;
 
                 me.buscarPublicaciones(page, buscar, criterio, true);
             },
@@ -492,7 +822,7 @@
                         
                         util.AVISO('Se realizo el cambio correctamente', util.tipoOk);
                         
-                        me.buscarPublicaciones(1, me.buscadorGrid.textoBuscar, me.buscadorGrid.criterio, true);
+                        me.buscarPublicaciones(1, me.modalDetalleVisorProyecto.textoBuscar, me.modalDetalleVisorProyecto.criterio, true);
                        
                     }else{
                         throw new Error(response.data.error);
@@ -674,7 +1004,120 @@
                     me.isLoading = 0;
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
-            }
+            },
+
+            getImagenLocal(e){                       
+                let file = e.target.files[0];
+                this.modalRegistraProyecto.imagen.nombre = file.name;
+                this.modalRegistraProyecto.imagen.size = file.size;
+                this.modalRegistraProyecto.imagen.type = file.type;                
+                            
+                let reader = new FileReader();
+
+                reader.onload = (e) => {
+                    this.modalRegistraProyecto.imagen.local = e.target.result;                    
+                }
+                reader.readAsDataURL(file);
+            },
+
+
+            onRegistrarProyecto(){                
+                let me = this;
+                this.isLoading = 1;
+                axios.post('/zicandi/public/meli/metricas/proyecto/save',{                    
+                    'nombre': this.modalRegistraProyecto.nombre, 
+                    'idMeliMetricaProyecto': this.modalRegistraProyecto.idMeliMetricaProyecto,                                       
+                    'imagen_local': this.modalRegistraProyecto.imagen.local,
+                    'imagen_nombre': this.modalRegistraProyecto.imagen.nombre,
+                    'imagen_size': this.modalRegistraProyecto.imagen.size,
+                    'imagen_type': this.modalRegistraProyecto.imagen.type                    
+                })
+                .then(function (response) {                    
+                    me.buscar = '';
+                    me.isLoading = 0;
+                    me.closeModal();
+                    util.AVISO('Perfecto, registro correcto', util.tipoOk);                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+            
+            /**
+             * Activa / desactiva proyecto
+             * 
+             * 
+             */
+            onActivaDesactivaProyecto(idMeliMetricaProyecto, estatusActual){
+                let me = this;                
+                
+                let estatusNuevo = '';
+
+                if(estatusActual == "1"){
+                    estatusNuevo = "0";
+                }else{
+                    estatusNuevo = "1";
+                }
+
+
+                this.isLoading = 1;
+                axios.post('/zicandi/public/meli/metricas/proyecto/xstatus',{
+                        'idMeliMetricaProyecto': idMeliMetricaProyecto,
+                        'xstatus': estatusNuevo
+                })                
+                .then(function (response) {  
+                    me.isLoading = 0;           
+                    
+                    if(response.data.xstatus){ 
+                        
+                        util.AVISO('Se realizo el cambio correctamente', util.tipoOk);
+                        
+                        me.buscarProyectos(1, me.buscadorGrid.textoBuscar, me.buscadorGrid.criterio, true);
+                       
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+                                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+
+            },
+
+
+             onCalcularEstadistica(url, idMeliMetricaVisor){
+                let me = this;                
+                
+                this.isLoading = 1;
+          
+                console.log('/zicandi/public/meli/metricas/visor/metrica?url=' + url + '&ListMeliMetricaVisor='+idMeliMetricaVisor+'&ultimoBloque=0&bloque=0');
+                axios.get('/zicandi/public/meli/metricas/visor/metrica?url=' + url + '&ListMeliMetricaVisor='+idMeliMetricaVisor+'&ultimoBloque=0&bloque=0')
+                .then(function (response) {  
+                    me.isLoading = 0;           
+                    
+                    if(response.data.xstatus){ 
+                        
+                        util.AVISO('Metricas actualizadas', util.tipoOk);
+                        
+                        me.buscarPublicaciones(1, me.modalDetalleVisorProyecto.textoBuscar, me.modalDetalleVisorProyecto.criterio, true);
+                       
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+                                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+
+            },
+
+
+            
             
         },
         mounted() {
@@ -684,7 +1127,8 @@
             this.modalDetalleMetrica.fechaFinal = new Date();
             this.modalDetalleMetrica.fechaInicial = hoy30;
 
-            this.buscarPublicaciones(1, this.buscadorGrid.textoBuscar, this.buscadorGrid.criterio, true);
+            //this.buscarPublicaciones(1, this.buscadorGrid.textoBuscar, this.buscadorGrid.criterio, true);
+            this.buscarProyectos(1, this.buscadorGrid.textoBuscar, this.buscadorGrid.criterio, true);
         }
     }
 </script>

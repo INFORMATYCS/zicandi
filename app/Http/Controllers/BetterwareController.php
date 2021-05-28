@@ -499,125 +499,148 @@ class BetterwareController extends Controller{
      */
     public function procesaTempProducto(Request $request){
         try{            
-            $idTempCatBett = $request->id_temp_cat_bett;
+            $cadenaProcesa = $request->id_temp_cat_bett;
             
-            $temp = TempCatBett::findOrFail($idTempCatBett);
+            $idTempCatBettList = explode(",", $cadenaProcesa);
+            $mensajeErrSalida = "";
 
-            $codigo = $temp->codigo;
-            $nombre = $temp->nombre;
-            $precio = $temp->precio;
-            $precio_oferta = $temp->precio_oferta;
-            $url = $temp->url;
-            $imagen = $temp->imagen;
-            $descripcion = $temp->descripcion;
-            $categoria = $temp->categoria;
-            $espec_json = $temp->espec_json;
+            foreach($idTempCatBettList as $idTempCatBett){
+                if(intval($idTempCatBett)>0){
+                    
+                    //----------------------- Procesamiento individual
+                    try{
+                        $temp = TempCatBett::findOrFail($idTempCatBett);
 
-            //~No todos los productos tienen precio de oferta
-            if($precio_oferta == null || $precio_oferta == 0){
-                $precio_oferta = $precio;
+                        $codigo = $temp->codigo;
+                        $nombre = $temp->nombre;
+                        $precio = $temp->precio;
+                        $precio_oferta = $temp->precio_oferta;
+                        $url = $temp->url;
+                        $imagen = $temp->imagen;
+                        $descripcion = $temp->descripcion;
+                        $categoria = $temp->categoria;
+                        $espec_json = $temp->espec_json;
+            
+                        //~No todos los productos tienen precio de oferta
+                        if($precio_oferta == null || $precio_oferta == 0){
+                            $precio_oferta = $precio;
+                        }
+            
+                        
+                        //Procesa imagen 1 y mini
+                        list ($bandExito, $url_original, $url_imagen) = $this->getImagenBett($imagen, $codigo, $codigo, true);			
+            
+                        //~Intenta recuperar la segunda imagen
+                        if($bandExito){
+                            $pathAlterno = str_replace('_1.jpg','_2.jpg',$imagen);
+                            list ($bandExito, $url_original, $url_imagen_aux) = $this->getImagenBett($pathAlterno, $codigo, $codigo."_2", false);
+            
+                            if(!$bandExito){
+                                $pathAlterno = str_replace('-H_1.jpg','_2.jpg',$imagen);
+                                list ($bandExito, $url_original, $url_imagen_aux) = $this->getImagenBett($pathAlterno, $codigo, $codigo."_2", false);
+            
+                            }
+                        }else{
+                            Log::error( 'No fue posible descargar la imagen' );								
+                        }
+                        
+            
+                        $temp->imagen_mini = $url_imagen;
+                        $temp->imagen_respaldo = $url_original;
+                        $temp->estatus_proceso = 'PRO';
+            
+                        $temp->update();
+            
+                        //~Configura proveedor
+                        $proveedor = Proveedor::where('nombre_corto','=','BETT')
+                        ->select('id_proveedor','nombre')        
+                        ->get(); 
+            
+                        $idProveedor = $proveedor[0]->id_proveedor;
+            
+                        //~Configura categoria
+                        $idCategoria = 0;
+                        $categorias = Categoria::where('xstatus','=','1')
+                        ->select('id_categoria','nombre')
+                        ->where('nombre','=','Carga Masiva')
+                        ->get();        
+            
+                        if($categorias->isEmpty()){
+                            $categoria = new Categoria();
+                            $categoria->codigo = "MAS";
+                            $categoria->nombre = "Carga Masiva"; 
+                            $categoria->save();   
+                            
+                            $idCategoria = $categoria->id_categoria;
+                        }else{
+                            $idCategoria = $categorias[0]->id_categoria;
+                        }         
+                        
+                        //Realiza la migracion a Producto
+                        $producto = Producto::where('codigo','=',$codigo)
+                        ->select('id_producto','nombre','codigo','url_imagen','nota','ultimo_precio_compra','promedio_precio_compra','xstatus')            
+                        ->get(); 
+            
+                        if($producto->isEmpty()){
+                            $producto = new Producto();    
+                            $producto->id_categoria = $idCategoria;
+                            $producto->codigo = $codigo;
+                            $producto->nombre = substr($nombre, 0, 30);
+                            
+                            if($bandExito){
+                                $producto->url_imagen = Config::get('zicandi.url_public').$url_imagen;
+                            }
+                            
+                            $producto->nota = $descripcion;
+                            $producto->id_carpeta_adjuntos = 0;
+                            $producto->ultimo_precio_compra = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
+                            $producto->promedio_precio_compra = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
+                            $producto->precio_referenciado = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
+                            $producto->xstatus ='1';
+                            $producto->save();
+            
+                            $producto->proveedores()->attach($idProveedor,['codigo_barras'=>$codigo]);
+            
+            
+            
+                        }else{
+                            $producto = Producto::find($producto[0]->id_producto);
+                            $producto->nombre = substr($nombre, 0, 30);
+                            
+                            if($bandExito){
+                                $producto->url_imagen = Config::get('zicandi.url_public').$url_imagen;
+                            }
+                            
+                            $producto->nota = $descripcion;                
+                            $ultimoPrecioCompras = $producto->calcularUltimoPrecioCompra();
+            
+                            if( $ultimoPrecioCompras<=0 ){
+                                $producto->ultimo_precio_compra = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
+                                $producto->promedio_precio_compra = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
+                                $producto->precio_referenciado = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
+                            }else{
+                                $producto->precio_referenciado = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
+                            }
+            
+            
+                            $producto->save();
+                        
+                        }
+                    }catch(Exception $e){
+                        Log::error( $e->getTraceAsString() ); 
+                        $mensajeErrSalida.= $idTempCatBett . '=>' . substr($e->getMessage(),0 , 100);                                  
+                    }
+                    //----------------------- Procesamiento individual
+                }
             }
 
-			
-            //Procesa imagen 1 y mini
-            list ($bandExito, $url_original, $url_imagen) = $this->getImagenBett($imagen, $codigo, $codigo, true);			
-
-            //~Intenta recuperar la segunda imagen
-            if($bandExito){
-                $pathAlterno = str_replace('_1.jpg','_2.jpg',$imagen);
-                list ($bandExito, $url_original, $url_imagen_aux) = $this->getImagenBett($pathAlterno, $codigo, $codigo."_2", false);
-
-                if(!$bandExito){
-                    $pathAlterno = str_replace('-H_1.jpg','_2.jpg',$imagen);
-                    list ($bandExito, $url_original, $url_imagen_aux) = $this->getImagenBett($pathAlterno, $codigo, $codigo."_2", false);
-
-                }
-            }else{
-				Log::error( 'No fue posible descargar la imagen' );								
-			}
-            
-
-            $temp->imagen_mini = $url_imagen;
-            $temp->imagen_respaldo = $url_original;
-            $temp->estatus_proceso = 'PRO';
-
-            $temp->update();
-
-            //~Configura proveedor
-            $proveedor = Proveedor::where('nombre_corto','=','BETT')
-            ->select('id_proveedor','nombre')        
-            ->get(); 
-
-            $idProveedor = $proveedor[0]->id_proveedor;
-
-            //~Configura categoria
-            $idCategoria = 0;
-            $categorias = Categoria::where('xstatus','=','1')
-            ->select('id_categoria','nombre')
-            ->where('nombre','=','Carga Masiva')
-            ->get();        
-
-            if($categorias->isEmpty()){
-                $categoria = new Categoria();
-                $categoria->codigo = "MAS";
-                $categoria->nombre = "Carga Masiva"; 
-                $categoria->save();   
-                
-                $idCategoria = $categoria->id_categoria;
-            }else{
-                $idCategoria = $categorias[0]->id_categoria;
-            }         
-            
-            //Realiza la migracion a Producto
-            $producto = Producto::where('codigo','=',$codigo)
-            ->select('id_producto','nombre','codigo','url_imagen','nota','ultimo_precio_compra','promedio_precio_compra','xstatus')            
-            ->get(); 
-
-            if($producto->isEmpty()){
-                $producto = new Producto();    
-                $producto->id_categoria = $idCategoria;
-                $producto->codigo = $codigo;
-                $producto->nombre = substr($nombre, 0, 30);
-				
-				if($bandExito){
-					$producto->url_imagen = Config::get('zicandi.url_public').$url_imagen;
-				}
-				
-                $producto->nota = $descripcion;
-                $producto->id_carpeta_adjuntos = 0;
-                $producto->ultimo_precio_compra = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
-                $producto->promedio_precio_compra = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
-                $producto->precio_referenciado = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
-                $producto->xstatus ='1';
-                $producto->save();
-
-                $producto->proveedores()->attach($idProveedor,['codigo_barras'=>$codigo]);
-
-
-
-            }else{
-                $producto = Producto::find($producto[0]->id_producto);
-                $producto->nombre = substr($nombre, 0, 30);
-                
-				if($bandExito){
-					$producto->url_imagen = Config::get('zicandi.url_public').$url_imagen;
-				}
-				
-                $producto->nota = $descripcion;                
-                $ultimoPrecioCompras = $producto->calcularUltimoPrecioCompra();
-
-                if( $ultimoPrecioCompras<=0 ){
-                    $producto->ultimo_precio_compra = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
-                    $producto->promedio_precio_compra = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
-                    $producto->precio_referenciado = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
-                }else{
-                    $producto->precio_referenciado = $precio_oferta * Config::get('zicandi.betterware.factorConversion');
-                }
-
-
-                $producto->save();
-              
+            if($mensajeErrSalida!=""){
+                throw new Exception($mensajeErrSalida);
             }
+            
+            
+            
+           
             
             return [ 'xstatus'=>true ];
         }catch(Exception $e){

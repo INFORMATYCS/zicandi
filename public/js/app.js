@@ -1278,110 +1278,6 @@ function applyToTag (styleElement, obj) {
 
 /***/ }),
 /* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(process) {
-
-var utils = __webpack_require__(1);
-var normalizeHeaderName = __webpack_require__(40);
-
-var DEFAULT_CONTENT_TYPE = {
-  'Content-Type': 'application/x-www-form-urlencoded'
-};
-
-function setContentTypeIfUnset(headers, value) {
-  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
-    headers['Content-Type'] = value;
-  }
-}
-
-function getDefaultAdapter() {
-  var adapter;
-  if (typeof XMLHttpRequest !== 'undefined') {
-    // For browsers use XHR adapter
-    adapter = __webpack_require__(18);
-  } else if (typeof process !== 'undefined') {
-    // For node use HTTP adapter
-    adapter = __webpack_require__(18);
-  }
-  return adapter;
-}
-
-var defaults = {
-  adapter: getDefaultAdapter(),
-
-  transformRequest: [function transformRequest(data, headers) {
-    normalizeHeaderName(headers, 'Content-Type');
-    if (utils.isFormData(data) ||
-      utils.isArrayBuffer(data) ||
-      utils.isBuffer(data) ||
-      utils.isStream(data) ||
-      utils.isFile(data) ||
-      utils.isBlob(data)
-    ) {
-      return data;
-    }
-    if (utils.isArrayBufferView(data)) {
-      return data.buffer;
-    }
-    if (utils.isURLSearchParams(data)) {
-      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
-      return data.toString();
-    }
-    if (utils.isObject(data)) {
-      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
-      return JSON.stringify(data);
-    }
-    return data;
-  }],
-
-  transformResponse: [function transformResponse(data) {
-    /*eslint no-param-reassign:0*/
-    if (typeof data === 'string') {
-      try {
-        data = JSON.parse(data);
-      } catch (e) { /* Ignore */ }
-    }
-    return data;
-  }],
-
-  /**
-   * A timeout in milliseconds to abort a request. If set to 0 (default) a
-   * timeout is not created.
-   */
-  timeout: 0,
-
-  xsrfCookieName: 'XSRF-TOKEN',
-  xsrfHeaderName: 'X-XSRF-TOKEN',
-
-  maxContentLength: -1,
-
-  validateStatus: function validateStatus(status) {
-    return status >= 200 && status < 300;
-  }
-};
-
-defaults.headers = {
-  common: {
-    'Accept': 'application/json, text/plain, */*'
-  }
-};
-
-utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
-  defaults.headers[method] = {};
-});
-
-utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
-  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
-});
-
-module.exports = defaults;
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(17)))
-
-/***/ }),
-/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3823,6 +3719,110 @@ __vue_render__$4._withStripped = true;
 
 /* harmony default export */ __webpack_exports__["a"] = (Datepicker);
 
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {
+
+var utils = __webpack_require__(1);
+var normalizeHeaderName = __webpack_require__(40);
+
+var DEFAULT_CONTENT_TYPE = {
+  'Content-Type': 'application/x-www-form-urlencoded'
+};
+
+function setContentTypeIfUnset(headers, value) {
+  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
+    headers['Content-Type'] = value;
+  }
+}
+
+function getDefaultAdapter() {
+  var adapter;
+  if (typeof XMLHttpRequest !== 'undefined') {
+    // For browsers use XHR adapter
+    adapter = __webpack_require__(18);
+  } else if (typeof process !== 'undefined') {
+    // For node use HTTP adapter
+    adapter = __webpack_require__(18);
+  }
+  return adapter;
+}
+
+var defaults = {
+  adapter: getDefaultAdapter(),
+
+  transformRequest: [function transformRequest(data, headers) {
+    normalizeHeaderName(headers, 'Content-Type');
+    if (utils.isFormData(data) ||
+      utils.isArrayBuffer(data) ||
+      utils.isBuffer(data) ||
+      utils.isStream(data) ||
+      utils.isFile(data) ||
+      utils.isBlob(data)
+    ) {
+      return data;
+    }
+    if (utils.isArrayBufferView(data)) {
+      return data.buffer;
+    }
+    if (utils.isURLSearchParams(data)) {
+      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
+      return data.toString();
+    }
+    if (utils.isObject(data)) {
+      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
+      return JSON.stringify(data);
+    }
+    return data;
+  }],
+
+  transformResponse: [function transformResponse(data) {
+    /*eslint no-param-reassign:0*/
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch (e) { /* Ignore */ }
+    }
+    return data;
+  }],
+
+  /**
+   * A timeout in milliseconds to abort a request. If set to 0 (default) a
+   * timeout is not created.
+   */
+  timeout: 0,
+
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+
+  maxContentLength: -1,
+
+  validateStatus: function validateStatus(status) {
+    return status >= 200 && status < 300;
+  }
+};
+
+defaults.headers = {
+  common: {
+    'Accept': 'application/json, text/plain, */*'
+  }
+};
+
+utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+  defaults.headers[method] = {};
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
+});
+
+module.exports = defaults;
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(17)))
 
 /***/ }),
 /* 15 */
@@ -7537,6 +7537,8 @@ Vue.component('almacenstockproducto-component', __webpack_require__(148));
 Vue.component('enviosfullmeli-component', __webpack_require__(151));
 
 Vue.component('metrica-visor-component', __webpack_require__(154));
+
+Vue.component('buscar-meli-metrica-component', __webpack_require__(157));
 
 var app = new Vue({
   el: '#app',
@@ -39902,7 +39904,7 @@ module.exports = __webpack_require__(37);
 var utils = __webpack_require__(1);
 var bind = __webpack_require__(16);
 var Axios = __webpack_require__(39);
-var defaults = __webpack_require__(13);
+var defaults = __webpack_require__(14);
 
 /**
  * Create an instance of Axios
@@ -39975,7 +39977,7 @@ module.exports = function isBuffer (obj) {
 "use strict";
 
 
-var defaults = __webpack_require__(13);
+var defaults = __webpack_require__(14);
 var utils = __webpack_require__(1);
 var InterceptorManager = __webpack_require__(47);
 var dispatchRequest = __webpack_require__(48);
@@ -40471,7 +40473,7 @@ module.exports = InterceptorManager;
 var utils = __webpack_require__(1);
 var transformData = __webpack_require__(49);
 var isCancel = __webpack_require__(20);
-var defaults = __webpack_require__(13);
+var defaults = __webpack_require__(14);
 var isAbsoluteURL = __webpack_require__(50);
 var combineURLs = __webpack_require__(51);
 
@@ -71512,7 +71514,7 @@ exports.push([module.i, "\n.mostrarDiv{\r\n    display: list-item !important;\n}
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vuejs_datepicker__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vuejs_datepicker__ = __webpack_require__(13);
 //
 //
 //
@@ -78329,7 +78331,7 @@ module.exports = Component.exports
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vuejs_datepicker__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vuejs_datepicker__ = __webpack_require__(13);
 //
 //
 //
@@ -80366,7 +80368,197 @@ module.exports = Component.exports
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vuejs_datepicker__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vuejs_datepicker__ = __webpack_require__(13);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -80650,9 +80842,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     data: function data() {
         return {
             buscadorGrid: {
-                publicaciones: [],
+                proyectos: [],
                 textoBuscar: '',
-                criterio: 'ACT'
+                criterio: '1'
             },
 
             modalRegistraPublicacion: {
@@ -80678,7 +80870,44 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 fechaFinal: ''
             },
 
+            modalRegistraProyecto: {
+                modal: 0,
+                tituloModal: '',
+                tipoAccion: 0,
+                error: 0,
+                erroresMsjList: [],
+                idMeliMetricaProyecto: 0,
+                nombre: '',
+                imagen: {
+                    local: '',
+                    nombre: '',
+                    size: 0,
+                    type: ''
+                }
+            },
+
+            modalDetalleVisorProyecto: {
+                modal: 0,
+                tituloModal: '',
+                tipoAccion: 0,
+                error: 0,
+                criterio: 'ACT',
+                textoBuscar: '',
+                idMeliMetricaProyecto: 0,
+                erroresMsjList: [],
+                publicaciones: []
+            },
+
             pagination: {
+                total: 0,
+                current_page: 0,
+                per_page: 0,
+                last_page: 0,
+                from: 0,
+                to: 0
+            },
+
+            paginationPubli: {
                 total: 0,
                 current_page: 0,
                 per_page: 0,
@@ -80697,12 +80926,50 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         },
         pagesNumber: function pagesNumber() {
             return paginador.getPagesNumber(this.pagination);
+        },
+        isActivedPubli: function isActivedPubli() {
+            return this.paginationPubli.current_page;
+        },
+        pagesNumberPubli: function pagesNumberPubli() {
+            return paginador.getPagesNumber(this.paginationPubli);
         }
     },
     components: {
         Datepicker: __WEBPACK_IMPORTED_MODULE_0_vuejs_datepicker__["a" /* default */]
     },
     methods: {
+        buscarProyectos: function buscarProyectos(page, buscar, criterio) {
+            var aplLoading = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+
+            if (aplLoading) {
+                this.isLoading = 1;
+            }
+
+            var me = this;
+            var url = '/zicandi/public/meli/metricas/proyecto/buscar?page=' + page + '&filtro=' + buscar + '&estatus=' + criterio;
+            axios.get(url).then(function (response) {
+                me.isLoading = 0;
+                console.log(response.data);
+                if (response.data.xstatus) {
+                    me.buscadorGrid.proyectos = response.data.proyectos.data;
+                    me.pagination = response.data.pagination;
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+
+
+        /**
+         * Busca publicaciones
+         * 
+         * 
+         * 
+         */
         buscarPublicaciones: function buscarPublicaciones(page, buscar, criterio) {
             var aplLoading = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
@@ -80712,13 +80979,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }
 
             var me = this;
-            var url = '/zicandi/public/meli/metricas/visor?page=' + page + '&filtro=' + buscar + '&estatus=' + criterio;
+            var idMeliMetricaProyecto = this.modalDetalleVisorProyecto.idMeliMetricaProyecto;
+            var url = '/zicandi/public/meli/metricas/visor?page=' + page + '&filtro=' + buscar + '&estatus=' + criterio + '&idMeliMetricaProyecto=' + idMeliMetricaProyecto;
+
+            console.log(url);
+
             axios.get(url).then(function (response) {
                 me.isLoading = 0;
 
                 if (response.data.xstatus) {
-                    me.buscadorGrid.publicaciones = response.data.metricas.data;
-                    me.pagination = response.data.pagination;
+                    me.modalDetalleVisorProyecto.publicaciones = response.data.metricas.data;
+                    me.paginationPubli = response.data.pagination;
                 } else {
                     throw new Error(response.data.error);
                 }
@@ -80767,6 +81038,39 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                                     break;
                                 }
 
+                            case 'proyecto':
+                                {
+                                    this.modalRegistraProyecto.modal = 1;
+                                    this.modalRegistraProyecto.nombre = '';
+                                    this.modalRegistraProyecto.tituloModal = 'Registrar proyecto';
+                                    this.modalRegistraProyecto.tipoAccion = 1;
+                                    this.modalRegistraProyecto.idMeliMetricaProyecto = 0;
+                                    this.modalRegistraProyecto.imagen.local = null;
+
+                                    break;
+                                }
+
+                            case 'proyecto_edit':
+                                {
+                                    this.modalRegistraProyecto.modal = 1;
+                                    this.modalRegistraProyecto.nombre = data.nombre;
+                                    this.modalRegistraProyecto.tituloModal = 'Modificar proyecto';
+                                    this.modalRegistraProyecto.tipoAccion = 2;
+                                    this.modalRegistraProyecto.idMeliMetricaProyecto = data.id_meli_metrica_proyecto;
+                                    this.modalRegistraProyecto.imagen.local = data.foto;
+
+                                    break;
+                                }
+
+                            case 'deta_publicacion_proyecto':
+                                {
+                                    this.modalDetalleVisorProyecto.modal = 1;
+                                    this.modalDetalleVisorProyecto.tituloModal = 'Publicaciones monitoreadas';
+                                    this.modalDetalleVisorProyecto.idMeliMetricaProyecto = data.id_meli_metrica_proyecto;
+                                    this.buscarPublicaciones(1, '', 'ACT', true);
+                                    break;
+                                }
+
                         }
                     }
             }
@@ -80777,6 +81081,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             this.modalRegistraPublicacion.tituloModal = '';
 
             this.modalDetalleMetrica.modal = 0;
+            this.modalDetalleMetrica.tituloModal = '';
+
+            this.modalRegistraProyecto.modal = 0;
+            this.modalRegistraProyecto.tituloModal = '';
+
+            this.modalDetalleVisorProyecto.modal = 0;
+            this.modalDetalleVisorProyecto.tituloModal = '';
+        },
+        closeModalGrafico: function closeModalGrafico() {
+            this.modalDetalleMetrica.modal = 0;
+            this.modalDetalleMetrica.url = '';
             this.modalDetalleMetrica.tituloModal = '';
         },
         validarProveedor: function validarProveedor() {
@@ -80793,6 +81108,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var me = this;
 
             me.pagination.current_page = page;
+
+            me.buscarPublicaciones(page, buscar, criterio, true);
+        },
+        cambiarPaginaPubli: function cambiarPaginaPubli(page, buscar, criterio) {
+            var me = this;
+
+            me.paginationPubli.current_page = page;
 
             me.buscarPublicaciones(page, buscar, criterio, true);
         },
@@ -80841,7 +81163,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
                     util.AVISO('Se realizo el cambio correctamente', util.tipoOk);
 
-                    me.buscarPublicaciones(1, me.buscadorGrid.textoBuscar, me.buscadorGrid.criterio, true);
+                    me.buscarPublicaciones(1, me.modalDetalleVisorProyecto.textoBuscar, me.modalDetalleVisorProyecto.criterio, true);
                 } else {
                     throw new Error(response.data.error);
                 }
@@ -80993,6 +81315,101 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 me.isLoading = 0;
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
             });
+        },
+        getImagenLocal: function getImagenLocal(e) {
+            var _this = this;
+
+            var file = e.target.files[0];
+            this.modalRegistraProyecto.imagen.nombre = file.name;
+            this.modalRegistraProyecto.imagen.size = file.size;
+            this.modalRegistraProyecto.imagen.type = file.type;
+
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                _this.modalRegistraProyecto.imagen.local = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        },
+        onRegistrarProyecto: function onRegistrarProyecto() {
+            var me = this;
+            this.isLoading = 1;
+            axios.post('/zicandi/public/meli/metricas/proyecto/save', {
+                'nombre': this.modalRegistraProyecto.nombre,
+                'idMeliMetricaProyecto': this.modalRegistraProyecto.idMeliMetricaProyecto,
+                'imagen_local': this.modalRegistraProyecto.imagen.local,
+                'imagen_nombre': this.modalRegistraProyecto.imagen.nombre,
+                'imagen_size': this.modalRegistraProyecto.imagen.size,
+                'imagen_type': this.modalRegistraProyecto.imagen.type
+            }).then(function (response) {
+                me.buscar = '';
+                me.isLoading = 0;
+                me.closeModal();
+                util.AVISO('Perfecto, registro correcto', util.tipoOk);
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+
+
+        /**
+         * Activa / desactiva proyecto
+         * 
+         * 
+         */
+        onActivaDesactivaProyecto: function onActivaDesactivaProyecto(idMeliMetricaProyecto, estatusActual) {
+            var me = this;
+
+            var estatusNuevo = '';
+
+            if (estatusActual == "1") {
+                estatusNuevo = "0";
+            } else {
+                estatusNuevo = "1";
+            }
+
+            this.isLoading = 1;
+            axios.post('/zicandi/public/meli/metricas/proyecto/xstatus', {
+                'idMeliMetricaProyecto': idMeliMetricaProyecto,
+                'xstatus': estatusNuevo
+            }).then(function (response) {
+                me.isLoading = 0;
+
+                if (response.data.xstatus) {
+
+                    util.AVISO('Se realizo el cambio correctamente', util.tipoOk);
+
+                    me.buscarProyectos(1, me.buscadorGrid.textoBuscar, me.buscadorGrid.criterio, true);
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onCalcularEstadistica: function onCalcularEstadistica(url, idMeliMetricaVisor) {
+            var me = this;
+
+            this.isLoading = 1;
+
+            console.log('/zicandi/public/meli/metricas/visor/metrica?url=' + url + '&ListMeliMetricaVisor=' + idMeliMetricaVisor + '&ultimoBloque=0&bloque=0');
+            axios.get('/zicandi/public/meli/metricas/visor/metrica?url=' + url + '&ListMeliMetricaVisor=' + idMeliMetricaVisor + '&ultimoBloque=0&bloque=0').then(function (response) {
+                me.isLoading = 0;
+
+                if (response.data.xstatus) {
+
+                    util.AVISO('Metricas actualizadas', util.tipoOk);
+
+                    me.buscarPublicaciones(1, me.modalDetalleVisorProyecto.textoBuscar, me.modalDetalleVisorProyecto.criterio, true);
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
         }
     },
     mounted: function mounted() {
@@ -81002,7 +81419,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.modalDetalleMetrica.fechaFinal = new Date();
         this.modalDetalleMetrica.fechaInicial = hoy30;
 
-        this.buscarPublicaciones(1, this.buscadorGrid.textoBuscar, this.buscadorGrid.criterio, true);
+        //this.buscarPublicaciones(1, this.buscadorGrid.textoBuscar, this.buscadorGrid.criterio, true);
+        this.buscarProyectos(1, this.buscadorGrid.textoBuscar, this.buscadorGrid.criterio, true);
     }
 });
 
@@ -81031,7 +81449,7 @@ var render = function() {
           _c(
             "button",
             {
-              staticClass: "btn btn-secondary",
+              staticClass: "btn btn-primary",
               attrs: { type: "button" },
               on: {
                 click: function($event) {
@@ -81041,7 +81459,24 @@ var render = function() {
             },
             [
               _c("i", { staticClass: "icon-plus" }),
-              _vm._v(" Nuevo\n                ")
+              _vm._v(" Nueva metrica\n                ")
+            ]
+          ),
+          _vm._v("             \n                     \n                "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary",
+              attrs: { type: "button" },
+              on: {
+                click: function($event) {
+                  return _vm.showModal("metrica", "proyecto")
+                }
+              }
+            },
+            [
+              _c("i", { staticClass: "icon-plus" }),
+              _vm._v(" Nuevo Proyecto\n                ")
             ]
           )
         ])
@@ -81084,11 +81519,9 @@ var render = function() {
                   }
                 },
                 [
-                  _c("option", { attrs: { value: "ACT" } }, [
-                    _vm._v("Activas")
-                  ]),
+                  _c("option", { attrs: { value: "1" } }, [_vm._v("Activas")]),
                   _vm._v(" "),
-                  _c("option", { attrs: { value: "CAN" } }, [
+                  _c("option", { attrs: { value: "0" } }, [
                     _vm._v("Canceladas")
                   ])
                 ]
@@ -81114,7 +81547,7 @@ var render = function() {
                     ) {
                       return null
                     }
-                    return _vm.buscarPublicaciones(
+                    return _vm.buscarProyectos(
                       1,
                       _vm.buscadorGrid.textoBuscar,
                       _vm.buscadorGrid.criterio,
@@ -81141,7 +81574,7 @@ var render = function() {
                   attrs: { type: "submit" },
                   on: {
                     click: function($event) {
-                      return _vm.buscarPublicaciones(
+                      return _vm.buscarProyectos(
                         1,
                         _vm.buscadorGrid.textoBuscar,
                         _vm.buscadorGrid.criterio,
@@ -81150,7 +81583,10 @@ var render = function() {
                     }
                   }
                 },
-                [_c("i", { staticClass: "fa fa-search" }), _vm._v(" Buscar")]
+                [
+                  _c("i", { staticClass: "fa fa-search" }),
+                  _vm._v(" Buscar proyecto")
+                ]
               )
             ])
           ])
@@ -81164,30 +81600,12 @@ var render = function() {
             _vm._v(" "),
             _c(
               "tbody",
-              _vm._l(_vm.buscadorGrid.publicaciones, function(publicacion) {
-                return _c("tr", { key: publicacion.id_meli_metrica_visor }, [
+              _vm._l(_vm.buscadorGrid.proyectos, function(proyectos) {
+                return _c("tr", { key: proyectos.id_meli_metrica_proyecto }, [
                   _c(
                     "td",
                     [
-                      _c(
-                        "button",
-                        {
-                          staticClass: "btn btn-primary btn-sm",
-                          attrs: { type: "button" },
-                          on: {
-                            click: function($event) {
-                              return _vm.showModal(
-                                "metrica",
-                                "grafico",
-                                publicacion
-                              )
-                            }
-                          }
-                        },
-                        [_c("i", { staticClass: "icon-graph" })]
-                      ),
-                      _vm._v(" "),
-                      publicacion.estatus == "ACT"
+                      proyectos.xstatus == "1"
                         ? [
                             _c(
                               "button",
@@ -81196,9 +81614,9 @@ var render = function() {
                                 attrs: { type: "button" },
                                 on: {
                                   click: function($event) {
-                                    return _vm.onActivaDesactivaPublicacion(
-                                      publicacion.id_meli_metrica_visor,
-                                      publicacion.estatus
+                                    return _vm.onActivaDesactivaProyecto(
+                                      proyectos.id_meli_metrica_proyecto,
+                                      proyectos.xstatus
                                     )
                                   }
                                 }
@@ -81214,69 +81632,111 @@ var render = function() {
                                 attrs: { type: "button" },
                                 on: {
                                   click: function($event) {
-                                    return _vm.onActivaDesactivaPublicacion(
-                                      publicacion.id_meli_metrica_visor,
-                                      publicacion.estatus
+                                    return _vm.onActivaDesactivaProyecto(
+                                      proyectos.id_meli_metrica_proyecto,
+                                      proyectos.xstatus
                                     )
                                   }
                                 }
                               },
                               [_c("i", { staticClass: "icon-check" })]
                             )
-                          ]
+                          ],
+                      _vm._v(" "),
+                      _c(
+                        "button",
+                        {
+                          staticClass: "btn btn-warning btn-sm",
+                          attrs: { type: "button" },
+                          on: {
+                            click: function($event) {
+                              return _vm.showModal(
+                                "metrica",
+                                "proyecto_edit",
+                                proyectos
+                              )
+                            }
+                          }
+                        },
+                        [_c("i", { staticClass: "icon-pencil" })]
+                      ),
+                      _vm._v("  \n                        ")
                     ],
                     2
                   ),
                   _vm._v(" "),
                   _c("td", [
-                    _c(
-                      "a",
-                      {
-                        attrs: { href: "#" },
-                        on: {
-                          click: function($event) {
-                            return _vm.onAbrirPublicacionML(publicacion.url)
+                    _c("div", [
+                      _c(
+                        "a",
+                        {
+                          attrs: { href: "#" },
+                          on: {
+                            click: function($event) {
+                              return _vm.showModal(
+                                "metrica",
+                                "deta_publicacion_proyecto",
+                                proyectos
+                              )
+                            }
                           }
-                        }
-                      },
-                      [
-                        _c("img", {
-                          attrs: {
-                            src: publicacion.foto,
-                            alt: "dog",
-                            width: "50px",
-                            height: "50px"
-                          }
-                        })
-                      ]
-                    )
+                        },
+                        [
+                          _c("img", {
+                            attrs: {
+                              src: proyectos.foto,
+                              alt: "dog",
+                              width: "50px",
+                              height: "50px"
+                            }
+                          })
+                        ]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("span", {
+                      domProps: { textContent: _vm._s(proyectos.nombre) }
+                    })
                   ]),
                   _vm._v(" "),
-                  _c("td", {
-                    domProps: { textContent: _vm._s(publicacion.titulo) }
-                  }),
-                  _vm._v(" "),
                   _c("td", [
-                    _c("a", {
-                      attrs: { href: "#" },
-                      domProps: {
-                        textContent: _vm._s(publicacion.id_publicacion_tienda)
+                    _c("img", {
+                      attrs: {
+                        src: proyectos.graph_ventas,
+                        alt: "dog",
+                        height: "100px"
                       }
                     })
                   ]),
                   _vm._v(" "),
                   _c("td", [
-                    publicacion.estatus_publicacion == "ACTIVA"
-                      ? _c("div", [
-                          _c("span", { staticClass: "badge badge-success" }, [
-                            _vm._v("Activa")
-                          ])
-                        ])
-                      : _c("div", [
-                          _c("span", { staticClass: "badge badge-danger" }, [
-                            _vm._v("Pausada")
-                          ])
-                        ])
+                    _c("img", {
+                      attrs: {
+                        src: proyectos.graph_visitas,
+                        alt: "dog",
+                        height: "100px"
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("td", [
+                    proyectos.tendencia == "UP"
+                      ? _c(
+                          "button",
+                          {
+                            staticClass: "btn btn-success",
+                            attrs: { type: "button" }
+                          },
+                          [_c("i", { staticClass: "icon-like" })]
+                        )
+                      : _c(
+                          "button",
+                          {
+                            staticClass: "btn btn-danger",
+                            attrs: { type: "button" }
+                          },
+                          [_c("i", { staticClass: "icon-dislike" })]
+                        )
                   ])
                 ])
               }),
@@ -81549,6 +82009,799 @@ var render = function() {
       "div",
       {
         staticClass: "modal fade",
+        class: { mostrar: _vm.modalRegistraProyecto.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-primary modal-lg",
+            attrs: { role: "document" }
+          },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c("div", { staticClass: "modal-header" }, [
+                _c("h4", {
+                  staticClass: "modal-title",
+                  domProps: {
+                    textContent: _vm._s(_vm.modalRegistraProyecto.tituloModal)
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "close",
+                    attrs: { type: "button", "aria-label": "Close" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeModal()
+                      }
+                    }
+                  },
+                  [
+                    _c("span", { attrs: { "aria-hidden": "true" } }, [
+                      _vm._v("×")
+                    ])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-body" }, [
+                _c(
+                  "form",
+                  {
+                    staticClass: "form-horizontal",
+                    attrs: {
+                      action: "",
+                      method: "post",
+                      enctype: "multipart/form-data"
+                    }
+                  },
+                  [
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Nombre")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.modalRegistraProyecto.nombre,
+                              expression: "modalRegistraProyecto.nombre"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: {
+                            type: "text",
+                            placeholder: "Nombre del proyecto",
+                            maxlength: "30"
+                          },
+                          domProps: { value: _vm.modalRegistraProyecto.nombre },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.modalRegistraProyecto,
+                                "nombre",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group" }, [
+                      _c("div", { staticClass: "row" }, [
+                        _c(
+                          "label",
+                          {
+                            staticClass: "col-md-3 form-control-label",
+                            attrs: { for: "text-input" }
+                          },
+                          [_vm._v("Avatar")]
+                        ),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "col-md-3" }, [
+                          _c("div", { staticClass: "custom-file" }, [
+                            _c("input", {
+                              staticClass: "custom-file-input",
+                              attrs: {
+                                type: "file",
+                                id: "customFileLangLocal",
+                                lang: "es",
+                                accept: "image/png, .jpeg, .jpg, image/gif"
+                              },
+                              on: { change: _vm.getImagenLocal }
+                            }),
+                            _vm._v(" "),
+                            _c(
+                              "label",
+                              {
+                                staticClass:
+                                  "btn btn-primary custom-file-label",
+                                attrs: { for: "customFileLangLocal" }
+                              },
+                              [_vm._v("Seleccionar Archivo")]
+                            )
+                          ])
+                        ]),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "col-md-3" }, [
+                          _c("img", {
+                            attrs: {
+                              src: _vm.modalRegistraProyecto.imagen.local,
+                              alt: "Imagen del producto",
+                              contain: "",
+                              height: "100px",
+                              width: "100px"
+                            }
+                          })
+                        ])
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      {
+                        directives: [
+                          {
+                            name: "show",
+                            rawName: "v-show",
+                            value: _vm.modalRegistraProyecto.errorProveedor,
+                            expression: "modalRegistraProyecto.errorProveedor"
+                          }
+                        ],
+                        staticClass: "form-group row div-error"
+                      },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "text-center text-error" },
+                          _vm._l(
+                            _vm.modalRegistraProyecto.erroresProveedorMsjList,
+                            function(error) {
+                              return _c("div", {
+                                key: error,
+                                domProps: { textContent: _vm._s(error) }
+                              })
+                            }
+                          ),
+                          0
+                        )
+                      ]
+                    )
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeModal()
+                      }
+                    }
+                  },
+                  [_vm._v("Cerrar")]
+                ),
+                _vm._v(" "),
+                _vm.modalRegistraProyecto.tipoAccion == 1
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-primary",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.onRegistrarProyecto()
+                          }
+                        }
+                      },
+                      [_vm._v("Guardar")]
+                    )
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.modalRegistraProyecto.tipoAccion == 2
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-primary",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.onRegistrarProyecto()
+                          }
+                        }
+                      },
+                      [_vm._v("Modificar")]
+                    )
+                  : _vm._e()
+              ])
+            ])
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.modalDetalleVisorProyecto.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-primary",
+            staticStyle: { "max-width": "90% !important" },
+            attrs: { role: "document" }
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "modal-content",
+                staticStyle: { height: "700px" }
+              },
+              [
+                _c("div", { staticClass: "modal-header" }, [
+                  _c("h4", {
+                    staticClass: "modal-title",
+                    domProps: {
+                      textContent: _vm._s(
+                        _vm.modalDetalleVisorProyecto.tituloModal
+                      )
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "close",
+                      attrs: { type: "button", "aria-label": "Close" },
+                      on: {
+                        click: function($event) {
+                          return _vm.closeModal()
+                        }
+                      }
+                    },
+                    [
+                      _c("span", { attrs: { "aria-hidden": "true" } }, [
+                        _vm._v("×")
+                      ])
+                    ]
+                  )
+                ]),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass: "modal-body",
+                    staticStyle: {
+                      "max-height": "calc(100% - 120px)",
+                      "overflow-y": "scroll"
+                    }
+                  },
+                  [
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c("div", { staticClass: "col-md-6" }, [
+                        _c("div", { staticClass: "input-group" }, [
+                          _c(
+                            "select",
+                            {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.modalDetalleVisorProyecto.criterio,
+                                  expression:
+                                    "modalDetalleVisorProyecto.criterio"
+                                }
+                              ],
+                              staticClass: "form-control col-md-3",
+                              on: {
+                                change: function($event) {
+                                  var $$selectedVal = Array.prototype.filter
+                                    .call($event.target.options, function(o) {
+                                      return o.selected
+                                    })
+                                    .map(function(o) {
+                                      var val =
+                                        "_value" in o ? o._value : o.value
+                                      return val
+                                    })
+                                  _vm.$set(
+                                    _vm.modalDetalleVisorProyecto,
+                                    "criterio",
+                                    $event.target.multiple
+                                      ? $$selectedVal
+                                      : $$selectedVal[0]
+                                  )
+                                }
+                              }
+                            },
+                            [
+                              _c("option", { attrs: { value: "ACT" } }, [
+                                _vm._v("Activas")
+                              ]),
+                              _vm._v(" "),
+                              _c("option", { attrs: { value: "CAN" } }, [
+                                _vm._v("Canceladas")
+                              ])
+                            ]
+                          ),
+                          _vm._v(" "),
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value:
+                                  _vm.modalDetalleVisorProyecto.textoBuscar,
+                                expression:
+                                  "modalDetalleVisorProyecto.textoBuscar"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            attrs: {
+                              type: "text",
+                              placeholder: "Texto a buscar"
+                            },
+                            domProps: {
+                              value: _vm.modalDetalleVisorProyecto.textoBuscar
+                            },
+                            on: {
+                              keyup: function($event) {
+                                if (
+                                  !$event.type.indexOf("key") &&
+                                  _vm._k(
+                                    $event.keyCode,
+                                    "enter",
+                                    13,
+                                    $event.key,
+                                    "Enter"
+                                  )
+                                ) {
+                                  return null
+                                }
+                                return _vm.buscarPublicaciones(
+                                  1,
+                                  _vm.modalDetalleVisorProyecto.textoBuscar,
+                                  _vm.modalDetalleVisorProyecto.criterio,
+                                  true
+                                )
+                              },
+                              input: function($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.$set(
+                                  _vm.modalDetalleVisorProyecto,
+                                  "textoBuscar",
+                                  $event.target.value
+                                )
+                              }
+                            }
+                          }),
+                          _vm._v(" "),
+                          _c(
+                            "button",
+                            {
+                              staticClass: "btn btn-primary",
+                              attrs: { type: "submit" },
+                              on: {
+                                click: function($event) {
+                                  return _vm.buscarPublicaciones(
+                                    1,
+                                    _vm.modalDetalleVisorProyecto.textoBuscar,
+                                    _vm.modalDetalleVisorProyecto.criterio,
+                                    true
+                                  )
+                                }
+                              }
+                            },
+                            [
+                              _c("i", { staticClass: "fa fa-search" }),
+                              _vm._v(" Buscar")
+                            ]
+                          )
+                        ])
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "table",
+                      {
+                        staticClass:
+                          "table table-bordered table-striped table-sm"
+                      },
+                      [
+                        _vm._m(2),
+                        _vm._v(" "),
+                        _c(
+                          "tbody",
+                          _vm._l(
+                            _vm.modalDetalleVisorProyecto.publicaciones,
+                            function(publicacion) {
+                              return _c(
+                                "tr",
+                                { key: publicacion.id_meli_metrica_visor },
+                                [
+                                  _c(
+                                    "td",
+                                    [
+                                      publicacion.estatus == "ACT"
+                                        ? [
+                                            _c(
+                                              "button",
+                                              {
+                                                staticClass:
+                                                  "btn btn-danger btn-sm",
+                                                attrs: { type: "button" },
+                                                on: {
+                                                  click: function($event) {
+                                                    return _vm.onActivaDesactivaPublicacion(
+                                                      publicacion.id_meli_metrica_visor,
+                                                      publicacion.estatus
+                                                    )
+                                                  }
+                                                }
+                                              },
+                                              [
+                                                _c("i", {
+                                                  staticClass: "icon-trash"
+                                                })
+                                              ]
+                                            )
+                                          ]
+                                        : [
+                                            _c(
+                                              "button",
+                                              {
+                                                staticClass:
+                                                  "btn btn-info btn-sm",
+                                                attrs: { type: "button" },
+                                                on: {
+                                                  click: function($event) {
+                                                    return _vm.onActivaDesactivaPublicacion(
+                                                      publicacion.id_meli_metrica_visor,
+                                                      publicacion.estatus
+                                                    )
+                                                  }
+                                                }
+                                              },
+                                              [
+                                                _c("i", {
+                                                  staticClass: "icon-check"
+                                                })
+                                              ]
+                                            )
+                                          ],
+                                      _vm._v(" "),
+                                      _c(
+                                        "button",
+                                        {
+                                          staticClass: "btn btn-warning btn-sm",
+                                          attrs: { type: "button" },
+                                          on: {
+                                            click: function($event) {
+                                              return _vm.onCalcularEstadistica(
+                                                publicacion.url,
+                                                publicacion.id_meli_metrica_visor
+                                              )
+                                            }
+                                          }
+                                        },
+                                        [
+                                          _c("i", {
+                                            staticClass: "icon-calculator"
+                                          })
+                                        ]
+                                      ),
+                                      _vm._v(" "),
+                                      _c(
+                                        "button",
+                                        {
+                                          staticClass: "btn btn-primary btn-sm",
+                                          attrs: { type: "button" },
+                                          on: {
+                                            click: function($event) {
+                                              return _vm.showModal(
+                                                "metrica",
+                                                "grafico",
+                                                publicacion
+                                              )
+                                            }
+                                          }
+                                        },
+                                        [_c("i", { staticClass: "icon-graph" })]
+                                      )
+                                    ],
+                                    2
+                                  ),
+                                  _vm._v(" "),
+                                  _c("td", [
+                                    _c("div", { staticClass: "row" }, [
+                                      _c("div", { staticClass: "col-3" }, [
+                                        _c(
+                                          "a",
+                                          {
+                                            attrs: { href: "#" },
+                                            on: {
+                                              click: function($event) {
+                                                return _vm.onAbrirPublicacionML(
+                                                  publicacion.url
+                                                )
+                                              }
+                                            }
+                                          },
+                                          [
+                                            _c("img", {
+                                              attrs: {
+                                                src: publicacion.foto,
+                                                alt: "dog",
+                                                width: "100px",
+                                                height: "100px"
+                                              }
+                                            })
+                                          ]
+                                        )
+                                      ]),
+                                      _vm._v(" "),
+                                      _c("div", { staticClass: "col-9" }, [
+                                        _c("h6", {
+                                          domProps: {
+                                            textContent: _vm._s(
+                                              publicacion.titulo
+                                            )
+                                          }
+                                        }),
+                                        _vm._v(" "),
+                                        _c("small", {
+                                          staticClass: "text-muted",
+                                          domProps: {
+                                            textContent: _vm._s(
+                                              publicacion.id_publicacion_tienda
+                                            )
+                                          }
+                                        }),
+                                        _vm._v(" "),
+                                        _c("span", {
+                                          domProps: {
+                                            textContent: _vm._s(
+                                              publicacion.estatus_publicacion
+                                            )
+                                          }
+                                        })
+                                      ])
+                                    ])
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("td", [
+                                    _c("img", {
+                                      attrs: {
+                                        src: publicacion.url_graph_ventas,
+                                        alt: "dog",
+                                        height: "100px"
+                                      }
+                                    })
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("td", [
+                                    _c("img", {
+                                      attrs: {
+                                        src: publicacion.url_graph_visitas,
+                                        alt: "dog",
+                                        height: "100px"
+                                      }
+                                    })
+                                  ])
+                                ]
+                              )
+                            }
+                          ),
+                          0
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c("nav", [
+                      _c(
+                        "ul",
+                        { staticClass: "pagination" },
+                        [
+                          _vm.paginationPubli.current_page > 1
+                            ? _c("li", { staticClass: "page-item" }, [
+                                _c(
+                                  "a",
+                                  {
+                                    staticClass: "page-link",
+                                    attrs: { href: "#" },
+                                    on: {
+                                      click: function($event) {
+                                        $event.preventDefault()
+                                        return _vm.cambiarPaginaPubli(
+                                          _vm.paginationPubli.current_page - 1,
+                                          _vm.modalDetalleVisorProyecto
+                                            .textoBuscar,
+                                          _vm.modalDetalleVisorProyecto.criterio
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("Ant")]
+                                )
+                              ])
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _vm._l(_vm.pagesNumberPubli, function(page) {
+                            return _c(
+                              "li",
+                              {
+                                key: page,
+                                staticClass: "page-item",
+                                class: [
+                                  page == _vm.isActivedPubli ? "active" : ""
+                                ]
+                              },
+                              [
+                                _c("a", {
+                                  staticClass: "page-link",
+                                  attrs: { href: "#" },
+                                  domProps: { textContent: _vm._s(page) },
+                                  on: {
+                                    click: function($event) {
+                                      $event.preventDefault()
+                                      return _vm.cambiarPaginaPubli(
+                                        page,
+                                        _vm.modalDetalleVisorProyecto
+                                          .textoBuscar,
+                                        _vm.modalDetalleVisorProyecto.criterio
+                                      )
+                                    }
+                                  }
+                                })
+                              ]
+                            )
+                          }),
+                          _vm._v(" "),
+                          _vm.paginationPubli.current_page <
+                          _vm.paginationPubli.last_page
+                            ? _c("li", { staticClass: "page-item" }, [
+                                _c(
+                                  "a",
+                                  {
+                                    staticClass: "page-link",
+                                    attrs: { href: "#" },
+                                    on: {
+                                      click: function($event) {
+                                        $event.preventDefault()
+                                        return _vm.cambiarPaginaPubli(
+                                          _vm.paginationPubli.current_page + 1,
+                                          _vm.modalDetalleVisorProyecto
+                                            .textoBuscar,
+                                          _vm.modalDetalleVisorProyecto.criterio
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("Sig")]
+                                )
+                              ])
+                            : _vm._e()
+                        ],
+                        2
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      {
+                        directives: [
+                          {
+                            name: "show",
+                            rawName: "v-show",
+                            value: _vm.modalDetalleVisorProyecto.errorProveedor,
+                            expression:
+                              "modalDetalleVisorProyecto.errorProveedor"
+                          }
+                        ],
+                        staticClass: "form-group row div-error"
+                      },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "text-center text-error" },
+                          _vm._l(
+                            _vm.modalDetalleVisorProyecto
+                              .erroresProveedorMsjList,
+                            function(error) {
+                              return _c("div", {
+                                key: error,
+                                domProps: { textContent: _vm._s(error) }
+                              })
+                            }
+                          ),
+                          0
+                        )
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "modal-footer" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-secondary",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.closeModal()
+                        }
+                      }
+                    },
+                    [_vm._v("Cerrar")]
+                  ),
+                  _vm._v(" "),
+                  _vm.modalDetalleVisorProyecto.tipoAccion == 1
+                    ? _c(
+                        "button",
+                        {
+                          staticClass: "btn btn-primary",
+                          attrs: { type: "button" },
+                          on: {
+                            click: function($event) {
+                              return _vm.onCreaNuevoFolioEnvio()
+                            }
+                          }
+                        },
+                        [_vm._v("Guardar")]
+                      )
+                    : _vm._e()
+                ])
+              ]
+            )
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
         class: { mostrar: _vm.modalDetalleMetrica.modal },
         staticStyle: { display: "none" },
         attrs: {
@@ -81589,7 +82842,7 @@ var render = function() {
                       attrs: { type: "button", "aria-label": "Close" },
                       on: {
                         click: function($event) {
-                          return _vm.closeModal()
+                          return _vm.closeModalGrafico()
                         }
                       }
                     },
@@ -81695,7 +82948,7 @@ var render = function() {
                         "div",
                         { staticClass: "card", staticStyle: { width: "100%" } },
                         [
-                          _vm._m(2),
+                          _vm._m(3),
                           _vm._v(" "),
                           _c("div", { staticClass: "ror" }, [
                             _c("div", { staticClass: "col-md-12" }, [
@@ -81706,7 +82959,7 @@ var render = function() {
                                     "table table-bordered table-striped table-sm"
                                 },
                                 [
-                                  _vm._m(3),
+                                  _vm._m(4),
                                   _vm._v(" "),
                                   _c(
                                     "tbody",
@@ -81823,7 +83076,7 @@ var render = function() {
                       attrs: { type: "button" },
                       on: {
                         click: function($event) {
-                          return _vm.closeModal()
+                          return _vm.closeModalGrafico()
                         }
                       }
                     },
@@ -81859,17 +83112,31 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c("thead", [
       _c("tr", [
-        _c("th", [_vm._v("Opciones")]),
+        _c("th", { staticStyle: { width: "10px" } }, [_vm._v("Opciones")]),
         _vm._v(" "),
-        _c("th", [_vm._v("Alias")]),
+        _c("th", [_vm._v("Proyecto")]),
         _vm._v(" "),
-        _c("th", [_vm._v("Nombre")]),
+        _c("th", [_vm._v("Ventas")]),
         _vm._v(" "),
-        _c("th", [_vm._v("Pagina Web")]),
+        _c("th", [_vm._v("Visitas")]),
         _vm._v(" "),
-        _c("th", [_vm._v("Contacto")]),
+        _c("th", [_vm._v("Tendencia")])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("thead", [
+      _c("tr", [
+        _c("th", { attrs: { width: "10%;" } }, [_vm._v("Opciones")]),
         _vm._v(" "),
-        _c("th", [_vm._v("Estado")])
+        _c("th", [_vm._v("Producto")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Ventas")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Visitas")])
       ])
     ])
   },
@@ -81932,6 +83199,961 @@ if (false) {
   module.hot.accept()
   if (module.hot.data) {
     require("vue-hot-reload-api")      .rerender("data-v-76e869b3", module.exports)
+  }
+}
+
+/***/ }),
+/* 157 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__(0)
+/* script */
+var __vue_script__ = __webpack_require__(158)
+/* template */
+var __vue_template__ = __webpack_require__(159)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/MetricasBuscadorMeliComponent.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-0876c354", Component.options)
+  } else {
+    hotAPI.reload("data-v-0876c354", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 158 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vuejs_datepicker__ = __webpack_require__(13);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    data: function data() {
+        return {
+            resultadoBusquedaMeli: [],
+            totalResultadoBusquedaMeli: 0,
+            buscadorMeli: '',
+            paginaBuscadorMeli: 1,
+            totalPaginaBuscadorMeli: 1,
+            mostrarSoloSeleccionado: false,
+            isLoading: 0,
+            selectProyecto: [],
+            idMeliMetricaProyecto: 0
+        };
+    },
+
+    computed: {},
+    components: {},
+    methods: {
+        onBuscadorMeli: function onBuscadorMeli() {
+            var aplLoading = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+            var cambioPagina = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+            if (this.idMeliMetricaProyecto == 0) {
+                util.MSG('Falta!', 'Selecciona el proyecto', util.tipoErr);
+                return;
+            }
+            if (aplLoading) {
+                this.isLoading = 1;
+            }
+
+            var q = this.buscadorMeli;
+            if (cambioPagina == false) {
+                this.paginaBuscadorMeli = 1;
+            }
+            var page = this.paginaBuscadorMeli;
+
+            var me = this;
+            var url = '/zicandi/public/meli/buscador?q=' + q + '&page=' + page + '&idMeliMetricaProyecto=' + this.idMeliMetricaProyecto;
+            axios.get(url).then(function (response) {
+                var respuesta = response.data;
+                me.isLoading = 0;
+                me.resultadoBusquedaMeli = respuesta.publicaciones;
+                me.totalResultadoBusquedaMeli = respuesta.totalResultados;
+
+                me.totalPaginaBuscadorMeli = Math.trunc(respuesta.totalResultados / 50);
+                if (respuesta.totalResultados / 50 - Math.trunc(respuesta.totalResultados / 50) > 0) {
+                    me.totalPaginaBuscadorMeli = Math.trunc(respuesta.totalResultados / 50) + 1;
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        showModal: function showModal(modelo, accion) {
+            var data = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+            switch (modelo) {
+                case 'envios':
+                    {
+                        switch (accion) {
+                            case 'registrar':
+                                {
+
+                                    break;
+                                }
+
+                        }
+                    }
+            }
+        },
+        closeModal: function closeModal() {},
+        selectTienda: function selectTienda() {
+            var me = this;
+            var url = '/zicandi/public/tienda/getSelectCuentaTiendas';
+            axios.get(url).then(function (response) {
+                var respuesta = response.data;
+
+                me.modalNuevoFolioEnvio.CuentasTiendaList = respuesta.tiendas;
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onAbrirPublicacionML: function onAbrirPublicacionML(url) {
+            var params = 'width=' + screen.width;
+            params += ', height=' + screen.height;
+            params += ', top=0, left=0';
+            params += ', fullscreen=yes';
+            newwin = window.open(url, "Publicacion");
+
+            if (window.focus) {
+                newwin.focus();
+            }
+        },
+
+
+        /**
+         * Agrega la publicacion al visor
+         * 
+         */
+        onAddMetricaVisor: function onAddMetricaVisor(publicacion, idMeliMetricaProyecto) {
+            return new Promise(function (resolve, reject) {
+                axios.post('/zicandi/public/meli/metricas/visor/save', {
+                    'url': publicacion.url,
+                    'idMeliMetricaProyecto': idMeliMetricaProyecto,
+                    'idPublicacionTienda': publicacion.idPublicacionTienda
+                }).then(function (response) {
+                    resolve(response.data);
+                }).catch(function (error) {
+                    reject(error);
+                });
+            });
+        },
+
+
+        /**
+         * Cancela metrica existente
+         * 
+         * 
+         */
+        onRemoveMetricaVisor: function onRemoveMetricaVisor(publicacion) {
+            return new Promise(function (resolve, reject) {
+                axios.post('/zicandi/public/meli/metricas/visor/edit_estatus', {
+                    'idMeliMetricaVisor': publicacion.idMeliMetricaVisor,
+                    'estatus': 'CAN'
+                }).then(function (response) {
+                    resolve(response.data);
+                }).catch(function (error) {
+                    reject(error);
+                });
+            });
+        },
+
+
+        /**
+         * Procesa Colas
+         * 
+         */
+        onProcesarListaSeleccion: function onProcesarListaSeleccion() {
+            var me = this;
+            var resultadoBusquedaMeli = this.resultadoBusquedaMeli;
+            var pilaProcesaAdd = [];
+
+            for (var i = 0; i < resultadoBusquedaMeli.length; i++) {
+                var publicacion = resultadoBusquedaMeli[i];
+
+                if (publicacion.check == false && publicacion.idMeliMetricaVisor > 0) {
+                    publicacion.tarea = 'remove';
+                    publicacion.indice = i;
+                    pilaProcesaAdd.push(publicacion);
+                } else if (publicacion.check == true && publicacion.idMeliMetricaVisor > 0) {
+                    console.log('Nada');
+                } else if (publicacion.check == true) {
+
+                    publicacion.tarea = 'add';
+                    publicacion.indice = i;
+                    pilaProcesaAdd.push(publicacion);
+                }
+            }
+
+            console.log('Add');
+            console.log(pilaProcesaAdd);
+
+            //~Procesa pila para agregar
+            var procesaOk = 0;
+            var procesaErr = 0;
+            var idMeliMetricaProyecto = this.idMeliMetricaProyecto;
+            //~Procesa la pila de trabajo
+            pilaProcesaAdd.reduce(function (sequence, datosVO) {
+                return sequence.then(function () {
+                    //~Proceso a ejecutar       
+                    if (datosVO.tarea == 'add') {
+                        return me.onAddMetricaVisor(datosVO, idMeliMetricaProyecto);
+                    } else if (datosVO.tarea == 'remove') {
+                        return me.onRemoveMetricaVisor(datosVO);
+                    }
+                }).then(function (response) {
+
+                    if (response.xstatus == true) {
+                        if (datosVO.tarea == 'remove') {
+                            me.resultadoBusquedaMeli[datosVO.indice].idMeliMetricaVisor = 0;
+                        } else {
+                            me.resultadoBusquedaMeli[datosVO.indice].idMeliMetricaVisor = 1;
+                        }
+
+                        procesaOk++;
+                    } else {
+                        me.resultadoBusquedaMeli[datosVO.indice].error = response.error.substring(0, 50);
+                        procesaErr++;
+                    }
+                    me.$forceUpdate();
+                });
+            }, Promise.resolve()).then(function () {
+                //~Termina la ejecucion de toda la pila
+                if (procesaErr > 0) {
+                    util.AVISO('Termina ejecucion, revise los errores', util.tipoOk);
+                } else {
+                    util.AVISO('Termina ejecucion', util.tipoOk);
+                    me.onBuscadorMeli(true, false);
+                }
+            });
+        },
+        onLigarProyecto: function onLigarProyecto(registro, accion) {
+            var me = this;
+
+            var idMeliMetricaProyecto = this.idMeliMetricaProyecto;
+            var idMeliMetricaVisor = registro.idMeliMetricaVisor;
+
+            this.isLoading = 1;
+            axios.post('/zicandi/public/meli/metricas/proyecto/ligar', {
+                'idMeliMetricaProyecto': idMeliMetricaProyecto,
+                'idMeliMetricaVisor': idMeliMetricaVisor,
+                'accion': accion
+            }).then(function (response) {
+                me.isLoading = 0;
+
+                if (response.data.xstatus) {
+                    registro.perteneceProyecto = 'S';
+                    me.$forceUpdate();
+                    util.AVISO('Se realizo el cambio correctamente', util.tipoOk);
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        selectProyectos: function selectProyectos() {
+            var me = this;
+            var url = '/zicandi/public/meli/metricas/proyecto/select';
+            axios.get(url).then(function (response) {
+                var respuesta = response.data;
+
+                me.selectProyecto = respuesta.proyectos;
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        }
+    },
+    mounted: function mounted() {
+        this.selectProyectos();
+    }
+});
+
+/***/ }),
+/* 159 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("main", { staticClass: "main" }, [
+    _c("div", {
+      staticClass: "sbl-circ-ripple",
+      class: { "abrir-load-sbl": _vm.isLoading },
+      staticStyle: { display: "none" }
+    }),
+    _vm._v(" "),
+    _vm._m(0),
+    _vm._v(" "),
+    _c("div", { staticClass: "container-fluid" }, [
+      _c("div", { staticClass: "card" }, [
+        _c("div", { staticClass: "card-header" }, [
+          _c("i", { staticClass: "fa fa-align-justify" }),
+          _vm._v(" Tareas:\n                "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary",
+              attrs: { type: "button" },
+              on: {
+                click: function($event) {
+                  return _vm.onProcesarListaSeleccion()
+                }
+              }
+            },
+            [
+              _c("i", { staticClass: "icon-plus" }),
+              _vm._v(" Agregar/Quitar Seleccionados\n                ")
+            ]
+          ),
+          _vm._v("                    \n                   \n                "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary",
+              attrs: { type: "button" },
+              on: {
+                click: function($event) {
+                  _vm.mostrarSoloSeleccionado == false
+                    ? (_vm.mostrarSoloSeleccionado = true)
+                    : (_vm.mostrarSoloSeleccionado = false)
+                }
+              }
+            },
+            [
+              _c("i", { staticClass: "icon-plus" }),
+              _vm._v(" Mostrar solo seleccionados\n                ")
+            ]
+          )
+        ])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "card-body" }, [
+        _c("div", { staticClass: "row" }, [
+          _c("div", { staticClass: "col-md-12" }, [
+            _c("input", {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.buscadorMeli,
+                  expression: "buscadorMeli"
+                }
+              ],
+              staticClass: "form-control form-control-lg",
+              attrs: { type: "text", maxlength: "30" },
+              domProps: { value: _vm.buscadorMeli },
+              on: {
+                focus: function($event) {
+                  return $event.target.select()
+                },
+                keyup: function($event) {
+                  if (
+                    !$event.type.indexOf("key") &&
+                    _vm._k($event.keyCode, "enter", 13, $event.key, "Enter")
+                  ) {
+                    return null
+                  }
+                  return _vm.onBuscadorMeli(true, false)
+                },
+                input: function($event) {
+                  if ($event.target.composing) {
+                    return
+                  }
+                  _vm.buscadorMeli = $event.target.value
+                }
+              }
+            })
+          ])
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "row" }, [
+          _c("div", { staticClass: "col-md-1" }, [
+            _vm._v("\n                    Proyecto\n                ")
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-md-8" }, [
+            _c(
+              "select",
+              {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.idMeliMetricaProyecto,
+                    expression: "idMeliMetricaProyecto"
+                  }
+                ],
+                staticClass: "form-control",
+                on: {
+                  change: function($event) {
+                    var $$selectedVal = Array.prototype.filter
+                      .call($event.target.options, function(o) {
+                        return o.selected
+                      })
+                      .map(function(o) {
+                        var val = "_value" in o ? o._value : o.value
+                        return val
+                      })
+                    _vm.idMeliMetricaProyecto = $event.target.multiple
+                      ? $$selectedVal
+                      : $$selectedVal[0]
+                  }
+                }
+              },
+              [
+                _c("option", { attrs: { value: "0", disabled: "" } }, [
+                  _vm._v("Seleccione...")
+                ]),
+                _vm._v(" "),
+                _vm._l(_vm.selectProyecto, function(proyecto) {
+                  return _c("option", {
+                    key: proyecto.id_meli_metrica_proyecto,
+                    domProps: {
+                      value: proyecto.id_meli_metrica_proyecto,
+                      textContent: _vm._s(proyecto.nombre)
+                    }
+                  })
+                })
+              ],
+              2
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-md-3" }, [
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-primary",
+                attrs: { type: "button" },
+                on: {
+                  click: function($event) {
+                    return _vm.onBuscadorMeli(true, false)
+                  }
+                }
+              },
+              [
+                _c("i", { staticClass: "icon-magnifier" }),
+                _vm._v(" Buscar en Mercadolibre\n                    ")
+              ]
+            )
+          ])
+        ]),
+        _vm._v(" "),
+        _c("br"),
+        _vm._v(" "),
+        _c("div", { staticClass: "row" }, [
+          _c("div", { staticClass: "col-md-8" }, [
+            _vm._v("\n                    Total de resultados: "),
+            _c("span", {
+              domProps: { textContent: _vm._s(_vm.totalResultadoBusquedaMeli) }
+            })
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-md-4" }, [
+            _vm._v("\n                    Pagina: "),
+            _c("input", {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.paginaBuscadorMeli,
+                  expression: "paginaBuscadorMeli"
+                }
+              ],
+              attrs: { type: "text", maxlength: "2", size: "2", width: "20px" },
+              domProps: { value: _vm.paginaBuscadorMeli },
+              on: {
+                input: function($event) {
+                  if ($event.target.composing) {
+                    return
+                  }
+                  _vm.paginaBuscadorMeli = $event.target.value
+                }
+              }
+            }),
+            _vm._v("\n                    de "),
+            _c("span", {
+              domProps: { textContent: _vm._s(_vm.totalPaginaBuscadorMeli) }
+            }),
+            _vm._v(" "),
+            _c(
+              "a",
+              {
+                attrs: { href: "#" },
+                on: {
+                  click: function($event) {
+                    return _vm.onBuscadorMeli(true, true)
+                  }
+                }
+              },
+              [_vm._v("Ir")]
+            )
+          ])
+        ]),
+        _vm._v(" "),
+        _c(
+          "table",
+          { staticClass: "table table-bordered table-striped table-sm" },
+          [
+            _vm._m(1),
+            _vm._v(" "),
+            _c(
+              "tbody",
+              _vm._l(_vm.resultadoBusquedaMeli, function(resultado) {
+                return _c("tr", { key: resultado.idPublicacionTienda }, [
+                  _vm.mostrarSoloSeleccionado == false ||
+                  (resultado.check == true &&
+                    _vm.mostrarSoloSeleccionado == true)
+                    ? _c(
+                        "td",
+                        {
+                          on: {
+                            click: function($event) {
+                              resultado.check
+                                ? (resultado.check = 0)
+                                : (resultado.check = 1)
+                            }
+                          }
+                        },
+                        [
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: resultado.check,
+                                expression: "resultado.check"
+                              }
+                            ],
+                            attrs: { type: "checkbox" },
+                            domProps: {
+                              checked: Array.isArray(resultado.check)
+                                ? _vm._i(resultado.check, null) > -1
+                                : resultado.check
+                            },
+                            on: {
+                              change: function($event) {
+                                var $$a = resultado.check,
+                                  $$el = $event.target,
+                                  $$c = $$el.checked ? true : false
+                                if (Array.isArray($$a)) {
+                                  var $$v = null,
+                                    $$i = _vm._i($$a, $$v)
+                                  if ($$el.checked) {
+                                    $$i < 0 &&
+                                      _vm.$set(
+                                        resultado,
+                                        "check",
+                                        $$a.concat([$$v])
+                                      )
+                                  } else {
+                                    $$i > -1 &&
+                                      _vm.$set(
+                                        resultado,
+                                        "check",
+                                        $$a
+                                          .slice(0, $$i)
+                                          .concat($$a.slice($$i + 1))
+                                      )
+                                  }
+                                } else {
+                                  _vm.$set(resultado, "check", $$c)
+                                }
+                              }
+                            }
+                          })
+                        ]
+                      )
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.mostrarSoloSeleccionado == false ||
+                  (resultado.check == true &&
+                    _vm.mostrarSoloSeleccionado == true)
+                    ? _c("td", [
+                        _c(
+                          "a",
+                          {
+                            attrs: { href: "#" },
+                            on: {
+                              click: function($event) {
+                                return _vm.onAbrirPublicacionML(resultado.url)
+                              }
+                            }
+                          },
+                          [
+                            _c("img", {
+                              attrs: {
+                                src: resultado.foto,
+                                alt: "dog",
+                                width: "50px",
+                                height: "50px"
+                              }
+                            })
+                          ]
+                        )
+                      ])
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.mostrarSoloSeleccionado == false ||
+                  (resultado.check == true &&
+                    _vm.mostrarSoloSeleccionado == true)
+                    ? _c("td", [
+                        resultado.idMeliMetricaVisor > 0
+                          ? _c("div", [
+                              _c("strong", [
+                                _c("span", {
+                                  domProps: {
+                                    textContent: _vm._s(
+                                      resultado.idPublicacionTienda
+                                    )
+                                  }
+                                })
+                              ]),
+                              _vm._v(" "),
+                              resultado.check == false
+                                ? _c("div", [
+                                    _c(
+                                      "cite",
+                                      { attrs: { title: "Source Title" } },
+                                      [_vm._v("Quitar")]
+                                    )
+                                  ])
+                                : _vm._e(),
+                              _vm._v(" "),
+                              resultado.perteneceProyecto == "S"
+                                ? _c("div", [
+                                    _c(
+                                      "span",
+                                      {
+                                        staticClass:
+                                          "badge badge-pill badge-info",
+                                        on: {
+                                          click: function($event) {
+                                            return _vm.onLigarProyecto(
+                                              resultado,
+                                              "-"
+                                            )
+                                          }
+                                        }
+                                      },
+                                      [_vm._v("Proyecto")]
+                                    )
+                                  ])
+                                : _vm._e(),
+                              _vm._v(" "),
+                              resultado.perteneceProyecto == "N"
+                                ? _c("div", [
+                                    _c(
+                                      "span",
+                                      {
+                                        staticClass:
+                                          "badge badge-pill badge-light",
+                                        on: {
+                                          click: function($event) {
+                                            return _vm.onLigarProyecto(
+                                              resultado,
+                                              "+"
+                                            )
+                                          }
+                                        }
+                                      },
+                                      [_vm._v("+ proyecto")]
+                                    )
+                                  ])
+                                : _vm._e()
+                            ])
+                          : _c("div", [
+                              _c("span", {
+                                domProps: {
+                                  textContent: _vm._s(
+                                    resultado.idPublicacionTienda
+                                  )
+                                }
+                              })
+                            ])
+                      ])
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.mostrarSoloSeleccionado == false ||
+                  (resultado.check == true &&
+                    _vm.mostrarSoloSeleccionado == true)
+                    ? _c("td", [
+                        _c("span", {
+                          domProps: { textContent: _vm._s(resultado.titulo) }
+                        }),
+                        _vm._v(" "),
+                        resultado.error
+                          ? _c("div", [
+                              _c("cite", {
+                                staticStyle: { color: "red" },
+                                attrs: { title: "Source Title" },
+                                domProps: {
+                                  textContent: _vm._s(resultado.error)
+                                }
+                              })
+                            ])
+                          : _vm._e()
+                      ])
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.mostrarSoloSeleccionado == false ||
+                  (resultado.check == true &&
+                    _vm.mostrarSoloSeleccionado == true)
+                    ? _c("td", {
+                        domProps: { textContent: _vm._s(resultado.precio) }
+                      })
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.mostrarSoloSeleccionado == false ||
+                  (resultado.check == true &&
+                    _vm.mostrarSoloSeleccionado == true)
+                    ? _c("td", [
+                        resultado.envioGratis == true
+                          ? _c("div", { staticClass: "badge bg-success" }, [
+                              _vm._v("Envio Gratis")
+                            ])
+                          : _vm._e(),
+                        _vm._v(" "),
+                        _c("div", {
+                          staticClass: "badge bg-info text-dark",
+                          domProps: {
+                            textContent: _vm._s(resultado.publicacionLocal)
+                          }
+                        }),
+                        _vm._v(" "),
+                        resultado.tipoLogistica == "fulfillment"
+                          ? _c("div", [
+                              _c("img", {
+                                attrs: {
+                                  src: "repositorio/sistema/full.png",
+                                  alt: "dog",
+                                  width: "50px"
+                                }
+                              })
+                            ])
+                          : _vm._e()
+                      ])
+                    : _vm._e()
+                ])
+              }),
+              0
+            )
+          ]
+        )
+      ])
+    ])
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("ol", { staticClass: "breadcrumb" }, [
+      _c("li", { staticClass: "breadcrumb-item" }, [_vm._v("Home")]),
+      _vm._v(" "),
+      _c("li", { staticClass: "breadcrumb-item" }, [_vm._v("Tiendas")]),
+      _vm._v(" "),
+      _c("li", { staticClass: "breadcrumb-item active" }, [
+        _vm._v("Buscar en Mercadolibre")
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("thead", [
+      _c("tr", [
+        _c("th"),
+        _vm._v(" "),
+        _c("th", [_vm._v("Foto")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("ID publicacion")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Titulo")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Precio")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Etiquetas")])
+      ])
+    ])
+  }
+]
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-0876c354", module.exports)
   }
 }
 

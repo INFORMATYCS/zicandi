@@ -29,7 +29,7 @@ class MultiFondosController extends Controller
             
             $movProducto = new MovimientoProducto();
             $producto = Producto::find($deta['id_producto']);
-            $stockProducto = $producto->stock;
+            //$stockProducto = $producto->stock;
 
             $movProducto->id_producto = $deta['id_producto'];
             $movProducto->fecha_aplicacion = $currentDBtime[0]->fecha;
@@ -39,7 +39,7 @@ class MultiFondosController extends Controller
             $movProducto->naturaleza = $concepto->naturaleza;
             $movProducto->cantidad = $deta['cantidad'];
             $movProducto->precio = $deta['precio'];
-            $movProducto->stock = $stockProducto->stock + $deta['cantidad'];
+            $movProducto->stock = $deta['cantidad'];
             $movProducto->estatus_movimiento = 'A';
 
             $movProducto->save();

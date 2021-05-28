@@ -260,11 +260,19 @@ class Meli {
      * @return mixed
      */
     public function execute($path, $opts = array(), $params = array(), $assoc = false) {
+        if(isset($params["access_token"])){
+            $authorization = "Authorization: Bearer ".$params["access_token"];
+            unset($params['access_token']);
+        }
+
         $uri = $this->make_path($path, $params);
 
         $ch = curl_init($uri);
         curl_setopt_array($ch, self::$CURL_OPTS);
-
+        
+        if(isset($authorization)){
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json' , $authorization ));
+        }
         if(!empty($opts))
             curl_setopt_array($ch, $opts);
 
