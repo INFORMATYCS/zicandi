@@ -80836,6 +80836,32 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -81175,6 +81201,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         onGenerarGraficoVentas: function onGenerarGraficoVentas() {
             var varTotalVentas = [];
             var varTotalDiaVentas = [];
+            var varTotalAcumVentas = [];
+            var acumVentas = 0;
             var varDiaVentas = [];
             var varPorVisitas = [];
 
@@ -81185,8 +81213,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
                 if (i >= 1) {
                     varTotalDiaVentas.push(metrica.ventas - this.modalDetalleMetrica.historicoMetricas[i - 1].ventas);
+                    varTotalAcumVentas.push(acumVentas + (metrica.ventas - this.modalDetalleMetrica.historicoMetricas[i - 1].ventas));
+                    acumVentas += metrica.ventas - this.modalDetalleMetrica.historicoMetricas[i - 1].ventas;
                 } else {
                     varTotalDiaVentas.push(0);
+                    varTotalAcumVentas.push(0);
                 }
                 varDiaVentas.push(metrica.fecha_consulta);
                 varTotalVentas.push(metrica.ventas);
@@ -81198,8 +81229,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var chartData = {
                 labels: varDiaVentas,
                 datasets: [{
-                    type: 'line',
-                    label: 'VENTAS',
+                    type: 'bar',
+                    label: 'Ventas dia',
                     borderColor: 'rgba(227, 22, 60, 1)',
                     backgroundColor: 'rgba(227, 22, 60, 0.8)',
                     borderWidth: 5,
@@ -81207,6 +81238,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     pointRadius: 5,
                     pointHoverRadius: 15,
                     data: varTotalDiaVentas
+                }, {
+                    type: 'line',
+                    label: 'Ventas acumuladas',
+                    borderColor: 'rgba(34, 177, 76, 1)',
+                    backgroundColor: 'rgba(34, 177, 76, 0.8)',
+                    borderWidth: 5,
+                    fill: false,
+                    pointRadius: 5,
+                    pointHoverRadius: 15,
+                    data: varTotalAcumVentas
                 }]
 
             };
@@ -82603,7 +82644,57 @@ var render = function() {
                                               publicacion.estatus_publicacion
                                             )
                                           }
-                                        })
+                                        }),
+                                        _vm._v(" "),
+                                        _c("div", [
+                                          _vm._m(3, true),
+                                          _vm._v(" "),
+                                          _c("div", { staticClass: "row" }, [
+                                            _c(
+                                              "div",
+                                              { staticClass: "col-4" },
+                                              [
+                                                _c("span", {
+                                                  domProps: {
+                                                    textContent: _vm._s(
+                                                      publicacion.ult_ventas
+                                                    )
+                                                  }
+                                                })
+                                              ]
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "div",
+                                              { staticClass: "col-4" },
+                                              [
+                                                _c("span", {
+                                                  domProps: {
+                                                    textContent: _vm._s(
+                                                      publicacion.ult_visitas
+                                                    )
+                                                  }
+                                                })
+                                              ]
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "div",
+                                              { staticClass: "col-4" },
+                                              [
+                                                _c("strong", [
+                                                  _c("span", {
+                                                    domProps: {
+                                                      textContent: _vm._s(
+                                                        publicacion.ult_precio
+                                                      )
+                                                    }
+                                                  })
+                                                ])
+                                              ]
+                                            )
+                                          ])
+                                        ])
                                       ])
                                     ])
                                   ]),
@@ -82948,7 +83039,7 @@ var render = function() {
                         "div",
                         { staticClass: "card", staticStyle: { width: "100%" } },
                         [
-                          _vm._m(3),
+                          _vm._m(4),
                           _vm._v(" "),
                           _c("div", { staticClass: "ror" }, [
                             _c("div", { staticClass: "col-md-12" }, [
@@ -82959,7 +83050,7 @@ var render = function() {
                                     "table table-bordered table-striped table-sm"
                                 },
                                 [
-                                  _vm._m(4),
+                                  _vm._m(5),
                                   _vm._v(" "),
                                   _c(
                                     "tbody",
@@ -83137,6 +83228,24 @@ var staticRenderFns = [
         _c("th", [_vm._v("Ventas")]),
         _vm._v(" "),
         _c("th", [_vm._v("Visitas")])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "row" }, [
+      _c("div", { staticClass: "col-4" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("Ventas")])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-4" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("Visitas")])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-4" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("Precio")])
       ])
     ])
   },
@@ -83388,6 +83497,29 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -83397,6 +83529,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             resultadoBusquedaMeli: [],
             totalResultadoBusquedaMeli: 0,
             buscadorMeli: '',
+            tipoBuscadorMeli: 'NORMAL',
             paginaBuscadorMeli: 1,
             totalPaginaBuscadorMeli: 1,
             mostrarSoloSeleccionado: false,
@@ -83426,9 +83559,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 this.paginaBuscadorMeli = 1;
             }
             var page = this.paginaBuscadorMeli;
+            var tipo = this.tipoBuscadorMeli;
 
             var me = this;
-            var url = '/zicandi/public/meli/buscador?q=' + q + '&page=' + page + '&idMeliMetricaProyecto=' + this.idMeliMetricaProyecto;
+            var url = '/zicandi/public/meli/buscador?q=' + q + '&page=' + page + '&idMeliMetricaProyecto=' + this.idMeliMetricaProyecto + '&tipoBusqueda=' + tipo;
             axios.get(url).then(function (response) {
                 var respuesta = response.data;
                 me.isLoading = 0;
@@ -83660,7 +83794,7 @@ var render = function() {
           _c(
             "button",
             {
-              staticClass: "btn btn-secondary",
+              staticClass: "btn btn-primary",
               attrs: { type: "button" },
               on: {
                 click: function($event) {
@@ -83696,6 +83830,91 @@ var render = function() {
       ]),
       _vm._v(" "),
       _c("div", { staticClass: "card-body" }, [
+        _c("div", { staticClass: "row" }, [
+          _c("div", { staticClass: "col-md-2" }, [
+            _vm._v(
+              "                        \n                    Tipo de busqueda\n                "
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-md-2" }, [
+            _c("input", {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.tipoBuscadorMeli,
+                  expression: "tipoBuscadorMeli"
+                }
+              ],
+              staticClass: "form-check-input",
+              attrs: { type: "radio", id: "tipo1", value: "NORMAL" },
+              domProps: { checked: _vm._q(_vm.tipoBuscadorMeli, "NORMAL") },
+              on: {
+                change: function($event) {
+                  _vm.tipoBuscadorMeli = "NORMAL"
+                }
+              }
+            }),
+            _vm._v(" "),
+            _c(
+              "label",
+              { staticClass: "form-check-label", attrs: { for: "tipo1" } },
+              [
+                _vm._v(
+                  "\n                        Abierta\n                    "
+                )
+              ]
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-md-2" }, [
+            _c("input", {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.tipoBuscadorMeli,
+                  expression: "tipoBuscadorMeli"
+                }
+              ],
+              staticClass: "form-check-input",
+              attrs: { type: "radio", id: "tipo2", value: "VENDEDOR" },
+              domProps: { checked: _vm._q(_vm.tipoBuscadorMeli, "VENDEDOR") },
+              on: {
+                change: function($event) {
+                  _vm.tipoBuscadorMeli = "VENDEDOR"
+                }
+              }
+            }),
+            _vm._v(" "),
+            _vm._m(1)
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-md-4" }, [
+            _c("input", {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.tipoBuscadorMeli,
+                  expression: "tipoBuscadorMeli"
+                }
+              ],
+              staticClass: "form-check-input",
+              attrs: { type: "radio", id: "tipo3", value: "ID" },
+              domProps: { checked: _vm._q(_vm.tipoBuscadorMeli, "ID") },
+              on: {
+                change: function($event) {
+                  _vm.tipoBuscadorMeli = "ID"
+                }
+              }
+            }),
+            _vm._v(" "),
+            _vm._m(2)
+          ])
+        ]),
+        _vm._v(" "),
         _c("div", { staticClass: "row" }, [
           _c("div", { staticClass: "col-md-12" }, [
             _c("input", {
@@ -83863,7 +84082,7 @@ var render = function() {
           "table",
           { staticClass: "table table-bordered table-striped table-sm" },
           [
-            _vm._m(1),
+            _vm._m(3),
             _vm._v(" "),
             _c(
               "tbody",
@@ -84126,6 +84345,34 @@ var staticRenderFns = [
         _vm._v("Buscar en Mercadolibre")
       ])
     ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "label",
+      { staticClass: "form-check-label", attrs: { for: "tipo2" } },
+      [
+        _vm._v("\n                        Por vendedor "),
+        _c("small", { staticClass: "text-muted" }, [_vm._v("Nickname")])
+      ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "label",
+      { staticClass: "form-check-label", attrs: { for: "tipo3" } },
+      [
+        _vm._v("\n                        Por IDs "),
+        _c("small", { staticClass: "text-muted" }, [
+          _vm._v("MLM632166728,MLM567242653")
+        ])
+      ]
+    )
   },
   function() {
     var _vm = this

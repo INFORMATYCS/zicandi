@@ -19,7 +19,7 @@
             <div class="card">
                 <div class="card-header">
                     <i class="fa fa-align-justify"></i> Tareas:
-                    <button type="button" class="btn btn-secondary" @click="onProcesarListaSeleccion()">
+                    <button type="button" class="btn btn-primary" @click="onProcesarListaSeleccion()">
                         <i class="icon-plus"></i>&nbsp;Agregar/Quitar Seleccionados
                     </button>                    
                     &nbsp;&nbsp;&nbsp;
@@ -30,7 +30,30 @@
             </div>
             
             <div class="card-body">
-
+                <div class="row">
+                    <div class="col-md-2">                        
+                        Tipo de busqueda
+                    </div>
+                    <div class="col-md-2">
+                        
+                        <input class="form-check-input" type="radio" id="tipo1" v-model="tipoBuscadorMeli" value="NORMAL">
+                        <label class="form-check-label" for="tipo1">
+                            Abierta
+                        </label>
+                    </div>
+                    <div class="col-md-2">
+                        <input class="form-check-input" type="radio" id="tipo2" v-model="tipoBuscadorMeli" value="VENDEDOR">
+                        <label class="form-check-label" for="tipo2">
+                            Por vendedor <small class="text-muted">Nickname</small>
+                        </label>                        
+                    </div>
+                    <div class="col-md-4">
+                        <input class="form-check-input" type="radio" id="tipo3" v-model="tipoBuscadorMeli" value="ID">
+                        <label class="form-check-label" for="tipo3">
+                            Por IDs <small class="text-muted">MLM632166728,MLM567242653</small>
+                        </label>                        
+                    </div>
+                </div>
                <div class="row">
                     <div class="col-md-12">
                         <input type="text" class="form-control form-control-lg" maxlength="30"  @focus="$event.target.select()" v-model="buscadorMeli" @keyup.enter="onBuscadorMeli(true, false);">
@@ -139,6 +162,7 @@
                 resultadoBusquedaMeli: [],
                 totalResultadoBusquedaMeli: 0,
                 buscadorMeli: '',
+                tipoBuscadorMeli: 'NORMAL',
                 paginaBuscadorMeli: 1,
                 totalPaginaBuscadorMeli: 1,
                 mostrarSoloSeleccionado: false,
@@ -168,9 +192,10 @@
                     this.paginaBuscadorMeli = 1;
                 }
                 let page = this.paginaBuscadorMeli;
+                let tipo = this.tipoBuscadorMeli;
 
                 let me=this;                
-                let url= '/zicandi/public/meli/buscador?q='+q+'&page='+page+'&idMeliMetricaProyecto='+this.idMeliMetricaProyecto;
+                let url= '/zicandi/public/meli/buscador?q='+q+'&page='+page+'&idMeliMetricaProyecto='+this.idMeliMetricaProyecto+'&tipoBusqueda='+tipo;
                 axios.get(url)
                 .then(function (response) {                    
                     let respuesta = response.data;  

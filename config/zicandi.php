@@ -10,7 +10,7 @@ return [
     | 
     |
     */
-    'version'       => 'BETA-0.111',
+    'version'       => 'BETA-0.200',
     'entorno'       => 'pruebas', //pruebas | produccion
     'url_public'    => 'http://localhost/zicandi/public/',
 
