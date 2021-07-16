@@ -80,6 +80,102 @@ class TiendasController extends Controller
         return 'OK';
     }
 
+    /***
+     * Realiza el calculo de comisiones, envio etc por publicacion
+     * 
+     * 
+     */
+    public function calculadoraPublicacion($publicacion, $idUsuarioMELI){
+        try{
+            //~Tasas de impuestos
+            $parametria = Parametria::where('xstatus','=','1')->where('clave_proceso','=','IMPUESTO')->where('llave','=','TASA_IVA')->select('valor')->first();
+            $tasaIva = floatval($parametria->valor);
+
+            $parametria = Parametria::where('xstatus','=','1')->where('clave_proceso','=','IMPUESTO')->where('llave','=','TASA_ISR')->select('valor')->first();
+            $tasaIsr = floatval($parametria->valor);
+
+            $id             = $publicacion->id;                    
+            $precio         = $publicacion->price;
+            
+            $shipping       = $publicacion->shipping;
+            $envioGratis    = $shipping->free_shipping;                    
+            $idCategoria    = $publicacion->category_id;
+            $tipoListing    = $publicacion->listing_type_id;
+            $envioGratis    = $publicacion->shipping->free_shipping;
+
+            //~Calcula la comision por venta del producto
+            $comisionVenta = app(MercadoLibreController::class)->precioVentaCategoria($idCategoria, $tipoListing, $precio);                
+            
+            //~Calcula impuestos aplicables
+            $baseGravable = $precio / 1.16;
+            $iva = $baseGravable * $tasaIva;
+            $isr = $baseGravable * $tasaIsr;
+
+            //~Precio del envio en caso de aplicar
+            if($envioGratis){
+                $costoEnvio = app(MercadoLibreController::class)->costoEnvioGratis($id, $idUsuarioMELI);
+            }else{
+                $costoEnvio = 0;
+            }
+
+            $final = $precio - $comisionVenta - $iva - $isr - $costoEnvio;     
+
+            return array ($comisionVenta, $iva, $isr, $costoEnvio, $final);
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());            
+            return ['exception' => $e->getMessage()];
+        }   
+    }
+
+    public function simuladorCalculadoraPublicacion(Request $request){
+        try{
+            $publicacionProcesa = $request->publicacion;
+            $idCuentaTienda = $request->idCuentaTienda;
+            $cuenta = CuentaTienda::findOrFail($idCuentaTienda);
+            $idTienda = $cuenta->id_tienda;
+            $idUsuarioMELI = $cuenta->att_id;
+            $usuarioMELI = $cuenta->usuario;
+            $token = $cuenta->att_access_token; 
+
+            $p = app(MercadoLibreController::class)->items($publicacionProcesa, $token);
+
+            if($p['httpCode']=="200"){
+                $listaPublicaciones = $p['body'];
+
+                for($b=0; $b<count($listaPublicaciones); $b++){
+                    $publicacion    = $listaPublicaciones[$b]->body;
+                    $id             = $publicacion->id;
+                    $titulo         = $publicacion->title;
+                    $precio         = $publicacion->price;
+                    $stock          = $publicacion->available_quantity;
+                    $ventas         = $publicacion->sold_quantity;
+                    $estatus        = $publicacion->status;
+                    $link           = $publicacion->permalink;
+                    $fotoMini       = $publicacion->thumbnail;
+
+                    $shipping       = $publicacion->shipping;
+                    $envioGratis    = $shipping->free_shipping;
+                    $tipoEnvio      = $shipping->logistic_type;  
+                    $tipoListing    = $publicacion->listing_type_id;
+                    $envioGratis    = $publicacion->shipping->free_shipping;
+
+                    list($comisionVenta, $iva, $isr, $costoEnvio, $final) = $this->calculadoraPublicacion($publicacion, $idUsuarioMELI);
+                   
+                   
+
+                }
+            }
+
+
+
+
+            return array ($comisionVenta, $iva, $isr, $costoEnvio, $final);
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());            
+            return ['exception' => $e->getMessage()];
+        }   
+    }
+
     public function getDetallePublicacion(Request $request){ 
     try{           
         $publicaciones20 = $request->publicaciones20;
@@ -90,18 +186,7 @@ class TiendasController extends Controller
         $usuarioMELI = $cuenta->usuario;
         $token = $cuenta->att_access_token; 
         
-        $publicaciones = explode(",", $publicaciones20);
-
-        
-
-        
-
-        //~Tasas de impuestos
-        $parametria = Parametria::where('xstatus','=','1')->where('clave_proceso','=','IMPUESTO')->where('llave','=','TASA_IVA')->select('valor')->first();
-        $tasaIva = floatval($parametria->valor);
-
-        $parametria = Parametria::where('xstatus','=','1')->where('clave_proceso','=','IMPUESTO')->where('llave','=','TASA_ISR')->select('valor')->first();
-        $tasaIsr = floatval($parametria->valor);
+        $publicaciones = explode(",", $publicaciones20);            
 
         foreach($publicaciones as $publicacionProcesa){
            
@@ -127,32 +212,14 @@ class TiendasController extends Controller
                     $link           = $publicacion->permalink;
                     $fotoMini       = $publicacion->thumbnail;
 
-                    
-                    
                     $shipping       = $publicacion->shipping;
                     $envioGratis    = $shipping->free_shipping;
                     $tipoEnvio      = $shipping->logistic_type;  
-                    $idCategoria    = $publicacion->category_id;
                     $tipoListing    = $publicacion->listing_type_id;
                     $envioGratis    = $publicacion->shipping->free_shipping;
 
-                    //~Calcula la comision por venta del producto
-                    $comisionVenta = app(MercadoLibreController::class)->precioVentaCategoria($idCategoria, $tipoListing, $precio);                
-                    
-                    //~Calcula impuestos aplicables
-                    $baseGravable = $precio / 1.16;
-                    $iva = $baseGravable * $tasaIva;
-                    $isr = $baseGravable * $tasaIsr;
-
-                    //~Precio del envio en caso de aplicar
-                    if($envioGratis){
-                        $costoEnvio = app(MercadoLibreController::class)->costoEnvioGratis($id, $idUsuarioMELI);
-                    }else{
-                        $costoEnvio = 0;
-                    }
-
-                    $final = $precio - $comisionVenta - $iva - $isr - $costoEnvio;                
-
+                    list($comisionVenta, $iva, $isr, $costoEnvio, $final) = $this->calculadoraPublicacion($publicacion, $idUsuarioMELI);
+                   
                     $variations     = $publicacion->variations;
                     if(count($variations)>0){
                         for($v=0; $v<count($variations); $v++){
