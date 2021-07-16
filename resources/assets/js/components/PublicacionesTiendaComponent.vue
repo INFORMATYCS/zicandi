@@ -31,7 +31,7 @@
                             <input type="checkbox" v-model="chkEstatusPausadas"> Pausadas                        
                     </p>
                     <p class="card-text">                                                                
-                            <input type="checkbox" v-model="chkEstatusSinLigar"> Sin ligar                        
+                            <input type="checkbox" v-model="chkEstatusSinLigar"> Sin ligar                                
                     </p>
                 </div>
             </div>
@@ -164,7 +164,7 @@
                             </td>
                             <td v-if="(chkEstatusSinLigar && publicacion.config.length == 0) || (chkEstatusSinLigar==false)">
                                 <span v-text="publicacion.precio"></span>                            
-                                <span :class="colorPorcentaje(publicacion.p_neto)" data-toggle="tooltip" data-placement="top" @click="onDetalleVentaCalculadora(publicacion)" v-if="publicacion.p_neto !=null"><span v-text="publicacion.p_neto"></span>%</span>                            
+                                <span :class="colorPorcentaje(publicacion.p_neto)" data-toggle="modal" data-target="#calculadoraModal" data-placement="top" @click="showModal('calculadora','show', publicacion)" v-if="publicacion.p_neto !=null"><span v-text="publicacion.p_neto"></span>%</span>                            
                             </td>
                             <td v-if="(chkEstatusSinLigar && publicacion.config.length == 0) || (chkEstatusSinLigar==false)">
                                 <div>
@@ -344,6 +344,125 @@
             <!-- /.modal-dialog -->
         </div>
         <!--Fin del modal-->
+
+
+        <!--Inicio del modal calculadora-->
+        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" id="calculadoraModal">
+            <div class="modal-dialog modal-primary" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        
+                        
+                        <div class="row" style="width: 100%;">
+                            <div class="col-11">
+                                <h4 class="modal-title" v-text="modalCalculadora.tituloModal"></h4>                                
+                            </div>                            
+                            <div class="col-1">
+                                <button type="button" class="close" aria-label="Close" data-dismiss="modal">
+                                    <span aria-hidden="true">×</span>
+                                </button>
+                            </div>
+                        </div>
+                                                
+                        
+                    </div>
+                    <div class="modal-body">
+                        
+                        <div class="card" style="width: 100%;">                                                        
+                                
+                            <div class="row">
+                                <div class="col-7" style="text-align: left;"><strong>Tipo de publicacion</strong></div>
+                                <div class="col-5" style="text-align: right;"><span v-text="modalCalculadora.publicacionSeleccion.tipo_listing"/></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-7" style="text-align: left;"><strong>Precio Venta</strong></div>
+                                <div class="col-5" style="text-align: right;"><span v-text="modalCalculadora.publicacionSeleccion.precio"/></div>
+                            </div>                            
+
+                            <div class="row">
+                                <div class="col-7" style="text-align: left;"><strong>Costo envio</strong></div>
+                                <div class="col-5" style="text-align: right;"><span v-text="modalCalculadora.publicacionSeleccion.costo_envio"/></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-7" style="text-align: left;"><strong>Comision venta</strong></div>
+                                <div class="col-5" style="text-align: right;"><span v-text="modalCalculadora.publicacionSeleccion.comision_venta"/></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-7" style="text-align: left;"><strong>IVA</strong></div>
+                                <div class="col-5" style="text-align: right;"><span v-text="modalCalculadora.publicacionSeleccion.iva"/></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-7" style="text-align: left;"><strong>ISR</strong></div>
+                                <div class="col-5" style="text-align: right;"><span v-text="modalCalculadora.publicacionSeleccion.isr"/></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-7" style="text-align: left;"><strong>NETO Venta</strong></div>
+                                <div class="col-5" style="text-align: right;"><span v-text="modalCalculadora.publicacionSeleccion.neto_venta_final"/></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-7" style="text-align: left;"><strong>Precio Compra</strong></div>
+                                <div class="col-5" style="text-align: right;"><span v-text="modalCalculadora.publicacionSeleccion.ultimo_precio_compra"/></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-7" style="text-align: left;"><strong>NETO FINAL</strong></div>
+                                <div class="col-5" style="text-align: right;"><span v-text="modalCalculadora.publicacionSeleccion.neto"/></div>
+                            </div>
+
+
+                           
+                        </div>
+
+                        <div class="card" style="width: 100%;">                                                        
+                                
+                            
+                            <div class="row">
+                                <div class="col-12" ><h6>Simulador</h6></div>                            
+                            </div>
+                            <div class="row">
+                                <div class="col-5" >Precio Compra</div>
+                                <div class="col-7" style="text-align: left;"><input type="text" v-model="modalCalculadora.nuevoPrecioCompra" class="form-control" placeholder="Nuevo precio"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-5" >Precio Venta</div>
+                                <div class="col-7" style="text-align: left;"><input type="text" v-model="modalCalculadora.nuevoPrecio" class="form-control" placeholder="Nuevo precio"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-5" >Envio Gratis</div>
+                                <div class="col-7" style="text-align: left;"><input type="checkbox" v-model="modalCalculadora.envioGratis"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-7" ></div>
+                                <div class="col-5" style="text-align: right;"><button type="button" class="btn btn-primary" @click="closeModal();">Calcular</button></div>
+                            </div>
+
+                           
+                        </div>
+
+                       
+                    </div>
+          
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>                        
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!--Fin del modal-->
+
+
+
+        
+
+
     </main>    
 </template>
 
@@ -404,6 +523,15 @@
                     ventas: [],
                     varTotalVentas: [],
                     varDiaVentas: []
+                },
+                modalCalculadora: {                    
+                    tituloModal: '',                                        
+                    errorProducto: 0,
+                    erroresProductoMsjList: [],                    
+                    publicacionSeleccion: {},
+                    nuevoPrecio: 0,
+                    envioGratis: 0,
+                    nuevoPrecioCompra: 0
                 },
                 chkUtilidadEstatusVerde: true,
                 chkUtilidadEstatusAmarilla: true,
@@ -634,6 +762,23 @@
 
                         break;
                     }
+                    case 'calculadora':
+                    {
+                        switch(accion){
+                            case 'show':
+                            {                                
+                                this.modalCalculadora.tituloModal = 'Calculadora xxx';                                
+                                this.modalCalculadora.publicacionSeleccion = data;
+                                this.modalCalculadora.nuevoPrecio = data.precio;
+                                this.modalCalculadora.envioGratis = data.envio_gratis;
+                                this.modalCalculadora.nuevoPrecioCompra = data.ultimo_precio_compra;   
+                                break;
+                            }
+                        }
+
+                        break;
+                        
+                    }
                 }                
             },
             closeModal(){
@@ -643,6 +788,9 @@
 
                 this.modalGrafico.modal = 0;                
                 this.modalGrafico.tituloModal = '';
+
+                this.modalCalculadora.modal = 0;                
+                this.modalCalculadora.tituloModal = '';
             },
             getProduccionSeleccion(producto){                                
                 producto.temporal = true;
@@ -740,14 +888,56 @@
             },
 
             onDetalleVentaCalculadora(publicacion){
-                let mensaje =   '<p><strong>Tipo de publicacion:</strong> '+publicacion.tipo_listing+'</p>'
-                                +'<p><strong>Costo envio:</strong> '+publicacion.costo_envio+'</p>'
-                                +'<p><strong>Comision venta:</strong> '+publicacion.comision_venta+'</p>'
-                                +'<p><strong>Iva:</strong> '+publicacion.iva+'</p>'
-                                +'<p><strong>Isr:</strong> '+publicacion.isr+'</p>'
-                                +'<p><strong>Neto Venta:</strong> '+publicacion.neto_venta_final+'</p>'
-                                +'<p><strong>Precio Compra:</strong> '+publicacion.ultimo_precio_compra+'</p>'
-                                +'<p><strong>Neto:</strong> '+publicacion.neto+'</p>';
+                let mensaje =   '<div class="row">'
+                               +'    <div class="col-7" style="text-align: left;"><strong>Tipo de publicacion</strong></div>'
+                               +'     <div class="col-5" style="text-align: right;">'+publicacion.tipo_listing+'</div>'
+                               +' </div>'
+
+                               +'<div class="row">'
+                               +'    <div class="col-7" style="text-align: left;"><strong>Precio Venta</strong></div>'
+                               +'     <div class="col-5" style="text-align: right;">'+publicacion.precio+'</div>'
+                               +' </div>'
+
+                               +'<div class="row">'
+                               +'    <div class="col-7" style="text-align: left;"><input type="text" v-model="buscar" class="form-control" placeholder="Nuevo precio"></div>'
+                               +'     <div class="col-5" style="text-align: right;"></div>'
+                               +' </div>'
+                               
+                               +'<div class="row">'
+                               +'    <div class="col-7" style="text-align: left;"><strong>Costo envio</strong></div>'
+                               +'     <div class="col-5" style="text-align: right;">'+publicacion.costo_envio+'</div>'
+                               +' </div>'
+
+                               +'<div class="row">'
+                               +'    <div class="col-7" style="text-align: left;"><strong>Comision venta</strong></div>'
+                               +'     <div class="col-5" style="text-align: right;">'+publicacion.comision_venta+'</div>'
+                               +' </div>'
+
+                               +'<div class="row">'
+                               +'    <div class="col-7" style="text-align: left;"><strong>IVA</strong></div>'
+                               +'     <div class="col-5" style="text-align: right;">'+publicacion.iva+'</div>'
+                               +' </div>'
+
+                               +'<div class="row">'
+                               +'    <div class="col-7" style="text-align: left;"><strong>ISR</strong></div>'
+                               +'     <div class="col-5" style="text-align: right;">'+publicacion.isr+'</div>'
+                               +' </div>'
+
+                               +'<div class="row">'
+                               +'    <div class="col-7" style="text-align: left;"><strong>NETO Venta</strong></div>'
+                               +'     <div class="col-5" style="text-align: right;">'+publicacion.neto_venta_final+'</div>'
+                               +' </div>'
+
+                               +'<div class="row">'
+                               +'    <div class="col-7" style="text-align: left;"><strong>Precio Compra</strong></div>'
+                               +'     <div class="col-5" style="text-align: right;">'+publicacion.ultimo_precio_compra+'</div>'
+                               +' </div>'
+
+                               +'<div class="row">'
+                               +'    <div class="col-7" style="text-align: left;"><strong>NETO FINAL</strong></div>'
+                               +'     <div class="col-5" style="text-align: right;">'+publicacion.neto+'</div>'
+                               +' </div>';
+
                 util.MSG((publicacion.p_neto)+' %',mensaje, util.tipoInf);       
             },
             colorPorcentaje(valor){

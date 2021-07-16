@@ -65601,6 +65601,125 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -65657,6 +65776,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 ventas: [],
                 varTotalVentas: [],
                 varDiaVentas: []
+            },
+            modalCalculadora: {
+                tituloModal: '',
+                errorProducto: 0,
+                erroresProductoMsjList: [],
+                publicacionSeleccion: {},
+                nuevoPrecio: 0,
+                envioGratis: 0,
+                nuevoPrecioCompra: 0
             },
             chkUtilidadEstatusVerde: true,
             chkUtilidadEstatusAmarilla: true,
@@ -65873,6 +66001,22 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
                         break;
                     }
+                case 'calculadora':
+                    {
+                        switch (accion) {
+                            case 'show':
+                                {
+                                    this.modalCalculadora.tituloModal = 'Calculadora xxx';
+                                    this.modalCalculadora.publicacionSeleccion = data;
+                                    this.modalCalculadora.nuevoPrecio = data.precio;
+                                    this.modalCalculadora.envioGratis = data.envio_gratis;
+                                    this.modalCalculadora.nuevoPrecioCompra = data.ultimo_precio_compra;
+                                    break;
+                                }
+                        }
+
+                        break;
+                    }
             }
         },
         closeModal: function closeModal() {
@@ -65882,6 +66026,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             this.modalGrafico.modal = 0;
             this.modalGrafico.tituloModal = '';
+
+            this.modalCalculadora.modal = 0;
+            this.modalCalculadora.tituloModal = '';
         },
         getProduccionSeleccion: function getProduccionSeleccion(producto) {
             producto.temporal = true;
@@ -65959,7 +66106,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             });
         },
         onDetalleVentaCalculadora: function onDetalleVentaCalculadora(publicacion) {
-            var mensaje = '<p><strong>Tipo de publicacion:</strong> ' + publicacion.tipo_listing + '</p>' + '<p><strong>Costo envio:</strong> ' + publicacion.costo_envio + '</p>' + '<p><strong>Comision venta:</strong> ' + publicacion.comision_venta + '</p>' + '<p><strong>Iva:</strong> ' + publicacion.iva + '</p>' + '<p><strong>Isr:</strong> ' + publicacion.isr + '</p>' + '<p><strong>Neto Venta:</strong> ' + publicacion.neto_venta_final + '</p>' + '<p><strong>Precio Compra:</strong> ' + publicacion.ultimo_precio_compra + '</p>' + '<p><strong>Neto:</strong> ' + publicacion.neto + '</p>';
+            var mensaje = '<div class="row">' + '    <div class="col-7" style="text-align: left;"><strong>Tipo de publicacion</strong></div>' + '     <div class="col-5" style="text-align: right;">' + publicacion.tipo_listing + '</div>' + ' </div>' + '<div class="row">' + '    <div class="col-7" style="text-align: left;"><strong>Precio Venta</strong></div>' + '     <div class="col-5" style="text-align: right;">' + publicacion.precio + '</div>' + ' </div>' + '<div class="row">' + '    <div class="col-7" style="text-align: left;"><input type="text" v-model="buscar" class="form-control" placeholder="Nuevo precio"></div>' + '     <div class="col-5" style="text-align: right;"></div>' + ' </div>' + '<div class="row">' + '    <div class="col-7" style="text-align: left;"><strong>Costo envio</strong></div>' + '     <div class="col-5" style="text-align: right;">' + publicacion.costo_envio + '</div>' + ' </div>' + '<div class="row">' + '    <div class="col-7" style="text-align: left;"><strong>Comision venta</strong></div>' + '     <div class="col-5" style="text-align: right;">' + publicacion.comision_venta + '</div>' + ' </div>' + '<div class="row">' + '    <div class="col-7" style="text-align: left;"><strong>IVA</strong></div>' + '     <div class="col-5" style="text-align: right;">' + publicacion.iva + '</div>' + ' </div>' + '<div class="row">' + '    <div class="col-7" style="text-align: left;"><strong>ISR</strong></div>' + '     <div class="col-5" style="text-align: right;">' + publicacion.isr + '</div>' + ' </div>' + '<div class="row">' + '    <div class="col-7" style="text-align: left;"><strong>NETO Venta</strong></div>' + '     <div class="col-5" style="text-align: right;">' + publicacion.neto_venta_final + '</div>' + ' </div>' + '<div class="row">' + '    <div class="col-7" style="text-align: left;"><strong>Precio Compra</strong></div>' + '     <div class="col-5" style="text-align: right;">' + publicacion.ultimo_precio_compra + '</div>' + ' </div>' + '<div class="row">' + '    <div class="col-7" style="text-align: left;"><strong>NETO FINAL</strong></div>' + '     <div class="col-5" style="text-align: right;">' + publicacion.neto + '</div>' + ' </div>';
+
             util.MSG(publicacion.p_neto + ' %', mensaje, util.tipoInf);
         },
         colorPorcentaje: function colorPorcentaje(valor) {
@@ -66166,7 +66314,9 @@ var render = function() {
                   }
                 }
               }),
-              _vm._v(" Sin ligar                        \n                ")
+              _vm._v(
+                " Sin ligar                                \n                "
+              )
             ])
           ])
         ]
@@ -66710,12 +66860,15 @@ var render = function() {
                             {
                               class: _vm.colorPorcentaje(publicacion.p_neto),
                               attrs: {
-                                "data-toggle": "tooltip",
+                                "data-toggle": "modal",
+                                "data-target": "#calculadoraModal",
                                 "data-placement": "top"
                               },
                               on: {
                                 click: function($event) {
-                                  return _vm.onDetalleVentaCalculadora(
+                                  return _vm.showModal(
+                                    "calculadora",
+                                    "show",
                                     publicacion
                                   )
                                 }
@@ -67290,6 +67443,466 @@ var render = function() {
           ])
         ])
       ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          id: "calculadoraModal"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-primary",
+            attrs: { role: "document" }
+          },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c("div", { staticClass: "modal-header" }, [
+                _c(
+                  "div",
+                  { staticClass: "row", staticStyle: { width: "100%" } },
+                  [
+                    _c("div", { staticClass: "col-11" }, [
+                      _c("h4", {
+                        staticClass: "modal-title",
+                        domProps: {
+                          textContent: _vm._s(_vm.modalCalculadora.tituloModal)
+                        }
+                      })
+                    ]),
+                    _vm._v(" "),
+                    _vm._m(5)
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-body" }, [
+                _c(
+                  "div",
+                  { staticClass: "card", staticStyle: { width: "100%" } },
+                  [
+                    _c("div", { staticClass: "row" }, [
+                      _vm._m(6),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass: "col-5",
+                          staticStyle: { "text-align": "right" }
+                        },
+                        [
+                          _c("span", {
+                            domProps: {
+                              textContent: _vm._s(
+                                _vm.modalCalculadora.publicacionSeleccion
+                                  .tipo_listing
+                              )
+                            }
+                          })
+                        ]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "row" }, [
+                      _vm._m(7),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass: "col-5",
+                          staticStyle: { "text-align": "right" }
+                        },
+                        [
+                          _c("span", {
+                            domProps: {
+                              textContent: _vm._s(
+                                _vm.modalCalculadora.publicacionSeleccion.precio
+                              )
+                            }
+                          })
+                        ]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "row" }, [
+                      _vm._m(8),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass: "col-5",
+                          staticStyle: { "text-align": "right" }
+                        },
+                        [
+                          _c("span", {
+                            domProps: {
+                              textContent: _vm._s(
+                                _vm.modalCalculadora.publicacionSeleccion
+                                  .costo_envio
+                              )
+                            }
+                          })
+                        ]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "row" }, [
+                      _vm._m(9),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass: "col-5",
+                          staticStyle: { "text-align": "right" }
+                        },
+                        [
+                          _c("span", {
+                            domProps: {
+                              textContent: _vm._s(
+                                _vm.modalCalculadora.publicacionSeleccion
+                                  .comision_venta
+                              )
+                            }
+                          })
+                        ]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "row" }, [
+                      _vm._m(10),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass: "col-5",
+                          staticStyle: { "text-align": "right" }
+                        },
+                        [
+                          _c("span", {
+                            domProps: {
+                              textContent: _vm._s(
+                                _vm.modalCalculadora.publicacionSeleccion.iva
+                              )
+                            }
+                          })
+                        ]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "row" }, [
+                      _vm._m(11),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass: "col-5",
+                          staticStyle: { "text-align": "right" }
+                        },
+                        [
+                          _c("span", {
+                            domProps: {
+                              textContent: _vm._s(
+                                _vm.modalCalculadora.publicacionSeleccion.isr
+                              )
+                            }
+                          })
+                        ]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "row" }, [
+                      _vm._m(12),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass: "col-5",
+                          staticStyle: { "text-align": "right" }
+                        },
+                        [
+                          _c("span", {
+                            domProps: {
+                              textContent: _vm._s(
+                                _vm.modalCalculadora.publicacionSeleccion
+                                  .neto_venta_final
+                              )
+                            }
+                          })
+                        ]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "row" }, [
+                      _vm._m(13),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass: "col-5",
+                          staticStyle: { "text-align": "right" }
+                        },
+                        [
+                          _c("span", {
+                            domProps: {
+                              textContent: _vm._s(
+                                _vm.modalCalculadora.publicacionSeleccion
+                                  .ultimo_precio_compra
+                              )
+                            }
+                          })
+                        ]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "row" }, [
+                      _vm._m(14),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass: "col-5",
+                          staticStyle: { "text-align": "right" }
+                        },
+                        [
+                          _c("span", {
+                            domProps: {
+                              textContent: _vm._s(
+                                _vm.modalCalculadora.publicacionSeleccion.neto
+                              )
+                            }
+                          })
+                        ]
+                      )
+                    ])
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  { staticClass: "card", staticStyle: { width: "100%" } },
+                  [
+                    _vm._m(15),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "row" }, [
+                      _c("div", { staticClass: "col-5" }, [
+                        _vm._v("Precio Compra")
+                      ]),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass: "col-7",
+                          staticStyle: { "text-align": "left" }
+                        },
+                        [
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.modalCalculadora.nuevoPrecioCompra,
+                                expression: "modalCalculadora.nuevoPrecioCompra"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            attrs: {
+                              type: "text",
+                              placeholder: "Nuevo precio"
+                            },
+                            domProps: {
+                              value: _vm.modalCalculadora.nuevoPrecioCompra
+                            },
+                            on: {
+                              input: function($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.$set(
+                                  _vm.modalCalculadora,
+                                  "nuevoPrecioCompra",
+                                  $event.target.value
+                                )
+                              }
+                            }
+                          })
+                        ]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "row" }, [
+                      _c("div", { staticClass: "col-5" }, [
+                        _vm._v("Precio Venta")
+                      ]),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass: "col-7",
+                          staticStyle: { "text-align": "left" }
+                        },
+                        [
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.modalCalculadora.nuevoPrecio,
+                                expression: "modalCalculadora.nuevoPrecio"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            attrs: {
+                              type: "text",
+                              placeholder: "Nuevo precio"
+                            },
+                            domProps: {
+                              value: _vm.modalCalculadora.nuevoPrecio
+                            },
+                            on: {
+                              input: function($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.$set(
+                                  _vm.modalCalculadora,
+                                  "nuevoPrecio",
+                                  $event.target.value
+                                )
+                              }
+                            }
+                          })
+                        ]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "row" }, [
+                      _c("div", { staticClass: "col-5" }, [
+                        _vm._v("Envio Gratis")
+                      ]),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass: "col-7",
+                          staticStyle: { "text-align": "left" }
+                        },
+                        [
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.modalCalculadora.envioGratis,
+                                expression: "modalCalculadora.envioGratis"
+                              }
+                            ],
+                            attrs: { type: "checkbox" },
+                            domProps: {
+                              checked: Array.isArray(
+                                _vm.modalCalculadora.envioGratis
+                              )
+                                ? _vm._i(
+                                    _vm.modalCalculadora.envioGratis,
+                                    null
+                                  ) > -1
+                                : _vm.modalCalculadora.envioGratis
+                            },
+                            on: {
+                              change: function($event) {
+                                var $$a = _vm.modalCalculadora.envioGratis,
+                                  $$el = $event.target,
+                                  $$c = $$el.checked ? true : false
+                                if (Array.isArray($$a)) {
+                                  var $$v = null,
+                                    $$i = _vm._i($$a, $$v)
+                                  if ($$el.checked) {
+                                    $$i < 0 &&
+                                      _vm.$set(
+                                        _vm.modalCalculadora,
+                                        "envioGratis",
+                                        $$a.concat([$$v])
+                                      )
+                                  } else {
+                                    $$i > -1 &&
+                                      _vm.$set(
+                                        _vm.modalCalculadora,
+                                        "envioGratis",
+                                        $$a
+                                          .slice(0, $$i)
+                                          .concat($$a.slice($$i + 1))
+                                      )
+                                  }
+                                } else {
+                                  _vm.$set(
+                                    _vm.modalCalculadora,
+                                    "envioGratis",
+                                    $$c
+                                  )
+                                }
+                              }
+                            }
+                          })
+                        ]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "row" }, [
+                      _c("div", { staticClass: "col-7" }),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass: "col-5",
+                          staticStyle: { "text-align": "right" }
+                        },
+                        [
+                          _c(
+                            "button",
+                            {
+                              staticClass: "btn btn-primary",
+                              attrs: { type: "button" },
+                              on: {
+                                click: function($event) {
+                                  return _vm.closeModal()
+                                }
+                              }
+                            },
+                            [_vm._v("Calcular")]
+                          )
+                        ]
+                      )
+                    ])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeModal()
+                      }
+                    }
+                  },
+                  [_vm._v("Cerrar")]
+                )
+              ])
+            ])
+          ]
+        )
+      ]
     )
   ])
 }
@@ -67374,6 +67987,123 @@ var staticRenderFns = [
           ])
         ])
       ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "col-1" }, [
+      _c(
+        "button",
+        {
+          staticClass: "close",
+          attrs: {
+            type: "button",
+            "aria-label": "Close",
+            "data-dismiss": "modal"
+          }
+        },
+        [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("×")])]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "col-7", staticStyle: { "text-align": "left" } },
+      [_c("strong", [_vm._v("Tipo de publicacion")])]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "col-7", staticStyle: { "text-align": "left" } },
+      [_c("strong", [_vm._v("Precio Venta")])]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "col-7", staticStyle: { "text-align": "left" } },
+      [_c("strong", [_vm._v("Costo envio")])]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "col-7", staticStyle: { "text-align": "left" } },
+      [_c("strong", [_vm._v("Comision venta")])]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "col-7", staticStyle: { "text-align": "left" } },
+      [_c("strong", [_vm._v("IVA")])]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "col-7", staticStyle: { "text-align": "left" } },
+      [_c("strong", [_vm._v("ISR")])]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "col-7", staticStyle: { "text-align": "left" } },
+      [_c("strong", [_vm._v("NETO Venta")])]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "col-7", staticStyle: { "text-align": "left" } },
+      [_c("strong", [_vm._v("Precio Compra")])]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "col-7", staticStyle: { "text-align": "left" } },
+      [_c("strong", [_vm._v("NETO FINAL")])]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "row" }, [
+      _c("div", { staticClass: "col-12" }, [_c("h6", [_vm._v("Simulador")])])
     ])
   }
 ]
@@ -80836,6 +81566,32 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -81175,6 +81931,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         onGenerarGraficoVentas: function onGenerarGraficoVentas() {
             var varTotalVentas = [];
             var varTotalDiaVentas = [];
+            var varTotalAcumVentas = [];
+            var acumVentas = 0;
             var varDiaVentas = [];
             var varPorVisitas = [];
 
@@ -81185,8 +81943,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
                 if (i >= 1) {
                     varTotalDiaVentas.push(metrica.ventas - this.modalDetalleMetrica.historicoMetricas[i - 1].ventas);
+                    varTotalAcumVentas.push(acumVentas + (metrica.ventas - this.modalDetalleMetrica.historicoMetricas[i - 1].ventas));
+                    acumVentas += metrica.ventas - this.modalDetalleMetrica.historicoMetricas[i - 1].ventas;
                 } else {
                     varTotalDiaVentas.push(0);
+                    varTotalAcumVentas.push(0);
                 }
                 varDiaVentas.push(metrica.fecha_consulta);
                 varTotalVentas.push(metrica.ventas);
@@ -81198,8 +81959,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var chartData = {
                 labels: varDiaVentas,
                 datasets: [{
-                    type: 'line',
-                    label: 'VENTAS',
+                    type: 'bar',
+                    label: 'Ventas dia',
                     borderColor: 'rgba(227, 22, 60, 1)',
                     backgroundColor: 'rgba(227, 22, 60, 0.8)',
                     borderWidth: 5,
@@ -81207,6 +81968,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     pointRadius: 5,
                     pointHoverRadius: 15,
                     data: varTotalDiaVentas
+                }, {
+                    type: 'line',
+                    label: 'Ventas acumuladas',
+                    borderColor: 'rgba(34, 177, 76, 1)',
+                    backgroundColor: 'rgba(34, 177, 76, 0.8)',
+                    borderWidth: 5,
+                    fill: false,
+                    pointRadius: 5,
+                    pointHoverRadius: 15,
+                    data: varTotalAcumVentas
                 }]
 
             };
@@ -82603,7 +83374,57 @@ var render = function() {
                                               publicacion.estatus_publicacion
                                             )
                                           }
-                                        })
+                                        }),
+                                        _vm._v(" "),
+                                        _c("div", [
+                                          _vm._m(3, true),
+                                          _vm._v(" "),
+                                          _c("div", { staticClass: "row" }, [
+                                            _c(
+                                              "div",
+                                              { staticClass: "col-4" },
+                                              [
+                                                _c("span", {
+                                                  domProps: {
+                                                    textContent: _vm._s(
+                                                      publicacion.ult_ventas
+                                                    )
+                                                  }
+                                                })
+                                              ]
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "div",
+                                              { staticClass: "col-4" },
+                                              [
+                                                _c("span", {
+                                                  domProps: {
+                                                    textContent: _vm._s(
+                                                      publicacion.ult_visitas
+                                                    )
+                                                  }
+                                                })
+                                              ]
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "div",
+                                              { staticClass: "col-4" },
+                                              [
+                                                _c("strong", [
+                                                  _c("span", {
+                                                    domProps: {
+                                                      textContent: _vm._s(
+                                                        publicacion.ult_precio
+                                                      )
+                                                    }
+                                                  })
+                                                ])
+                                              ]
+                                            )
+                                          ])
+                                        ])
                                       ])
                                     ])
                                   ]),
@@ -82948,7 +83769,7 @@ var render = function() {
                         "div",
                         { staticClass: "card", staticStyle: { width: "100%" } },
                         [
-                          _vm._m(3),
+                          _vm._m(4),
                           _vm._v(" "),
                           _c("div", { staticClass: "ror" }, [
                             _c("div", { staticClass: "col-md-12" }, [
@@ -82959,7 +83780,7 @@ var render = function() {
                                     "table table-bordered table-striped table-sm"
                                 },
                                 [
-                                  _vm._m(4),
+                                  _vm._m(5),
                                   _vm._v(" "),
                                   _c(
                                     "tbody",
@@ -83137,6 +83958,24 @@ var staticRenderFns = [
         _c("th", [_vm._v("Ventas")]),
         _vm._v(" "),
         _c("th", [_vm._v("Visitas")])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "row" }, [
+      _c("div", { staticClass: "col-4" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("Ventas")])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-4" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("Visitas")])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-4" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("Precio")])
       ])
     ])
   },
@@ -83388,6 +84227,29 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -83397,6 +84259,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             resultadoBusquedaMeli: [],
             totalResultadoBusquedaMeli: 0,
             buscadorMeli: '',
+            tipoBuscadorMeli: 'NORMAL',
             paginaBuscadorMeli: 1,
             totalPaginaBuscadorMeli: 1,
             mostrarSoloSeleccionado: false,
@@ -83426,9 +84289,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 this.paginaBuscadorMeli = 1;
             }
             var page = this.paginaBuscadorMeli;
+            var tipo = this.tipoBuscadorMeli;
 
             var me = this;
-            var url = '/zicandi/public/meli/buscador?q=' + q + '&page=' + page + '&idMeliMetricaProyecto=' + this.idMeliMetricaProyecto;
+            var url = '/zicandi/public/meli/buscador?q=' + q + '&page=' + page + '&idMeliMetricaProyecto=' + this.idMeliMetricaProyecto + '&tipoBusqueda=' + tipo;
             axios.get(url).then(function (response) {
                 var respuesta = response.data;
                 me.isLoading = 0;
@@ -83660,7 +84524,7 @@ var render = function() {
           _c(
             "button",
             {
-              staticClass: "btn btn-secondary",
+              staticClass: "btn btn-primary",
               attrs: { type: "button" },
               on: {
                 click: function($event) {
@@ -83696,6 +84560,91 @@ var render = function() {
       ]),
       _vm._v(" "),
       _c("div", { staticClass: "card-body" }, [
+        _c("div", { staticClass: "row" }, [
+          _c("div", { staticClass: "col-md-2" }, [
+            _vm._v(
+              "                        \n                    Tipo de busqueda\n                "
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-md-2" }, [
+            _c("input", {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.tipoBuscadorMeli,
+                  expression: "tipoBuscadorMeli"
+                }
+              ],
+              staticClass: "form-check-input",
+              attrs: { type: "radio", id: "tipo1", value: "NORMAL" },
+              domProps: { checked: _vm._q(_vm.tipoBuscadorMeli, "NORMAL") },
+              on: {
+                change: function($event) {
+                  _vm.tipoBuscadorMeli = "NORMAL"
+                }
+              }
+            }),
+            _vm._v(" "),
+            _c(
+              "label",
+              { staticClass: "form-check-label", attrs: { for: "tipo1" } },
+              [
+                _vm._v(
+                  "\n                        Abierta\n                    "
+                )
+              ]
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-md-2" }, [
+            _c("input", {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.tipoBuscadorMeli,
+                  expression: "tipoBuscadorMeli"
+                }
+              ],
+              staticClass: "form-check-input",
+              attrs: { type: "radio", id: "tipo2", value: "VENDEDOR" },
+              domProps: { checked: _vm._q(_vm.tipoBuscadorMeli, "VENDEDOR") },
+              on: {
+                change: function($event) {
+                  _vm.tipoBuscadorMeli = "VENDEDOR"
+                }
+              }
+            }),
+            _vm._v(" "),
+            _vm._m(1)
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "col-md-4" }, [
+            _c("input", {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.tipoBuscadorMeli,
+                  expression: "tipoBuscadorMeli"
+                }
+              ],
+              staticClass: "form-check-input",
+              attrs: { type: "radio", id: "tipo3", value: "ID" },
+              domProps: { checked: _vm._q(_vm.tipoBuscadorMeli, "ID") },
+              on: {
+                change: function($event) {
+                  _vm.tipoBuscadorMeli = "ID"
+                }
+              }
+            }),
+            _vm._v(" "),
+            _vm._m(2)
+          ])
+        ]),
+        _vm._v(" "),
         _c("div", { staticClass: "row" }, [
           _c("div", { staticClass: "col-md-12" }, [
             _c("input", {
@@ -83863,7 +84812,7 @@ var render = function() {
           "table",
           { staticClass: "table table-bordered table-striped table-sm" },
           [
-            _vm._m(1),
+            _vm._m(3),
             _vm._v(" "),
             _c(
               "tbody",
@@ -84126,6 +85075,34 @@ var staticRenderFns = [
         _vm._v("Buscar en Mercadolibre")
       ])
     ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "label",
+      { staticClass: "form-check-label", attrs: { for: "tipo2" } },
+      [
+        _vm._v("\n                        Por vendedor "),
+        _c("small", { staticClass: "text-muted" }, [_vm._v("Nickname")])
+      ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "label",
+      { staticClass: "form-check-label", attrs: { for: "tipo3" } },
+      [
+        _vm._v("\n                        Por IDs "),
+        _c("small", { staticClass: "text-muted" }, [
+          _vm._v("MLM632166728,MLM567242653")
+        ])
+      ]
+    )
   },
   function() {
     var _vm = this

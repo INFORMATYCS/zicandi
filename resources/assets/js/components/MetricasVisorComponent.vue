@@ -291,6 +291,32 @@
                                                     <h6 v-text="publicacion.titulo"></h6>
                                                     <small class="text-muted" v-text="publicacion.id_publicacion_tienda"></small>                                    
                                                     <span v-text="publicacion.estatus_publicacion"></span>
+                                                    <div>
+                                                        <div class="row">                 
+                                                            <div class="col-4">
+                                                                <small class="text-muted">Ventas</small>
+                                                            </div>
+                                                            <div class="col-4">  
+                                                                <small class="text-muted">Visitas</small>
+                                                            </div>
+                                                            <div class="col-4"> 
+                                                                <small class="text-muted">Precio</small>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">                 
+                                                            <div class="col-4">
+                                                                <span v-text="publicacion.ult_ventas"></span>
+                                                            </div>
+                                                            <div class="col-4">  
+                                                                <span v-text="publicacion.ult_visitas"></span>
+                                                            </div>
+                                                            <div class="col-4"> 
+                                                                <strong><span v-text="publicacion.ult_precio"></span></strong>
+                                                            </div>
+                                                        </div>
+
+                                                        
+                                                    </div>
                                                 </div>          
                                             </div>
                                         </td>                            
@@ -839,6 +865,8 @@
             onGenerarGraficoVentas(){
                 let varTotalVentas = [];
                 let varTotalDiaVentas = [];
+                let varTotalAcumVentas = [];
+                let acumVentas = 0;
                 let varDiaVentas = [];
                 let varPorVisitas = [];                
 
@@ -852,8 +880,11 @@
 
                     if(i>=1){
                         varTotalDiaVentas.push(metrica.ventas - this.modalDetalleMetrica.historicoMetricas[i-1].ventas);   
+                        varTotalAcumVentas.push(acumVentas + (metrica.ventas - this.modalDetalleMetrica.historicoMetricas[i-1].ventas));   
+                        acumVentas+=metrica.ventas - this.modalDetalleMetrica.historicoMetricas[i-1].ventas;
                     }else{                        
                         varTotalDiaVentas.push(0);   
+                        varTotalAcumVentas.push(0);   
                     }
                     varDiaVentas.push(metrica.fecha_consulta);
                     varTotalVentas.push(metrica.ventas);
@@ -867,8 +898,8 @@
                 let chartData = {
                     labels: varDiaVentas,
                     datasets: [{
-                        type: 'line',
-                        label: 'VENTAS',
+                        type: 'bar',
+                        label: 'Ventas dia',
                         borderColor: 'rgba(227, 22, 60, 1)',
                         backgroundColor: 'rgba(227, 22, 60, 0.8)',
                         borderWidth: 5,
@@ -876,7 +907,20 @@
                         pointRadius: 5,
                         pointHoverRadius: 15,
                         data: varTotalDiaVentas
-                    }]
+                    },
+                    {
+                        type: 'line',
+                        label: 'Ventas acumuladas',
+                        borderColor: 'rgba(34, 177, 76, 1)',
+                        backgroundColor: 'rgba(34, 177, 76, 0.8)',
+                        borderWidth: 5,
+                        fill: false,
+                        pointRadius: 5,
+                        pointHoverRadius: 15,
+                        data: varTotalAcumVentas
+                    }
+                    
+                    ]
 
                 };
 
