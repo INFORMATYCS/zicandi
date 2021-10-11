@@ -85,7 +85,7 @@ class TiendasController extends Controller
      * 
      * 
      */
-    public function calculadoraPublicacion($publicacion, $idUsuarioMELI){
+    public function calculadoraPublicacion($publicacion, $idUsuarioMELI, $isSimulacion=false, $precioSimulacion=0, $tipoPublicacion='', $isEnvioGratis=false){
         try{
             //~Tasas de impuestos
             $parametria = Parametria::where('xstatus','=','1')->where('clave_proceso','=','IMPUESTO')->where('llave','=','TASA_IVA')->select('valor')->first();
@@ -93,6 +93,9 @@ class TiendasController extends Controller
 
             $parametria = Parametria::where('xstatus','=','1')->where('clave_proceso','=','IMPUESTO')->where('llave','=','TASA_ISR')->select('valor')->first();
             $tasaIsr = floatval($parametria->valor);
+
+            $parametria = Parametria::where('xstatus','=','1')->where('clave_proceso','=','IMPUESTO')->where('llave','=','MONTO_ENVIO_GRATIS_LIMITE')->select('valor')->first();
+            $limiteEnvioGratis = floatval($parametria->valor);
 
             $id             = $publicacion->id;                    
             $precio         = $publicacion->price;
@@ -102,6 +105,16 @@ class TiendasController extends Controller
             $idCategoria    = $publicacion->category_id;
             $tipoListing    = $publicacion->listing_type_id;
             $envioGratis    = $publicacion->shipping->free_shipping;
+
+            if($isSimulacion==true){
+                $precio         = floatval($precioSimulacion);
+                $envioGratis    = $isEnvioGratis=='false' ? false: true;
+                if($precio>=$limiteEnvioGratis){
+                    $envioGratis= true;
+                }
+
+                $tipoListing    = $tipoPublicacion == 'CLASICA' ? 'gold_special' : 'gold_pro'; //gold_special|gold_pro
+            }
 
             //~Calcula la comision por venta del producto
             $comisionVenta = app(MercadoLibreController::class)->precioVentaCategoria($idCategoria, $tipoListing, $precio);                
@@ -127,6 +140,13 @@ class TiendasController extends Controller
         }   
     }
 
+
+    /**
+     * Similador precios comisiones
+     * 
+     * 
+     * 
+     */
     public function simuladorCalculadoraPublicacion(Request $request){
         try{
             $publicacionProcesa = $request->publicacion;
@@ -137,32 +157,25 @@ class TiendasController extends Controller
             $usuarioMELI = $cuenta->usuario;
             $token = $cuenta->att_access_token; 
 
+            $idPublicacion = $request->idPublicacion;
+            $idCuentaTienda = $request->idCuentaTienda;
+
             $p = app(MercadoLibreController::class)->items($publicacionProcesa, $token);
 
             if($p['httpCode']=="200"){
                 $listaPublicaciones = $p['body'];
 
                 for($b=0; $b<count($listaPublicaciones); $b++){
-                    $publicacion    = $listaPublicaciones[$b]->body;
-                    $id             = $publicacion->id;
-                    $titulo         = $publicacion->title;
-                    $precio         = $publicacion->price;
-                    $stock          = $publicacion->available_quantity;
-                    $ventas         = $publicacion->sold_quantity;
-                    $estatus        = $publicacion->status;
-                    $link           = $publicacion->permalink;
-                    $fotoMini       = $publicacion->thumbnail;
+                    $publicacion    = $listaPublicaciones[$b]->body;                  
+  
+                    $isSimulacion = false;
+                    if(isset($request->simulacion)){
+                        if($request->simulacion == true){
+                            $isSimulacion = true;                            
+                        }
+                    }
 
-                    $shipping       = $publicacion->shipping;
-                    $envioGratis    = $shipping->free_shipping;
-                    $tipoEnvio      = $shipping->logistic_type;  
-                    $tipoListing    = $publicacion->listing_type_id;
-                    $envioGratis    = $publicacion->shipping->free_shipping;
-
-                    list($comisionVenta, $iva, $isr, $costoEnvio, $final) = $this->calculadoraPublicacion($publicacion, $idUsuarioMELI);
-                   
-                   
-
+                    list($comisionVenta, $iva, $isr, $costoEnvio, $final) = $this->calculadoraPublicacion($publicacion, $idUsuarioMELI, $isSimulacion, $request->precio, $request->tipoPublicacion, $request->envioGratis);                                      
                 }
             }
 

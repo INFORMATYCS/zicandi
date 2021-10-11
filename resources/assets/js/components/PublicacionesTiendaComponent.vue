@@ -438,12 +438,82 @@
                                 <div class="col-7" style="text-align: left;"><input type="checkbox" v-model="modalCalculadora.envioGratis"></div>
                             </div>
                             <div class="row">
+                                <div class="col-5" >Tipo Publicacion</div>
+                                <div class="col-7" style="text-align: left;">
+                                    <select class="form-control" v-model="modalCalculadora.tipoPublicacion">
+                                        <option value="CLASICA">Clasica</option>
+                                        <option value="PREMIUM">Premium</option>                                        
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
                                 <div class="col-7" ></div>
-                                <div class="col-5" style="text-align: right;"><button type="button" class="btn btn-primary" @click="closeModal();">Calcular</button></div>
+                                <div class="col-5" style="text-align: right;"><button type="button" class="btn btn-primary" @click="onCalculadora(modalCalculadora.idPublicacion);">Calcular</button></div>
                             </div>
 
                            
                         </div>
+
+                        <div class="card" style="width: 100%;" v-if="modalCalculadora.resultadoVer==1">                                                        
+                                
+                            <div class="row">
+                                <div class="col-7" style="text-align: left;"><strong>Tipo de publicacion</strong></div>
+                                <div class="col-5" style="text-align: right;"><span v-text="modalCalculadora.tipoPublicacion"/></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-7" style="text-align: left;"><strong>Precio Venta</strong></div>
+                                <div class="col-5" style="text-align: right;"><span v-text="modalCalculadora.nuevoPrecio"/></div>
+                            </div>                            
+
+                            <div class="row">
+                                <div class="col-7" style="text-align: left;"><strong>Costo envio</strong></div>
+                                <div class="col-5" style="text-align: right;"><span v-text="modalCalculadora.calculoCostoEnvio"/></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-7" style="text-align: left; background-color:#FDEDEC;"><strong>Comision venta</strong></div>
+                                <div class="col-5" style="text-align: right; background-color:#FDEDEC;"><span v-text="modalCalculadora.calculoComision"/></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6" style="text-align: left;"><strong>IVA</strong></div>
+                                <div class="col-3" style="text-align: right;"><span v-text="modalCalculadora.calculoIva"/></div>
+                                <div class="col-3" style="text-align: right;"><span v-text="modalCalculadora.calculoIva"/></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-7" style="text-align: left;"><strong>ISR</strong></div>
+                                <div class="col-5" style="text-align: right;"><span v-text="modalCalculadora.calculoIsr"/></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6" style="text-align: left; background-color:#D6EAF8;"><strong>NETO Venta</strong></div>
+                                <div class="col-3" style="text-align: right; background-color:#D6EAF8;"><span v-text="modalCalculadora.calculoFinal16"/></div>
+                                <div class="col-3" style="text-align: right; background-color:#D6EAF8;"><span v-text="modalCalculadora.calculoFinal"/></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-7" style="text-align: left;"><strong>Precio Compra</strong></div>
+                                <div class="col-5" style="text-align: right;"><span v-text="modalCalculadora.nuevoPrecioCompra"/></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6" style="text-align: left; background-color:#FEF9E7;"><strong>NETO FINAL</strong></div>
+                                <div class="col-3" style="text-align: right; background-color:#FEF9E7;"><span v-text="modalCalculadora.calculoNeto16"/></div>
+                                <div class="col-3" style="text-align: right; background-color:#FEF9E7;"><span v-text="modalCalculadora.calculoNeto8"/></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6" style="text-align: left; background-color:#EAFAF1;"><strong>Utilidad FINAL</strong></div>
+                                <div class="col-3" style="text-align: right; background-color:#EAFAF1;"><h5 v-text="modalCalculadora.porcentajeUtilidad16"/></div>
+                                <div class="col-3" style="text-align: right; background-color:#EAFAF1;"><h2 v-text="modalCalculadora.porcentajeUtilidad"/></div>
+                            </div>
+
+
+                           
+                        </div>
+
+
 
                        
                     </div>
@@ -524,14 +594,27 @@
                     varTotalVentas: [],
                     varDiaVentas: []
                 },
-                modalCalculadora: {                    
+                modalCalculadora: {           
+                    idPublicacion: 0,         
                     tituloModal: '',                                        
                     errorProducto: 0,
                     erroresProductoMsjList: [],                    
                     publicacionSeleccion: {},
                     nuevoPrecio: 0,
-                    envioGratis: 0,
-                    nuevoPrecioCompra: 0
+                    envioGratis: 'false',
+                    tipoPublicacion: 'CLASICA',
+                    nuevoPrecioCompra: 0,
+                    calculoComision: 0,
+                    calculoIva: 0,
+                    calculoIsr: 0,
+                    calculoCostoEnvio: 0,
+                    calculoFinal: 0,
+                    calculoFinal16: 0,
+                    calculoNeto8: 0,
+                    calculoNeto16: 0,
+                    porcentajeUtilidad: '',
+                    porcentajeUtilidad16: '',
+                    resultadoVer: 0
                 },
                 chkUtilidadEstatusVerde: true,
                 chkUtilidadEstatusAmarilla: true,
@@ -772,6 +855,9 @@
                                 this.modalCalculadora.nuevoPrecio = data.precio;
                                 this.modalCalculadora.envioGratis = data.envio_gratis;
                                 this.modalCalculadora.nuevoPrecioCompra = data.ultimo_precio_compra;   
+                                this.modalCalculadora.idPublicacion = data.id_publicacion_tienda;
+                                this.modalCalculadora.tipoPublicacion = data.tipo_listing == 'gold_special' ? 'CLASICA' : 'PREMIUM';
+                                this.modalCalculadora.resultadoVer = 0;
                                 break;
                             }
                         }
@@ -885,61 +971,7 @@
                         }
                     }
                 });
-            },
-
-            onDetalleVentaCalculadora(publicacion){
-                let mensaje =   '<div class="row">'
-                               +'    <div class="col-7" style="text-align: left;"><strong>Tipo de publicacion</strong></div>'
-                               +'     <div class="col-5" style="text-align: right;">'+publicacion.tipo_listing+'</div>'
-                               +' </div>'
-
-                               +'<div class="row">'
-                               +'    <div class="col-7" style="text-align: left;"><strong>Precio Venta</strong></div>'
-                               +'     <div class="col-5" style="text-align: right;">'+publicacion.precio+'</div>'
-                               +' </div>'
-
-                               +'<div class="row">'
-                               +'    <div class="col-7" style="text-align: left;"><input type="text" v-model="buscar" class="form-control" placeholder="Nuevo precio"></div>'
-                               +'     <div class="col-5" style="text-align: right;"></div>'
-                               +' </div>'
-                               
-                               +'<div class="row">'
-                               +'    <div class="col-7" style="text-align: left;"><strong>Costo envio</strong></div>'
-                               +'     <div class="col-5" style="text-align: right;">'+publicacion.costo_envio+'</div>'
-                               +' </div>'
-
-                               +'<div class="row">'
-                               +'    <div class="col-7" style="text-align: left;"><strong>Comision venta</strong></div>'
-                               +'     <div class="col-5" style="text-align: right;">'+publicacion.comision_venta+'</div>'
-                               +' </div>'
-
-                               +'<div class="row">'
-                               +'    <div class="col-7" style="text-align: left;"><strong>IVA</strong></div>'
-                               +'     <div class="col-5" style="text-align: right;">'+publicacion.iva+'</div>'
-                               +' </div>'
-
-                               +'<div class="row">'
-                               +'    <div class="col-7" style="text-align: left;"><strong>ISR</strong></div>'
-                               +'     <div class="col-5" style="text-align: right;">'+publicacion.isr+'</div>'
-                               +' </div>'
-
-                               +'<div class="row">'
-                               +'    <div class="col-7" style="text-align: left;"><strong>NETO Venta</strong></div>'
-                               +'     <div class="col-5" style="text-align: right;">'+publicacion.neto_venta_final+'</div>'
-                               +' </div>'
-
-                               +'<div class="row">'
-                               +'    <div class="col-7" style="text-align: left;"><strong>Precio Compra</strong></div>'
-                               +'     <div class="col-5" style="text-align: right;">'+publicacion.ultimo_precio_compra+'</div>'
-                               +' </div>'
-
-                               +'<div class="row">'
-                               +'    <div class="col-7" style="text-align: left;"><strong>NETO FINAL</strong></div>'
-                               +'     <div class="col-5" style="text-align: right;">'+publicacion.neto+'</div>'
-                               +' </div>';
-
-                util.MSG((publicacion.p_neto)+' %',mensaje, util.tipoInf);       
-            },
+            },            
             colorPorcentaje(valor){
                 if(valor>=20){
                     return "badge badge-success";
@@ -963,7 +995,67 @@
                     console.log(valor + " salida 0");
                     return 0;
                 }
-            }
+            },
+
+            /**
+             * Recalcula la comision sin persistir
+             * 
+             * 
+             */
+            onCalculadora(idPublicacion){
+
+                if(this.objPublicacion.idCuentaTienda == 0){
+                    util.MSG('Algo salio Mal!', 'Seleccione la cuenta de la tienda', util.tipoErr);
+                    return;
+                }
+                
+                this.isLoading = 1;    
+                this.modalCalculadora.resultadoVer = 0;
+
+                let me=this;                
+                
+                axios.get('/zicandi/public/tienda/calculadora',{
+                    params: {
+                        'simulacion': true,
+                        'publicacion': idPublicacion,
+                        'idCuentaTienda': this.objPublicacion.idCuentaTienda,
+                        'precio': this.modalCalculadora.nuevoPrecio,
+                        'tipoPublicacion': this.modalCalculadora.tipoPublicacion,                        
+                        'envioGratis': this.modalCalculadora.envioGratis == '0' ? 'false' : this.modalCalculadora.envioGratis
+                        }
+                    }
+                )
+                .then(function (response) {                    
+                    var respuesta = response.data;  
+                    me.isLoading = 0;
+                    console.log(respuesta);  
+                    let comision = respuesta[0];
+                    let iva = respuesta[1];
+                    let isr = respuesta[2];
+                    let costoEnvio = respuesta[3];
+                    let final = respuesta[4];  
+                    
+                    me.modalCalculadora.resultadoVer = 1;
+                    me.modalCalculadora.calculoComision = Math.round(comision * 100) / 100;
+                    me.modalCalculadora.calculoIva = Math.round(iva * 100) / 100;
+                    me.modalCalculadora.calculoIsr = Math.round(isr * 100) / 100;
+                    me.modalCalculadora.calculoCostoEnvio = Math.round(costoEnvio * 100) / 100;
+                    me.modalCalculadora.calculoFinal = Math.round(final * 100) / 100;
+                    me.modalCalculadora.calculoFinal16 = Math.round((final - iva) * 100) / 100;                    
+                    me.modalCalculadora.calculoNeto8 = Math.round((final - me.modalCalculadora.nuevoPrecioCompra) * 100) / 100;
+                    me.modalCalculadora.calculoNeto16 = Math.round((final - me.modalCalculadora.nuevoPrecioCompra - iva) * 100) / 100;
+                    
+                    let utilidad = Math.round( (me.modalCalculadora.calculoNeto8 / me.modalCalculadora.nuevoPrecioCompra) *100) / 100;
+                    let utilidad16 = Math.round( (me.modalCalculadora.calculoNeto16 / me.modalCalculadora.nuevoPrecioCompra) *100) / 100;
+
+                    me.modalCalculadora.porcentajeUtilidad = (Math.round( (utilidad *100) *100 )/100) + '%';
+                    me.modalCalculadora.porcentajeUtilidad16 = (Math.round( (utilidad16 *100) *100 )/100) + '%';
+                })
+                .catch(function (error) {                    
+                    me.isLoading = 0;
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
 
 
         },

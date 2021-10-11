@@ -1295,12 +1295,14 @@ class MercadoLibreController extends Controller
 
                         foreach($rs as $venta){  
                             if($ind >=1){
-                                array_push($ventasValues, $acumVentas + (($venta->ventas + 1)-$ventasDiaAntes));
-                                $ultimaVenta= ($venta->ventas + 1)-$ventasDiaAntes;
+                                array_push($ventasValues, $acumVentas + (($venta->ventas)-$ventasDiaAntes));
+                                $ultimaVenta= ($venta->ventas)-$ventasDiaAntes;
+                                $acumVentas+=$ultimaVenta;
                             }else{
                                 array_push($ventasValues, 1);
+                                $acumVentas+=1;
                             }                                
-                            $acumVentas+=$ultimaVenta;
+                            
 
                             $ventasDiaAntes= $venta->ventas;
                             $ind++;
@@ -1308,8 +1310,12 @@ class MercadoLibreController extends Controller
                             array_push($visitasValues, $venta->visitas + 1);
                             $ultimaVisita= $venta->visitas;
                         }            
+                        //Reemplaza el primer valor
+                        if(count($ventasValues)>=2){
+                            $ventasValues[0] = $ventasValues[1];
+                        }
 
-                        $procesadorImagenes = new ProcesadorImagenes();
+                        $procesadorImagenes = new ProcesadorImagenes();                        
 
                         $graphVentas = $procesadorImagenes->creaGraficaPlanaMetricas($ventasValues, "g_ventas_".$idMeliMetricaVisor, "VENTA");
                         $graphVisitas = $procesadorImagenes->creaGraficaPlanaMetricas($visitasValues, "g_visita_".$idMeliMetricaVisor, "VISITA");
