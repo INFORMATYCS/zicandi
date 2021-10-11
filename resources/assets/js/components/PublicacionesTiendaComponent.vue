@@ -1030,7 +1030,7 @@
                     me.isLoading = 0;
                     console.log(respuesta);  
                     let comision = respuesta[0];
-                    let iva = respuesta[1];
+                    let iva = respuesta[1] / 2;
                     let isr = respuesta[2];
                     let costoEnvio = respuesta[3];
                     let final = respuesta[4];  
