@@ -160,6 +160,7 @@ Route::get('/tienda/ventas', 'TiendasController@consultaVentasMeli');
 Route::get('/tienda/calculaEstadistica', 'TiendasController@calculaVentaEstadistica');
 Route::get('/tienda/ventasList', 'TiendasController@getListaVentas');
 Route::get('/tienda/ventas/export', 'TiendasController@exportar');
+Route::get('/tienda/calculadora', 'TiendasController@simuladorCalculadoraPublicacion');
 
 // - Rutas para Publicaciones
 Route::get('/publicaciones', 'PublicacionesController@index');
