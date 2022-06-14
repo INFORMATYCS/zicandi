@@ -66,19 +66,22 @@ $wget -O ./migrazica.sql https://informatycs.com/test/migrazica.sql
 
 Importar base remota en local:
 ```
-$mysql.exe -u root -p zicandi_bd
+$mysql -u root -p zicandi_bd
 Enter password: (password bd local)
 
 MariaDB [zicandi_bd]> source migrazica.sql
 ```
 
+#### Deploy
 
-### Requerimientos
+http://localhost/zicandi/public/
+
+#### Requerimientos
 PHP 7^
 
 
 
-### Posibles errores
+#### Posibles errores
 Al ejecutar composer install, si no pudiera ejecutar @php artisan package:discover y obtener el siguiente error: 
 > @php artisan package:discover
 > 
@@ -93,3 +96,4 @@ Correccion:
 ```
 $composer update
 ```
+***
