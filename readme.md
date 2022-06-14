@@ -50,11 +50,11 @@ $ CREATE DATABASE zicandi_bd CHARACTER SET utf8 COLLATE utf8_spanish_ci;
 Descarga de la BD del ambiente de pruebas (desazica):
 ```
 $ ssh -p 65002 u469753676@151.106.96.201
-u469753676@151.106.96.201's password: *********
+u469753676@151.106.96.201's password: (password ssh/ftp)
 
 -bash-4.2$ cd public_html/test
 -bash-4.2$ mysqldump -u u469753676_desazica -p u469753676_desa_zicandi > migrazica.sql
-Enter password: *********
+Enter password: (password bd remota)
 
 -bash-4.2$ exit
 logout
@@ -67,7 +67,7 @@ $wget -O ./migrazica.sql https://informatycs.com/test/migrazica.sql
 Importar base remota en local:
 ```
 $mysql.exe -u root -p zicandi_bd
-Enter password: *********
+Enter password: (password bd local)
 
 MariaDB [zicandi_bd]> source migrazica.sql
 ```
