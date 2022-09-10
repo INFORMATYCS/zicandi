@@ -93,7 +93,7 @@ class MercadoLibreController extends Controller
                 $salida = array('urlLogin'=>null, 'msg'=>'Sesion activa');            
             }
         }else{
-            $urlLogin = $meli->getAuthUrl($redirectURI, Meli::$AUTH_URL["MLA"]); //Al parecer mercadolibre autentica solo en Argentina (Provisional)
+            $urlLogin = $meli->getAuthUrl($redirectURI, Meli::$AUTH_URL["MLM"]);
 
             $salida = array('urlLogin'=>$urlLogin, 'msg'=>'Inicia logeo con ML');            
         }

@@ -48,6 +48,7 @@ class Meli {
     protected $redirect_uri;
     protected $access_token;
     protected $refresh_token;
+    protected $code;
 
     /**
      * Constructor method. Set all variables to connect in Meli
@@ -91,6 +92,7 @@ class Meli {
         if($redirect_uri)
             $this->redirect_uri = $redirect_uri;
 
+        $this->code = $code;
         $body = array(
             "grant_type" => "authorization_code", 
             "client_id" => $this->client_id, 
@@ -273,8 +275,11 @@ class Meli {
         if(isset($authorization)){
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json' , $authorization ));
         }
-        if(!empty($opts))
+        if(!empty($opts)){
             curl_setopt_array($ch, $opts);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, "grant_type=authorization_code&client_id=".$this->client_id."&client_secret=".$this->client_secret."&code=".$this->code."&redirect_uri=".$this->redirect_uri);
+        }
 
         $return["body"] = json_decode(curl_exec($ch), $assoc);
         $return["httpCode"] = curl_getinfo($ch, CURLINFO_HTTP_CODE);
