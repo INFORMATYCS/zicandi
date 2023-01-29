@@ -53,7 +53,7 @@ Vue.component('metrica-visor-component', require('./components/MetricasVisorComp
 
 Vue.component('buscar-meli-metrica-component', require('./components/MetricasBuscadorMeliComponent.vue'));
 
-
+Vue.component('buscador-ubicacion-component', require('./components/BuscadorUbicacionComponent.vue'));
 
 
 const app = new Vue({

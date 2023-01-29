@@ -704,6 +704,31 @@ class AlmacenController extends Controller{
         }   
     }
 
+    /**
+     * Filter ubicaciones
+     * 
+     * 
+     * 
+     */
+    public function filterAlmacenUbicaciones(Request $request){
+        try{
+            if(!$request->ajax())return redirect('/');
+
+            $criterio = $request->criterio;
+
+            $cat = CatUbicaProducto::select('codigo','nombre')
+            ->where('xstatus','=', '1')
+            ->where('codigo','like', '%' . $criterio . '%')            
+            ->orderBy('nombre', 'asc')
+            ->get();
+
+            return ['ubicaciones' => $cat];
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());            
+            return ['exception' => $e->getMessage()];
+        }   
+    }
+
 
     /**
      * Crea nueva ubicacion

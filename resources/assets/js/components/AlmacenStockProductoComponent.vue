@@ -277,13 +277,10 @@
                                         </button>
                                     </div>
                                     <div class="col-3"> 
-                                        <select class="form-control" v-model="modalTareasUbicacion.codigoOrigen" @change="onCargaDetalleUbicacion('origen','consulta')">
-                                            <option value="0" disabled>Seleccione...</option>
-                                            <option v-for="newUbica in mapUbicaciones" :key="newUbica.codigo" :value="newUbica.codigo" v-text="newUbica.nombre"></option>                                    
-                                        </select>
+                                        <buscador-ubicacion-component @setUbicacion="getUbicacionSeleccionOrigen" ></buscador-ubicacion-component>
                                     </div>
                                     <div class="col-7">
-                                        <div class="row">
+                                        <div class="row pre-scrollable">
                                             <div class="col-md-12">
                                                 <ul class="list-group">
                                                     <li class="list-group-item">
@@ -317,11 +314,8 @@
                                                 <i class="icon-printer"></i>
                                             </button>
                                         </div>
-                                        <div class="col-4"> 
-                                            <select class="form-control" v-model="modalTareasUbicacion.codigoOrigen" @change="onCargaDetalleUbicacion('origen','consulta')">
-                                                <option value="0" disabled>Seleccione...</option>
-                                                <option v-for="newUbica in mapUbicaciones" :key="newUbica.codigo" :value="newUbica.codigo" v-text="newUbica.nombre"></option>                                    
-                                            </select>
+                                        <div class="col-4">
+                                            <buscador-ubicacion-component @setUbicacion="getUbicacionSeleccionOrigen" ></buscador-ubicacion-component>                                             
                                         </div>
                                         <div class="col-2">
                                             <h1>=></h1>
@@ -332,16 +326,12 @@
                                             </button>
                                         </div>
                                         <div class="col-4">
-                                            <select class="form-control" v-model="modalTareasUbicacion.codigoDestino" @change="onCargaDetalleUbicacion('destino', 'consulta')">
-                                                <option value="0" disabled>Seleccione...</option>
-                                                <option v-for="newUbica in mapUbicaciones" :key="newUbica.codigo" :value="newUbica.codigo" v-text="newUbica.nombre"></option>                                    
-                                            </select>
-
+                                            <buscador-ubicacion-component @setUbicacion="getUbicacionSeleccionDestino" ></buscador-ubicacion-component>                                        
                                         </div>
                                     </div>
 
                                     <div class="row">
-                                        <div class="col-md-5">
+                                        <div class="col-md-5 pre-scrollable">
                                             <ul class="list-group">
                                                 <li class="list-group-item">
                                                     <div class="row">
@@ -364,7 +354,7 @@
                                         <div class="col-md-2">
                                         
                                         </div>
-                                        <div class="col-md-5">
+                                        <div class="col-md-5 pre-scrollable">
                                             <ul class="list-group">
                                                 <li class="list-group-item">
                                                     <div class="row">
@@ -464,12 +454,18 @@
                                                 
                                                 
                                             </div>
-                                            <div>                                            
-                                                <select class="form-control" v-model="orden.nuevaUbicacionSelect" @change="onNuevaUbicacionOrden(orden)">
-                                                    <option value="0" disabled>Seleccione...</option>
-                                                    <option v-for="newUbica in mapUbicaciones" :key="newUbica.codigo" :value="newUbica.codigo" v-text="newUbica.nombre"></option>
-                                                    <option value="_new_" >-- Nuevo --</option>
-                                                </select>   
+                                            <div>     
+                                                <div class="row">
+                                                    <div class="col-1">
+                                                        <button type="button" class="btn btn-warning btn-sm" @click="showModal('cat_ubicacion','mostrar')">
+                                                        <i class="icon-plus"></i>
+                                                    </button>
+                                                    </div>
+                                                    <div class="col-11">
+                                                        <buscador-ubicacion-component @setUbicacion="getUbicacionSeleccionInOut" :data=orden></buscador-ubicacion-component>                                                
+                                                    </div>
+                                                </div>
+                                                                                                                                                    
                                             </div>
                                         
                                     </div>
@@ -692,7 +688,7 @@
                     fileSeleccion: null,
                     fileServidor: '',
                     cargaTemporal: []
-                },
+                }
             }
         },
         computed:{
@@ -875,6 +871,51 @@
                 console.log(producto);
                 this.buscador = producto;                           
                 this.onResumenDetalleAlmacen(1, producto.id_producto);
+            },
+
+            /**
+             * Ubicacion seleccion en buscador
+             * 
+             */
+             getUbicacionSeleccionOrigen(resp){ 
+                let ubicacion = resp.ubicacion;
+
+                if(ubicacion!=null){
+                    this.modalTareasUbicacion.codigoOrigen = ubicacion.codigo;
+                    this.onCargaDetalleUbicacion('origen','consulta');
+                }else{
+                    this.modalTareasUbicacion.codigoOrigen = null;
+                    this.modalTareasUbicacion.detalleOrigen = [];
+                }
+            },
+
+            /**
+             * Ubicacion seleccion en buscador Destino
+             * 
+             */
+             getUbicacionSeleccionDestino(resp){                                                     
+                let ubicacion = resp.ubicacion;
+                
+                if(ubicacion!=null){
+                    this.modalTareasUbicacion.codigoDestino = ubicacion.codigo;
+                    this.onCargaDetalleUbicacion('destino','consulta');
+                }else{
+                    this.modalTareasUbicacion.codigoDestino = null;
+                    this.modalTareasUbicacion.detalleDestino = [];
+                }
+            },
+
+            /**
+             * Ubicacion seleccion en buscador Destino
+             * 
+             */
+             getUbicacionSeleccionInOut(resp){                                                     
+                let ubicacion = resp.ubicacion;
+        
+                if(ubicacion!=null){                    
+                    resp.data.nuevaUbicacionSelect = ubicacion.codigo;
+                    this.onNuevaUbicacionOrden(resp.data);
+                }
             },
 
             /**
@@ -1085,6 +1126,8 @@
                 }
 
                 let ubicacion = orden.ubicacion_stock;
+                console.log('Selecciona actual del combio: ' + orden);
+                console.log(orden);
                 let existe = false;
                 for(let i=0; i<=ubicacion.length-1; i++){
                     if(ubicacion[i].codigo_ubica == orden.nuevaUbicacionSelect){
@@ -1320,6 +1363,8 @@
                     url = '/zicandi/public/almacenes/cat_ubica/resumen?opcion='+tipoSalida+'&codigoUbicacion='+codigoDestino;
                 }
 
+                console.log(url);
+
                 if(tipoSalida=="ticket"){
                     if((me.modalTareasUbicacion.detalleOrigen.length > 0 && tag == "origen") || (me.modalTareasUbicacion.detalleDestino.length > 0 && tag == "destino"))
                     Swal.fire({
@@ -1365,11 +1410,20 @@
                 let codigoOrigen = this.modalTareasUbicacion.codigoOrigen;
                 let codigoDestino = this.modalTareasUbicacion.codigoDestino; 
 
+                if(codigoOrigen==null || codigoDestino==null){
+                    util.MSG('Algo salio Mal!', 'Selecciona una ubicacion origen y destino', util.tipoErr);
+                    return;
+                }
+
+                if(codigoOrigen==codigoDestino){
+                    util.MSG('Algo salio Mal!', 'No puedes inificar la misma ubicacion', util.tipoErr);
+                    return;
+                }
+
                 if(me.modalTareasUbicacion.detalleOrigen.length <= 0){
                     util.MSG('Algo salio Mal!', 'Sin registros origen que unificar', util.tipoErr);
                     return;
                 }
-
 
                 this.isLoading = 1;
                 axios.post('/zicandi/public/almacenes/cat_ubica/unifica',{
@@ -1552,6 +1606,13 @@
             },
             setActive (menuItem) {
                 this.activeItem = menuItem
+
+
+                this.modalTareasUbicacion.codigoOrigen = null;
+                this.modalTareasUbicacion.detalleOrigen = [];
+                this.modalTareasUbicacion.codigoDestino = null;
+                this.modalTareasUbicacion.detalleDestino = [];
+
 
                 if(menuItem=="cat_ubica"){
                     //this.onResumenMigracionBett();
