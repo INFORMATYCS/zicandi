@@ -52,6 +52,10 @@ class MercadoLibreController extends Controller
                     Session::put('access_token', $user['body']->access_token);
                     Session::put('expires_in', time() + $user['body']->expires_in);
                     Session::put('refresh_token', $user['body']->refresh_token);
+					
+                    //~Reserva el valor para guardar al terminar el proceso
+                    $tokenLogeo = $user['body']->access_token;
+                    $refreshTokenLogeo = $user['body']->refresh_token;
 
                     $request->accessToken = $user['body']->access_token;
                     $me = $this->me($request);
@@ -60,8 +64,8 @@ class MercadoLibreController extends Controller
                     if( $me['httpCode']=="200" ){
                         CuentaTienda::where('usuario','=',$me['body']->nickname)
                         ->update([  'estatus' => 'CONECTADO',                        
-                            'att_access_token' => $user['body']->access_token,
-                            'att_refresh_token' =>  $user['body']->refresh_token,
+                            'att_access_token' => $tokenLogeo,
+                            'att_refresh_token' =>  $refreshTokenLogeo,
                             'att_expira_token' =>  date("Y-m-d H:i:s", Session::get('expires_in')) ]);
                     }
 
@@ -514,7 +518,7 @@ class MercadoLibreController extends Controller
             }
             
             //~Registra folio envio
-            $meliEnvioFull = new MeliEnvioFull();
+            $meliEnvioFull = new MeliEnvioFull();            
             $meliEnvioFull->id_cuenta_tienda = $idCuentaTienda;
             $meliEnvioFull->folio_full = $folioFull;
             $meliEnvioFull->referencia = $referencia;

@@ -414,7 +414,7 @@ class BetterwareController extends Controller{
      */
     public function getProductosBett(Request $request){
         try{            
-            $totalProd = 500;
+            $totalProd = 1000;
             $data = json_decode( file_get_contents('https://www.betterware.com.mx/mx/es/cms/product-grid?categoryId=categories&categoryName&offset=0&limit='.$totalProd.'&heroImageType=picture&thumbnailImageType=swatch&variationField=style&filter={"q":"","facets":{}}&t=54521545122'), true );            
             
             $this->limpiaTablaTemporal($request);
