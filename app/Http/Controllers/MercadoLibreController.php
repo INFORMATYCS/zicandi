@@ -53,6 +53,7 @@ class MercadoLibreController extends Controller
                     Session::put('expires_in', time() + $user['body']->expires_in);
                     Session::put('refresh_token', $user['body']->refresh_token);
 					
+
                     //~Reserva el valor para guardar al terminar el proceso
                     $tokenLogeo = $user['body']->access_token;
                     $refreshTokenLogeo = $user['body']->refresh_token;
