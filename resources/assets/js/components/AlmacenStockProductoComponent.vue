@@ -489,7 +489,7 @@
                     </div>                                        
                     <div class="modal-footer">
     
-                        <button type="button" class="btn btn-secondary" v-if="modalOrdenEntradaSalida.resultadoProcesaLote == 0 || modalOrdenEntradaSalida.resultadoProcesaLote == 1" @click="onAplicarOrden();">Aplicar</button>
+                        <button type="button" class="btn btn-secondary" v-if="modalOrdenEntradaSalida.resultadoProcesaLote == 0 || modalOrdenEntradaSalida.resultadoProcesaLote == 1" @click="onAplicarOrden();" :disabled="btnAplicarEstado">Aplicar</button>
                         <button type="button" class="btn btn-secondary" v-if="modalOrdenEntradaSalida.resultadoProcesaLote >= 1" @click="onGenerarReporte();">Generar reporte</button>
                         <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>                            
                                     
@@ -688,7 +688,8 @@
                     fileSeleccion: null,
                     fileServidor: '',
                     cargaTemporal: []
-                }
+                },
+                btnAplicarEstado: false
             }
         },
         computed:{
@@ -1214,6 +1215,8 @@
              * 
              */
             onAplicarOrden(){
+                this.btnAplicarEstado = true;
+
                 let pilaTrabajo = [];                
                 let me = this;
 
@@ -1282,16 +1285,16 @@
                             }else{
                                 procesaErr++;
                             }
-                            
-                                                       
-                            me.$forceUpdate();
-                                                       
+                                                        
+                            me.$forceUpdate();                                                       
                         });
                     },
                     Promise.resolve()
                 ).then(function() {
                     //~Termina la ejecucion de toda la pila
                     util.AVISO('Termina ejecucion', util.tipoOk);
+                    me.btnAplicarEstado = false;
+
                     if(procesaOk > 0 && procesaErr == 0){
                         me.modalOrdenEntradaSalida.resultadoProcesaLote= 2;
                     }else if(procesaOk > 0 || procesaErr > 0){
