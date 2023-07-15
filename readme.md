@@ -90,6 +90,7 @@ http://localhost/zicandi/public/
 
 #### Requerimientos
 PHP 7^
+
 node 16.13.0 /soccers-nas/nfs-soccers/software/win/desarrollo/node-v16.13.0-x64.msi
 
 
