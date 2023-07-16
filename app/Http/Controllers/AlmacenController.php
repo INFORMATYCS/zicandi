@@ -16,6 +16,7 @@ use App\MovimientoAlmacen;
 use App\CatUbicaProducto;
 use App\StockUbicaProducto;
 use App\TempCargaStock;
+use App\Parametria;
 use App\Exports\AlmacenExport;
 use App\Exports\AlmacenDetalleExport;
 use App\Imports\StockMasivaImport;
@@ -370,8 +371,19 @@ class AlmacenController extends Controller{
             ->where('stock', '=', 0)            
             ->delete();
 
-
             DB::commit();
+
+            //Realiza el arrastre de stock
+            $parametria = Parametria::where('xstatus','=','1')
+            ->where('clave_proceso','=','ARR_STOCK_MOV')
+            ->where('llave','=','ARRASTRE_ACTIVO')
+            ->select('llave','valor', 'descripcion')
+            ->get()->first();
+
+            if($parametria->valor == '1'){
+                DB::select('call sp_arrastre_stock_producto(?)', [$idProducto]);
+            }
+
             return [ 'xstatus'=>true, 'movimiento'=>$movimientoAlmacen, 'stockUbicacion'=>$stockUbicaProducto, 'stockProducto'=>$stockProducto];
         }catch(Exception $e){
             DB::rollBack();
