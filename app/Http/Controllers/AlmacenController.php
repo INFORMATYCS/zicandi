@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 Use Config;
 Use Exception;
 Use Log;
@@ -1192,6 +1193,84 @@ class AlmacenController extends Controller{
             $idProducto = $request->idProducto;
 
             DB::select('call sp_arrastre_stock_producto(?)', [$idProducto]);
+
+            return [ 'xstatus'=>true];
+        }catch(Exception $e){
+            DB::rollBack();
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+    /**
+     * Genera un archivo png con el codigo qr del texto proporcionado
+     * API: /almacenes/cat_ubica/generate-qr
+     * 
+     */
+    public function generateQrPng(Request $request){
+        DB::beginTransaction();
+        try{            
+            $texto = $request->text;
+
+            $repositorio = Config::get('zicandi.repositorio.entrada.codigo-qr');
+
+            QrCode::size(150)->generate($texto, $repositorio.$texto.'.svg');
+
+            return [ 'xstatus'=>true];
+        }catch(Exception $e){
+            DB::rollBack();
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+    /**
+     * Genera el reporte en pdf con los qr almacenados
+     * API: /almacenes/cat_ubica/report-qr
+     * 
+     */
+    public function imprimirReporteQr(Request $request){
+        DB::beginTransaction();
+        try{            
+            $arrFiles = array();
+            $handle = opendir(Config::get('zicandi.repositorio.entrada.codigo-qr'));
+            if ($handle) {
+                while (($entry = readdir($handle)) !== FALSE) {
+                    if( strrpos($entry, ".svg") ){
+                        $name = basename(Config::get('zicandi.repositorio.entrada.codigo-qr').$entry, ".svg");
+                        array_push($arrFiles, array("nombre"=>$name,"path"=>Config::get('zicandi.repositorio.entrada.codigo-qr').$entry));
+                    }
+                }
+            }
+            closedir($handle);
+            
+            return \PDF::loadView('exports/codigoQrUbicaciones', ['datos' => $arrFiles])
+            ->setPaper('a4', 'portrait')
+            ->stream('impresionCodigoQR.pdf');            
+        }catch(Exception $e){
+            DB::rollBack();
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+    /**
+     * Depura el directorio a donde se almacenan los qr
+     * API: /almacenes/cat_ubica/depura/report-qr
+     * 
+     */
+    public function limpiarDirectorioCodigosQr(Request $request){
+        DB::beginTransaction();
+        try{                        
+            $handle = opendir(Config::get('zicandi.repositorio.entrada.codigo-qr'));
+            if ($handle) {
+                while (($entry = readdir($handle)) !== FALSE) {
+                    if( strrpos($entry, ".svg") ){                       
+                        unlink( Config::get('zicandi.repositorio.entrada.codigo-qr').$entry );
+                    }
+                }
+            }
+            closedir($handle);    
 
             return [ 'xstatus'=>true];
         }catch(Exception $e){

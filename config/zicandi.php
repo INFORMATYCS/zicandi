@@ -48,8 +48,9 @@ return [
             'log_batch'         => 'repositorio/entrada/log_batch/',
             'bettimg'           => 'repositorio/entrada/productos/better_alta_resolucion/',
             'tmp'               => 'repositorio/entrada/tmp/',
-            'metricas'         => 'repositorio/entrada/metrica/proyectos/',
-            'grafico_metricas' => 'repositorio/entrada/metrica/graficos/',
+            'metricas'          => 'repositorio/entrada/metrica/proyectos/',
+            'grafico_metricas'  => 'repositorio/entrada/metrica/graficos/',
+            'codigo-qr'         => 'repositorio/entrada/qr/',
         ],
         'salida'    => [
 

@@ -266,6 +266,10 @@
                             <div class="tab-pane fade" :class="{ 'active show': isActive('cat_ubica') }" id="cat_ubica">
                                 <div class="row">
                                     <div class="col-2">
+                                        <button type="button" class="btn btn-warning btn-sm" @click="onGenerateQrUbicacion()">
+                                            <i class="icon-tag"></i>
+                                        </button>
+
                                         <button type="button" class="btn btn-warning btn-sm" @click="onCargaDetalleUbicacion('origen','ticket')">
                                             <i class="icon-printer"></i>
                                         </button>
@@ -388,7 +392,9 @@
                     </div>
                     
                     <div class="modal-footer">                        
-                        <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>                        
+                        <button v-if="modalTareasUbicacion.mostrarBotonReporteQr" type="button" class="btn btn-secondary" @click="onDepurarDirQr();">Limpiar y generar nuevo reporte</button>
+                        <button v-if="modalTareasUbicacion.mostrarBotonReporteQr" type="button" class="btn btn-secondary" @click="onImprimirCodigosQr();">Imprimir codigos QR</button>
+                        <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>
                     </div>
                 </div>
                 <!-- /.modal-content -->
@@ -661,7 +667,8 @@
                     codigoOrigen: '',
                     codigoDestino: '',
                     detalleOrigen: [],
-                    detalleDestino: []
+                    detalleDestino: [],
+                    mostrarBotonReporteQr: false
                 },
                 pagination: {
                     total : 0,
@@ -1636,8 +1643,6 @@
                 this.isLoading = 1;
                 let idProducto = me.modalDetalleMovimientos.producto.id_producto;
 
-                console.log(me);
-
                 axios.post('/zicandi/public/almacenes/arrastreStock',{
                         'idProducto': idProducto
                 })
@@ -1657,8 +1662,79 @@
                     me.isLoading = 0;             
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
+            },
 
+            /**
+             * Genera codigo QR
+             * 
+             */
+            onGenerateQrUbicacion(){
+                let me = this;                            
+                this.isLoading = 1;                
+                let codigoOrigen = this.modalTareasUbicacion.codigoOrigen;
 
+                axios.post('/zicandi/public/almacenes/cat_ubica/generate-qr',{
+                        'text': codigoOrigen
+                })
+                .then(function (response) {  
+                    me.isLoading = 0;           
+                    
+                    if(response.data.xstatus){
+                        me.modalTareasUbicacion.mostrarBotonReporteQr=true;
+                        
+                        util.AVISO('Codigo QR generado', util.tipoOk);
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+                                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+
+            /**
+             * Genera reporte con QR almacenados
+             * 
+             */
+            onImprimirCodigosQr(){                
+                let url = '/zicandi/public/almacenes/cat_ubica/report-qr';
+
+                Swal.fire({
+                    title: 'Ticket',
+                    html: '<embed src="'+url+'" type="application/pdf" width="100%" height="300px" />',
+                    showCloseButton: false,
+                    showCancelButton: false,
+                    focusConfirm: false                    
+                });       
+            },
+
+            /**
+             * Depura directorio con QR almacenados previamente
+             * 
+             * 
+             */
+            onDepurarDirQr(){
+                let me = this;                            
+                this.isLoading = 1;
+
+                axios.get('/zicandi/public/almacenes/cat_ubica/depura/report-qr')
+                .then(function (response) {  
+                    me.isLoading = 0;           
+                    
+                    if(response.data.xstatus){
+                        me.modalTareasUbicacion.mostrarBotonReporteQr=false;                        
+                        util.AVISO('Perfecto, se limpio el repositorio de QR local', util.tipoOk);
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+                                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
             },
 
         },
@@ -1669,3 +1745,5 @@
         }
     }
 </script>
+
+

@@ -76,6 +76,9 @@ Route::get('/almacenes/cat_ubica/resumen', 'AlmacenController@resumenUbicacion')
 Route::post('/almacenes/cat_ubica/remove', 'AlmacenController@removeUbicacion');
 Route::get('/almacenes/filter_ubicacion', 'AlmacenController@filterAlmacenUbicaciones');
 Route::post('/almacenes/arrastreStock', 'AlmacenController@aplicaArrastreStockProducto');
+Route::post('/almacenes/cat_ubica/generate-qr', 'AlmacenController@generateQrPng');
+Route::get('/almacenes/cat_ubica/report-qr', 'AlmacenController@imprimirReporteQr');
+Route::get('/almacenes/cat_ubica/depura/report-qr', 'AlmacenController@limpiarDirectorioCodigosQr');
 
 
 

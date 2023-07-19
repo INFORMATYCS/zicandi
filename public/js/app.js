@@ -76138,6 +76138,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -76187,7 +76193,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 codigoOrigen: '',
                 codigoDestino: '',
                 detalleOrigen: [],
-                detalleDestino: []
+                detalleDestino: [],
+                mostrarBotonReporteQr: false
             },
             pagination: {
                 total: 0,
@@ -77097,8 +77104,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             this.isLoading = 1;
             var idProducto = me.modalDetalleMovimientos.producto.id_producto;
 
-            console.log(me);
-
             axios.post('/zicandi/public/almacenes/arrastreStock', {
                 'idProducto': idProducto
             }).then(function (response) {
@@ -77108,6 +77113,76 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     me.onDetalleMovimientosProducto(1, idProducto);
 
                     util.AVISO('Perfecto, se relizo el arrastre, valide posibles cambios de stock!', util.tipoOk);
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+
+
+        /**
+         * Genera codigo QR
+         * 
+         */
+        onGenerateQrUbicacion: function onGenerateQrUbicacion() {
+            var me = this;
+            this.isLoading = 1;
+            var codigoOrigen = this.modalTareasUbicacion.codigoOrigen;
+
+            axios.post('/zicandi/public/almacenes/cat_ubica/generate-qr', {
+                'text': codigoOrigen
+            }).then(function (response) {
+                me.isLoading = 0;
+
+                if (response.data.xstatus) {
+                    me.modalTareasUbicacion.mostrarBotonReporteQr = true;
+
+                    util.AVISO('Codigo QR generado', util.tipoOk);
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+
+
+        /**
+         * Genera reporte con QR almacenados
+         * 
+         */
+        onImprimirCodigosQr: function onImprimirCodigosQr() {
+            var url = '/zicandi/public/almacenes/cat_ubica/report-qr';
+
+            Swal.fire({
+                title: 'Ticket',
+                html: '<embed src="' + url + '" type="application/pdf" width="100%" height="300px" />',
+                showCloseButton: false,
+                showCancelButton: false,
+                focusConfirm: false
+            });
+        },
+
+
+        /**
+         * Depura directorio con QR almacenados previamente
+         * 
+         * 
+         */
+        onDepurarDirQr: function onDepurarDirQr() {
+            var me = this;
+            this.isLoading = 1;
+
+            axios.get('/zicandi/public/almacenes/cat_ubica/depura/report-qr').then(function (response) {
+                me.isLoading = 0;
+
+                if (response.data.xstatus) {
+                    me.modalTareasUbicacion.mostrarBotonReporteQr = false;
+                    util.AVISO('Perfecto, se limpio el repositorio de QR local', util.tipoOk);
                 } else {
                     throw new Error(response.data.error);
                 }
@@ -77981,6 +78056,20 @@ var render = function() {
                                 attrs: { type: "button" },
                                 on: {
                                   click: function($event) {
+                                    return _vm.onGenerateQrUbicacion()
+                                  }
+                                }
+                              },
+                              [_c("i", { staticClass: "icon-tag" })]
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "button",
+                              {
+                                staticClass: "btn btn-warning btn-sm",
+                                attrs: { type: "button" },
+                                on: {
+                                  click: function($event) {
                                     return _vm.onCargaDetalleUbicacion(
                                       "origen",
                                       "ticket"
@@ -78319,6 +78408,38 @@ var render = function() {
               ]),
               _vm._v(" "),
               _c("div", { staticClass: "modal-footer" }, [
+                _vm.modalTareasUbicacion.mostrarBotonReporteQr
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-secondary",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.onDepurarDirQr()
+                          }
+                        }
+                      },
+                      [_vm._v("Limpiar y generar nuevo reporte")]
+                    )
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.modalTareasUbicacion.mostrarBotonReporteQr
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-secondary",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.onImprimirCodigosQr()
+                          }
+                        }
+                      },
+                      [_vm._v("Imprimir codigos QR")]
+                    )
+                  : _vm._e(),
+                _vm._v(" "),
                 _c(
                   "button",
                   {
