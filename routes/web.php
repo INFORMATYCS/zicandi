@@ -75,7 +75,7 @@ Route::post('/almacenes/cat_ubica/unifica', 'AlmacenController@unificaUbicacion'
 Route::get('/almacenes/cat_ubica/resumen', 'AlmacenController@resumenUbicacion');
 Route::post('/almacenes/cat_ubica/remove', 'AlmacenController@removeUbicacion');
 Route::get('/almacenes/filter_ubicacion', 'AlmacenController@filterAlmacenUbicaciones');
-
+Route::post('/almacenes/arrastreStock', 'AlmacenController@aplicaArrastreStockProducto');
 
 
 

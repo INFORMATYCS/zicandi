@@ -229,7 +229,8 @@
                     </div>
                     
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>                        
+                        <button type="button" class="btn btn-secondary" @click="onAplicaArrastreStock();">Aplicar arrastre de stock historico</button>
+                        <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>
                     </div>
                 </div>
                 <!-- /.modal-content -->
@@ -1624,6 +1625,40 @@
                 if(menuItem=="unificacion"){
                     //this.onGetProcesosBatch();
                 }
+            },
+
+            /**
+             * Ejecuta el arrastre de stock a peticion
+             * 
+             */
+            onAplicaArrastreStock(){
+                let me = this;                            
+                this.isLoading = 1;
+                let idProducto = me.modalDetalleMovimientos.producto.id_producto;
+
+                console.log(me);
+
+                axios.post('/zicandi/public/almacenes/arrastreStock',{
+                        'idProducto': idProducto
+                })
+                .then(function (response) {  
+                    me.isLoading = 0;           
+                    
+                    if(response.data.xstatus){
+                        me.onDetalleMovimientosProducto(1, idProducto);
+                        
+                        util.AVISO('Perfecto, se relizo el arrastre, valide posibles cambios de stock!', util.tipoOk);
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+                                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+
+
             },
 
         },

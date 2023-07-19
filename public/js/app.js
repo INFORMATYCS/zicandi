@@ -76137,6 +76137,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -77084,6 +77085,36 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             if (menuItem == "unificacion") {
                 //this.onGetProcesosBatch();
             }
+        },
+
+
+        /**
+         * Ejecuta el arrastre de stock a peticion
+         * 
+         */
+        onAplicaArrastreStock: function onAplicaArrastreStock() {
+            var me = this;
+            this.isLoading = 1;
+            var idProducto = me.modalDetalleMovimientos.producto.id_producto;
+
+            console.log(me);
+
+            axios.post('/zicandi/public/almacenes/arrastreStock', {
+                'idProducto': idProducto
+            }).then(function (response) {
+                me.isLoading = 0;
+
+                if (response.data.xstatus) {
+                    me.onDetalleMovimientosProducto(1, idProducto);
+
+                    util.AVISO('Perfecto, se relizo el arrastre, valide posibles cambios de stock!', util.tipoOk);
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
         }
     },
     mounted: function mounted() {
@@ -77804,6 +77835,20 @@ var render = function() {
                 ),
                 _vm._v(" "),
                 _c("div", { staticClass: "modal-footer" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-secondary",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.onAplicaArrastreStock()
+                        }
+                      }
+                    },
+                    [_vm._v("Aplicar arrastre de stock historico")]
+                  ),
+                  _vm._v(" "),
                   _c(
                     "button",
                     {

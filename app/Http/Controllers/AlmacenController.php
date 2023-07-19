@@ -1181,6 +1181,24 @@ class AlmacenController extends Controller{
             return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
         }                 
     }
-    
+    /**
+     * Realizar el arrastre del stock historico por ID producto
+     * API: /almacenes/movimiento
+     * 
+     */
+    public function aplicaArrastreStockProducto(Request $request){
+        DB::beginTransaction();
+        try{            
+            $idProducto = $request->idProducto;
+
+            DB::select('call sp_arrastre_stock_producto(?)', [$idProducto]);
+
+            return [ 'xstatus'=>true];
+        }catch(Exception $e){
+            DB::rollBack();
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
 
 }
