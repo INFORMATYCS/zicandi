@@ -101,6 +101,10 @@ Route::post('/uploadfile/generico', 'UploadFileController@uploadGenerico');
 
 // - Rutas multifondos
 Route::post('/mf2/liquidarCompra', 'MultiFondosController@liquidarCompra');
+Route::post('/mf2/aplica-lote', 'MultiFondosController@aplicaLoteOperacion');
+Route::get('/mf2/get-detalle-lote', 'MultiFondosController@getDetalleLoteOperacion');
+
+
 
 // - Rutas API mercadolibre
 Route::get('/meli/login', 'MercadoLibreController@login');
@@ -195,3 +199,16 @@ Route::get('/conta/plantilla', 'ContabilidadController@plantillaByEmpresa');
 Route::post('/conta/ejercicio/crear', 'ContabilidadController@crearEjercicio');
 Route::post('/conta/ejercicio/update_saldo', 'ContabilidadController@updateSaldo');
 Route::get('/conta/select_empresa', 'ContabilidadController@selectEmpresa');
+
+//~ Capturador estandar
+Route::get('/cap/get/folios', 'CapturadorController@getFolios');
+Route::get('/cap/get/folio', 'CapturadorController@getFolio');
+Route::post('/cap/crud/store', 'CapturadorController@store');
+Route::post('/cap/crud/update', 'CapturadorController@update');
+Route::put('/cap/crud/xstatus', 'CapturadorController@setXstatus');
+Route::post('/cap/add-product', 'CapturadorController@addProduct');
+Route::post('/cap/add-products-all', 'CapturadorController@addProductsAll');
+Route::delete('/cap/remove-product', 'CapturadorController@removeProduct');
+Route::post('/cap/set-piezas-product', 'CapturadorController@setPiezasProduct');
+Route::post('/cap/migrate-lote', 'CapturadorController@migrateLote');
+Route::get('/cap/depuracion-binaria', 'CapturadorController@depuraFoliosBinario');

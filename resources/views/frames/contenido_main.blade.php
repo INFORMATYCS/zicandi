@@ -1,7 +1,7 @@
 @extends('principal')
 @section('contenido_main')
     <template v-if="oppMenuSeleccion==0">
-        <h1>sdasd asdasd asdad  asdasd  asasdInicio</h1>        
+        <h3>Nunduva - MeLi</h3>
     </template>
 
     <template v-if="oppMenuSeleccion==1">

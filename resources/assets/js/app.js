@@ -55,6 +55,8 @@ Vue.component('buscar-meli-metrica-component', require('./components/MetricasBus
 
 Vue.component('buscador-ubicacion-component', require('./components/BuscadorUbicacionComponent.vue'));
 
+Vue.component('captura-estandar-component', require('./components/captura-estandar/CapturaEstandarComponent.vue'));
+
 
 const app = new Vue({
     el: '#app',

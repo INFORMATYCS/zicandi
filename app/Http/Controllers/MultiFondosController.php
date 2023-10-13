@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use DB;
+Use Exception;
+Use Log;
 use App\Compra;
 use App\DetaCompra;
 use App\MovimientoProducto;
 use App\Concepto;
 use App\StockProducto;
 use App\Producto;
+use App\LoteOperacionProcesosEntity;
 
 
 class MultiFondosController extends Controller
@@ -110,4 +113,42 @@ class MultiFondosController extends Controller
 
         $rs = DB::select( $sql );
     }
+
+    public function aplicaLoteOperacion(Request $request){
+        DB::beginTransaction();
+        try{                        
+            $idLote = $request->lote;
+
+            DB::select('call sp_aplica_lote_operacion(?, @err, @msg)', [$idLote]);
+            $results = DB::select('select @err as err, @msg as msg');
+
+            if($results[0]->err!="0"){
+                throw new Exception('Error al aplicar el lote. '.$results[0]->msg);
+            }
+
+            DB::commit();            
+            return [ 'xstatus'=>true, 'msg'=>'Se borro correctamente el producto', 'error' => null ];
+        }catch(Exception $e){
+            DB::rollBack();
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+    public function getDetalleLoteOperacion(Request $request){       
+        try{                                    
+            $idLote = $request->lote;
+
+            $cap= LoteOperacionProcesosEntity::where('lote_referencia','=',$idLote)->get();
+            
+            return [ 'xstatus'=>true, 'detalle'=>$cap, 'error' => null ];
+        }catch(Exception $e){            
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+        
+    }
+
+
+    
 }

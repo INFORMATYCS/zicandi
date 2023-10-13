@@ -23,7 +23,7 @@ class CreateEstadisticaPublicacionTable extends Migration
 
             $table->timestamps();
             
-            $table->foreign('id_publicacion')->references('id_publicacion')->on('publicacion');
+            //$table->foreign('id_publicacion')->references('id_publicacion')->on('publicacion');
         });
     }
 

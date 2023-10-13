@@ -31,12 +31,13 @@
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <button type="button" class="btn btn-info" @click="showModal('carga_masiva','mostrar')">
                         <i class="icon-plus"></i>&nbsp;Carga masiva
-                    </button>  
+                    </button>
+                    <button type="button" class="btn btn-info" @click="showModal('carga_captura_estandar','mostrar')">
+                        <i class="icon-energy"></i>&nbsp;Captura Estandar
+                    </button>
                 </div>   
             </div>
 
-            
-            
             <div class="card-body">
                 <!-- Buscador -->
 
@@ -138,7 +139,7 @@
                             <td>
                                 <ul>
                                     <li style="list-style:none;" v-for="ubicacion in detalle.ubicacion_stock" :key="ubicacion.id_stock_ubica_producto">                                        
-                                        <span class="badge badge-pill badge-info" v-text="ubicacion.stock">14</span>
+                                        <span class="badge badge-pill badge-info" v-text="ubicacion.stock"></span>
                                         <span v-text="ubicacion.codigo_ubica"></span>                                        
                                     </li>
                                 </ul>
@@ -612,7 +613,27 @@
         <!--Fin del modal-->
 
 
+        <!--Inicio modal captura estandar-->
+        <div class="modal fade" :class="{'mostrar' : modalCapturaEstandar.modal}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true">
+            
+            <div class="modal-dialog modal-primary" style="max-width: 90% !important;" role="document">
+                <div class="modal-content" :style="{height: modalCapturaEstandar.h}">
+                    <div class="modal-header" style="height: 30px;">
+                        <h5 class="modal-title" v-text="modalCapturaEstandar.tituloModal"></h5>
+                        <button type="button" class="close" aria-label="Close" @click="closeModal();">
+                            <span aria-hidden="true">×</span>
+                        </button>                        
+                    </div>
+                    <div class="modal-body" style="max-height: calc(100% - 10px); overflow-y: scroll;">
+                        <captura-estandar-component ></captura-estandar-component> 
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
 
+        </div>
+        <!--Fin del modal-->
 
 
     </main>    
@@ -697,6 +718,11 @@
                     fileServidor: '',
                     cargaTemporal: []
                 },
+                modalCapturaEstandar: {
+                    modal: 0,
+                    tituloModal: '',
+                    h: (window.innerHeight-50)+'px'                
+                },                
                 btnAplicarEstado: false
             }
         },
@@ -940,7 +966,7 @@
                 axios.get(url)
                 .then(function (response) {  
                     me.isLoading = 0;       
-                    console.log(response);             
+                    console.log(response);
                     if(response.data.xstatus){ 
                         me.modalDetalleMovimientos.detalleMovimientos = response.data.detalle.data;                                            
                         me.modalDetalleMovimientos.pagination = response.data.pagination;
@@ -1063,23 +1089,28 @@
                                 this.modalCargaMasiva.fileSeleccion = null;   
                                 this.modalCargaMasiva.fileServidor = '';   
                                 this.modalCargaMasiva.cargaTemporal = [];  
-                                this.modalCargaMasiva.cargaServidorExitosa = false;                                 
-                                
+                                this.modalCargaMasiva.cargaServidorExitosa = false;
                                 break;
                             }
                             
                         }
 
                         break;
-                    } 
+                    }
+                    case 'carga_captura_estandar':
+                    {
+                        switch(accion){
+                            case 'mostrar':
+                            {                                                                                                
+                                this.modalCapturaEstandar.modal = 1;
+                                this.modalCapturaEstandar.tituloModal = 'Captura estandar (rapida)';
+                                break;
+                            }
+                            
+                        }
 
-
-
-                    
-                    
-                    
-
-                    
+                        break;
+                    }  
                 }                
             },
             /**
@@ -1103,7 +1134,9 @@
 
                 this.modalCargaMasiva.modal = 0;                
                 this.modalCargaMasiva.tituloModal = '';
-        
+
+                this.modalCapturaEstandar.modal = 0;                
+                this.modalCapturaEstandar.tituloModal = '';
             },
 
             addDetalleSeleccion(data){   
@@ -1735,7 +1768,7 @@
                     me.isLoading = 0;             
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
-            },
+            }            
 
         },
         mounted() {
