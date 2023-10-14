@@ -287,6 +287,11 @@ class CapturadorController extends Controller{
             $almacen = Almacen::findOrFail($request->id_almacen);            
             $ubicacion = CatUbicaProducto::where('codigo', '=', $request->codigo_ubicacion)->where('xstatus', '=', '1')->firstOrFail();                        
 
+            //~Valida que el la ubicacion este asignada al almacen seleccionado
+            if($request->id_almacen!=$ubicacion->id_almacen){
+                return [ 'xstatus'=>false, 'error' => 'La ubicacion seleccionada no pertence al almacen elegido' ];
+            }            
+            
             if($request->lote!=null){
                 //~Elimina el lote                
                 $lote= $request->lote;
@@ -329,7 +334,7 @@ class CapturadorController extends Controller{
             }
 
             DB::commit();          
-            return [ 'xstatus'=>true, 'msg'=>'Migracion exitosa', 'total_reg'=>$totalReg, 'result'=>$result, 'error' => null ];
+            return [ 'xstatus'=>true, 'msg'=>'Migracion exitosa', 'lote'=>$lote, 'total_reg'=>$totalReg, 'result'=>$result, 'error' => null ];
         }catch(Exception $e){
             DB::rollBack();
             Log::error( $e->getTraceAsString() );            
@@ -365,5 +370,5 @@ class CapturadorController extends Controller{
             Log::error( $e->getTraceAsString() );            
             return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
         }
-    }
+    }   
 }

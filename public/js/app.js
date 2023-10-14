@@ -86420,12 +86420,58 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
         var _this = this;
 
         return {
+            isLoading: 0,
             step: 1,
             mapAlmacen: [],
             mapFoliosExistentes: [],
@@ -86443,7 +86489,8 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
             configLote: {
                 idAlmacen: 0,
                 ubicacion: '',
-                tipoMovimiento: ''
+                tipoMovimiento: '',
+                detalleLoteProcess: []
             }
         };
     },
@@ -86833,18 +86880,56 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
             this.bandExisteCambio = false;
         },
         onContinuarStep: function onContinuarStep(newStep) {
+            var _this2 = this;
+
             switch (newStep) {
                 case 1:
                     console.log("Captura estandar");
-                    this.step = newStep;
+                    this.temporizador = setInterval(function () {
+                        _this2.onTemporizador();
+                    }, this.tiempoActualiza), this.step = newStep;
                     break;
                 case 2:
                     clearInterval(clearInterval(this.temporizador));
                     this.step = newStep;
                     break;
                 case 3:
-                    console.log("Confirmacion");
-                    this.step = newStep;
+                    console.log("Generacion de lote");
+                    var me = this;
+                    //~Validaciones
+                    if (me.configLote.idAlmacen <= 0) {
+                        util.MSG('Algo salio Mal!', 'Se requiere el almacen', util.tipoErr);
+                        return;
+                    }
+                    if (me.configLote.ubicacion.codigo == null || me.configLote.ubicacion.codigo == '') {
+                        util.MSG('Algo salio Mal!', 'Selecciona la ubicacion', util.tipoErr);
+                        return;
+                    }
+                    if (me.configLote.tipoMovimiento == 0) {
+                        util.MSG('Algo salio Mal!', 'Falta tipo de movimiento', util.tipoErr);
+                        return;
+                    }
+
+                    this.isLoading = 1;
+                    axios.post('/zicandi/public/cap/migrate-lote', {
+                        'id_cap_folio': me.folioActual,
+                        'id_almacen': me.configLote.idAlmacen,
+                        'codigo_ubicacion': me.configLote.ubicacion.codigo,
+                        'tipo_movimiento': me.configLote.tipoMovimiento
+                    }).then(function (response) {
+                        console.log(response);
+                        me.isLoading = 0;
+
+                        if (!response.data.xstatus) {
+                            util.MSG('Algo salio Mal!', util.getErrorMensaje(response.data.error), util.tipoErr);
+                            return;
+                        }
+                        me.configLote.detalleLoteProcess = response.data.result;
+                        me.step = newStep;
+                    }).catch(function (error) {
+                        me.isLoading = 0;
+                    });
+
                     break;
                 default:
                     console.log("No definido");
@@ -87680,6 +87765,12 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("main", [
+    _c("div", {
+      staticClass: "sbl-circ-ripple",
+      class: { "abrir-load-sbl": _vm.isLoading },
+      staticStyle: { display: "none" }
+    }),
+    _vm._v(" "),
     _vm.step == 1
       ? _c(
           "div",
@@ -88276,11 +88367,13 @@ var render = function() {
                     _vm._v("Seleccione...")
                   ]),
                   _vm._v(" "),
-                  _c("option", { attrs: { value: "ING" } }, [
+                  _c("option", { attrs: { value: "INGRESO" } }, [
                     _vm._v("Ingreso")
                   ]),
                   _vm._v(" "),
-                  _c("option", { attrs: { value: "RET" } }, [_vm._v("Retiro")])
+                  _c("option", { attrs: { value: "RETIRO" } }, [
+                    _vm._v("Retiro")
+                  ])
                 ]
               )
             ]),
@@ -88334,7 +88427,136 @@ var render = function() {
         ])
       : _vm._e(),
     _vm._v(" "),
-    _vm.step == 3 ? _c("div", [_vm._m(6)]) : _vm._e()
+    _vm.step == 3
+      ? _c(
+          "div",
+          [
+            _vm._m(6),
+            _vm._v(" "),
+            _vm._l(_vm.configLote.detalleLoteProcess, function(
+              detaLote,
+              indice
+            ) {
+              return _c(
+                "div",
+                { key: detaLote.id_lote_operacion, staticClass: "row" },
+                [
+                  _c("div", { staticClass: "col-md-1" }, [
+                    _c("img", {
+                      attrs: {
+                        src: detaLote.url_img_producto,
+                        width: "30",
+                        alt: "dog"
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-md-3" }, [
+                    _c("label", {
+                      domProps: { textContent: _vm._s(detaLote.nombre_almacen) }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-md-2" }, [
+                    _c("label", {
+                      domProps: {
+                        textContent: _vm._s(detaLote.codigo_ubicacion)
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-md-1" }, [
+                    _c("strong", [
+                      _c("label", {
+                        domProps: {
+                          textContent: _vm._s(detaLote.codigo_producto)
+                        }
+                      })
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-md-3" }, [
+                    _c("label", {
+                      domProps: {
+                        textContent: _vm._s(detaLote.nombre_producto)
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-md-1" }, [
+                    detaLote.tipo_movimiento == "ING"
+                      ? _c("label", {
+                          staticStyle: { color: "blue" },
+                          domProps: { textContent: _vm._s(detaLote.cantidad) }
+                        })
+                      : _vm._e(),
+                    _vm._v(" "),
+                    detaLote.tipo_movimiento == "RET"
+                      ? _c("label", {
+                          staticStyle: { color: "red" },
+                          domProps: {
+                            textContent: _vm._s(detaLote.cantidad * -1)
+                          }
+                        })
+                      : _vm._e()
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-md-1" }, [
+                    _c("label", {
+                      domProps: { textContent: _vm._s(detaLote.estado) }
+                    })
+                  ])
+                ]
+              )
+            }),
+            _vm._v(" "),
+            _vm._m(7),
+            _vm._v(" "),
+            _c("div", { staticClass: "row" }, [
+              _c("div", { staticClass: "col-md-4" }),
+              _vm._v(" "),
+              _c("div", { staticClass: "col-md-4" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.onContinuarStep(2)
+                      }
+                    }
+                  },
+                  [
+                    _c("i", { staticClass: "icon-close" }),
+                    _vm._v(" Regresar\n                ")
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-danger",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.onContinuarStep(20)
+                      }
+                    }
+                  },
+                  [
+                    _c("i", { staticClass: "icon-control-play" }),
+                    _vm._v(" Aplicar\n                ")
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "col-md-4" })
+            ])
+          ],
+          2
+        )
+      : _vm._e()
   ])
 }
 var staticRenderFns = [
@@ -88407,6 +88629,12 @@ var staticRenderFns = [
         [_vm._v("Resumen:")]
       )
     ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "col" }, [_c("hr")])
   }
 ]
 render._withStripped = true

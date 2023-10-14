@@ -15,6 +15,6 @@ class CatUbicaProducto extends Model
     protected $primaryKey = 'id_cat_ubica_producto'; 
 
     //~Por seguridad se agrega para evitar ataques. Toda las columnas de la tabla
-    protected $fillable = ['codigo','nombre','xstatus'];
+    protected $fillable = ['codigo','nombre','id_almacen','xstatus'];
 
 }

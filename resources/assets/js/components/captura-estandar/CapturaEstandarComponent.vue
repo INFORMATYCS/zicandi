@@ -1,5 +1,8 @@
 <template>
     <main>
+        <!-- Loading -->
+        <div style="display: none;" class="sbl-circ-ripple" :class="{'abrir-load-sbl' : isLoading}"></div>
+
         <div v-if="step == 1">
             <div class="card">
                 <div class="row"> 
@@ -140,8 +143,8 @@
                 <div class="col-md-6">
                     <select class="form-control" v-model="configLote.tipoMovimiento">
                         <option value="0">Seleccione...</option>
-                        <option value="ING">Ingreso</option>
-                        <option value="RET">Retiro</option>                        
+                        <option value="INGRESO">Ingreso</option>
+                        <option value="RETIRO">Retiro</option>                        
                     </select> 
                 </div>
                 <div class="col-md-3">
@@ -170,7 +173,49 @@
         <div v-if="step == 3">
             <div class="form-group row">
                 <h4 class="col-md-12 form-control-label" for="text-input">Resumen:</h4>                
-            </div>            
+            </div>
+            <div class="row" v-for="(detaLote, indice) in configLote.detalleLoteProcess" :key="detaLote.id_lote_operacion">                                 
+                <div class="col-md-1">                    
+                    <img :src="detaLote.url_img_producto" width="30" alt="dog">
+                </div>
+                <div class="col-md-3">
+                    <label v-text="detaLote.nombre_almacen"></label>
+                </div>
+                <div class="col-md-2">
+                    <label v-text="detaLote.codigo_ubicacion"></label>
+                </div>                
+                <div class="col-md-1">
+                    <strong><label v-text="detaLote.codigo_producto"></label></strong>
+                </div>
+                <div class="col-md-3">
+                    <label v-text="detaLote.nombre_producto"></label>
+                </div>                
+                <div class="col-md-1">
+                    <label v-if="detaLote.tipo_movimiento == 'ING'" v-text="detaLote.cantidad" style="color: blue;"></label>
+                    <label v-if="detaLote.tipo_movimiento == 'RET'" v-text="detaLote.cantidad*-1" style="color: red;"></label>
+                </div>
+                <div class="col-md-1">
+                    <label v-text="detaLote.estado"></label>
+                </div>
+            </div>
+
+            <div class="col"><hr></div>
+
+            <div class="row">                
+                <div class="col-md-4">                    
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-secondary" @click="onContinuarStep(2)">
+                        <i class="icon-close"></i>&nbsp;Regresar
+                    </button>
+                    <button type="button" class="btn btn-danger" @click="onContinuarStep(20)">
+                        <i class="icon-control-play"></i>&nbsp;Aplicar
+                    </button>
+                </div>
+                <div class="col-md-4">
+                    
+                </div>
+            </div>
         </div>
     </main>    
 </template>
@@ -179,6 +224,7 @@
     export default {
         data(){
             return{
+                isLoading: 0,
                 step: 1,
                 mapAlmacen: [],
                 mapFoliosExistentes:[],
@@ -194,7 +240,8 @@
                 configLote:{
                     idAlmacen: 0,
                     ubicacion: '',
-                    tipoMovimiento: ''
+                    tipoMovimiento: '',
+                    detalleLoteProcess: []
                 }
             }
         },        
@@ -581,6 +628,7 @@
                 switch (newStep) {
                     case 1:
                         console.log("Captura estandar");
+                        this.temporizador= setInterval(()=>{ this.onTemporizador(); }, this.tiempoActualiza),
                         this.step= newStep;
                         break;
                     case 2:
@@ -588,8 +636,45 @@
                         this.step= newStep;
                         break;
                     case 3:
-                        console.log("Confirmacion");
-                        this.step= newStep;
+                        console.log("Generacion de lote");
+                        let me = this;                                    
+                        //~Validaciones
+                        if(me.configLote.idAlmacen<=0){
+                            util.MSG('Algo salio Mal!','Se requiere el almacen', util.tipoErr);
+                            return;
+                        }
+                        if(me.configLote.ubicacion.codigo==null || me.configLote.ubicacion.codigo==''){
+                            util.MSG('Algo salio Mal!','Selecciona la ubicacion', util.tipoErr);
+                            return;
+                        }
+                        if(me.configLote.tipoMovimiento==0){
+                            util.MSG('Algo salio Mal!','Falta tipo de movimiento', util.tipoErr);
+                            return;
+                        }
+
+                        this.isLoading = 1;
+                        axios.post('/zicandi/public/cap/migrate-lote',{
+                            'id_cap_folio': me.folioActual,
+                            'id_almacen': me.configLote.idAlmacen,
+                            'codigo_ubicacion': me.configLote.ubicacion.codigo,
+                            'tipo_movimiento': me.configLote.tipoMovimiento
+                        })
+                        .then(function (response) { 
+                            console.log(response); 
+                            me.isLoading = 0;
+
+                            if(!response.data.xstatus){
+                                util.MSG('Algo salio Mal!',util.getErrorMensaje(response.data.error), util.tipoErr);
+                                return;
+                            }
+                            me.configLote.detalleLoteProcess=response.data.result;
+                            me.step= newStep;
+                        })
+                        .catch(function (error) {       
+                            me.isLoading = 0;             
+                            
+                        });
+                        
                         break;                    
                     default:
                         console.log("No definido");
