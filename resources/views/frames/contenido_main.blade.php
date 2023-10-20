@@ -63,6 +63,10 @@
         <buscar-meli-metrica-component></buscar-meli-metrica-component>
     </template>
 
+    <template v-if="oppMenuSeleccion==23">
+        <mov-almacen-catalogo-component></mov-almacen-catalogo-component>
+    </template>
+
     <template v-if="oppMenuSeleccion==90">
         <mercadolibre-component></mercadolibre-component>
     </template>

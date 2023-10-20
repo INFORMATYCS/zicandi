@@ -58,6 +58,14 @@
                                   
                                     <div class="row">                 
                                         <div class="col-7">
+                                            ID
+                                        </div>
+                                        <div class="col-5">                                            
+                                            <h6 v-text="idAlmacenSeleccion"></h6>
+                                        </div>          
+                                    </div>
+                                    <div class="row">                 
+                                        <div class="col-7">
                                             Total de productos
                                         </div>
                                         <div class="col-5">                                            
@@ -266,9 +274,13 @@
                     
                             <div class="tab-pane fade" :class="{ 'active show': isActive('cat_ubica') }" id="cat_ubica">
                                 <div class="row">
-                                    <div class="col-2">
+                                    <div class="col-4">
                                         <button type="button" class="btn btn-warning btn-sm" @click="onGenerateQrUbicacion()">
                                             <i class="icon-tag"></i>
+                                        </button>
+
+                                        <button type="button" class="btn btn-light btn-sm" @click="onGenerateQrOnLine()">
+                                            <i class="icon-grid"></i>
                                         </button>
 
                                         <button type="button" class="btn btn-warning btn-sm" @click="onCargaDetalleUbicacion('origen','ticket')">
@@ -282,10 +294,19 @@
                                             <i class="icon-plus"></i>
                                         </button>
                                     </div>
-                                    <div class="col-3"> 
-                                        <buscador-ubicacion-component @setUbicacion="getUbicacionSeleccionOrigen" ></buscador-ubicacion-component>
+                                    <div class="col-4"> 
+                                        Almacen: <span v-text="modalTareasUbicacion.almacenNombre"></span>
+                                        <button type="button" class="btn btn-light btn-sm" @click="onSetAlmacenByUbicacion()">
+                                            <i class="icon-pencil"></i>
+                                        </button>
                                     </div>
-                                    <div class="col-7">
+                                    <div class="col-4"> 
+                                        <buscador-ubicacion-component @setUbicacion="getUbicacionSeleccionOrigen" ></buscador-ubicacion-component>
+                                    </div>                                                                                                            
+                                </div>
+
+                                <div class="row">                                    
+                                    <div class="col-12">
                                         <div class="row pre-scrollable">
                                             <div class="col-md-12">
                                                 <ul class="list-group">
@@ -310,6 +331,7 @@
                                     </div>
                                                                         
                                 </div>
+
                             </div>
 
                             <div class="tab-pane fade" :class="{ 'active show': isActive('unificacion') }" id="unificacion">
@@ -530,6 +552,13 @@
                     <label for="message-text" class="col-form-label">Nombre:</label>
                     <input type="text" class="form-control" v-model="modalCatUbicacion.nombre">
                 </div>
+                <div class="form-group">
+                    <label for="message-text" class="col-form-label">ID Almacen:</label>
+                    <select class="form-control" v-model="modalCatUbicacion.idAlmacenSeleccion">
+                        <option value="0" disabled>Seleccione...</option>
+                        <option v-for="almacen in modalCatUbicacion.mapAlmacen" :key="almacen.id_almacen" :value="almacen.id_almacen" v-text="almacen.nombre"></option>                                        
+                    </select>
+                </div>
                 </form>
             </div>
             <div class="modal-footer">                
@@ -625,7 +654,7 @@
                         </button>                        
                     </div>
                     <div class="modal-body" style="max-height: calc(100% - 10px); overflow-y: scroll;">
-                        <captura-estandar-component ></captura-estandar-component> 
+                        <captura-estandar-component></captura-estandar-component> 
                     </div>
                 </div>
                 <!-- /.modal-content -->
@@ -689,7 +718,8 @@
                     codigoDestino: '',
                     detalleOrigen: [],
                     detalleDestino: [],
-                    mostrarBotonReporteQr: false
+                    mostrarBotonReporteQr: false,
+                    almacenNombre: ''
                 },
                 pagination: {
                     total : 0,
@@ -705,7 +735,9 @@
                     error: 0,
                     erroresMsjList: [],
                     codigo:'',
-                    nombre:''
+                    nombre:'',
+                    mapAlmacen:[],
+                    idAlmacenSeleccion: 0
                 },
                 loteReferencia: '',
                 chkModoSet: false,
@@ -752,6 +784,7 @@
                 .then(function (response) {                    
                     let respuesta = response.data;                      
                     me.mapAlmacen = respuesta.almacen;
+                    me.modalCatUbicacion.mapAlmacen = respuesta.almacen;
                 })
                 .catch(function (error) {                                        
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
@@ -918,6 +951,7 @@
                 if(ubicacion!=null){
                     this.modalTareasUbicacion.codigoOrigen = ubicacion.codigo;
                     this.onCargaDetalleUbicacion('origen','consulta');
+                    this.onGetAlmacenByUbicacion();
                 }else{
                     this.modalTareasUbicacion.codigoOrigen = null;
                     this.modalTareasUbicacion.detalleOrigen = [];
@@ -1530,13 +1564,11 @@
 
             onStoreUbicacionAlmacen(){
                 let me = this;                
-                
-
-
                 this.isLoading = 1;
                 axios.post('/zicandi/public/almacenes/cat_ubica/store',{
                         'codigo': this.modalCatUbicacion.codigo,
-                        'nombre': this.modalCatUbicacion.nombre                       
+                        'nombre': this.modalCatUbicacion.nombre,
+                        'id_almacen': this.modalCatUbicacion.idAlmacenSeleccion
                 })
                 .then(function (response) {  
                     me.isLoading = 0;           
@@ -1768,7 +1800,94 @@
                     me.isLoading = 0;             
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
-            }            
+            },
+            onGenerateQrOnLine(){
+                let me = this;                            
+                
+                let codigoOrigen = this.modalTareasUbicacion.codigoOrigen;
+
+                if(codigoOrigen==null || codigoOrigen==''){
+                    util.MSG('Algo salio Mal!','Selecciona una ubicacion', util.tipoErr);
+                    return;
+                }                
+
+                this.isLoading = 1;                
+                axios.post('/zicandi/public/almacenes/cat_ubica/generate-qr-label',{
+                        'text': codigoOrigen
+                })
+                .then(function (response) {  
+                    me.isLoading = 0;           
+  
+                    if(response.data.xstatus){                        
+                        util.AVISO('Codigo QR generado, imprimiendo...', util.tipoOk);
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+                                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+
+            /**
+             * Consulta el almacen ligado a la ubicacion
+             * 
+             */
+             onGetAlmacenByUbicacion(){                
+                let me = this;
+                this.isLoading = 1;
+                let codigo= this.modalTareasUbicacion.codigoOrigen;
+                let url = '/zicandi/public/almacenes/cat_ubica/get-almacen?codigo='+codigo;
+        
+                axios.get(url)
+                .then(function (response) {
+                    console.log(response);
+                    me.isLoading = 0;                           
+                    if(response.data.xstatus){
+                        if(response.data.almacen!=null){
+                            me.modalTareasUbicacion.almacenNombre= response.data.almacen.nombre;
+                        }else{
+                            me.modalTareasUbicacion.almacenNombre= "";
+                        }
+                    }else{
+                        me.modalTareasUbicacion.almacenNombre= "";
+                    } 
+                                      
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+
+            onSetAlmacenByUbicacion(){
+                let me = this;                
+                let codigo= this.modalTareasUbicacion.codigoOrigen;
+                let idAlmacen = prompt("Id Almacen", this.idAlmacenSeleccion);
+                if(idAlmacen!=undefined){                                    
+                    this.isLoading = 1;
+                    axios.post('/zicandi/public/almacenes/cat_ubica/set-almacen',{
+                            'codigo': codigo,
+                            'id_almacen': idAlmacen                       
+                    })
+                    .then(function (response) {  
+                        me.isLoading = 0;           
+                        
+                        if(response.data.xstatus){ 
+                            me.onDetalleMovimientosProducto();                       
+                        }else{
+                            throw new Error(response.data.error);
+                        } 
+                                        
+                    })
+                    .catch(function (error) {       
+                        me.isLoading = 0;             
+                        util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                    });
+                }
+            }
 
         },
         mounted() {

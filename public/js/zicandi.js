@@ -9165,7 +9165,17 @@ var util = {
   toMoneda: function toMoneda(valor) {
     var val = (valor / 1).toFixed(2).replace(',', '.');
     return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  },
+
+
+  POPUP_IMG: function POPUP_IMG(url, etiqueta) {
+    Swal.fire({
+      title: '<strong>' + etiqueta + '</strong>',
+      html: '<img src="' + url + '" width="100" height="100">',
+      showCloseButton: true
+    });
   }
+
 };
 var paginador = {
   offset: 3,

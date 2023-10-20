@@ -3,62 +3,67 @@
         <!-- Loading -->
         <div style="display: none;" class="sbl-circ-ripple" :class="{'abrir-load-sbl' : isLoading}"></div>
 
-        <div v-if="step == 1">
-            <div class="card">
-                <div class="row"> 
-                    <div class="col-md-7">                    
-                        <div class="row"> 
-                            <div class="col-md-2" style="line-height: 30px;">
-                                &nbsp;&nbsp;&nbsp;Folio: <strong><span v-text="folioActual"></span></strong>
-                            </div>
-                            <div class="col-md-4">
-                                <input type="text" class="form-control" style="width: 200px;" v-model="conceptoFolioActual" @keyup.enter="onUpdateConceptoFolioCap()">                    
-                            </div>
-                            <div class="col-md-4">
-                                <select class="form-control" style="width: 200px;" v-model="folioComboSelect" @change="onChangeFolioCapturaEstandar()">
-                                    <option value="0" disabled>Otro folio</option>
-                                    <option v-for="folio in mapFoliosExistentes" :key="folio.id_cap_folio" :value="folio.id_cap_folio" v-text="folio.concepto"></option>                                        
-                                    <option value="REFRESH_LISTA">Refresh lista</option>
-                                    <option value="DEPURA_LISTA">Depurar lista</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="button" class="btn btn-secondary" @click="onGeneraNuevoFolioCap()">
-                                    <i class="icon-plus"></i>&nbsp;Nuevo folio
-                                </button> 
-                            </div>
+        <div class="card">
+            <div class="row"> 
+                <div class="col-md-7">                    
+                    <div class="row"> 
+                        <div class="col-md-2" style="line-height: 30px;">
+                            &nbsp;&nbsp;&nbsp;Folio: <strong><span v-text="folioActual"></span></strong>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" style="width: 200px;" v-model="conceptoFolioActual" @keyup.enter="onUpdateConceptoFolioCap()">                    
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-control" style="width: 200px;" v-model="folioComboSelect" @change="onChangeFolioCapturaEstandar()">
+                                <option value="0" disabled>Otro folio</option>
+                                <option v-for="folio in mapFoliosExistentes" :key="folio.id_cap_folio" :value="folio.id_cap_folio" v-text="folio.concepto"></option>                                        
+                                <option value="REFRESH_LISTA">Refresh lista</option>
+                                <option value="DEPURA_LISTA">Depurar lista</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-secondary" @click="onGeneraNuevoFolioCap()">
+                                <i class="icon-plus"></i>&nbsp;Nuevo folio
+                            </button>
+                        </div>                        
+                    </div>
+                </div>
+                       
+                <div class="col-md-5">
+                    <div class="row"> 
+                        <div class="col-md-6">
+                            <button type="button" class="btn btn-secondary" @click="onResetAll()">
+                                <i class="icon-plus"></i>&nbsp;Reset All
+                            </button> 
+                        </div>
+                        <div class="col-md-6">
+                            Paso actual: <span v-text="step"></span>
                         </div>
                     </div>
-                    
-                    <div class="col-md-5">
-                        <div class="row">
-                            <div class="col-md-1">
-                                &nbsp;
-                            </div> 
-                            <div class="col-md-3">
-                                &nbsp;
-                            </div>
-                            <div class="col-md-3">
-                                <button type="button" class="btn btn-primary" @click="onEliminarConError()">
-                                    <i class="icon-plus"></i>&nbsp;Limpiar
-                                </button> 
-                            </div>
-                            <div class="col-md-3">
-                                <button type="button" class="btn btn-danger" @click="onContinuarStep(2)">
-                                    <i class="icon-control-play"></i>&nbsp;Continuar
-                                </button> 
-                            </div>
-                        </div>
-                    </div>                
-                </div>            
-            </div>
+                </div>                
+            </div>            
+        </div>
+
+        <div v-if="step == 1">
+            
 
             <!-- Buscador -->
             <div class="form-group row"> 
-                <div class="col-md-12">
+                <div class="col-md-8">
                     <div class="input-group">                            
                         <input type="text" ref="buscadorCapEst" v-model="buscador" @keyup.enter="onPushDetalleProductosLOCAL()" @focus="$event.target.select()" class="form-control" style="font-size:30px;" placeholder="Codigo del producto a buscar" autofocus>
                     </div>                
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-primary" @click="onEliminarConError()">
+                        <i class="icon-plus"></i>&nbsp;Limpiar
+                    </button>
+
+                    
+                    <button type="button" class="btn btn-danger" @click="onContinuarStep(2)">
+                        <i class="icon-control-play"></i>&nbsp;Continuar
+                    </button> 
+                    
                 </div>
             </div>
 
@@ -171,33 +176,9 @@
         </div>
 
         <div v-if="step == 3">
-            <div class="form-group row">
-                <h4 class="col-md-12 form-control-label" for="text-input">Resumen:</h4>                
-            </div>
-            <div class="row" v-for="(detaLote, indice) in configLote.detalleLoteProcess" :key="detaLote.id_lote_operacion">                                 
-                <div class="col-md-1">                    
-                    <img :src="detaLote.url_img_producto" width="30" alt="dog">
-                </div>
-                <div class="col-md-3">
-                    <label v-text="detaLote.nombre_almacen"></label>
-                </div>
-                <div class="col-md-2">
-                    <label v-text="detaLote.codigo_ubicacion"></label>
-                </div>                
-                <div class="col-md-1">
-                    <strong><label v-text="detaLote.codigo_producto"></label></strong>
-                </div>
-                <div class="col-md-3">
-                    <label v-text="detaLote.nombre_producto"></label>
-                </div>                
-                <div class="col-md-1">
-                    <label v-if="detaLote.tipo_movimiento == 'ING'" v-text="detaLote.cantidad" style="color: blue;"></label>
-                    <label v-if="detaLote.tipo_movimiento == 'RET'" v-text="detaLote.cantidad*-1" style="color: red;"></label>
-                </div>
-                <div class="col-md-1">
-                    <label v-text="detaLote.estado"></label>
-                </div>
-            </div>
+            <aplica-mov-almacen-component :p_idLote="configLote.idLoteGenerado" :p_isValidado="configLote.isValidadoLote"></aplica-mov-almacen-component> 
+
+            
 
             <div class="col"><hr></div>
 
@@ -205,11 +186,11 @@
                 <div class="col-md-4">                    
                 </div>
                 <div class="col-md-4">
-                    <button type="button" class="btn btn-secondary" @click="onContinuarStep(2)">
+                    <button v-if="configLote.isValidadoLote==0" type="button" class="btn btn-secondary" @click="onContinuarStep(2)">
                         <i class="icon-close"></i>&nbsp;Regresar
                     </button>
-                    <button type="button" class="btn btn-danger" @click="onContinuarStep(20)">
-                        <i class="icon-control-play"></i>&nbsp;Aplicar
+                    <button v-if="configLote.isValidadoLote==0" type="button" class="btn btn-danger" @click="onValidaOkLote()">
+                        <i class="icon-control-play"></i>&nbsp;Validado OK
                     </button>
                 </div>
                 <div class="col-md-4">
@@ -225,6 +206,7 @@
         data(){
             return{
                 isLoading: 0,
+                isProcessBackend: false,
                 step: 1,
                 mapAlmacen: [],
                 mapFoliosExistentes:[],
@@ -241,7 +223,9 @@
                     idAlmacen: 0,
                     ubicacion: '',
                     tipoMovimiento: '',
-                    detalleLoteProcess: []
+                    detalleLoteProcess: [],
+                    idLoteGenerado:'',
+                    isValidadoLote: 0
                 }
             }
         },        
@@ -294,7 +278,10 @@
                     me.conceptoFolioActual='cap' + sufix;
 
                     me.onGetMapFoliosCapEstandar(0);                    
-                    me.$refs.buscadorCapEst.select();
+                    
+                    if(me.$refs.buscadorCapEst){                        
+                        me.$refs.buscadorCapEst.select();
+                    }                    
                 })
                 .catch(function (error) {       
                     me.isLoading = 0;             
@@ -375,7 +362,10 @@
                         me.$forceUpdate();
 
                         me.onSetFocusBuscadorCapEst();
-                        me.$refs.buscadorCapEst.select();
+                        if(me.$refs.buscadorCapEst){                        
+                            me.$refs.buscadorCapEst.select();
+                        }                    
+                        
                     })
                     .catch(function (error) {                                        
                         util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
@@ -531,8 +521,10 @@
                     //-----
                     me.bandExisteCambio= true;
                     //-----
-
-                    me.$refs.buscadorCapEst.select();
+                    
+                    if(me.$refs.buscadorCapEst){                        
+                        me.$refs.buscadorCapEst.select();
+                    }                    
                 })
                 .catch(function (error) {       
                     me.isLoading = 0;             
@@ -614,14 +606,25 @@
                 this.$refs.buscadorCapEst.select(); 
             },
 
-            onResetAll(){                
+            onResetAll(){
+                console.log('------------- reset-all------------- ')                
                 this.buscador =  '';
                 this.folioActual =  0;
                 this.conceptoFolioActual =  '';
                 this.folioComboSelect =  0;
                 this.detalleProductosBD =  [];
                 this.detalleProductosLOCAL =  [];
-                this.bandExisteCambio =  false;                
+                this.bandExisteCambio =  false;    
+                this.step = 1;                                                                                                 
+                this.configLote.idAlmacen= 0;
+                this.configLote.ubicacion= '';
+                this.configLote.tipoMovimiento= '';
+                this.configLote.detalleLoteProcess= [];
+                this.configLote.idLoteGenerado= '';
+                this.configLote.isValidadoLote= 0;
+                
+                clearInterval(this.temporizador);
+                this.temporizador= setInterval(()=>{ this.onTemporizador(); }, this.tiempoActualiza);
             },
 
             onContinuarStep(newStep){
@@ -632,11 +635,15 @@
                         this.step= newStep;
                         break;
                     case 2:
-                        clearInterval(clearInterval(this.temporizador));                
+                        clearInterval(this.temporizador);
                         this.step= newStep;
                         break;
                     case 3:
                         console.log("Generacion de lote");
+                        if(this.isProcessBackend){
+                            return;
+                        }
+
                         let me = this;                                    
                         //~Validaciones
                         if(me.configLote.idAlmacen<=0){
@@ -653,6 +660,7 @@
                         }
 
                         this.isLoading = 1;
+                        this.isProcessBackend=true;
                         axios.post('/zicandi/public/cap/migrate-lote',{
                             'id_cap_folio': me.folioActual,
                             'id_almacen': me.configLote.idAlmacen,
@@ -660,7 +668,8 @@
                             'tipo_movimiento': me.configLote.tipoMovimiento
                         })
                         .then(function (response) { 
-                            console.log(response); 
+                            me.isProcessBackend=false;
+
                             me.isLoading = 0;
 
                             if(!response.data.xstatus){
@@ -668,6 +677,7 @@
                                 return;
                             }
                             me.configLote.detalleLoteProcess=response.data.result;
+                            me.configLote.idLoteGenerado=response.data.lote;
                             me.step= newStep;
                         })
                         .catch(function (error) {       
@@ -707,6 +717,10 @@
 
                 console.log(resp);
             },
+
+            onValidaOkLote(){
+                this.configLote.isValidadoLote=1;
+            }
         },
         mounted() {
             console.log('caegando desde fuera');

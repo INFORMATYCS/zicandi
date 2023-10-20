@@ -7550,6 +7550,10 @@ Vue.component('buscador-ubicacion-component', __webpack_require__(160));
 
 Vue.component('captura-estandar-component', __webpack_require__(165));
 
+Vue.component('aplica-mov-almacen-component', __webpack_require__(173));
+
+Vue.component('mov-almacen-catalogo-component', __webpack_require__(178));
+
 var app = new Vue({
   el: '#app',
   data: {
@@ -76167,6 +76171,35 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -76217,7 +76250,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 codigoDestino: '',
                 detalleOrigen: [],
                 detalleDestino: [],
-                mostrarBotonReporteQr: false
+                mostrarBotonReporteQr: false,
+                almacenNombre: ''
             },
             pagination: {
                 total: 0,
@@ -76233,7 +76267,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 error: 0,
                 erroresMsjList: [],
                 codigo: '',
-                nombre: ''
+                nombre: '',
+                mapAlmacen: [],
+                idAlmacenSeleccion: 0
             },
             loteReferencia: '',
             chkModoSet: false,
@@ -76280,6 +76316,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             axios.get(url).then(function (response) {
                 var respuesta = response.data;
                 me.mapAlmacen = respuesta.almacen;
+                me.modalCatUbicacion.mapAlmacen = respuesta.almacen;
             }).catch(function (error) {
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
             });
@@ -76437,6 +76474,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             if (ubicacion != null) {
                 this.modalTareasUbicacion.codigoOrigen = ubicacion.codigo;
                 this.onCargaDetalleUbicacion('origen', 'consulta');
+                this.onGetAlmacenByUbicacion();
             } else {
                 this.modalTareasUbicacion.codigoOrigen = null;
                 this.modalTareasUbicacion.detalleOrigen = [];
@@ -77026,11 +77064,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         },
         onStoreUbicacionAlmacen: function onStoreUbicacionAlmacen() {
             var me = this;
-
             this.isLoading = 1;
             axios.post('/zicandi/public/almacenes/cat_ubica/store', {
                 'codigo': this.modalCatUbicacion.codigo,
-                'nombre': this.modalCatUbicacion.nombre
+                'nombre': this.modalCatUbicacion.nombre,
+                'id_almacen': this.modalCatUbicacion.idAlmacenSeleccion
             }).then(function (response) {
                 me.isLoading = 0;
 
@@ -77233,6 +77271,84 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 me.isLoading = 0;
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
             });
+        },
+        onGenerateQrOnLine: function onGenerateQrOnLine() {
+            var me = this;
+
+            var codigoOrigen = this.modalTareasUbicacion.codigoOrigen;
+
+            if (codigoOrigen == null || codigoOrigen == '') {
+                util.MSG('Algo salio Mal!', 'Selecciona una ubicacion', util.tipoErr);
+                return;
+            }
+
+            this.isLoading = 1;
+            axios.post('/zicandi/public/almacenes/cat_ubica/generate-qr-label', {
+                'text': codigoOrigen
+            }).then(function (response) {
+                me.isLoading = 0;
+
+                if (response.data.xstatus) {
+                    util.AVISO('Codigo QR generado, imprimiendo...', util.tipoOk);
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+
+
+        /**
+         * Consulta el almacen ligado a la ubicacion
+         * 
+         */
+        onGetAlmacenByUbicacion: function onGetAlmacenByUbicacion() {
+            var me = this;
+            this.isLoading = 1;
+            var codigo = this.modalTareasUbicacion.codigoOrigen;
+            var url = '/zicandi/public/almacenes/cat_ubica/get-almacen?codigo=' + codigo;
+
+            axios.get(url).then(function (response) {
+                console.log(response);
+                me.isLoading = 0;
+                if (response.data.xstatus) {
+                    if (response.data.almacen != null) {
+                        me.modalTareasUbicacion.almacenNombre = response.data.almacen.nombre;
+                    } else {
+                        me.modalTareasUbicacion.almacenNombre = "";
+                    }
+                } else {
+                    me.modalTareasUbicacion.almacenNombre = "";
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onSetAlmacenByUbicacion: function onSetAlmacenByUbicacion() {
+            var me = this;
+            var codigo = this.modalTareasUbicacion.codigoOrigen;
+            var idAlmacen = prompt("Id Almacen", this.idAlmacenSeleccion);
+            if (idAlmacen != undefined) {
+                this.isLoading = 1;
+                axios.post('/zicandi/public/almacenes/cat_ubica/set-almacen', {
+                    'codigo': codigo,
+                    'id_almacen': idAlmacen
+                }).then(function (response) {
+                    me.isLoading = 0;
+
+                    if (response.data.xstatus) {
+                        me.onDetalleMovimientosProducto();
+                    } else {
+                        throw new Error(response.data.error);
+                    }
+                }).catch(function (error) {
+                    me.isLoading = 0;
+                    util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+                });
+            }
         }
     },
     mounted: function mounted() {
@@ -77418,6 +77534,20 @@ var render = function() {
               ]),
               _vm._v(" "),
               _c("div", { staticClass: "col-5" }, [
+                _c("div", { staticClass: "row" }, [
+                  _c("div", { staticClass: "col-7" }, [
+                    _vm._v(
+                      "\n                                        ID\n                                    "
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-5" }, [
+                    _c("h6", {
+                      domProps: { textContent: _vm._s(_vm.idAlmacenSeleccion) }
+                    })
+                  ])
+                ]),
+                _vm._v(" "),
                 _c("div", { staticClass: "row" }, [
                   _c("div", { staticClass: "col-7" }, [
                     _vm._v(
@@ -78102,7 +78232,7 @@ var render = function() {
                       },
                       [
                         _c("div", { staticClass: "row" }, [
-                          _c("div", { staticClass: "col-2" }, [
+                          _c("div", { staticClass: "col-4" }, [
                             _c(
                               "button",
                               {
@@ -78115,6 +78245,20 @@ var render = function() {
                                 }
                               },
                               [_c("i", { staticClass: "icon-tag" })]
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "button",
+                              {
+                                staticClass: "btn btn-light btn-sm",
+                                attrs: { type: "button" },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.onGenerateQrOnLine()
+                                  }
+                                }
+                              },
+                              [_c("i", { staticClass: "icon-grid" })]
                             ),
                             _vm._v(" "),
                             _c(
@@ -78166,9 +78310,36 @@ var render = function() {
                             )
                           ]),
                           _vm._v(" "),
+                          _c("div", { staticClass: "col-4" }, [
+                            _vm._v(
+                              " \n                                    Almacen: "
+                            ),
+                            _c("span", {
+                              domProps: {
+                                textContent: _vm._s(
+                                  _vm.modalTareasUbicacion.almacenNombre
+                                )
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c(
+                              "button",
+                              {
+                                staticClass: "btn btn-light btn-sm",
+                                attrs: { type: "button" },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.onSetAlmacenByUbicacion()
+                                  }
+                                }
+                              },
+                              [_c("i", { staticClass: "icon-pencil" })]
+                            )
+                          ]),
+                          _vm._v(" "),
                           _c(
                             "div",
-                            { staticClass: "col-3" },
+                            { staticClass: "col-4" },
                             [
                               _c("buscador-ubicacion-component", {
                                 on: {
@@ -78177,9 +78348,11 @@ var render = function() {
                               })
                             ],
                             1
-                          ),
-                          _vm._v(" "),
-                          _c("div", { staticClass: "col-7" }, [
+                          )
+                        ]),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "row" }, [
+                          _c("div", { staticClass: "col-12" }, [
                             _c("div", { staticClass: "row pre-scrollable" }, [
                               _c("div", { staticClass: "col-md-12" }, [
                                 _c(
@@ -79119,6 +79292,69 @@ var render = function() {
                         }
                       }
                     })
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "form-group" }, [
+                    _c(
+                      "label",
+                      {
+                        staticClass: "col-form-label",
+                        attrs: { for: "message-text" }
+                      },
+                      [_vm._v("ID Almacen:")]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "select",
+                      {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.modalCatUbicacion.idAlmacenSeleccion,
+                            expression: "modalCatUbicacion.idAlmacenSeleccion"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        on: {
+                          change: function($event) {
+                            var $$selectedVal = Array.prototype.filter
+                              .call($event.target.options, function(o) {
+                                return o.selected
+                              })
+                              .map(function(o) {
+                                var val = "_value" in o ? o._value : o.value
+                                return val
+                              })
+                            _vm.$set(
+                              _vm.modalCatUbicacion,
+                              "idAlmacenSeleccion",
+                              $event.target.multiple
+                                ? $$selectedVal
+                                : $$selectedVal[0]
+                            )
+                          }
+                        }
+                      },
+                      [
+                        _c("option", { attrs: { value: "0", disabled: "" } }, [
+                          _vm._v("Seleccione...")
+                        ]),
+                        _vm._v(" "),
+                        _vm._l(_vm.modalCatUbicacion.mapAlmacen, function(
+                          almacen
+                        ) {
+                          return _c("option", {
+                            key: almacen.id_almacen,
+                            domProps: {
+                              value: almacen.id_almacen,
+                              textContent: _vm._s(almacen.nombre)
+                            }
+                          })
+                        })
+                      ],
+                      2
+                    )
                   ])
                 ])
               ]),
@@ -86446,25 +86682,6 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
@@ -86472,6 +86689,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
         return {
             isLoading: 0,
+            isProcessBackend: false,
             step: 1,
             mapAlmacen: [],
             mapFoliosExistentes: [],
@@ -86490,7 +86708,9 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
                 idAlmacen: 0,
                 ubicacion: '',
                 tipoMovimiento: '',
-                detalleLoteProcess: []
+                detalleLoteProcess: [],
+                idLoteGenerado: '',
+                isValidadoLote: 0
             }
         };
     },
@@ -86539,7 +86759,10 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
                 me.conceptoFolioActual = 'cap' + sufix;
 
                 me.onGetMapFoliosCapEstandar(0);
-                me.$refs.buscadorCapEst.select();
+
+                if (me.$refs.buscadorCapEst) {
+                    me.$refs.buscadorCapEst.select();
+                }
             }).catch(function (error) {
                 me.isLoading = 0;
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
@@ -86614,7 +86837,9 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
                     me.$forceUpdate();
 
                     me.onSetFocusBuscadorCapEst();
-                    me.$refs.buscadorCapEst.select();
+                    if (me.$refs.buscadorCapEst) {
+                        me.$refs.buscadorCapEst.select();
+                    }
                 }).catch(function (error) {
                     util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
                 });
@@ -86793,7 +87018,9 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
                 me.bandExisteCambio = true;
                 //-----
 
-                me.$refs.buscadorCapEst.select();
+                if (me.$refs.buscadorCapEst) {
+                    me.$refs.buscadorCapEst.select();
+                }
             }).catch(function (error) {
                 me.isLoading = 0;
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
@@ -86871,6 +87098,9 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
             this.$refs.buscadorCapEst.select();
         },
         onResetAll: function onResetAll() {
+            var _this2 = this;
+
+            console.log('------------- reset-all------------- ');
             this.buscador = '';
             this.folioActual = 0;
             this.conceptoFolioActual = '';
@@ -86878,23 +87108,39 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
             this.detalleProductosBD = [];
             this.detalleProductosLOCAL = [];
             this.bandExisteCambio = false;
+            this.step = 1;
+            this.configLote.idAlmacen = 0;
+            this.configLote.ubicacion = '';
+            this.configLote.tipoMovimiento = '';
+            this.configLote.detalleLoteProcess = [];
+            this.configLote.idLoteGenerado = '';
+            this.configLote.isValidadoLote = 0;
+
+            clearInterval(this.temporizador);
+            this.temporizador = setInterval(function () {
+                _this2.onTemporizador();
+            }, this.tiempoActualiza);
         },
         onContinuarStep: function onContinuarStep(newStep) {
-            var _this2 = this;
+            var _this3 = this;
 
             switch (newStep) {
                 case 1:
                     console.log("Captura estandar");
                     this.temporizador = setInterval(function () {
-                        _this2.onTemporizador();
+                        _this3.onTemporizador();
                     }, this.tiempoActualiza), this.step = newStep;
                     break;
                 case 2:
-                    clearInterval(clearInterval(this.temporizador));
+                    clearInterval(this.temporizador);
                     this.step = newStep;
                     break;
                 case 3:
                     console.log("Generacion de lote");
+                    if (this.isProcessBackend) {
+                        return;
+                    }
+
                     var me = this;
                     //~Validaciones
                     if (me.configLote.idAlmacen <= 0) {
@@ -86911,13 +87157,15 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
                     }
 
                     this.isLoading = 1;
+                    this.isProcessBackend = true;
                     axios.post('/zicandi/public/cap/migrate-lote', {
                         'id_cap_folio': me.folioActual,
                         'id_almacen': me.configLote.idAlmacen,
                         'codigo_ubicacion': me.configLote.ubicacion.codigo,
                         'tipo_movimiento': me.configLote.tipoMovimiento
                     }).then(function (response) {
-                        console.log(response);
+                        me.isProcessBackend = false;
+
                         me.isLoading = 0;
 
                         if (!response.data.xstatus) {
@@ -86925,6 +87173,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
                             return;
                         }
                         me.configLote.detalleLoteProcess = response.data.result;
+                        me.configLote.idLoteGenerado = response.data.lote;
                         me.step = newStep;
                     }).catch(function (error) {
                         me.isLoading = 0;
@@ -86961,6 +87210,9 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
             this.configLote.ubicacion = resp.ubicacion;
 
             console.log(resp);
+        },
+        onValidaOkLote: function onValidaOkLote() {
+            this.configLote.isValidadoLote = 1;
         }
     },
     mounted: function mounted() {
@@ -87771,213 +88023,179 @@ var render = function() {
       staticStyle: { display: "none" }
     }),
     _vm._v(" "),
+    _c("div", { staticClass: "card" }, [
+      _c("div", { staticClass: "row" }, [
+        _c("div", { staticClass: "col-md-7" }, [
+          _c("div", { staticClass: "row" }, [
+            _c(
+              "div",
+              {
+                staticClass: "col-md-2",
+                staticStyle: { "line-height": "30px" }
+              },
+              [
+                _vm._v("\n                           Folio: "),
+                _c("strong", [
+                  _c("span", {
+                    domProps: { textContent: _vm._s(_vm.folioActual) }
+                  })
+                ])
+              ]
+            ),
+            _vm._v(" "),
+            _c("div", { staticClass: "col-md-4" }, [
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.conceptoFolioActual,
+                    expression: "conceptoFolioActual"
+                  }
+                ],
+                staticClass: "form-control",
+                staticStyle: { width: "200px" },
+                attrs: { type: "text" },
+                domProps: { value: _vm.conceptoFolioActual },
+                on: {
+                  keyup: function($event) {
+                    if (
+                      !$event.type.indexOf("key") &&
+                      _vm._k($event.keyCode, "enter", 13, $event.key, "Enter")
+                    ) {
+                      return null
+                    }
+                    return _vm.onUpdateConceptoFolioCap()
+                  },
+                  input: function($event) {
+                    if ($event.target.composing) {
+                      return
+                    }
+                    _vm.conceptoFolioActual = $event.target.value
+                  }
+                }
+              })
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "col-md-4" }, [
+              _c(
+                "select",
+                {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.folioComboSelect,
+                      expression: "folioComboSelect"
+                    }
+                  ],
+                  staticClass: "form-control",
+                  staticStyle: { width: "200px" },
+                  on: {
+                    change: [
+                      function($event) {
+                        var $$selectedVal = Array.prototype.filter
+                          .call($event.target.options, function(o) {
+                            return o.selected
+                          })
+                          .map(function(o) {
+                            var val = "_value" in o ? o._value : o.value
+                            return val
+                          })
+                        _vm.folioComboSelect = $event.target.multiple
+                          ? $$selectedVal
+                          : $$selectedVal[0]
+                      },
+                      function($event) {
+                        return _vm.onChangeFolioCapturaEstandar()
+                      }
+                    ]
+                  }
+                },
+                [
+                  _c("option", { attrs: { value: "0", disabled: "" } }, [
+                    _vm._v("Otro folio")
+                  ]),
+                  _vm._v(" "),
+                  _vm._l(_vm.mapFoliosExistentes, function(folio) {
+                    return _c("option", {
+                      key: folio.id_cap_folio,
+                      domProps: {
+                        value: folio.id_cap_folio,
+                        textContent: _vm._s(folio.concepto)
+                      }
+                    })
+                  }),
+                  _vm._v(" "),
+                  _c("option", { attrs: { value: "REFRESH_LISTA" } }, [
+                    _vm._v("Refresh lista")
+                  ]),
+                  _vm._v(" "),
+                  _c("option", { attrs: { value: "DEPURA_LISTA" } }, [
+                    _vm._v("Depurar lista")
+                  ])
+                ],
+                2
+              )
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "col-md-2" }, [
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-secondary",
+                  attrs: { type: "button" },
+                  on: {
+                    click: function($event) {
+                      return _vm.onGeneraNuevoFolioCap()
+                    }
+                  }
+                },
+                [
+                  _c("i", { staticClass: "icon-plus" }),
+                  _vm._v(" Nuevo folio\n                        ")
+                ]
+              )
+            ])
+          ])
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "col-md-5" }, [
+          _c("div", { staticClass: "row" }, [
+            _c("div", { staticClass: "col-md-6" }, [
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-secondary",
+                  attrs: { type: "button" },
+                  on: {
+                    click: function($event) {
+                      return _vm.onResetAll()
+                    }
+                  }
+                },
+                [
+                  _c("i", { staticClass: "icon-plus" }),
+                  _vm._v(" Reset All\n                        ")
+                ]
+              )
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "col-md-6" }, [
+              _vm._v("\n                        Paso actual: "),
+              _c("span", { domProps: { textContent: _vm._s(_vm.step) } })
+            ])
+          ])
+        ])
+      ])
+    ]),
+    _vm._v(" "),
     _vm.step == 1
       ? _c(
           "div",
           [
-            _c("div", { staticClass: "card" }, [
-              _c("div", { staticClass: "row" }, [
-                _c("div", { staticClass: "col-md-7" }, [
-                  _c("div", { staticClass: "row" }, [
-                    _c(
-                      "div",
-                      {
-                        staticClass: "col-md-2",
-                        staticStyle: { "line-height": "30px" }
-                      },
-                      [
-                        _vm._v("\n                               Folio: "),
-                        _c("strong", [
-                          _c("span", {
-                            domProps: { textContent: _vm._s(_vm.folioActual) }
-                          })
-                        ])
-                      ]
-                    ),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "col-md-4" }, [
-                      _c("input", {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.conceptoFolioActual,
-                            expression: "conceptoFolioActual"
-                          }
-                        ],
-                        staticClass: "form-control",
-                        staticStyle: { width: "200px" },
-                        attrs: { type: "text" },
-                        domProps: { value: _vm.conceptoFolioActual },
-                        on: {
-                          keyup: function($event) {
-                            if (
-                              !$event.type.indexOf("key") &&
-                              _vm._k(
-                                $event.keyCode,
-                                "enter",
-                                13,
-                                $event.key,
-                                "Enter"
-                              )
-                            ) {
-                              return null
-                            }
-                            return _vm.onUpdateConceptoFolioCap()
-                          },
-                          input: function($event) {
-                            if ($event.target.composing) {
-                              return
-                            }
-                            _vm.conceptoFolioActual = $event.target.value
-                          }
-                        }
-                      })
-                    ]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "col-md-4" }, [
-                      _c(
-                        "select",
-                        {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.folioComboSelect,
-                              expression: "folioComboSelect"
-                            }
-                          ],
-                          staticClass: "form-control",
-                          staticStyle: { width: "200px" },
-                          on: {
-                            change: [
-                              function($event) {
-                                var $$selectedVal = Array.prototype.filter
-                                  .call($event.target.options, function(o) {
-                                    return o.selected
-                                  })
-                                  .map(function(o) {
-                                    var val = "_value" in o ? o._value : o.value
-                                    return val
-                                  })
-                                _vm.folioComboSelect = $event.target.multiple
-                                  ? $$selectedVal
-                                  : $$selectedVal[0]
-                              },
-                              function($event) {
-                                return _vm.onChangeFolioCapturaEstandar()
-                              }
-                            ]
-                          }
-                        },
-                        [
-                          _c(
-                            "option",
-                            { attrs: { value: "0", disabled: "" } },
-                            [_vm._v("Otro folio")]
-                          ),
-                          _vm._v(" "),
-                          _vm._l(_vm.mapFoliosExistentes, function(folio) {
-                            return _c("option", {
-                              key: folio.id_cap_folio,
-                              domProps: {
-                                value: folio.id_cap_folio,
-                                textContent: _vm._s(folio.concepto)
-                              }
-                            })
-                          }),
-                          _vm._v(" "),
-                          _c("option", { attrs: { value: "REFRESH_LISTA" } }, [
-                            _vm._v("Refresh lista")
-                          ]),
-                          _vm._v(" "),
-                          _c("option", { attrs: { value: "DEPURA_LISTA" } }, [
-                            _vm._v("Depurar lista")
-                          ])
-                        ],
-                        2
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "col-md-2" }, [
-                      _c(
-                        "button",
-                        {
-                          staticClass: "btn btn-secondary",
-                          attrs: { type: "button" },
-                          on: {
-                            click: function($event) {
-                              return _vm.onGeneraNuevoFolioCap()
-                            }
-                          }
-                        },
-                        [
-                          _c("i", { staticClass: "icon-plus" }),
-                          _vm._v(" Nuevo folio\n                            ")
-                        ]
-                      )
-                    ])
-                  ])
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "col-md-5" }, [
-                  _c("div", { staticClass: "row" }, [
-                    _c("div", { staticClass: "col-md-1" }, [
-                      _vm._v(
-                        "\n                             \n                        "
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "col-md-3" }, [
-                      _vm._v(
-                        "\n                             \n                        "
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "col-md-3" }, [
-                      _c(
-                        "button",
-                        {
-                          staticClass: "btn btn-primary",
-                          attrs: { type: "button" },
-                          on: {
-                            click: function($event) {
-                              return _vm.onEliminarConError()
-                            }
-                          }
-                        },
-                        [
-                          _c("i", { staticClass: "icon-plus" }),
-                          _vm._v(" Limpiar\n                            ")
-                        ]
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "col-md-3" }, [
-                      _c(
-                        "button",
-                        {
-                          staticClass: "btn btn-danger",
-                          attrs: { type: "button" },
-                          on: {
-                            click: function($event) {
-                              return _vm.onContinuarStep(2)
-                            }
-                          }
-                        },
-                        [
-                          _c("i", { staticClass: "icon-control-play" }),
-                          _vm._v(" Continuar\n                            ")
-                        ]
-                      )
-                    ])
-                  ])
-                ])
-              ])
-            ]),
-            _vm._v(" "),
             _c("div", { staticClass: "form-group row" }, [
-              _c("div", { staticClass: "col-md-12" }, [
+              _c("div", { staticClass: "col-md-8" }, [
                 _c("div", { staticClass: "input-group" }, [
                   _c("input", {
                     directives: [
@@ -88025,6 +88243,42 @@ var render = function() {
                     }
                   })
                 ])
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "col-md-4" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-primary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.onEliminarConError()
+                      }
+                    }
+                  },
+                  [
+                    _c("i", { staticClass: "icon-plus" }),
+                    _vm._v(" Limpiar\n                ")
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-danger",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.onContinuarStep(2)
+                      }
+                    }
+                  },
+                  [
+                    _c("i", { staticClass: "icon-control-play" }),
+                    _vm._v(" Continuar\n                ")
+                  ]
+                )
               ])
             ]),
             _vm._v(" "),
@@ -88431,130 +88685,62 @@ var render = function() {
       ? _c(
           "div",
           [
-            _vm._m(6),
-            _vm._v(" "),
-            _vm._l(_vm.configLote.detalleLoteProcess, function(
-              detaLote,
-              indice
-            ) {
-              return _c(
-                "div",
-                { key: detaLote.id_lote_operacion, staticClass: "row" },
-                [
-                  _c("div", { staticClass: "col-md-1" }, [
-                    _c("img", {
-                      attrs: {
-                        src: detaLote.url_img_producto,
-                        width: "30",
-                        alt: "dog"
-                      }
-                    })
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-md-3" }, [
-                    _c("label", {
-                      domProps: { textContent: _vm._s(detaLote.nombre_almacen) }
-                    })
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-md-2" }, [
-                    _c("label", {
-                      domProps: {
-                        textContent: _vm._s(detaLote.codigo_ubicacion)
-                      }
-                    })
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-md-1" }, [
-                    _c("strong", [
-                      _c("label", {
-                        domProps: {
-                          textContent: _vm._s(detaLote.codigo_producto)
-                        }
-                      })
-                    ])
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-md-3" }, [
-                    _c("label", {
-                      domProps: {
-                        textContent: _vm._s(detaLote.nombre_producto)
-                      }
-                    })
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-md-1" }, [
-                    detaLote.tipo_movimiento == "ING"
-                      ? _c("label", {
-                          staticStyle: { color: "blue" },
-                          domProps: { textContent: _vm._s(detaLote.cantidad) }
-                        })
-                      : _vm._e(),
-                    _vm._v(" "),
-                    detaLote.tipo_movimiento == "RET"
-                      ? _c("label", {
-                          staticStyle: { color: "red" },
-                          domProps: {
-                            textContent: _vm._s(detaLote.cantidad * -1)
-                          }
-                        })
-                      : _vm._e()
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-md-1" }, [
-                    _c("label", {
-                      domProps: { textContent: _vm._s(detaLote.estado) }
-                    })
-                  ])
-                ]
-              )
+            _c("aplica-mov-almacen-component", {
+              attrs: {
+                p_idLote: _vm.configLote.idLoteGenerado,
+                p_isValidado: _vm.configLote.isValidadoLote
+              }
             }),
             _vm._v(" "),
-            _vm._m(7),
+            _vm._m(6),
             _vm._v(" "),
             _c("div", { staticClass: "row" }, [
               _c("div", { staticClass: "col-md-4" }),
               _vm._v(" "),
               _c("div", { staticClass: "col-md-4" }, [
-                _c(
-                  "button",
-                  {
-                    staticClass: "btn btn-secondary",
-                    attrs: { type: "button" },
-                    on: {
-                      click: function($event) {
-                        return _vm.onContinuarStep(2)
-                      }
-                    }
-                  },
-                  [
-                    _c("i", { staticClass: "icon-close" }),
-                    _vm._v(" Regresar\n                ")
-                  ]
-                ),
+                _vm.configLote.isValidadoLote == 0
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-secondary",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.onContinuarStep(2)
+                          }
+                        }
+                      },
+                      [
+                        _c("i", { staticClass: "icon-close" }),
+                        _vm._v(" Regresar\n                ")
+                      ]
+                    )
+                  : _vm._e(),
                 _vm._v(" "),
-                _c(
-                  "button",
-                  {
-                    staticClass: "btn btn-danger",
-                    attrs: { type: "button" },
-                    on: {
-                      click: function($event) {
-                        return _vm.onContinuarStep(20)
-                      }
-                    }
-                  },
-                  [
-                    _c("i", { staticClass: "icon-control-play" }),
-                    _vm._v(" Aplicar\n                ")
-                  ]
-                )
+                _vm.configLote.isValidadoLote == 0
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-danger",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.onValidaOkLote()
+                          }
+                        }
+                      },
+                      [
+                        _c("i", { staticClass: "icon-control-play" }),
+                        _vm._v(" Validado OK\n                ")
+                      ]
+                    )
+                  : _vm._e()
               ]),
               _vm._v(" "),
               _c("div", { staticClass: "col-md-4" })
             ])
           ],
-          2
+          1
         )
       : _vm._e()
   ])
@@ -88619,17 +88805,369 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "form-group row" }, [
-      _c(
-        "h4",
-        {
-          staticClass: "col-md-12 form-control-label",
-          attrs: { for: "text-input" }
+    return _c("div", { staticClass: "col" }, [_c("hr")])
+  }
+]
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-6cc96b34", module.exports)
+  }
+}
+
+/***/ }),
+/* 173 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+function injectStyle (ssrContext) {
+  if (disposed) return
+  __webpack_require__(174)
+}
+var normalizeComponent = __webpack_require__(0)
+/* script */
+var __vue_script__ = __webpack_require__(176)
+/* template */
+var __vue_template__ = __webpack_require__(177)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = injectStyle
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/aplica-mov-almacen/AplicaMovAlmacenComponent.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-cb04839a", Component.options)
+  } else {
+    hotAPI.reload("data-v-cb04839a", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 174 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(175);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__(4)("103e6f62", content, false, {});
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../../../node_modules/css-loader/index.js!../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-cb04839a\",\"scoped\":false,\"hasInlineConfig\":true}!../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./AplicaMovAlmacenComponent.vue", function() {
+     var newContent = require("!!../../../../../node_modules/css-loader/index.js!../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-cb04839a\",\"scoped\":false,\"hasInlineConfig\":true}!../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./AplicaMovAlmacenComponent.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 175 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(3)(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n.circulo-verde{\n    height: 5px;\n    width: 5px;\n    background-color: green;\n    border-radius: 50%;\n}\n.circulo-gris{\n    height: 5px;\n    width: 5px;\n    background-color: gray;\n    border-radius: 50%;\n}\n.circulo-rojo{\n    height: 5px;\n    width: 5px;\n    background-color: red;\n    border-radius: 50%;\n}\n.contenedor {        \n    display: flex;\n}\n.contenedor div {\n    flex: 1;  \n    justify-content: right;\n    align-items: center;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+/* 176 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    props: ['p_idLote', 'p_isValidado'],
+    data: function data() {
+        return {
+            isLoading: 0,
+            isProcessBackend: false,
+            idLoteActual: '',
+            loteOperacionProcesosDeta: [],
+            aplicaLoteBtnVisible: 1
+        };
+    },
+
+    computed: {},
+    methods: {
+        /**
+         * Recupera el map de almacenes
+         * 
+         */
+        onGetDetalleLote: function onGetDetalleLote(idLote) {
+            var me = this;
+            this.idLoteActual = idLote;
+            this.isLoading = 1;
+            var url = '/zicandi/public/lop/get-detalle-lote?lote_referencia=' + this.idLoteActual;
+            axios.get(url).then(function (response) {
+                me.isLoading = 0;
+                var respuesta = response.data;
+                me.loteOperacionProcesosDeta = respuesta.deta;
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
         },
-        [_vm._v("Resumen:")]
-      )
-    ])
-  },
+        onAplicaLote: function onAplicaLote() {
+            var me = this;
+
+            if (this.isProcessBackend) {
+                return;
+            }
+
+            this.isLoading = 1;
+            this.isProcessBackend = true;
+            axios.post('/zicandi/public/lop/aplica-lote', {
+                'lote_referencia': this.idLoteActual
+            }).then(function (response) {
+                me.isLoading = 0;
+                me.isProcessBackend = false;
+                me.loteOperacionProcesosDeta = response.data.deta;
+                var totalErrCtn = 0;
+                response.data.deta.forEach(function (valor, indice) {
+                    if (valor.estado == 'E') {
+                        totalErrCtn++;
+                    }
+                });
+
+                if (totalErrCtn == 0) {
+                    me.aplicaLoteBtnVisible = 0;
+                    util.MSG('Bien!', 'Lote se aplico correctamente y completo', util.tipoOk);
+                } else {
+                    util.MSG('Algo salio Mal!', 'Valide, hay ' + totalErrCtn + ' errores. El resto se aplicó CORRECTAMENTE', util.tipoErr);
+                }
+
+                console.log('Hay ' + totalErrCtn + ' errores');
+                console.log(response);
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        }
+    },
+    mounted: function mounted() {
+        console.log('Inicia componente AplicaMovAlmacenComponent. ');
+        this.onGetDetalleLote(this.p_idLote);
+    }
+});
+
+/***/ }),
+/* 177 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "main",
+    [
+      _c("div", {
+        staticClass: "sbl-circ-ripple",
+        class: { "abrir-load-sbl": _vm.isLoading },
+        staticStyle: { display: "none" }
+      }),
+      _vm._v(" "),
+      _c("div", { staticClass: "form-group row" }, [
+        _c(
+          "h4",
+          {
+            staticClass: "col-md-12 form-control-label",
+            attrs: { for: "text-input" }
+          },
+          [_vm._v("Resumen: " + _vm._s(_vm.p_idLote))]
+        )
+      ]),
+      _vm._v(" "),
+      _vm._l(_vm.loteOperacionProcesosDeta, function(detaLote, indice) {
+        return _c(
+          "div",
+          { key: detaLote.id_lote_operacion, staticClass: "row" },
+          [
+            _c("div", { staticClass: "col-md-1" }, [
+              _c("img", {
+                attrs: {
+                  src: detaLote.url_img_producto,
+                  width: "30",
+                  alt: "dog"
+                }
+              })
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "col-md-3" }, [
+              _c("label", {
+                domProps: { textContent: _vm._s(detaLote.nombre_almacen) }
+              })
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "col-md-2" }, [
+              _c("label", {
+                domProps: { textContent: _vm._s(detaLote.codigo_ubicacion) }
+              })
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "col-md-1" }, [
+              _c("strong", [
+                _c("label", {
+                  domProps: { textContent: _vm._s(detaLote.codigo_producto) }
+                })
+              ])
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "col-md-3" }, [
+              _c("label", {
+                domProps: { textContent: _vm._s(detaLote.nombre_producto) }
+              })
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "col-md-1" }, [
+              detaLote.tipo_movimiento == "ING"
+                ? _c("label", {
+                    staticStyle: { color: "blue" },
+                    domProps: { textContent: _vm._s(detaLote.cantidad) }
+                  })
+                : _vm._e(),
+              _vm._v(" "),
+              detaLote.tipo_movimiento == "RET"
+                ? _c("label", {
+                    staticStyle: { color: "red" },
+                    domProps: { textContent: _vm._s(detaLote.cantidad * -1) }
+                  })
+                : _vm._e()
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "col-md-1" }, [
+              detaLote.estado == "E"
+                ? _c("div", {
+                    staticStyle: { color: "red" },
+                    attrs: { title: detaLote.msg_error },
+                    domProps: { textContent: _vm._s(detaLote.estado) }
+                  })
+                : _vm._e(),
+              _vm._v(" "),
+              detaLote.estado == "A"
+                ? _c("label", {
+                    domProps: { textContent: _vm._s(detaLote.estado) }
+                  })
+                : _vm._e()
+            ])
+          ]
+        )
+      }),
+      _vm._v(" "),
+      _vm._m(0),
+      _vm._v(" "),
+      _c("div", { staticClass: "row" }, [
+        _c("div", { staticClass: "col-md-12" }, [
+          _vm.p_isValidado == 1 && _vm.aplicaLoteBtnVisible == 1
+            ? _c(
+                "button",
+                {
+                  staticClass: "btn btn-danger",
+                  attrs: { type: "button" },
+                  on: {
+                    click: function($event) {
+                      return _vm.onAplicaLote()
+                    }
+                  }
+                },
+                [
+                  _c("i", { staticClass: "icon-control-play" }),
+                  _vm._v(" Aplicar\n            ")
+                ]
+              )
+            : _vm._e()
+        ])
+      ])
+    ],
+    2
+  )
+}
+var staticRenderFns = [
   function() {
     var _vm = this
     var _h = _vm.$createElement
@@ -88642,7 +89180,1666 @@ module.exports = { render: render, staticRenderFns: staticRenderFns }
 if (false) {
   module.hot.accept()
   if (module.hot.data) {
-    require("vue-hot-reload-api")      .rerender("data-v-6cc96b34", module.exports)
+    require("vue-hot-reload-api")      .rerender("data-v-cb04839a", module.exports)
+  }
+}
+
+/***/ }),
+/* 178 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__(0)
+/* script */
+var __vue_script__ = __webpack_require__(179)
+/* template */
+var __vue_template__ = __webpack_require__(180)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/aplica-mov-almacen/MovAlmacenCatalogoComponent.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-f426e472", Component.options)
+  } else {
+    hotAPI.reload("data-v-f426e472", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 179 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    data: function data() {
+        return {
+            isLoading: 0,
+            isProcessBackend: false,
+            filterLote: '',
+            detaCatalogo: [],
+            modalDetalleLote: {
+                modal: 0,
+                tituloModal: '',
+                tipoAccion: 0,
+                loteSeleccionado: '',
+                loteOperacionProcesosDeta: [],
+                regPendientesCnt: 0,
+                error: 0,
+                erroresMsjList: [],
+                h: window.innerHeight - 50 + 'px'
+            },
+            modalEditReg: {
+                modal: 0,
+                tituloModal: '',
+                tipoAccion: 0,
+                data: [],
+                error: 0,
+                erroresMsjList: []
+            },
+            modalDetalleMovimientos: {
+                modal: 0,
+                tituloModal: '',
+                error: 0,
+                erroresMsjList: [],
+                detalleMovimientos: [],
+                producto: null
+            }
+        };
+    },
+
+    computed: {},
+    methods: {
+        listar: function listar() {
+            this.isLoading = 1;
+
+            var me = this;
+            var url = '/zicandi/public/lop/get-catalog-lotes?prefix_lote=' + this.filterLote;
+            axios.get(url).then(function (response) {
+                var respuesta = response.data;
+                me.isLoading = 0;
+                me.detaCatalogo = respuesta.result;
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onEliminar: function onEliminar(lote) {
+            var _this = this;
+
+            util.MSG_SI_NO('Eliminar?', 'El borrar el lote no elimina los movimientos aplicados', util.tipoPreg).then(function (result) {
+                if (result == util.btnSi) {
+                    _this.isLoading = 1;
+                    var me = _this;
+
+                    axios.post('/zicandi/public/lop/elimina-lote', {
+                        'lote_referencia': lote
+                    }).then(function (response) {
+                        me.isLoading = 0;
+                        util.AVISO('Eliminado!!!', util.tipoOk);
+                        me.listar();
+                    }).catch(function (error) {
+                        me.isLoading = 0;
+                        util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+                    });
+                }
+            });
+        },
+        showModal: function showModal(modelo, accion) {
+            var data = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+            switch (modelo) {
+                case 'lote':
+                    {
+                        switch (accion) {
+                            case 'detalle':
+                                {
+                                    this.modalDetalleLote.modal = 1;
+                                    this.modalDetalleLote.tituloModal = 'Detalle lote: ' + data['lote_referencia'];
+                                    this.modalDetalleLote.tipoAccion = 1;
+
+                                    this.modalDetalleLote.loteSeleccionado = data['lote_referencia'];
+                                    this.modalDetalleLote.loteOperacionProcesosDeta = [];
+                                    this.modalDetalleLote.regPendientesCnt = 0;
+
+                                    this.onGetDetalleLote(data['lote_referencia']);
+                                    break;
+                                }
+
+                            case 'edit':
+                                {
+                                    this.modalEditReg.modal = 1;
+                                    this.modalEditReg.tituloModal = 'Editar registro pendiente o con error';
+                                    this.modalEditReg.tipoAccion = 1;
+                                    this.modalEditReg.data = data;
+                                    break;
+                                }
+
+                            case 'deta-mov':
+                                {
+                                    this.modalDetalleMovimientos.modal = 1;
+                                    this.modalDetalleMovimientos.tituloModal = 'Detalle de movimientos, ' + data.nombre_almacen + ' - ' + data.nombre_producto;
+                                    this.onDetalleMovimientosProducto(data);
+                                    break;
+                                }
+                        }
+                    }
+            }
+        },
+        closeModal: function closeModal() {
+            this.modalDetalleLote.modal = 0;
+            this.modalDetalleLote.tituloModal = '';
+            this.modalDetalleLote.loteSeleccionado = '';
+            this.modalDetalleLote.loteOperacionProcesosDeta = [];
+            this.modalDetalleLote.regPendientesCnt = 0;
+        },
+        closeSubModal: function closeSubModal() {
+            this.modalEditReg.modal = 0;
+            this.modalEditReg.tituloModal = '';
+            this.modalDetalleMovimientos.modal = 0;
+            this.modalDetalleMovimientos.tituloModal = '';
+        },
+        onGetDetalleLote: function onGetDetalleLote(idLote) {
+            var me = this;
+            this.idLoteActual = idLote;
+            this.isLoading = 1;
+            var url = '/zicandi/public/lop/get-detalle-lote?lote_referencia=' + this.idLoteActual;
+            axios.get(url).then(function (response) {
+                me.isLoading = 0;
+                var respuesta = response.data;
+                me.modalDetalleLote.loteOperacionProcesosDeta = respuesta.deta;
+
+                respuesta.deta.forEach(function (valor, indice) {
+                    if (valor.estado == 'P' || valor.estado == 'E') {
+                        me.modalDetalleLote.regPendientesCnt++;
+                    }
+                });
+            }).catch(function (error) {
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        updateRegLote: function updateRegLote(data) {
+            this.isLoading = 1;
+            var me = this;
+
+            axios.post('/zicandi/public/lop/update-reg-lote', {
+                'id_lote_operacion': data.id_lote_operacion,
+                'tipo_movimiento': data.tipo_movimiento,
+                'cantidad': data.cantidad
+            }).then(function (response) {
+                me.isLoading = 0;
+                util.AVISO('Actualizado: ' + response.data.xstatus, util.tipoOk);
+                me.onGetDetalleLote(data.lote_referencia);
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onAplicaLote: function onAplicaLote() {
+            var me = this;
+
+            if (this.isProcessBackend) {
+                return;
+            }
+
+            this.isLoading = 1;
+            this.isProcessBackend = true;
+            axios.post('/zicandi/public/lop/aplica-lote', {
+                'lote_referencia': this.modalDetalleLote.loteSeleccionado
+            }).then(function (response) {
+                me.isLoading = 0;
+                me.isProcessBackend = false;
+                me.modalDetalleLote.loteOperacionProcesosDeta = response.data.deta;
+
+                var totalErrCtn = 0;
+                response.data.deta.forEach(function (valor, indice) {
+                    if (valor.estado == 'E') {
+                        totalErrCtn++;
+                    }
+                });
+
+                if (totalErrCtn == 0) {
+                    me.modalDetalleLote.regPendientesCnt = 0;
+                    util.MSG('Bien!', 'Lote se aplico correctamente y completo', util.tipoOk);
+                } else {
+                    util.MSG('Algo salio Mal!', 'Valide, hay ' + totalErrCtn + ' errores. El resto se aplicó CORRECTAMENTE', util.tipoErr);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        mostrarImagenProd: function mostrarImagenProd(img, dato) {
+            util.POPUP_IMG(img, dato);
+        },
+
+
+        /**
+         * Detalle de movimientos
+         * 
+         * 
+         */
+        onDetalleMovimientosProducto: function onDetalleMovimientosProducto(data) {
+            var me = this;
+            this.isLoading = 1;
+            var page = 1;
+            var idAlmacenSeleccion = data.id_almacen;
+            var id_producto = data.id_producto;
+            var url = '/zicandi/public/almacenes/resumen/movimientos?page=' + page + '&id_almacen=' + idAlmacenSeleccion + '&id_producto=' + id_producto;
+
+            axios.get(url).then(function (response) {
+                me.isLoading = 0;
+                console.log(response);
+                if (response.data.xstatus) {
+                    me.modalDetalleMovimientos.detalleMovimientos = response.data.detalle.data;
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        }
+    },
+    mounted: function mounted() {
+        this.listar();
+    }
+});
+
+/***/ }),
+/* 180 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("main", { staticClass: "main" }, [
+    _c("div", {
+      staticClass: "sbl-circ-ripple",
+      class: { "abrir-load-sbl": _vm.isLoading },
+      staticStyle: { display: "none" }
+    }),
+    _vm._v(" "),
+    _vm._m(0),
+    _vm._v(" "),
+    _c("div", { staticClass: "container-fluid" }, [
+      _c("div", { staticClass: "card" }, [
+        _c("div", { staticClass: "card-header" }, [
+          _c("i", { staticClass: "fa fa-align-justify" }),
+          _vm._v(" Tareas:\n                "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary",
+              attrs: { type: "button" },
+              on: {
+                click: function($event) {
+                  return _vm.showModal("lote", "detalle")
+                }
+              }
+            },
+            [
+              _c("i", { staticClass: "icon-list" }),
+              _vm._v(" Nuevo\n                ")
+            ]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary",
+              attrs: { type: "button" },
+              on: {
+                click: function($event) {
+                  return _vm.onExportarPublicaciones()
+                }
+              }
+            },
+            [
+              _c("i", { staticClass: "icon-plus" }),
+              _vm._v(" Exportar Detalle Excel\n                ")
+            ]
+          )
+        ])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "card-body" }, [
+        _c("div", { staticClass: "form-group row" }, [
+          _c("div", { staticClass: "col-md-8" }, [
+            _c("div", { staticClass: "input-group" }, [
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.filterLote,
+                    expression: "filterLote"
+                  }
+                ],
+                staticClass: "form-control",
+                staticStyle: { "font-size": "30px" },
+                attrs: {
+                  type: "text",
+                  placeholder: "Prefijo Lote",
+                  autofocus: ""
+                },
+                domProps: { value: _vm.filterLote },
+                on: {
+                  keyup: function($event) {
+                    if (
+                      !$event.type.indexOf("key") &&
+                      _vm._k($event.keyCode, "enter", 13, $event.key, "Enter")
+                    ) {
+                      return null
+                    }
+                    return _vm.listar()
+                  },
+                  focus: function($event) {
+                    return $event.target.select()
+                  },
+                  input: function($event) {
+                    if ($event.target.composing) {
+                      return
+                    }
+                    _vm.filterLote = $event.target.value
+                  }
+                }
+              })
+            ])
+          ])
+        ]),
+        _vm._v(" "),
+        _c(
+          "table",
+          { staticClass: "table table-bordered table-striped table-sm" },
+          [
+            _vm._m(1),
+            _vm._v(" "),
+            _c(
+              "tbody",
+              _vm._l(_vm.detaCatalogo, function(lote) {
+                return _c("tr", { key: lote.lote_referencia }, [
+                  _c("td", [
+                    _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-warning btn-sm",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.showModal("lote", "detalle", lote)
+                          }
+                        }
+                      },
+                      [_c("i", { staticClass: "icon-list" })]
+                    ),
+                    _vm._v("  \n                            "),
+                    _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-danger btn-sm",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.onEliminar(lote.lote_referencia)
+                          }
+                        }
+                      },
+                      [_c("i", { staticClass: "icon-trash" })]
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("td", {
+                    domProps: { textContent: _vm._s(lote.lote_referencia) }
+                  }),
+                  _vm._v(" "),
+                  _c("td", {
+                    domProps: { textContent: _vm._s(lote.referencia) }
+                  }),
+                  _vm._v(" "),
+                  _c("td", {
+                    domProps: { textContent: _vm._s(lote.fecha_operacion) }
+                  }),
+                  _vm._v(" "),
+                  _c("td", [
+                    lote.estado_error > 0
+                      ? _c("span", [_vm._v("CON ERRORES")])
+                      : lote.estado_pendiente > 0
+                      ? _c("span", [_vm._v("PENDIENTE DE APLICAR")])
+                      : _c("span", [_vm._v("APLICADO OK")])
+                  ])
+                ])
+              }),
+              0
+            )
+          ]
+        )
+      ])
+    ]),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.modalDetalleLote.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-primary modal-lg",
+            staticStyle: { "max-width": "90% !important" },
+            attrs: { role: "document" }
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "modal-content",
+                style: { height: _vm.modalDetalleLote.h }
+              },
+              [
+                _c("div", { staticClass: "modal-header" }, [
+                  _c("h4", {
+                    staticClass: "modal-title",
+                    domProps: {
+                      textContent: _vm._s(_vm.modalDetalleLote.tituloModal)
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "close",
+                      attrs: { type: "button", "aria-label": "Close" },
+                      on: {
+                        click: function($event) {
+                          return _vm.closeModal()
+                        }
+                      }
+                    },
+                    [
+                      _c("span", { attrs: { "aria-hidden": "true" } }, [
+                        _vm._v("×")
+                      ])
+                    ]
+                  )
+                ]),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass: "modal-body",
+                    staticStyle: {
+                      "max-height": "calc(100% - 10px)",
+                      "overflow-y": "scroll"
+                    }
+                  },
+                  [
+                    _c(
+                      "table",
+                      {
+                        staticClass:
+                          "table table-bordered table-striped table-sm"
+                      },
+                      [
+                        _vm._m(2),
+                        _vm._v(" "),
+                        _c(
+                          "tbody",
+                          _vm._l(
+                            _vm.modalDetalleLote.loteOperacionProcesosDeta,
+                            function(deta) {
+                              return _c("tr", { key: deta.id_lote_operacion }, [
+                                _c("td", [
+                                  deta.estado == "P" || deta.estado == "E"
+                                    ? _c(
+                                        "button",
+                                        {
+                                          staticClass: "btn btn-warning btn-sm",
+                                          attrs: { type: "button" },
+                                          on: {
+                                            click: function($event) {
+                                              return _vm.showModal(
+                                                "lote",
+                                                "edit",
+                                                deta
+                                              )
+                                            }
+                                          }
+                                        },
+                                        [
+                                          _c("i", {
+                                            staticClass: "icon-pencil"
+                                          })
+                                        ]
+                                      )
+                                    : _vm._e(),
+                                  _vm._v(
+                                    "  \n                                    "
+                                  ),
+                                  deta.estado == "P" || deta.estado == "E"
+                                    ? _c(
+                                        "button",
+                                        {
+                                          staticClass: "btn btn-danger btn-sm",
+                                          attrs: { type: "button" },
+                                          on: {
+                                            click: function($event) {
+                                              return _vm.onEliminar(
+                                                deta.id_lote_operacion
+                                              )
+                                            }
+                                          }
+                                        },
+                                        [_c("i", { staticClass: "icon-trash" })]
+                                      )
+                                    : _vm._e(),
+                                  _vm._v(" "),
+                                  deta.estado == "A"
+                                    ? _c(
+                                        "button",
+                                        {
+                                          staticClass: "btn btn-primary btn-sm",
+                                          attrs: { type: "button" },
+                                          on: {
+                                            click: function($event) {
+                                              return _vm.showModal(
+                                                "lote",
+                                                "deta-mov",
+                                                deta
+                                              )
+                                            }
+                                          }
+                                        },
+                                        [_c("i", { staticClass: "icon-list" })]
+                                      )
+                                    : _vm._e()
+                                ]),
+                                _vm._v(" "),
+                                _c("td", {
+                                  domProps: {
+                                    textContent: _vm._s(deta.referencia)
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("td", {
+                                  domProps: {
+                                    textContent: _vm._s(deta.fecha_operacion)
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("td", {
+                                  domProps: {
+                                    textContent: _vm._s(deta.nombre_almacen)
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("td", {
+                                  domProps: {
+                                    textContent: _vm._s(deta.codigo_ubicacion)
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("td", {
+                                  staticStyle: {
+                                    "text-decoration": "underline blue",
+                                    cursor: "pointer"
+                                  },
+                                  domProps: {
+                                    textContent: _vm._s(deta.codigo_producto)
+                                  },
+                                  on: {
+                                    click: function($event) {
+                                      return _vm.mostrarImagenProd(
+                                        deta.url_img_producto,
+                                        deta.nombre_producto
+                                      )
+                                    }
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("td", {
+                                  domProps: {
+                                    textContent: _vm._s(deta.nombre_producto)
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("td", {
+                                  domProps: {
+                                    textContent: _vm._s(deta.tipo_movimiento)
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("td", {
+                                  domProps: {
+                                    textContent: _vm._s(deta.cantidad)
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("td", {
+                                  domProps: { textContent: _vm._s(deta.estado) }
+                                }),
+                                _vm._v(" "),
+                                _c("td", {
+                                  domProps: {
+                                    textContent: _vm._s(deta.msg_error)
+                                  }
+                                })
+                              ])
+                            }
+                          ),
+                          0
+                        )
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "modal-footer" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-secondary",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.closeModal()
+                        }
+                      }
+                    },
+                    [_vm._v("Cerrar")]
+                  ),
+                  _vm._v(" "),
+                  _vm.modalDetalleLote.regPendientesCnt > 0
+                    ? _c(
+                        "button",
+                        {
+                          staticClass: "btn btn-danger",
+                          attrs: { type: "button" },
+                          on: {
+                            click: function($event) {
+                              return _vm.onAplicaLote()
+                            }
+                          }
+                        },
+                        [_vm._v("Aplicar pendientes o con error")]
+                      )
+                    : _vm._e()
+                ])
+              ]
+            )
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.modalEditReg.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-secondary modal-lg",
+            staticStyle: { "max-width": "50% !important" },
+            attrs: { role: "document" }
+          },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c("div", { staticClass: "modal-header" }, [
+                _c("h4", {
+                  staticClass: "modal-title",
+                  domProps: {
+                    textContent: _vm._s(_vm.modalEditReg.tituloModal)
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "close",
+                    attrs: { type: "button", "aria-label": "Close" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeSubModal()
+                      }
+                    }
+                  },
+                  [
+                    _c("span", { attrs: { "aria-hidden": "true" } }, [
+                      _vm._v("×")
+                    ])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-body" }, [
+                _c(
+                  "form",
+                  {
+                    staticClass: "form-horizontal",
+                    attrs: {
+                      action: "",
+                      method: "post",
+                      enctype: "multipart/form-data"
+                    }
+                  },
+                  [
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Almacen")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.modalEditReg.data.nombre_almacen,
+                              expression: "modalEditReg.data.nombre_almacen"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: {
+                            type: "text",
+                            disabled: "disabled",
+                            placeholder: "Alias - Nombre"
+                          },
+                          domProps: {
+                            value: _vm.modalEditReg.data.nombre_almacen
+                          },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.modalEditReg.data,
+                                "nombre_almacen",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Ubicacion")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.modalEditReg.data.codigo_ubicacion,
+                              expression: "modalEditReg.data.codigo_ubicacion"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: {
+                            type: "text",
+                            disabled: "disabled",
+                            placeholder: "Alias - Nombre"
+                          },
+                          domProps: {
+                            value: _vm.modalEditReg.data.codigo_ubicacion
+                          },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.modalEditReg.data,
+                                "codigo_ubicacion",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Codigo producto")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.modalEditReg.data.codigo_producto,
+                              expression: "modalEditReg.data.codigo_producto"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: {
+                            type: "text",
+                            disabled: "disabled",
+                            placeholder: "Alias - Nombre"
+                          },
+                          domProps: {
+                            value: _vm.modalEditReg.data.codigo_producto
+                          },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.modalEditReg.data,
+                                "codigo_producto",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Producto")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.modalEditReg.data.nombre_producto,
+                              expression: "modalEditReg.data.nombre_producto"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: {
+                            type: "text",
+                            disabled: "disabled",
+                            placeholder: "Alias - Nombre"
+                          },
+                          domProps: {
+                            value: _vm.modalEditReg.data.nombre_producto
+                          },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.modalEditReg.data,
+                                "nombre_producto",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Tipo movimiento")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.modalEditReg.data.tipo_movimiento,
+                                expression: "modalEditReg.data.tipo_movimiento"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.$set(
+                                  _vm.modalEditReg.data,
+                                  "tipo_movimiento",
+                                  $event.target.multiple
+                                    ? $$selectedVal
+                                    : $$selectedVal[0]
+                                )
+                              }
+                            }
+                          },
+                          [
+                            _c("option", { attrs: { value: "RET" } }, [
+                              _vm._v("Retiro")
+                            ]),
+                            _vm._v(" "),
+                            _c("option", { attrs: { value: "ING" } }, [
+                              _vm._v("Ingreso")
+                            ])
+                          ]
+                        )
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group row" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass: "col-md-3 form-control-label",
+                          attrs: { for: "text-input" }
+                        },
+                        [_vm._v("Cantidad")]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-9" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.modalEditReg.data.cantidad,
+                              expression: "modalEditReg.data.cantidad"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: {
+                            type: "text",
+                            placeholder: "Alias - Nombre"
+                          },
+                          domProps: { value: _vm.modalEditReg.data.cantidad },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.modalEditReg.data,
+                                "cantidad",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
+                      ])
+                    ])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        return _vm.closeSubModal()
+                      }
+                    }
+                  },
+                  [_vm._v("Cerrar")]
+                ),
+                _vm._v(" "),
+                _vm.modalEditReg.tipoAccion == 1
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-primary",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.updateRegLote(_vm.modalEditReg.data)
+                          }
+                        }
+                      },
+                      [_vm._v("Guardar")]
+                    )
+                  : _vm._e()
+              ])
+            ])
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.modalDetalleMovimientos.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-secondary",
+            staticStyle: { "max-width": "60% !important" },
+            attrs: { role: "document" }
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "modal-content",
+                staticStyle: { height: "700px" }
+              },
+              [
+                _c("div", { staticClass: "modal-header" }, [
+                  _c("h4", {
+                    staticClass: "modal-title",
+                    domProps: {
+                      textContent: _vm._s(
+                        _vm.modalDetalleMovimientos.tituloModal
+                      )
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "close",
+                      attrs: { type: "button", "aria-label": "Close" },
+                      on: {
+                        click: function($event) {
+                          return _vm.closeSubModal()
+                        }
+                      }
+                    },
+                    [
+                      _c("span", { attrs: { "aria-hidden": "true" } }, [
+                        _vm._v("×")
+                      ])
+                    ]
+                  )
+                ]),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass: "modal-body",
+                    staticStyle: {
+                      "max-height": "calc(100% - 120px)",
+                      "overflow-y": "scroll"
+                    }
+                  },
+                  [
+                    _c(
+                      "table",
+                      {
+                        staticClass:
+                          "table table-bordered table-striped table-sm"
+                      },
+                      [
+                        _vm._m(3),
+                        _vm._v(" "),
+                        _c(
+                          "tbody",
+                          _vm._l(
+                            _vm.modalDetalleMovimientos.detalleMovimientos,
+                            function(detaMov) {
+                              return _c(
+                                "tr",
+                                { key: detaMov.id_movimiento_almacen },
+                                [
+                                  _c("td", {
+                                    domProps: {
+                                      textContent: _vm._s(
+                                        detaMov.fecha_aplicacion
+                                      )
+                                    }
+                                  }),
+                                  _vm._v(" "),
+                                  _c("td", [
+                                    _vm.modalDetalleLote.loteSeleccionado ==
+                                    detaMov.lote_referencia
+                                      ? _c("span", {
+                                          staticStyle: { color: "red" },
+                                          domProps: {
+                                            textContent: _vm._s(
+                                              detaMov.lote_referencia
+                                            )
+                                          }
+                                        })
+                                      : _c("span", {
+                                          domProps: {
+                                            textContent: _vm._s(
+                                              detaMov.lote_referencia
+                                            )
+                                          }
+                                        })
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("td", [
+                                    detaMov.tipo_movimiento == "ING"
+                                      ? _c("span", [_vm._v("Ingreso")])
+                                      : _vm._e(),
+                                    _vm._v(" "),
+                                    detaMov.tipo_movimiento == "RET"
+                                      ? _c("span", [_vm._v("Retiro")])
+                                      : _vm._e()
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("td", {
+                                    domProps: {
+                                      textContent: _vm._s(detaMov.ubicacion)
+                                    }
+                                  }),
+                                  _vm._v(" "),
+                                  _c(
+                                    "td",
+                                    { staticStyle: { "text-align": "right" } },
+                                    [
+                                      detaMov.tipo_movimiento == "RET"
+                                        ? _c("span", [_vm._v("-")])
+                                        : _vm._e(),
+                                      _vm._v(" "),
+                                      _c("span", {
+                                        domProps: {
+                                          textContent: _vm._s(detaMov.cantidad)
+                                        }
+                                      })
+                                    ]
+                                  ),
+                                  _vm._v(" "),
+                                  _c("td", {
+                                    staticStyle: { "text-align": "right" },
+                                    domProps: {
+                                      textContent: _vm._s(detaMov.stock)
+                                    }
+                                  }),
+                                  _vm._v(" "),
+                                  _c("td", {
+                                    domProps: {
+                                      textContent: _vm._s(
+                                        detaMov.estatus_movimientos
+                                      )
+                                    }
+                                  })
+                                ]
+                              )
+                            }
+                          ),
+                          0
+                        )
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "modal-footer" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-secondary",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.closeSubModal()
+                        }
+                      }
+                    },
+                    [_vm._v("Cerrar")]
+                  )
+                ])
+              ]
+            )
+          ]
+        )
+      ]
+    )
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("ol", { staticClass: "breadcrumb" }, [
+      _c("li", { staticClass: "breadcrumb-item" }, [_vm._v("Home")]),
+      _vm._v(" "),
+      _c("li", { staticClass: "breadcrumb-item" }, [_vm._v("Catalogos")]),
+      _vm._v(" "),
+      _c("li", { staticClass: "breadcrumb-item active" }, [
+        _vm._v("Lotes aplica movimientos almacen")
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("thead", [
+      _c("tr", [
+        _c("th", [_vm._v("Opciones")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Lote")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Referencia")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Fecha Operacion")])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("thead", [
+      _c("tr", [
+        _c("th", [_vm._v("Opciones")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Referencia")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Fecha")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Almacen")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Ubicacion")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Codigo")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Nombre producto")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Tipo Mov")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Cantidad")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Estado")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Msg")])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("thead", [
+      _c("tr", [
+        _c("th", [_vm._v("Fecha")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Lote")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Tipo movimiento")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Ubicacion")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Cantidad")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Stock")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Estatus")])
+      ])
+    ])
+  }
+]
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-f426e472", module.exports)
   }
 }
 

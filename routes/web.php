@@ -79,6 +79,9 @@ Route::post('/almacenes/arrastreStock', 'AlmacenController@aplicaArrastreStockPr
 Route::post('/almacenes/cat_ubica/generate-qr', 'AlmacenController@generateQrPng');
 Route::get('/almacenes/cat_ubica/report-qr', 'AlmacenController@imprimirReporteQr');
 Route::get('/almacenes/cat_ubica/depura/report-qr', 'AlmacenController@limpiarDirectorioCodigosQr');
+Route::post('/almacenes/cat_ubica/generate-qr-label', 'AlmacenController@generateQrPngLabel');
+Route::get('/almacenes/cat_ubica/get-almacen', 'AlmacenController@getAlmacenByUbicacion');
+Route::post('/almacenes/cat_ubica/set-almacen', 'AlmacenController@setAlmacenByUbicacion');
 
 
 
@@ -212,3 +215,13 @@ Route::delete('/cap/remove-product', 'CapturadorController@removeProduct');
 Route::post('/cap/set-piezas-product', 'CapturadorController@setPiezasProduct');
 Route::post('/cap/migrate-lote', 'CapturadorController@migrateLote');
 Route::get('/cap/depuracion-binaria', 'CapturadorController@depuraFoliosBinario');
+
+
+//~ Lote Operacion Procesos
+Route::get('/lop/get-detalle-lote', 'LoteOperacionProcesosController@getDetaLote');
+Route::post('/lop/aplica-lote', 'LoteOperacionProcesosController@aplicaLote');
+Route::get('/lop/get-catalog-lotes', 'LoteOperacionProcesosController@getCatalogoLotes');
+Route::post('/lop/elimina-lote', 'LoteOperacionProcesosController@eliminarLoteCompleto');
+Route::post('/lop/update-reg-lote', 'LoteOperacionProcesosController@updateRegLote');
+Route::post('/lop/delete-reg-lote', 'LoteOperacionProcesosController@deleteRegLote');
+

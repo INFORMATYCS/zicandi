@@ -57,6 +57,9 @@ Vue.component('buscador-ubicacion-component', require('./components/BuscadorUbic
 
 Vue.component('captura-estandar-component', require('./components/captura-estandar/CapturaEstandarComponent.vue'));
 
+Vue.component('aplica-mov-almacen-component', require('./components/aplica-mov-almacen/AplicaMovAlmacenComponent.vue'));
+
+Vue.component('mov-almacen-catalogo-component', require('./components/aplica-mov-almacen/MovAlmacenCatalogoComponent.vue'));
 
 const app = new Vue({
     el: '#app',
