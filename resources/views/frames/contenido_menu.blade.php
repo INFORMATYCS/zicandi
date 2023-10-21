@@ -19,6 +19,9 @@
                     <li class="nav-item">
                         <a @click="oppMenuSeleccion=19" class="nav-link" href="#"><i class="icon-bag"></i> Stock</a>
                     </li>
+                    <li class="nav-item">
+                        <a @click="oppMenuSeleccion=23" class="nav-link" href="#"><i class="icon-bag"></i> Aplicar stock por lote</a>
+                    </li>
                 </ul>
             </li>
             <li class="nav-item nav-dropdown">

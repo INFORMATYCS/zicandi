@@ -142,4 +142,42 @@ class ParametriaController extends Controller{
 
         return $anioActual.$seq;
     }
+
+
+    /**
+     * Crea una secuencia por prefijo
+     * para la creacion de lotes de almacen
+     */
+    public function seqLotePrefijoAlmacen_nextval($prefijo){        
+        $seq=0;
+        
+        $parametria = Parametria::where('clave_proceso', '=', 'SEQ_LOTE_ALM')
+        ->where('llave', '=', $prefijo)
+        ->where('xstatus', '=', '1')
+        ->select('id_parametria','clave_proceso','llave','valor','descripcion')
+        ->first(); 
+
+        if($parametria==null){            
+            $parametria = new Parametria();
+            $parametria->clave_proceso = 'SEQ_LOTE_ALM';
+            $parametria->llave = $prefijo;
+            $parametria->valor = 1;
+            $parametria->xstatus = 1;   
+            
+            $seq = 1;
+        }else{
+            $valor = $parametria->valor;
+            if($valor>=999){
+                $valor=0;
+            }
+
+            $parametria->valor = $valor + 1;
+            
+            $seq= $valor + 1;
+        }     
+        
+        $parametria->save();
+        
+        return str_pad($seq,3,"0",STR_PAD_LEFT);
+    }
 }

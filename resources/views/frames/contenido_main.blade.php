@@ -1,7 +1,7 @@
 @extends('principal')
 @section('contenido_main')
     <template v-if="oppMenuSeleccion==0">
-        <h1>sdasd asdasd asdad  asdasd  asasdInicio</h1>        
+        <h3>Nunduva - MeLi</h3>
     </template>
 
     <template v-if="oppMenuSeleccion==1">
@@ -61,6 +61,10 @@
 
     <template v-if="oppMenuSeleccion==22">
         <buscar-meli-metrica-component></buscar-meli-metrica-component>
+    </template>
+
+    <template v-if="oppMenuSeleccion==23">
+        <mov-almacen-catalogo-component></mov-almacen-catalogo-component>
     </template>
 
     <template v-if="oppMenuSeleccion==90">

@@ -31,12 +31,13 @@
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <button type="button" class="btn btn-info" @click="showModal('carga_masiva','mostrar')">
                         <i class="icon-plus"></i>&nbsp;Carga masiva
-                    </button>  
+                    </button>
+                    <button type="button" class="btn btn-info" @click="showModal('carga_captura_estandar','mostrar')">
+                        <i class="icon-energy"></i>&nbsp;Captura Estandar
+                    </button>
                 </div>   
             </div>
 
-            
-            
             <div class="card-body">
                 <!-- Buscador -->
 
@@ -55,6 +56,14 @@
 
                             <div class="col-5">                           
                                   
+                                    <div class="row">                 
+                                        <div class="col-7">
+                                            ID
+                                        </div>
+                                        <div class="col-5">                                            
+                                            <h6 v-text="idAlmacenSeleccion"></h6>
+                                        </div>          
+                                    </div>
                                     <div class="row">                 
                                         <div class="col-7">
                                             Total de productos
@@ -138,7 +147,7 @@
                             <td>
                                 <ul>
                                     <li style="list-style:none;" v-for="ubicacion in detalle.ubicacion_stock" :key="ubicacion.id_stock_ubica_producto">                                        
-                                        <span class="badge badge-pill badge-info" v-text="ubicacion.stock">14</span>
+                                        <span class="badge badge-pill badge-info" v-text="ubicacion.stock"></span>
                                         <span v-text="ubicacion.codigo_ubica"></span>                                        
                                     </li>
                                 </ul>
@@ -229,7 +238,8 @@
                     </div>
                     
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>                        
+                        <button type="button" class="btn btn-secondary" @click="onAplicaArrastreStock();">Aplicar arrastre de stock historico</button>
+                        <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>
                     </div>
                 </div>
                 <!-- /.modal-content -->
@@ -264,7 +274,15 @@
                     
                             <div class="tab-pane fade" :class="{ 'active show': isActive('cat_ubica') }" id="cat_ubica">
                                 <div class="row">
-                                    <div class="col-2">
+                                    <div class="col-4">
+                                        <button type="button" class="btn btn-warning btn-sm" @click="onGenerateQrUbicacion()">
+                                            <i class="icon-tag"></i>
+                                        </button>
+
+                                        <button type="button" class="btn btn-light btn-sm" @click="onGenerateQrOnLine()">
+                                            <i class="icon-grid"></i>
+                                        </button>
+
                                         <button type="button" class="btn btn-warning btn-sm" @click="onCargaDetalleUbicacion('origen','ticket')">
                                             <i class="icon-printer"></i>
                                         </button>
@@ -276,10 +294,19 @@
                                             <i class="icon-plus"></i>
                                         </button>
                                     </div>
-                                    <div class="col-3"> 
-                                        <buscador-ubicacion-component @setUbicacion="getUbicacionSeleccionOrigen" ></buscador-ubicacion-component>
+                                    <div class="col-4"> 
+                                        Almacen: <span v-text="modalTareasUbicacion.almacenNombre"></span>
+                                        <button type="button" class="btn btn-light btn-sm" @click="onSetAlmacenByUbicacion()">
+                                            <i class="icon-pencil"></i>
+                                        </button>
                                     </div>
-                                    <div class="col-7">
+                                    <div class="col-4"> 
+                                        <buscador-ubicacion-component @setUbicacion="getUbicacionSeleccionOrigen" ></buscador-ubicacion-component>
+                                    </div>                                                                                                            
+                                </div>
+
+                                <div class="row">                                    
+                                    <div class="col-12">
                                         <div class="row pre-scrollable">
                                             <div class="col-md-12">
                                                 <ul class="list-group">
@@ -304,6 +331,7 @@
                                     </div>
                                                                         
                                 </div>
+
                             </div>
 
                             <div class="tab-pane fade" :class="{ 'active show': isActive('unificacion') }" id="unificacion">
@@ -387,7 +415,9 @@
                     </div>
                     
                     <div class="modal-footer">                        
-                        <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>                        
+                        <button v-if="modalTareasUbicacion.mostrarBotonReporteQr" type="button" class="btn btn-secondary" @click="onDepurarDirQr();">Limpiar y generar nuevo reporte</button>
+                        <button v-if="modalTareasUbicacion.mostrarBotonReporteQr" type="button" class="btn btn-secondary" @click="onImprimirCodigosQr();">Imprimir codigos QR</button>
+                        <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>
                     </div>
                 </div>
                 <!-- /.modal-content -->
@@ -489,7 +519,7 @@
                     </div>                                        
                     <div class="modal-footer">
     
-                        <button type="button" class="btn btn-secondary" v-if="modalOrdenEntradaSalida.resultadoProcesaLote == 0 || modalOrdenEntradaSalida.resultadoProcesaLote == 1" @click="onAplicarOrden();">Aplicar</button>
+                        <button type="button" class="btn btn-secondary" v-if="modalOrdenEntradaSalida.resultadoProcesaLote == 0 || modalOrdenEntradaSalida.resultadoProcesaLote == 1" @click="onAplicarOrden();" :disabled="btnAplicarEstado">Aplicar</button>
                         <button type="button" class="btn btn-secondary" v-if="modalOrdenEntradaSalida.resultadoProcesaLote >= 1" @click="onGenerarReporte();">Generar reporte</button>
                         <button type="button" class="btn btn-secondary" @click="closeModal();">Cerrar</button>                            
                                     
@@ -521,6 +551,13 @@
                 <div class="form-group">
                     <label for="message-text" class="col-form-label">Nombre:</label>
                     <input type="text" class="form-control" v-model="modalCatUbicacion.nombre">
+                </div>
+                <div class="form-group">
+                    <label for="message-text" class="col-form-label">ID Almacen:</label>
+                    <select class="form-control" v-model="modalCatUbicacion.idAlmacenSeleccion">
+                        <option value="0" disabled>Seleccione...</option>
+                        <option v-for="almacen in modalCatUbicacion.mapAlmacen" :key="almacen.id_almacen" :value="almacen.id_almacen" v-text="almacen.nombre"></option>                                        
+                    </select>
                 </div>
                 </form>
             </div>
@@ -605,7 +642,27 @@
         <!--Fin del modal-->
 
 
+        <!--Inicio modal captura estandar-->
+        <div class="modal fade" :class="{'mostrar' : modalCapturaEstandar.modal}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true">
+            
+            <div class="modal-dialog modal-primary" style="max-width: 90% !important;" role="document">
+                <div class="modal-content" :style="{height: modalCapturaEstandar.h}">
+                    <div class="modal-header" style="height: 30px;">
+                        <h5 class="modal-title" v-text="modalCapturaEstandar.tituloModal"></h5>
+                        <button type="button" class="close" aria-label="Close" @click="closeModal();">
+                            <span aria-hidden="true">×</span>
+                        </button>                        
+                    </div>
+                    <div class="modal-body" style="max-height: calc(100% - 10px); overflow-y: scroll;">
+                        <captura-estandar-component></captura-estandar-component> 
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
 
+        </div>
+        <!--Fin del modal-->
 
 
     </main>    
@@ -660,7 +717,9 @@
                     codigoOrigen: '',
                     codigoDestino: '',
                     detalleOrigen: [],
-                    detalleDestino: []
+                    detalleDestino: [],
+                    mostrarBotonReporteQr: false,
+                    almacenNombre: ''
                 },
                 pagination: {
                     total : 0,
@@ -676,7 +735,9 @@
                     error: 0,
                     erroresMsjList: [],
                     codigo:'',
-                    nombre:''
+                    nombre:'',
+                    mapAlmacen:[],
+                    idAlmacenSeleccion: 0
                 },
                 loteReferencia: '',
                 chkModoSet: false,
@@ -688,7 +749,13 @@
                     fileSeleccion: null,
                     fileServidor: '',
                     cargaTemporal: []
-                }
+                },
+                modalCapturaEstandar: {
+                    modal: 0,
+                    tituloModal: '',
+                    h: (window.innerHeight-50)+'px'                
+                },                
+                btnAplicarEstado: false
             }
         },
         computed:{
@@ -717,6 +784,7 @@
                 .then(function (response) {                    
                     let respuesta = response.data;                      
                     me.mapAlmacen = respuesta.almacen;
+                    me.modalCatUbicacion.mapAlmacen = respuesta.almacen;
                 })
                 .catch(function (error) {                                        
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
@@ -883,6 +951,7 @@
                 if(ubicacion!=null){
                     this.modalTareasUbicacion.codigoOrigen = ubicacion.codigo;
                     this.onCargaDetalleUbicacion('origen','consulta');
+                    this.onGetAlmacenByUbicacion();
                 }else{
                     this.modalTareasUbicacion.codigoOrigen = null;
                     this.modalTareasUbicacion.detalleOrigen = [];
@@ -931,7 +1000,7 @@
                 axios.get(url)
                 .then(function (response) {  
                     me.isLoading = 0;       
-                    console.log(response);             
+                    console.log(response);
                     if(response.data.xstatus){ 
                         me.modalDetalleMovimientos.detalleMovimientos = response.data.detalle.data;                                            
                         me.modalDetalleMovimientos.pagination = response.data.pagination;
@@ -1054,23 +1123,28 @@
                                 this.modalCargaMasiva.fileSeleccion = null;   
                                 this.modalCargaMasiva.fileServidor = '';   
                                 this.modalCargaMasiva.cargaTemporal = [];  
-                                this.modalCargaMasiva.cargaServidorExitosa = false;                                 
-                                
+                                this.modalCargaMasiva.cargaServidorExitosa = false;
                                 break;
                             }
                             
                         }
 
                         break;
-                    } 
+                    }
+                    case 'carga_captura_estandar':
+                    {
+                        switch(accion){
+                            case 'mostrar':
+                            {                                                                                                
+                                this.modalCapturaEstandar.modal = 1;
+                                this.modalCapturaEstandar.tituloModal = 'Captura estandar (rapida)';
+                                break;
+                            }
+                            
+                        }
 
-
-
-                    
-                    
-                    
-
-                    
+                        break;
+                    }  
                 }                
             },
             /**
@@ -1094,7 +1168,9 @@
 
                 this.modalCargaMasiva.modal = 0;                
                 this.modalCargaMasiva.tituloModal = '';
-        
+
+                this.modalCapturaEstandar.modal = 0;                
+                this.modalCapturaEstandar.tituloModal = '';
             },
 
             addDetalleSeleccion(data){   
@@ -1214,6 +1290,8 @@
              * 
              */
             onAplicarOrden(){
+                this.btnAplicarEstado = true;
+
                 let pilaTrabajo = [];                
                 let me = this;
 
@@ -1282,16 +1360,16 @@
                             }else{
                                 procesaErr++;
                             }
-                            
-                                                       
-                            me.$forceUpdate();
-                                                       
+                                                        
+                            me.$forceUpdate();                                                       
                         });
                     },
                     Promise.resolve()
                 ).then(function() {
                     //~Termina la ejecucion de toda la pila
                     util.AVISO('Termina ejecucion', util.tipoOk);
+                    me.btnAplicarEstado = false;
+
                     if(procesaOk > 0 && procesaErr == 0){
                         me.modalOrdenEntradaSalida.resultadoProcesaLote= 2;
                     }else if(procesaOk > 0 || procesaErr > 0){
@@ -1486,13 +1564,11 @@
 
             onStoreUbicacionAlmacen(){
                 let me = this;                
-                
-
-
                 this.isLoading = 1;
                 axios.post('/zicandi/public/almacenes/cat_ubica/store',{
                         'codigo': this.modalCatUbicacion.codigo,
-                        'nombre': this.modalCatUbicacion.nombre                       
+                        'nombre': this.modalCatUbicacion.nombre,
+                        'id_almacen': this.modalCatUbicacion.idAlmacenSeleccion
                 })
                 .then(function (response) {  
                     me.isLoading = 0;           
@@ -1623,6 +1699,196 @@
                 }
             },
 
+            /**
+             * Ejecuta el arrastre de stock a peticion
+             * 
+             */
+            onAplicaArrastreStock(){
+                let me = this;                            
+                this.isLoading = 1;
+                let idProducto = me.modalDetalleMovimientos.producto.id_producto;
+
+                axios.post('/zicandi/public/almacenes/arrastreStock',{
+                        'idProducto': idProducto
+                })
+                .then(function (response) {  
+                    me.isLoading = 0;           
+                    
+                    if(response.data.xstatus){
+                        me.onDetalleMovimientosProducto(1, idProducto);
+                        
+                        util.AVISO('Perfecto, se relizo el arrastre, valide posibles cambios de stock!', util.tipoOk);
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+                                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+
+            /**
+             * Genera codigo QR
+             * 
+             */
+            onGenerateQrUbicacion(){
+                let me = this;                            
+                this.isLoading = 1;                
+                let codigoOrigen = this.modalTareasUbicacion.codigoOrigen;
+
+                axios.post('/zicandi/public/almacenes/cat_ubica/generate-qr',{
+                        'text': codigoOrigen
+                })
+                .then(function (response) {  
+                    me.isLoading = 0;           
+                    
+                    if(response.data.xstatus){
+                        me.modalTareasUbicacion.mostrarBotonReporteQr=true;
+                        
+                        util.AVISO('Codigo QR generado', util.tipoOk);
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+                                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+
+            /**
+             * Genera reporte con QR almacenados
+             * 
+             */
+            onImprimirCodigosQr(){                
+                let url = '/zicandi/public/almacenes/cat_ubica/report-qr';
+
+                Swal.fire({
+                    title: 'Ticket',
+                    html: '<embed src="'+url+'" type="application/pdf" width="100%" height="300px" />',
+                    showCloseButton: false,
+                    showCancelButton: false,
+                    focusConfirm: false                    
+                });       
+            },
+
+            /**
+             * Depura directorio con QR almacenados previamente
+             * 
+             * 
+             */
+            onDepurarDirQr(){
+                let me = this;                            
+                this.isLoading = 1;
+
+                axios.get('/zicandi/public/almacenes/cat_ubica/depura/report-qr')
+                .then(function (response) {  
+                    me.isLoading = 0;           
+                    
+                    if(response.data.xstatus){
+                        me.modalTareasUbicacion.mostrarBotonReporteQr=false;                        
+                        util.AVISO('Perfecto, se limpio el repositorio de QR local', util.tipoOk);
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+                                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+            onGenerateQrOnLine(){
+                let me = this;                            
+                
+                let codigoOrigen = this.modalTareasUbicacion.codigoOrigen;
+
+                if(codigoOrigen==null || codigoOrigen==''){
+                    util.MSG('Algo salio Mal!','Selecciona una ubicacion', util.tipoErr);
+                    return;
+                }                
+
+                this.isLoading = 1;                
+                axios.post('/zicandi/public/almacenes/cat_ubica/generate-qr-label',{
+                        'text': codigoOrigen
+                })
+                .then(function (response) {  
+                    me.isLoading = 0;           
+  
+                    if(response.data.xstatus){                        
+                        util.AVISO('Codigo QR generado, imprimiendo...', util.tipoOk);
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+                                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+
+            /**
+             * Consulta el almacen ligado a la ubicacion
+             * 
+             */
+             onGetAlmacenByUbicacion(){                
+                let me = this;
+                this.isLoading = 1;
+                let codigo= this.modalTareasUbicacion.codigoOrigen;
+                let url = '/zicandi/public/almacenes/cat_ubica/get-almacen?codigo='+codigo;
+        
+                axios.get(url)
+                .then(function (response) {
+                    console.log(response);
+                    me.isLoading = 0;                           
+                    if(response.data.xstatus){
+                        if(response.data.almacen!=null){
+                            me.modalTareasUbicacion.almacenNombre= response.data.almacen.nombre;
+                        }else{
+                            me.modalTareasUbicacion.almacenNombre= "";
+                        }
+                    }else{
+                        me.modalTareasUbicacion.almacenNombre= "";
+                    } 
+                                      
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+
+            onSetAlmacenByUbicacion(){
+                let me = this;                
+                let codigo= this.modalTareasUbicacion.codigoOrigen;
+                let idAlmacen = prompt("Id Almacen", this.idAlmacenSeleccion);
+                if(idAlmacen!=undefined){                                    
+                    this.isLoading = 1;
+                    axios.post('/zicandi/public/almacenes/cat_ubica/set-almacen',{
+                            'codigo': codigo,
+                            'id_almacen': idAlmacen                       
+                    })
+                    .then(function (response) {  
+                        me.isLoading = 0;           
+                        
+                        if(response.data.xstatus){ 
+                            me.onDetalleMovimientosProducto();                       
+                        }else{
+                            throw new Error(response.data.error);
+                        } 
+                                        
+                    })
+                    .catch(function (error) {       
+                        me.isLoading = 0;             
+                        util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                    });
+                }
+            }
+
         },
         mounted() {
             this.onGetMapAlmacen();
@@ -1631,3 +1897,5 @@
         }
     }
 </script>
+
+

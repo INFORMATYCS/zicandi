@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddConstrainIdalmacen extends Migration
+class AddIdAlmacenCatUbicaProducto extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,9 @@ class AddConstrainIdalmacen extends Migration
      */
     public function up()
     {
-        Schema::table('stock_producto', function (Blueprint $table) {                        
-            //$table->foreign('id_almacen')->references('id_almacen')->on('almacen');
-            
-            
+        Schema::table('cat_ubica_producto', function (Blueprint $table) {
+            $table->integer('id_almacen')->nullable()->after('nombre');
         });
-        
     }
 
     /**
@@ -28,6 +25,6 @@ class AddConstrainIdalmacen extends Migration
      */
     public function down()
     {
-        //
+        $table->dropColumn('id_almacen');
     }
 }

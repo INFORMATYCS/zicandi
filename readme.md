@@ -22,6 +22,18 @@ $ composer install
 ```
 Side information: To use the application in a special environment use ```lorem ipsum``` to start
 
+Instalacion de NODE
+
+Importante, al realizar la instalacion activar la siguiente opcion:
+
+Automatically install the necessary tools. Note thah this will also...
+
+```
+$ cd zicandi
+$ npm install
+$ npm run watch
+
+```
 
 #### Creacion del archivo .env
 ```
@@ -78,6 +90,8 @@ http://localhost/zicandi/public/
 
 #### Requerimientos
 PHP 7^
+
+node 16.13.0 /soccers-nas/nfs-soccers/software/win/desarrollo/node-v16.13.0-x64.msi
 
 
 

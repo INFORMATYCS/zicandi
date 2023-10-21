@@ -174,4 +174,14 @@ var util = {
         },
 
 
+        POPUP_IMG: function(url, etiqueta){            
+            Swal.fire({
+                title: '<strong>'+etiqueta+'</strong>',                
+                html:
+                  '<img src="'+url+'" width="100" height="100">',
+                showCloseButton: true                
+              });
+        },
+
+
 };        
