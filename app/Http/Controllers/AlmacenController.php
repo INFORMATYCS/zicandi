@@ -1024,6 +1024,20 @@ class AlmacenController extends Controller{
     public function aplicaCargaExcel(Request $request){        
         try{           
 
+            DB::select('call sp_genera_lote_excel(@lote,@err, @msg)');
+            $results = DB::select('select @lote lote, @err as err, @msg as msg');
+
+            $lote= $results[0]->lote;
+            $pError= $results[0]->err;
+            $pMsgError= $results[0]->msg;
+
+            if($pError!=0){
+                throw new Exception('No fue posible generar el lote. '.$pMsgError);
+            }
+
+            //~Deshabilita modulo 11 11 2023
+            return [ 'xstatus'=>false, 'error' => 'Se genero el lote '.$lote ];   
+
             //~Procesa la informacion
             $temp = TempCargaStock::where('estatus','=','ACE')->get();           
 

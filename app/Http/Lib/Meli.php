@@ -280,6 +280,14 @@ class Meli {
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, "grant_type=authorization_code&client_id=".$this->client_id."&client_secret=".$this->client_secret."&code=".$this->code."&redirect_uri=".$this->redirect_uri);
         }
+        
+        
+
+/*
+        "client_id" => $this->client_id, 
+            "client_secret" => $this->client_secret, 
+            "code" => $code, 
+            "redirect_uri" => $this->redirect_uri*/
 
         $return["body"] = json_decode(curl_exec($ch), $assoc);
         $return["httpCode"] = curl_getinfo($ch, CURLINFO_HTTP_CODE);
