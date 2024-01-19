@@ -135,6 +135,11 @@ Route::get('/meli/metricas/proyecto/select', 'MercadoLibreController@selectProye
 
 Route::get('/meli/buscador', 'MercadoLibreController@busquedaMeli');
 
+Route::get('/meli/surtir/envio/detalle', 'EnvioMeliController@getDetalleConfig');
+Route::post('/meli/surtir/envio/add/movimiento', 'EnvioMeliController@registrarMovimiento');
+Route::post('/meli/surtir/envio/del/movimiento', 'EnvioMeliController@eliminarMovimiento');
+Route::get('/meli/surtir/envio/ubicaciones/all', 'EnvioMeliController@getUbicacionesAll');
+
 
 // - Rutas API betterware
 Route::get('/bett/get', 'BetterwareController@getPage');

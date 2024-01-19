@@ -637,8 +637,21 @@ class MercadoLibreController extends Controller
 
             }                        
 
-        
-            return [ 'xstatus'=>true, 'zpl' => $zplList ];
+            // Genera indice de productos por SURTIR
+            DB::select('call sp_meli_surtir_genera_indice(?, @totalOk, @totalErr, @err, @msg)', [$folioFull]);
+            $results = DB::select('select @totalOk totalOk, @totalErr totalErr, @err as err, @msg as msg');
+            $totalOk= $results[0]->totalOk;
+            $totalErr= $results[0]->totalErr;
+            $pError= $results[0]->err;
+            $pMsgError= $results[0]->msg;
+
+            if($pError!=0){
+                throw new Exception('No fue posible generar el indice para surtir el envio'.$pMsgError);
+            }
+
+            DB::select('call sp_meli_surtir_genera_foto_stock(?, @err, @msg)', [$folioFull]);
+
+            return [ 'xstatus'=>true, 'zpl' => $zplList, 'surtirEnvioOk' => ($totalOk==null ? 0 : $totalOk), 'surtirEnvioErr' => ($totalErr==null ? 0 : $totalErr)];
         }catch (\Exception $e) {
             \Log::error($e->getTraceAsString());       
             return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
