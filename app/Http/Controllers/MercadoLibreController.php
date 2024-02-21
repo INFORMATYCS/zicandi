@@ -25,6 +25,10 @@ use App\MeliMetricaVisor;
 use App\MeliDetaMetricaVisor;
 use App\MeliMetricaProyecto;
 use App\MeliMetricaVisorProyecto;
+use App\MeliSurtirConfigEnvioFullEntity;
+use App\MeliSurtirDetaEnvioFullEntity;
+use App\MeliSurtirIndiceEnvioFullEntity;
+use App\MeliSurtirFotoStockEnvioFullEntity;
 
 class MercadoLibreController extends Controller
 {
@@ -512,7 +516,13 @@ class MercadoLibreController extends Controller
             //~Valida que no exista el folio
             $envio = MeliEnvioFull::where('folio_full','=',$folioFull)->first();
 
-            if($envio!=null){                        
+            if($envio!=null){ 
+                //~Limpia tablas para surtir el envio        
+                MeliSurtirFotoStockEnvioFullEntity::where('folio_full','=',$folioFull)->delete();
+                MeliSurtirDetaEnvioFullEntity::where('folio_full','=',$folioFull)->delete();
+                MeliSurtirConfigEnvioFullEntity::where('folio_full','=',$folioFull)->delete();
+                MeliSurtirIndiceEnvioFullEntity::where('folio_full','=',$folioFull)->delete();
+                //~Limpia tablas del envio
                 MeliConfigEnvioFull::where('id_meli_envio_full','=',$envio->id_meli_envio_full)->delete();
                 MeliDetaEnvioFull::where('id_meli_envio_full','=',$envio->id_meli_envio_full)->delete();
                 MeliEnvioFull::where('folio_full','=',$folioFull)->delete();
@@ -649,7 +659,7 @@ class MercadoLibreController extends Controller
                 throw new Exception('No fue posible generar el indice para surtir el envio'.$pMsgError);
             }
 
-            DB::select('call sp_meli_surtir_genera_foto_stock(?, @err, @msg)', [$folioFull]);
+            DB::select('call sp_meli_surtir_genera_foto_stock(?, ?, @err, @msg)', [$folioFull, $folioFull]);
 
             return [ 'xstatus'=>true, 'zpl' => $zplList, 'surtirEnvioOk' => ($totalOk==null ? 0 : $totalOk), 'surtirEnvioErr' => ($totalErr==null ? 0 : $totalErr)];
         }catch (\Exception $e) {

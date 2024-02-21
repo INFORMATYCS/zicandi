@@ -80316,6 +80316,318 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -80352,6 +80664,21 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 error: 0,
                 erroresMsjList: []
             },
+            modalSurtirFolioEnvio: {
+                modal: 0,
+                tituloModal: '',
+                tipoBusqueda: 0,
+                tipoAccion: 0,
+                folioFull: 0,
+                detalleEnvioFull: [],
+                filtro: '',
+                folioFullBuscador: '',
+                opcionFiltro: 'TODO',
+                opcionFiltroUbica: 'PENDIENTE',
+                error: 0,
+                erroresMsjList: [],
+                h: window.innerHeight - 50 + 'px'
+            },
             modalPrinter: {
                 modal: 0,
                 tituloModal: '',
@@ -80365,8 +80692,28 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 error: 0,
                 erroresMsjList: []
             },
-            isLoading: 0
-
+            modalDetaUbicaDisponible: {
+                modal: 0,
+                tituloModal: '',
+                tipoAccion: 0,
+                detalleUbicaciones: [],
+                error: 0,
+                erroresMsjList: []
+            },
+            modalDetaFotoStock: {
+                modal: 0,
+                tituloModal: '',
+                tipoAccion: 0,
+                folioFull: '',
+                nameFotoStock: '',
+                detalleStock: [],
+                renameFotoStock: '',
+                ultimaActualizacion: '',
+                error: 0,
+                erroresMsjList: []
+            },
+            isLoading: 0,
+            btnAplicarEstado: false
         };
     },
 
@@ -80470,6 +80817,44 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
                                     break;
                                 }
+
+                            case 'surtir':
+                                {
+                                    this.modalSurtirFolioEnvio.modal = 1;
+                                    this.modalSurtirFolioEnvio.tituloModal = 'Surtir envio full ' + this.onGetLocalStorageSurtir(data.folio_full);
+                                    this.modalSurtirFolioEnvio.tipoAccion = 1;
+                                    this.modalSurtirFolioEnvio.folioFull = data.folio_full;
+                                    this.modalSurtirFolioEnvio.folioFullBuscador = this.onGetLocalStorageSurtir(data.folio_full);
+                                    this.modalSurtirFolioEnvio.error = 0;
+                                    this.modalSurtirFolioEnvio.erroresMsjList = [];
+                                    this.onChangeTipoBusqueda(2);
+                                    break;
+                                }
+
+                            case 'deta-ubicaciones':
+                                {
+                                    this.modalDetaUbicaDisponible.modal = 1;
+                                    this.modalDetaUbicaDisponible.tituloModal = 'Ubicaciones stock disponible';
+                                    this.modalDetaUbicaDisponible.tipoAccion = 1;
+                                    this.modalDetaUbicaDisponible.error = 0;
+                                    this.modalDetaUbicaDisponible.erroresMsjList = [];
+                                    this.onConsultaUbicaDeta(data.id_producto, data.folio_full);
+
+                                    break;
+                                }
+
+                            case 'deta-foto-stock':
+                                {
+                                    this.modalDetaFotoStock.modal = 1;
+                                    this.modalDetaFotoStock.tituloModal = 'Detalle foto stock: ' + data.foto_stock_surtir;
+                                    this.modalDetaFotoStock.tipoAccion = 1;
+                                    this.modalDetaFotoStock.error = 0;
+                                    this.modalDetaFotoStock.erroresMsjList = [];
+                                    this.modalDetaFotoStock.nameFotoStock = data.foto_stock_surtir;
+                                    this.modalDetaFotoStock.folioFull = data.folio_full;
+                                    this.onCargaDetalleFotoStock(data.foto_stock_surtir);
+                                    break;
+                                }
                         }
                     }
             }
@@ -80479,6 +80864,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             this.modalNuevoFolioEnvio.tituloModal = '';
             this.modalDetalleNuevoFolioEnvio.modal = 0;
             this.modalDetalleNuevoFolioEnvio.tituloModal = '';
+            this.modalSurtirFolioEnvio.modal = 0;0;
         },
         selectTienda: function selectTienda() {
             var me = this;
@@ -80524,10 +80910,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             axios.post('/zicandi/public/meli/envios/crear', fd).then(function (response) {
                 me.isLoading = 0;
                 var bandExito = true;
-
+                console.log(response);
                 if (response.data.xstatus) {
                     me.modalNuevoFolioEnvio.erroresMsjList = [];
                     me.modalNuevoFolioEnvio.error = 0;
+                    var surteEnvioOk = response.data.surtirEnvioOk;
+                    var surteEnvioErr = response.data.surtirEnvioErr;
                     for (var i = 0; i < response.data.zpl.length; i++) {
                         var msg = response.data.zpl[i];
 
@@ -80539,8 +80927,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     }
 
                     if (bandExito) {
-                        util.AVISO('Perfecto, registro correcto', util.tipoOk);
-
+                        util.MSG('Envio registrado correctamente', 'Preparacion del envio ' + surteEnvioOk + ' ok, ' + surteEnvioErr + ' Err. Revise el detalle', util.tipoOk);
+                        me.listaFoliosEnvio();
                         me.closeModal();
                     }
                 } else {
@@ -80638,6 +81026,378 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 me.isLoading = 0;
                 util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
             });
+        },
+        onChangeTipoBusqueda: function onChangeTipoBusqueda(tipo) {
+            this.modalSurtirFolioEnvio.filtro = "";
+            this.modalSurtirFolioEnvio.tipoBusqueda = tipo;
+            this.modalSurtirFolioEnvio.detalleEnvioFull = [];
+
+            if (tipo == 2) {
+                this.onGetDetalleSurtirEnvioFull();
+            }
+        },
+        onGetDetalleSurtirEnvioFull: function onGetDetalleSurtirEnvioFull() {
+            var me = this;
+            this.isLoading = 1;
+
+            var filtro = this.modalSurtirFolioEnvio.filtro;
+            var opcionFiltroAll = this.modalSurtirFolioEnvio.opcionFiltro;
+            var opcionFiltroUbica = this.modalSurtirFolioEnvio.opcionFiltroUbica;
+            var tipoBusqueda = "ALL";
+            if (this.modalSurtirFolioEnvio.tipoBusqueda == 1) {
+                tipoBusqueda = "PRODUCTO";
+            } else if (this.modalSurtirFolioEnvio.tipoBusqueda == 0) {
+                tipoBusqueda = "UBICACION";
+            }
+
+            var folioFull = this.modalSurtirFolioEnvio.folioFull;
+            var folioFullBuscador = this.modalSurtirFolioEnvio.folioFullBuscador;
+
+            axios.get('/zicandi/public/meli/surtir/envio/detalle?folio_full=' + folioFull + '&filtro=' + filtro + '&criterio=' + tipoBusqueda + '&folios_full_complete=' + folioFullBuscador).then(function (response) {
+                me.isLoading = 0;
+                if (response.data.xstatus) {
+                    var deta = response.data.deta;
+
+                    if (tipoBusqueda == "UBICACION" && opcionFiltroUbica == "PENDIENTE" || tipoBusqueda == "ALL" && opcionFiltroAll == "PENDIENTE") {
+                        deta = [];
+                        console.log("Filter");
+                        response.data.deta.forEach(function (valor, indice) {
+                            if (valor.estatus != "SUR") {
+                                deta.push(valor);
+                            }
+                        });
+                    }
+                    me.modalSurtirFolioEnvio.detalleEnvioFull = deta;
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+
+            this.$refs.filtroTxt.select();
+        },
+        onShowDetaSurtir: function onShowDetaSurtir(deta) {
+            if (deta.showDetalleSurtido == 1) {
+                deta.showDetalleSurtido = 0;
+            } else {
+                deta.showDetalleSurtido = 1;
+            }
+
+            this.$forceUpdate();
+        },
+        onAddMovimientoSurtir: function onAddMovimientoSurtir(deta, detaStock) {
+            this.btnAplicarEstado = true;
+            var me = this;
+
+            setInterval(function () {
+                me.btnAplicarEstado = false;
+            }, 3000);
+
+            var piezasPendientes = deta.total_piezas_surtir - deta.total_piezas_surtidas;
+            var totalPiezasAplicar = detaStock.totalPiezas;
+
+            var stock = detaStock.stock;
+            var retenido = detaStock.retenido;
+            var disponible = detaStock.disponible;
+
+            if (totalPiezasAplicar <= 0) {
+                this.btnAplicarEstado = false;
+                return;
+            }
+
+            if (totalPiezasAplicar > piezasPendientes) {
+                this.btnAplicarEstado = false;
+                util.MSG('Algo salio Mal!', 'Se supera la cantidad de piezas esperadas', util.tipoErr);
+                return;
+            }
+
+            if (totalPiezasAplicar > disponible) {
+                this.btnAplicarEstado = false;
+                util.MSG('Algo salio Mal!', 'Stock disponible insuficiente', util.tipoErr);
+                return;
+            }
+
+            var fdSurtirAdd = new FormData();
+            fdSurtirAdd.append('folio_full', deta.folio_full);
+            fdSurtirAdd.append('id_surtir_config_envio_full', deta.id_surtir_config_envio_full);
+            fdSurtirAdd.append('codigo_producto', detaStock.codigo_producto);
+            fdSurtirAdd.append('codigo_ubicacion', detaStock.codigo_ubicacion);
+            fdSurtirAdd.append('total_piezas', totalPiezasAplicar);
+
+            this.isLoading = 1;
+            axios.post('/zicandi/public/meli/surtir/envio/add/movimiento', fdSurtirAdd).then(function (response) {
+                me.btnAplicarEstado = false;
+                me.isLoading = 0;
+                var bandExito = true;
+                console.log(response);
+
+                if (response.data.xstatus) {
+                    //~Actualiza montos
+                    me.onCalculaStockPersisteMov(deta, response.data.detaSurtido, totalPiezasAplicar, response.data.stockFoto);
+                    detaStock.totalPiezas = "";
+                    deta.showDetalleSurtido = 1;
+                    me.$forceUpdate();
+                } else {
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                me.btnAplicarEstado = false;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onDeleteMovimientoSurtir: function onDeleteMovimientoSurtir(deta, detaSurtido) {
+            var _this = this;
+
+            util.MSG_SI_NO('Deseas borrar el movimiento', 'Asegurarte de regresarlo a su caja', util.tipoPreg).then(function (result) {
+                if (result == util.btnSi) {
+                    _this.isLoading = 1;
+                    var me = _this;
+                    console.log(deta);
+                    console.log(detaSurtido);
+
+                    axios.post('/zicandi/public/meli/surtir/envio/del/movimiento', {
+                        'folio_full': detaSurtido.folio_full,
+                        'id_surtir_config_envio_full': detaSurtido.id_surtir_config_envio_full,
+                        'id_surtir_deta_envio_full': detaSurtido.id_surtir_deta_envio_full
+                    }).then(function (response) {
+                        me.isLoading = 0;
+                        if (response.data.xstatus) {
+                            //~Actualiza montos                                
+                            me.onCalculaStockPersisteMov(deta, response.data.detaSurtido, detaSurtido.total_piezas * -1, response.data.stockFoto);
+                            util.AVISO('Eliminado!!!', util.tipoOk);
+                            me.$forceUpdate();
+                        } else {
+                            throw new Error(response.data.error);
+                        }
+                    }).catch(function (error) {
+                        me.isLoading = 0;
+                        util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+                    });
+                }
+            });
+        },
+        onCalculaStockPersisteMov: function onCalculaStockPersisteMov(deta, detaSurtido, totalPiezas, detaStock) {
+            //~Sumariza el nuevo stock surtido
+            var totalPiezasSurtidas = 0;
+            detaSurtido.forEach(function (valor, indice) {
+                totalPiezasSurtidas += valor.total_piezas;
+            });
+
+            //~Actualiza total
+            deta.total_piezas_surtidas = totalPiezasSurtidas;
+            if (totalPiezasSurtidas == 0) {
+                deta.estatus = "PEN";
+                deta.showDetalleSurtido = 0;
+            } else if (deta.total_piezas_surtir == deta.total_piezas_surtidas) {
+                deta.estatus = "SUR";
+            } else {
+                deta.estatus = "PRO";
+            }
+
+            //~Actualiza stock
+            if (deta.stock) {
+                console.log("si hay stock");
+                detaStock.forEach(function (valor, indice) {
+                    deta.stock[0].retenido = valor.retenido;
+                    deta.stock[0].disponible = valor.disponible;
+                });
+            }
+
+            //~Reemplaza el detalle
+            deta.detaSurtido = detaSurtido;
+
+            //~Evalua si existe la misma ubicacion y producto para replicar el nuevo stock
+            this.modalSurtirFolioEnvio.detalleEnvioFull.forEach(function (gralDetaSur, indice) {
+                if (gralDetaSur.stock) {
+                    if (gralDetaSur.codigo_producto == deta.codigo_producto) {
+                        detaStock.forEach(function (valor, indice) {
+                            gralDetaSur.stock[0].retenido = valor.retenido;
+                            gralDetaSur.stock[0].disponible = valor.disponible;
+                        });
+                    }
+                }
+            });
+        },
+        onConsultaUbicaDeta: function onConsultaUbicaDeta(idProducto, folioFull) {
+            var me = this;
+            this.isLoading = 1;
+
+            axios.get('/zicandi/public/meli/surtir/envio/ubicaciones/all?folio_full=' + folioFull + '&id_producto=' + idProducto).then(function (response) {
+                me.isLoading = 0;
+                if (response.data.xstatus) {
+                    me.modalDetaUbicaDisponible.detalleUbicaciones = response.data.ubicaciones;
+                } else {
+                    me.modalDetaUbicaDisponible.detalleUbicaciones = [];
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onCargaDetalleFotoStock: function onCargaDetalleFotoStock(nameFotoStock) {
+            var me = this;
+            this.isLoading = 1;
+            console.log(nameFotoStock);
+
+            axios.get('/zicandi/public/meli/surtir/envio/foto/get?nameFotoStock=' + nameFotoStock).then(function (response) {
+                me.isLoading = 0;
+                if (response.data.xstatus) {
+                    me.modalDetaFotoStock.detalleStock = response.data.deta;
+                    if (response.data.deta.length > 0) {
+                        me.modalDetaFotoStock.ultimaActualizacion = response.data.deta[0].created_at;
+                    }
+                } else {
+                    me.modalDetaFotoStock.detalleStock = [];
+                    throw new Error(response.data.error);
+                }
+            }).catch(function (error) {
+                me.isLoading = 0;
+                util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+            });
+        },
+        onRefreshFotoStock: function onRefreshFotoStock() {
+            var _this2 = this;
+
+            var nameFotoStock = this.modalDetaFotoStock.nameFotoStock;
+            var folioFull = this.modalDetaFotoStock.folioFull;
+
+            util.MSG_SI_NO('Actualizar stock', 'Al actualizar se borran todos los cambios realizados', util.tipoPreg).then(function (result) {
+                if (result == util.btnSi) {
+                    _this2.isLoading = 1;
+                    var me = _this2;
+
+                    axios.post('/zicandi/public/meli/surtir/envio/foto/refresh', {
+                        'folioFull': folioFull,
+                        'nameFotoStock': nameFotoStock
+                    }).then(function (response) {
+                        me.isLoading = 0;
+                        if (response.data.xstatus) {
+                            me.onCargaDetalleFotoStock(nameFotoStock);
+                            util.AVISO('Foto actualizada!!!', util.tipoOk);
+                        } else {
+                            throw new Error(response.data.error);
+                        }
+                    }).catch(function (error) {
+                        me.isLoading = 0;
+                        util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+                    });
+                }
+            });
+        },
+        onLigarFotoStock: function onLigarFotoStock() {
+            var _this3 = this;
+
+            var nameFotoStock = this.modalDetaFotoStock.nameFotoStock;
+            var folioFull = this.modalDetaFotoStock.folioFull;
+            var renameFotoStock = this.modalDetaFotoStock.renameFotoStock;
+
+            util.MSG_SI_NO('Ligar a foto stock', 'Estas seguro de ligarlo a otra foto de stock?', util.tipoPreg).then(function (result) {
+                if (result == util.btnSi) {
+                    _this3.isLoading = 1;
+                    var me = _this3;
+
+                    axios.post('/zicandi/public/meli/surtir/envio/foto/ligar', {
+                        'folioFull': folioFull,
+                        'nameFotoStock': nameFotoStock,
+                        'renameFotoStock': renameFotoStock
+                    }).then(function (response) {
+                        me.isLoading = 0;
+                        if (response.data.xstatus) {
+                            me.onCargaDetalleFotoStock(response.data.nameFotoStock);
+                            me.modalDetaFotoStock.tituloModal = 'Detalle foto stock: ' + response.data.nameFotoStock;
+                            me.modalDetaFotoStock.renameFotoStock = '';
+                            util.AVISO('Ligado al la nueva foto, ok!!!', util.tipoOk);
+                            me.listaFoliosEnvio();
+                        } else {
+                            throw new Error(response.data.error);
+                        }
+                    }).catch(function (error) {
+                        me.isLoading = 0;
+                        util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+                    });
+                }
+            });
+        },
+        onGetLocalStorageSurtir: function onGetLocalStorageSurtir(folioFull) {
+            var folio = localStorage.getItem(folioFull);
+            if (folio == null) {
+                localStorage.setItem(folioFull, folioFull);
+                return folioFull;
+            }
+
+            return folio;
+        },
+        onAddFilterSurtir: function onAddFilterSurtir() {
+            var nuevoFolio = prompt('Nuevo folio para filtrar:');
+            console.log(nuevoFolio);
+            if (nuevoFolio != '' && nuevoFolio != null) {
+                var folioFull = this.modalSurtirFolioEnvio.folioFull;
+                var folioFullLS = this.onGetLocalStorageSurtir(folioFull);
+
+                localStorage.setItem(folioFull, folioFullLS + "," + nuevoFolio);
+                this.modalSurtirFolioEnvio.folioFullBuscador = this.onGetLocalStorageSurtir(folioFull);
+                this.modalSurtirFolioEnvio.tituloModal = 'Surtir envio full ' + this.onGetLocalStorageSurtir(folioFull);
+
+                this.onChangeTipoBusqueda(2);
+            }
+        },
+        onCleanFilterSurtir: function onCleanFilterSurtir() {
+            //~En caso de ya existir detalle surtido no se permite el borrado                
+            var folioFullAnfitrion = this.modalSurtirFolioEnvio.folioFull;
+            var isDetalleInvitado = false;
+
+            this.modalSurtirFolioEnvio.detalleEnvioFull.forEach(function (gralDetaSur, indice) {
+                if (gralDetaSur.folio_full != folioFullAnfitrion) {
+                    console.log(gralDetaSur.folio_full);
+                    console.log(folioFullAnfitrion);
+
+                    if (gralDetaSur.detaSurtido.length > 0) {
+                        console.log(gralDetaSur.detaSurtido);
+                        isDetalleInvitado = true;
+                        return;
+                    }
+                }
+            });
+
+            if (isDetalleInvitado) {
+                util.MSG('Algo salio Mal!', 'Ya se surtieron algunos productos del folio invitado', util.tipoErr);
+                return null;
+            }
+
+            var folioFull = this.modalSurtirFolioEnvio.folioFull;
+            this.modalSurtirFolioEnvio.folioFullBuscador = folioFull;
+            localStorage.setItem(folioFull, folioFull);
+            this.modalSurtirFolioEnvio.tituloModal = 'Surtir envio full ' + this.onGetLocalStorageSurtir(folioFull);
+
+            this.onChangeTipoBusqueda(2);
+        },
+        onGeneraMovimientosSurtirEnvio: function onGeneraMovimientosSurtirEnvio() {
+            var _this4 = this;
+
+            util.MSG_SI_NO('Generar movimientos', 'Estas seguro de generar movimientos para los siguientes folios: ' + this.modalSurtirFolioEnvio.folioFullBuscador, util.tipoPreg).then(function (result) {
+                if (result == util.btnSi) {
+                    _this4.isLoading = 1;
+                    var me = _this4;
+
+                    axios.post('/zicandi/public/meli/surtir/envio/lote/generar', {
+                        'folios_full': _this4.onGetLocalStorageSurtir(_this4.modalSurtirFolioEnvio.folioFull)
+                    }).then(function (response) {
+                        me.isLoading = 0;
+                        if (response.data.xstatus) {
+                            util.MSG('Lotes generados y listos para aplicarse', response.data.cadenaLotes, util.tipoOk);
+                        } else {
+                            throw new Error(response.data.error);
+                        }
+                    }).catch(function (error) {
+                        me.isLoading = 0;
+                        util.MSG('Algo salio Mal!', util.getErrorMensaje(error), util.tipoErr);
+                    });
+                }
+            });
         }
     },
     mounted: function mounted() {
@@ -80703,19 +81463,15 @@ var render = function() {
                     _c(
                       "button",
                       {
-                        staticClass: "btn btn-warning btn-sm",
+                        staticClass: "btn btn-primary btn-sm",
                         attrs: { type: "button" },
                         on: {
                           click: function($event) {
-                            return _vm.showModal(
-                              "proveedor",
-                              "actualizar",
-                              _vm.proveedor
-                            )
+                            return _vm.showModal("envios", "surtir", envio)
                           }
                         }
                       },
-                      [_c("i", { staticClass: "icon-pencil" })]
+                      [_c("i", { staticClass: "icon-social-dropbox" })]
                     ),
                     _vm._v(
                       "                                  \n                        "
@@ -80743,6 +81499,24 @@ var render = function() {
                   _c("td", {
                     domProps: { textContent: _vm._s(envio.referencia) }
                   }),
+                  _vm._v(" "),
+                  _c("td", [
+                    _c("a", {
+                      attrs: { href: "#" },
+                      domProps: {
+                        textContent: _vm._s(envio.foto_stock_surtir)
+                      },
+                      on: {
+                        click: function($event) {
+                          return _vm.showModal(
+                            "envios",
+                            "deta-foto-stock",
+                            envio
+                          )
+                        }
+                      }
+                    })
+                  ]),
                   _vm._v(" "),
                   _c("td", {
                     domProps: { textContent: _vm._s(envio.fecha_cita) }
@@ -81756,6 +82530,939 @@ var render = function() {
       "div",
       {
         staticClass: "modal fade",
+        class: { mostrar: _vm.modalSurtirFolioEnvio.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-primary modal-lg",
+            staticStyle: { "max-width": "90% !important" },
+            attrs: { role: "document" }
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "modal-content",
+                style: { height: _vm.modalSurtirFolioEnvio.h }
+              },
+              [
+                _c("div", { staticClass: "modal-header" }, [
+                  _c(
+                    "div",
+                    { staticClass: "row", staticStyle: { width: "100%" } },
+                    [
+                      _c("div", { staticClass: "col-md-6" }, [
+                        _c("h4", {
+                          staticClass: "modal-title",
+                          domProps: {
+                            textContent: _vm._s(
+                              _vm.modalSurtirFolioEnvio.tituloModal
+                            )
+                          }
+                        })
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-2" }, [
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn btn-primary",
+                            attrs: { type: "button" },
+                            on: {
+                              click: function($event) {
+                                return _vm.onAddFilterSurtir()
+                              }
+                            }
+                          },
+                          [_vm._v("Add")]
+                        ),
+                        _vm._v(
+                          "\n                            |\n                            "
+                        ),
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn btn-primary",
+                            attrs: { type: "button" },
+                            on: {
+                              click: function($event) {
+                                return _vm.onCleanFilterSurtir()
+                              }
+                            }
+                          },
+                          [_vm._v("Clean")]
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-4" }, [
+                        _c("div", [
+                          _c(
+                            "button",
+                            {
+                              staticClass: "btn btn-danger",
+                              attrs: { type: "button" },
+                              on: {
+                                click: function($event) {
+                                  return _vm.onGeneraMovimientosSurtirEnvio()
+                                }
+                              }
+                            },
+                            [_vm._v("Generar lote movimientos")]
+                          ),
+                          _vm._v(
+                            "\n                                   \n                                "
+                          ),
+                          _c(
+                            "button",
+                            {
+                              staticClass: "close",
+                              attrs: { type: "button", "aria-label": "Close" },
+                              on: {
+                                click: function($event) {
+                                  return _vm.closeModal()
+                                }
+                              }
+                            },
+                            [
+                              _c("span", { attrs: { "aria-hidden": "true" } }, [
+                                _vm._v("×")
+                              ])
+                            ]
+                          )
+                        ])
+                      ])
+                    ]
+                  )
+                ]),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass: "modal-body",
+                    staticStyle: {
+                      "max-height": "calc(100% - 10px)",
+                      "overflow-y": "scroll"
+                    }
+                  },
+                  [
+                    _c("div", { staticClass: "row" }, [
+                      _c("div", { staticClass: "col-md-3" }, [
+                        _c(
+                          "button",
+                          {
+                            class: [
+                              _vm.modalSurtirFolioEnvio.tipoBusqueda == 0
+                                ? "btn btn-primary"
+                                : "btn btn-outline-primary"
+                            ],
+                            attrs: { type: "button" },
+                            on: {
+                              click: function($event) {
+                                return _vm.onChangeTipoBusqueda(0)
+                              }
+                            }
+                          },
+                          [_vm._v("Ubicacion")]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "button",
+                          {
+                            class: [
+                              _vm.modalSurtirFolioEnvio.tipoBusqueda == 1
+                                ? "btn btn-primary"
+                                : "btn btn-outline-primary"
+                            ],
+                            attrs: { type: "button" },
+                            on: {
+                              click: function($event) {
+                                return _vm.onChangeTipoBusqueda(1)
+                              }
+                            }
+                          },
+                          [_vm._v("Producto")]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "button",
+                          {
+                            class: [
+                              _vm.modalSurtirFolioEnvio.tipoBusqueda == 2
+                                ? "btn btn-primary"
+                                : "btn btn-outline-primary"
+                            ],
+                            attrs: { type: "button" },
+                            on: {
+                              click: function($event) {
+                                return _vm.onChangeTipoBusqueda(2)
+                              }
+                            }
+                          },
+                          [_vm._v("Todo")]
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-7" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.modalSurtirFolioEnvio.filtro,
+                              expression: "modalSurtirFolioEnvio.filtro"
+                            }
+                          ],
+                          ref: "filtroTxt",
+                          staticClass: "form-control form-control-lg",
+                          attrs: { type: "text", maxlength: "30" },
+                          domProps: { value: _vm.modalSurtirFolioEnvio.filtro },
+                          on: {
+                            focus: function($event) {
+                              return $event.target.select()
+                            },
+                            keyup: function($event) {
+                              if (
+                                !$event.type.indexOf("key") &&
+                                _vm._k(
+                                  $event.keyCode,
+                                  "enter",
+                                  13,
+                                  $event.key,
+                                  "Enter"
+                                )
+                              ) {
+                                return null
+                              }
+                              return _vm.onGetDetalleSurtirEnvioFull()
+                            },
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(
+                                _vm.modalSurtirFolioEnvio,
+                                "filtro",
+                                $event.target.value
+                              )
+                            }
+                          }
+                        })
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-1" }, [
+                        _vm.modalSurtirFolioEnvio.tipoBusqueda == 2
+                          ? _c("div", { staticClass: "form-check" }, [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value:
+                                      _vm.modalSurtirFolioEnvio.opcionFiltro,
+                                    expression:
+                                      "modalSurtirFolioEnvio.opcionFiltro"
+                                  }
+                                ],
+                                staticClass: "form-check-input",
+                                attrs: {
+                                  type: "radio",
+                                  id: "exampleRadios1",
+                                  value: "TODO",
+                                  checked: ""
+                                },
+                                domProps: {
+                                  checked: _vm._q(
+                                    _vm.modalSurtirFolioEnvio.opcionFiltro,
+                                    "TODO"
+                                  )
+                                },
+                                on: {
+                                  change: function($event) {
+                                    return _vm.$set(
+                                      _vm.modalSurtirFolioEnvio,
+                                      "opcionFiltro",
+                                      "TODO"
+                                    )
+                                  }
+                                }
+                              }),
+                              _vm._v(" "),
+                              _c(
+                                "label",
+                                {
+                                  staticClass: "form-check-label",
+                                  attrs: { for: "exampleRadios1" }
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                                    Todos\n                                "
+                                  )
+                                ]
+                              ),
+                              _vm._v(" "),
+                              _c("br"),
+                              _vm._v(" "),
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value:
+                                      _vm.modalSurtirFolioEnvio.opcionFiltro,
+                                    expression:
+                                      "modalSurtirFolioEnvio.opcionFiltro"
+                                  }
+                                ],
+                                staticClass: "form-check-input",
+                                attrs: {
+                                  type: "radio",
+                                  id: "exampleRadios2",
+                                  value: "PENDIENTE"
+                                },
+                                domProps: {
+                                  checked: _vm._q(
+                                    _vm.modalSurtirFolioEnvio.opcionFiltro,
+                                    "PENDIENTE"
+                                  )
+                                },
+                                on: {
+                                  change: function($event) {
+                                    return _vm.$set(
+                                      _vm.modalSurtirFolioEnvio,
+                                      "opcionFiltro",
+                                      "PENDIENTE"
+                                    )
+                                  }
+                                }
+                              }),
+                              _vm._v(" "),
+                              _c(
+                                "label",
+                                {
+                                  staticClass: "form-check-label",
+                                  attrs: { for: "exampleRadios2" }
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                                    Pendientes\n                                "
+                                  )
+                                ]
+                              )
+                            ])
+                          : _vm._e(),
+                        _vm._v(" "),
+                        _vm.modalSurtirFolioEnvio.tipoBusqueda == 0
+                          ? _c("div", { staticClass: "form-check" }, [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value:
+                                      _vm.modalSurtirFolioEnvio
+                                        .opcionFiltroUbica,
+                                    expression:
+                                      "modalSurtirFolioEnvio.opcionFiltroUbica"
+                                  }
+                                ],
+                                staticClass: "form-check-input",
+                                attrs: {
+                                  type: "radio",
+                                  id: "exampleRadios3",
+                                  value: "TODO"
+                                },
+                                domProps: {
+                                  checked: _vm._q(
+                                    _vm.modalSurtirFolioEnvio.opcionFiltroUbica,
+                                    "TODO"
+                                  )
+                                },
+                                on: {
+                                  change: function($event) {
+                                    return _vm.$set(
+                                      _vm.modalSurtirFolioEnvio,
+                                      "opcionFiltroUbica",
+                                      "TODO"
+                                    )
+                                  }
+                                }
+                              }),
+                              _vm._v(" "),
+                              _c(
+                                "label",
+                                {
+                                  staticClass: "form-check-label",
+                                  attrs: { for: "exampleRadios3" }
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                                    Todos\n                                "
+                                  )
+                                ]
+                              ),
+                              _vm._v(" "),
+                              _c("br"),
+                              _vm._v(" "),
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value:
+                                      _vm.modalSurtirFolioEnvio
+                                        .opcionFiltroUbica,
+                                    expression:
+                                      "modalSurtirFolioEnvio.opcionFiltroUbica"
+                                  }
+                                ],
+                                staticClass: "form-check-input",
+                                attrs: {
+                                  type: "radio",
+                                  id: "exampleRadios4",
+                                  value: "PENDIENTE",
+                                  checked: ""
+                                },
+                                domProps: {
+                                  checked: _vm._q(
+                                    _vm.modalSurtirFolioEnvio.opcionFiltroUbica,
+                                    "PENDIENTE"
+                                  )
+                                },
+                                on: {
+                                  change: function($event) {
+                                    return _vm.$set(
+                                      _vm.modalSurtirFolioEnvio,
+                                      "opcionFiltroUbica",
+                                      "PENDIENTE"
+                                    )
+                                  }
+                                }
+                              }),
+                              _vm._v(" "),
+                              _c(
+                                "label",
+                                {
+                                  staticClass: "form-check-label",
+                                  attrs: { for: "exampleRadios4" }
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                                    Pendientes\n                                "
+                                  )
+                                ]
+                              )
+                            ])
+                          : _vm._e()
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-1" }, [
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn btn-primary",
+                            attrs: { type: "button" },
+                            on: {
+                              click: function($event) {
+                                return _vm.onGetDetalleSurtirEnvioFull()
+                              }
+                            }
+                          },
+                          [_vm._v("Buscar")]
+                        )
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _vm._m(3),
+                    _vm._v(" "),
+                    _vm._l(_vm.modalSurtirFolioEnvio.detalleEnvioFull, function(
+                      deta
+                    ) {
+                      return _c(
+                        "div",
+                        { key: deta.id_surtir_config_envio_full },
+                        [
+                          _c(
+                            "div",
+                            {
+                              staticClass: "card-header row",
+                              staticStyle: {
+                                "border-top": "1px solid #c2cfd6",
+                                "border-bottom": "none"
+                              }
+                            },
+                            [
+                              _c("div", { staticClass: "col-md-1" }, [
+                                _c("img", {
+                                  attrs: {
+                                    src:
+                                      deta.id_producto == 0
+                                        ? "repositorio/sistema/no_disponible.png"
+                                        : deta.producto[0].url_imagen,
+                                    alt: "dog"
+                                  }
+                                })
+                              ]),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "col-md-2" }, [
+                                _c("span", {
+                                  domProps: {
+                                    textContent: _vm._s(
+                                      deta.id_publicacion_tienda
+                                    )
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("p", [
+                                  _c("small", {
+                                    domProps: {
+                                      textContent: _vm._s(
+                                        deta.id_producto == 0
+                                          ? "00000"
+                                          : deta.producto[0].codigo
+                                      )
+                                    }
+                                  })
+                                ]),
+                                _vm._v(" "),
+                                _c("p", [
+                                  _c("small", {
+                                    staticStyle: { color: "gray" },
+                                    domProps: {
+                                      textContent: _vm._s(deta.referencia)
+                                    }
+                                  })
+                                ]),
+                                _vm._v(" "),
+                                deta.detaSurtido.length > 0
+                                  ? _c(
+                                      "p",
+                                      { staticStyle: { "margin-top": "40px" } },
+                                      [
+                                        deta.showDetalleSurtido == 1
+                                          ? _c(
+                                              "a",
+                                              {
+                                                attrs: { href: "#" },
+                                                on: {
+                                                  click: function($event) {
+                                                    return _vm.onShowDetaSurtir(
+                                                      deta
+                                                    )
+                                                  }
+                                                }
+                                              },
+                                              [
+                                                _vm._v(
+                                                  "Ocultar detalle surtido"
+                                                )
+                                              ]
+                                            )
+                                          : _c(
+                                              "a",
+                                              {
+                                                attrs: { href: "#" },
+                                                on: {
+                                                  click: function($event) {
+                                                    return _vm.onShowDetaSurtir(
+                                                      deta
+                                                    )
+                                                  }
+                                                }
+                                              },
+                                              [
+                                                _vm._v(
+                                                  "Mostrar detalle surtido"
+                                                )
+                                              ]
+                                            )
+                                      ]
+                                    )
+                                  : _vm._e()
+                              ]),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "col-md-2" }, [
+                                _c("span", {
+                                  domProps: {
+                                    textContent: _vm._s(
+                                      deta.id_producto == 0
+                                        ? "No localizado"
+                                        : deta.producto[0].nombre
+                                    )
+                                  }
+                                })
+                              ]),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "col-md-1" }, [
+                                _c("span", {
+                                  staticStyle: {
+                                    "font-weight": "bold",
+                                    "font-size": "2rem"
+                                  },
+                                  domProps: {
+                                    textContent: _vm._s(
+                                      deta.total_piezas_surtir
+                                    )
+                                  }
+                                })
+                              ]),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "col-md-1" }, [
+                                _c("span", {
+                                  staticStyle: {
+                                    "font-weight": "bold",
+                                    "font-size": "2rem"
+                                  },
+                                  domProps: {
+                                    textContent: _vm._s(
+                                      deta.total_piezas_surtidas
+                                    )
+                                  }
+                                })
+                              ]),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "col-md-1" }, [
+                                _c("span", {
+                                  staticStyle: {
+                                    "font-weight": "bold",
+                                    "font-size": "2rem",
+                                    color: "green"
+                                  },
+                                  domProps: {
+                                    textContent: _vm._s(
+                                      deta.total_piezas_surtir -
+                                        deta.total_piezas_surtidas
+                                    )
+                                  }
+                                })
+                              ]),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "col-md-2" }, [
+                                _c("span", {
+                                  domProps: {
+                                    textContent: _vm._s(deta.estatus)
+                                  }
+                                })
+                              ]),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "col-md-2" }, [
+                                _c("div", {
+                                  staticStyle: { "font-weight": "bold" },
+                                  domProps: {
+                                    textContent: _vm._s(deta.ubicacion_1)
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("div", {
+                                  domProps: {
+                                    textContent: _vm._s(deta.ubicacion_2)
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("div", {
+                                  domProps: {
+                                    textContent: _vm._s(deta.ubicacion_3)
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c(
+                                  "a",
+                                  {
+                                    attrs: { href: "#" },
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.showModal(
+                                          "envios",
+                                          "deta-ubicaciones",
+                                          deta
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("mas...")]
+                                )
+                              ])
+                            ]
+                          ),
+                          _vm._v(" "),
+                          _vm._l(deta.stock, function(detaStock) {
+                            return _c(
+                              "div",
+                              {
+                                key: detaStock.id_surtir_foto_stock_envio_full,
+                                staticClass: "card-header row",
+                                staticStyle: {
+                                  "background-color": "#e9eef2",
+                                  padding: "1px 10px 1px 10px"
+                                }
+                              },
+                              [
+                                _c("div", { staticClass: "col-md-2" }, [
+                                  _c("h5", {
+                                    staticStyle: {
+                                      color: "gray",
+                                      "padding-top": "15px"
+                                    },
+                                    domProps: {
+                                      textContent: _vm._s(
+                                        detaStock.codigo_ubicacion
+                                      )
+                                    }
+                                  })
+                                ]),
+                                _vm._v(" "),
+                                _c("div", { staticClass: "col-md-1" }, [
+                                  _c("small", { staticClass: "text-muted" }, [
+                                    _vm._v("stock")
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("h4", {
+                                    domProps: {
+                                      textContent: _vm._s(detaStock.stock)
+                                    }
+                                  })
+                                ]),
+                                _vm._v(" "),
+                                _c("div", { staticClass: "col-md-1" }, [
+                                  _c("small", { staticClass: "text-muted" }, [
+                                    _vm._v("retenido")
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("h4", {
+                                    domProps: {
+                                      textContent: _vm._s(detaStock.retenido)
+                                    }
+                                  })
+                                ]),
+                                _vm._v(" "),
+                                _c("div", { staticClass: "col-md-1" }, [
+                                  _c("small", { staticClass: "text-muted" }, [
+                                    _vm._v("disponible")
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("h4", {
+                                    domProps: {
+                                      textContent: _vm._s(detaStock.disponible)
+                                    }
+                                  })
+                                ]),
+                                _vm._v(" "),
+                                _c("div", { staticClass: "col-md-2" }, [
+                                  _c("input", {
+                                    directives: [
+                                      {
+                                        name: "model",
+                                        rawName: "v-model",
+                                        value: detaStock.totalPiezas,
+                                        expression: "detaStock.totalPiezas"
+                                      }
+                                    ],
+                                    staticClass: "form-control form-control-lg",
+                                    staticStyle: { "margin-top": "3px" },
+                                    attrs: {
+                                      type: "text",
+                                      maxlength: "4",
+                                      value: "0"
+                                    },
+                                    domProps: { value: detaStock.totalPiezas },
+                                    on: {
+                                      focus: function($event) {
+                                        return $event.target.select()
+                                      },
+                                      keyup: function($event) {
+                                        if (
+                                          !$event.type.indexOf("key") &&
+                                          _vm._k(
+                                            $event.keyCode,
+                                            "enter",
+                                            13,
+                                            $event.key,
+                                            "Enter"
+                                          )
+                                        ) {
+                                          return null
+                                        }
+                                        return _vm.onAddMovimientoSurtir(
+                                          deta,
+                                          detaStock
+                                        )
+                                      },
+                                      input: function($event) {
+                                        if ($event.target.composing) {
+                                          return
+                                        }
+                                        _vm.$set(
+                                          detaStock,
+                                          "totalPiezas",
+                                          $event.target.value
+                                        )
+                                      }
+                                    }
+                                  })
+                                ]),
+                                _vm._v(" "),
+                                _c("div", { staticClass: "col-md-1" }, [
+                                  _c(
+                                    "button",
+                                    {
+                                      staticClass: "btn btn-success",
+                                      staticStyle: { "margin-top": "10px" },
+                                      attrs: {
+                                        type: "button",
+                                        disabled: _vm.btnAplicarEstado
+                                      },
+                                      on: {
+                                        click: function($event) {
+                                          return _vm.onAddMovimientoSurtir(
+                                            deta,
+                                            detaStock
+                                          )
+                                        }
+                                      }
+                                    },
+                                    [_c("i", { staticClass: "icon-check" })]
+                                  )
+                                ]),
+                                _vm._v(" "),
+                                _c("div", { staticClass: "col-md-4" })
+                              ]
+                            )
+                          }),
+                          _vm._v(" "),
+                          deta.showDetalleSurtido == 1
+                            ? _c(
+                                "div",
+                                _vm._l(deta.detaSurtido, function(detaSurtido) {
+                                  return _c(
+                                    "div",
+                                    {
+                                      key:
+                                        detaSurtido.id_surtir_deta_envio_full,
+                                      staticClass: "card-header row",
+                                      staticStyle: {
+                                        "background-color": "#d7dee3",
+                                        "margin-left": "10px"
+                                      }
+                                    },
+                                    [
+                                      _c("div", { staticClass: "col-md-1" }, [
+                                        _c(
+                                          "button",
+                                          {
+                                            staticClass: "btn btn-danger",
+                                            attrs: { type: "button" },
+                                            on: {
+                                              click: function($event) {
+                                                return _vm.onDeleteMovimientoSurtir(
+                                                  deta,
+                                                  detaSurtido
+                                                )
+                                              }
+                                            }
+                                          },
+                                          [
+                                            _c("i", {
+                                              staticClass: "icon-trash"
+                                            })
+                                          ]
+                                        )
+                                      ]),
+                                      _vm._v(" "),
+                                      _c("div", { staticClass: "col-md-2" }, [
+                                        _c("span", {
+                                          domProps: {
+                                            textContent: _vm._s(
+                                              detaSurtido.codigo_ubicacion
+                                            )
+                                          }
+                                        }),
+                                        _vm._v(" ("),
+                                        _c("span", {
+                                          domProps: {
+                                            textContent: _vm._s(
+                                              detaSurtido.id_almacen
+                                            )
+                                          }
+                                        }),
+                                        _vm._v(
+                                          ")\n                                "
+                                        )
+                                      ]),
+                                      _vm._v(" "),
+                                      _c("div", { staticClass: "col-md-4" }, [
+                                        _c("span", {
+                                          domProps: {
+                                            textContent: _vm._s(
+                                              detaSurtido.total_piezas
+                                            )
+                                          }
+                                        })
+                                      ]),
+                                      _vm._v(" "),
+                                      _c("div", { staticClass: "col-md-5" })
+                                    ]
+                                  )
+                                }),
+                                0
+                              )
+                            : _vm._e()
+                        ],
+                        2
+                      )
+                    }),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      {
+                        directives: [
+                          {
+                            name: "show",
+                            rawName: "v-show",
+                            value: _vm.modalSurtirFolioEnvio.error,
+                            expression: "modalSurtirFolioEnvio.error"
+                          }
+                        ],
+                        staticClass: "form-group row div-error"
+                      },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "text-center text-error" },
+                          _vm._l(
+                            _vm.modalSurtirFolioEnvio.erroresMsjList,
+                            function(error) {
+                              return _c("div", {
+                                key: error,
+                                domProps: { textContent: _vm._s(error) }
+                              })
+                            }
+                          ),
+                          0
+                        )
+                      ]
+                    )
+                  ],
+                  2
+                )
+              ]
+            )
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
         class: { mostrar: _vm.modalPrinter.modal },
         staticStyle: { display: "none" },
         attrs: {
@@ -81890,6 +83597,391 @@ var render = function() {
           ]
         )
       ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.modalDetaUbicaDisponible.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-primary modal-dialog-centered",
+            staticStyle: { margin: "20vh auto 0px auto" },
+            attrs: { role: "document" }
+          },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c("div", { staticClass: "modal-header" }, [
+                _c("h4", {
+                  staticClass: "modal-title",
+                  domProps: {
+                    textContent: _vm._s(
+                      _vm.modalDetaUbicaDisponible.tituloModal
+                    )
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "close",
+                    attrs: { type: "button", "aria-label": "Close" },
+                    on: {
+                      click: function($event) {
+                        _vm.modalDetaUbicaDisponible.modal = 0
+                      }
+                    }
+                  },
+                  [
+                    _c("span", { attrs: { "aria-hidden": "true" } }, [
+                      _vm._v("×")
+                    ])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c(
+                "div",
+                { staticClass: "modal-body" },
+                [
+                  _vm._m(4),
+                  _vm._v(" "),
+                  _vm._l(
+                    _vm.modalDetaUbicaDisponible.detalleUbicaciones,
+                    function(detaUbica) {
+                      return _c(
+                        "div",
+                        {
+                          key: detaUbica.id_surtir_foto_stock_envio_full,
+                          staticClass: "row"
+                        },
+                        [
+                          _c("div", { staticClass: "col-md-3" }, [
+                            _c("strong", [
+                              _c("span", {
+                                domProps: {
+                                  textContent: _vm._s(
+                                    detaUbica.codigo_ubicacion
+                                  )
+                                }
+                              })
+                            ])
+                          ]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "col-md-3" }, [
+                            _c("span", {
+                              domProps: {
+                                textContent: _vm._s(
+                                  detaUbica.almacen[0].nombre.substring(0, 5)
+                                )
+                              }
+                            }),
+                            _vm._v(" ("),
+                            _c("span", {
+                              domProps: {
+                                textContent: _vm._s(detaUbica.id_almacen)
+                              }
+                            }),
+                            _vm._v(")\n                        ")
+                          ]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "col-md-2" }, [
+                            _c("span", {
+                              domProps: { textContent: _vm._s(detaUbica.stock) }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "col-md-2" }, [
+                            _c("span", {
+                              domProps: {
+                                textContent: _vm._s(detaUbica.retenido)
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "col-md-2" }, [
+                            _c("span", {
+                              domProps: {
+                                textContent: _vm._s(detaUbica.disponible)
+                              }
+                            })
+                          ])
+                        ]
+                      )
+                    }
+                  )
+                ],
+                2
+              )
+            ])
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        class: { mostrar: _vm.modalDetaFotoStock.modal },
+        staticStyle: { display: "none" },
+        attrs: {
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "modal-dialog modal-primary modal-dialog-centered",
+            staticStyle: { "max-width": "70% !important" },
+            attrs: { role: "document" }
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "modal-content",
+                staticStyle: { height: "650px" }
+              },
+              [
+                _c("div", { staticClass: "modal-header" }, [
+                  _c("h4", {
+                    staticClass: "modal-title",
+                    domProps: {
+                      textContent: _vm._s(_vm.modalDetaFotoStock.tituloModal)
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "close",
+                      attrs: { type: "button", "aria-label": "Close" },
+                      on: {
+                        click: function($event) {
+                          _vm.modalDetaFotoStock.modal = 0
+                        }
+                      }
+                    },
+                    [
+                      _c("span", { attrs: { "aria-hidden": "true" } }, [
+                        _vm._v("×")
+                      ])
+                    ]
+                  )
+                ]),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass: "modal-body",
+                    staticStyle: {
+                      "max-height": "calc(100% - 50px)",
+                      "overflow-y": "scroll"
+                    }
+                  },
+                  [
+                    _vm._m(5),
+                    _vm._v(" "),
+                    _vm._l(_vm.modalDetaFotoStock.detalleStock, function(
+                      detaFotoStock
+                    ) {
+                      return _c(
+                        "div",
+                        {
+                          key: detaFotoStock.id_surtir_foto_stock_envio_full,
+                          staticClass: "row"
+                        },
+                        [
+                          _c("div", { staticClass: "col-md-3" }, [
+                            _c("span", {
+                              domProps: {
+                                textContent: _vm._s(
+                                  detaFotoStock.almacen[0].nombre
+                                )
+                              }
+                            }),
+                            _vm._v(" ("),
+                            _c("span", {
+                              domProps: {
+                                textContent: _vm._s(detaFotoStock.id_almacen)
+                              }
+                            }),
+                            _vm._v(")\n                        ")
+                          ]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "col-md-2" }, [
+                            _c("span", {
+                              domProps: {
+                                textContent: _vm._s(
+                                  detaFotoStock.codigo_ubicacion
+                                )
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "col-md-4" }, [
+                            _c("span", {
+                              domProps: {
+                                textContent: _vm._s(
+                                  detaFotoStock.codigo_producto
+                                )
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("span", {
+                              domProps: {
+                                textContent: _vm._s(
+                                  detaFotoStock.producto[0].nombre
+                                )
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "col-md-1" }, [
+                            _c("span", {
+                              domProps: {
+                                textContent: _vm._s(detaFotoStock.stock)
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "col-md-1" }, [
+                            _c("span", {
+                              domProps: {
+                                textContent: _vm._s(detaFotoStock.retenido)
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "col-md-1" }, [
+                            _c("span", {
+                              domProps: {
+                                textContent: _vm._s(detaFotoStock.disponible)
+                              }
+                            })
+                          ])
+                        ]
+                      )
+                    })
+                  ],
+                  2
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "modal-footer" }, [
+                  _c("div", { staticClass: "container" }, [
+                    _c("div", { staticClass: "row" }, [
+                      _c("div", { staticClass: "col-5" }, [
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn btn-danger",
+                            attrs: { type: "button" },
+                            on: {
+                              click: function($event) {
+                                return _vm.onRefreshFotoStock()
+                              }
+                            }
+                          },
+                          [_vm._v("Refresh")]
+                        ),
+                        _vm._v(" "),
+                        _c("small", [_vm._v("Ultima carga: ")]),
+                        _c("small", {
+                          domProps: {
+                            textContent: _vm._s(
+                              _vm.modalDetaFotoStock.ultimaActualizacion
+                            )
+                          }
+                        })
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-1" }),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-6" }, [
+                        _c(
+                          "div",
+                          {
+                            staticClass: "row",
+                            staticStyle: { width: "100%" }
+                          },
+                          [
+                            _c("div", { staticClass: "col-10" }, [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value:
+                                      _vm.modalDetaFotoStock.renameFotoStock,
+                                    expression:
+                                      "modalDetaFotoStock.renameFotoStock"
+                                  }
+                                ],
+                                staticClass: "form-control",
+                                attrs: {
+                                  type: "text",
+                                  placeholder: "Ligar a foto existente"
+                                },
+                                domProps: {
+                                  value: _vm.modalDetaFotoStock.renameFotoStock
+                                },
+                                on: {
+                                  input: function($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(
+                                      _vm.modalDetaFotoStock,
+                                      "renameFotoStock",
+                                      $event.target.value
+                                    )
+                                  }
+                                }
+                              })
+                            ]),
+                            _vm._v(" "),
+                            _c("div", { staticClass: "col-2" }, [
+                              _c(
+                                "button",
+                                {
+                                  staticClass: "btn btn-info",
+                                  attrs: { type: "button" },
+                                  on: {
+                                    click: function($event) {
+                                      return _vm.onLigarFotoStock()
+                                    }
+                                  }
+                                },
+                                [_vm._v("Ligar foto")]
+                              )
+                            ])
+                          ]
+                        )
+                      ])
+                    ])
+                  ])
+                ])
+              ]
+            )
+          ]
+        )
+      ]
     )
   ])
 }
@@ -81921,6 +84013,8 @@ var staticRenderFns = [
         _c("th", [_vm._v("Folio Envio")]),
         _vm._v(" "),
         _c("th", [_vm._v("Referencia")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Foto Stock")]),
         _vm._v(" "),
         _c("th", [_vm._v("Fecha Cita")]),
         _vm._v(" "),
@@ -81960,6 +84054,114 @@ var staticRenderFns = [
       ]),
       _vm._v(" "),
       _c("div", { staticClass: "col-md-1" })
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "row" }, [
+      _c("div", { staticClass: "col-md-1" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("IMG")])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-2" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("PUBLICACION")])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-2" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("PRODUCTO")])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-1" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("PIEZAS SURTIR")])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-1" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("SURTIDAS")])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-1" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("PEN SURTIR")])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-2" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("ESTADO")])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-2" }, [
+        _c("small", { staticClass: "text-muted" }, [_vm._v("UBICACIONES")])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "card-header row" }, [
+      _c("div", { staticClass: "col-md-3" }, [
+        _vm._v(
+          "\n                            Ubicacion\n                        "
+        )
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-3" }, [
+        _vm._v(
+          "\n                            Almacen\n                        "
+        )
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-2" }, [
+        _vm._v("\n                            Stk\n                        ")
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-2" }, [
+        _vm._v("\n                            Ret\n                        ")
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-2" }, [
+        _vm._v("\n                            Dis\n                        ")
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "card-header row" }, [
+      _c("div", { staticClass: "col-md-3" }, [
+        _vm._v(
+          "\n                            Almacen\n                        "
+        )
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-2" }, [
+        _vm._v(
+          "\n                            Ubicacion\n                        "
+        )
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-4" }, [
+        _vm._v(
+          "\n                            Producto\n                        "
+        )
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-1" }, [
+        _vm._v("\n                            Stock\n                        ")
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-1" }, [
+        _vm._v(
+          "\n                            Retenido\n                        "
+        )
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-1" }, [
+        _vm._v(
+          "\n                            Disponible\n                        "
+        )
+      ])
     ])
   }
 ]

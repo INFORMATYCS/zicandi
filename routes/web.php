@@ -139,6 +139,10 @@ Route::get('/meli/surtir/envio/detalle', 'EnvioMeliController@getDetalleConfig')
 Route::post('/meli/surtir/envio/add/movimiento', 'EnvioMeliController@registrarMovimiento');
 Route::post('/meli/surtir/envio/del/movimiento', 'EnvioMeliController@eliminarMovimiento');
 Route::get('/meli/surtir/envio/ubicaciones/all', 'EnvioMeliController@getUbicacionesAll');
+Route::get('/meli/surtir/envio/foto/get', 'EnvioMeliController@getDetalleFotoStock');
+Route::post('/meli/surtir/envio/foto/refresh', 'EnvioMeliController@refreshFotoStock');
+Route::post('/meli/surtir/envio/foto/ligar', 'EnvioMeliController@ligarFotoSotck');
+Route::post('/meli/surtir/envio/lote/generar', 'EnvioMeliController@generaMovimientosLoteSurtir');
 
 
 // - Rutas API betterware

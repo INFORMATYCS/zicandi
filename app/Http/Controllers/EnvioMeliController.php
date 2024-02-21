@@ -14,6 +14,7 @@ use App\MeliSurtirFotoStockEnvioFullEntity;
 use App\MeliSurtirDetaEnvioFullEntity;
 use App\StockUbicaProducto;
 use App\CatUbicaProducto;
+use App\MeliEnvioFull;
 
 class EnvioMeliController extends Controller{
     /**
@@ -27,6 +28,7 @@ class EnvioMeliController extends Controller{
         try{            
             $folioFull = $request->folio_full;
             $filtro = $request->filtro;
+            $foliosFullComplete = $request->folios_full_complete;
             $criterio = $request->criterio;
             $ubica  = null;
             //~Validaciones
@@ -37,6 +39,8 @@ class EnvioMeliController extends Controller{
                 throw new Exception('Se requiere el folio');
             }
 
+            $arrFoliosFull= explode(",", $foliosFullComplete);
+
             if($criterio == "UBICACION"){
                 //~Valida que exista la ubicacion
                 $ubica= CatUbicaProducto::where('codigo','=',$filtro)->get()->first();
@@ -46,19 +50,25 @@ class EnvioMeliController extends Controller{
                 }
 
                 $detaConfig = MeliSurtirConfigEnvioFullEntity::with('producto')
-                ->where('folio_full', '=', $folioFull)
+                ->whereIn('folio_full', $arrFoliosFull)
                 ->whereIn('id_producto', StockUbicaProducto::select(['id_producto'])
                     ->where('codigo_ubica', '=', $ubica->codigo)
                 )->get();
 
                 //~Agrega el stock(foto) y detalle de lo surtido
-                foreach ($detaConfig as $deta) {                    
-                    $stock= MeliSurtirFotoStockEnvioFullEntity::where('folio_full','=',$folioFull)
+                foreach ($detaConfig as $deta) {
+                    $folioFullConfig= $deta->folio_full;
+
+                    //~Busca el nombre de la foto
+                    $meliEnvioFull= MeliEnvioFull::where('folio_full','=',$folioFullConfig)->first();
+                    $fotoStockSurtir= $meliEnvioFull->foto_stock_surtir;
+
+                    $stock= MeliSurtirFotoStockEnvioFullEntity::where('folio_full','=',$fotoStockSurtir)
                         ->where('codigo_ubicacion','=',$ubica->codigo)
                         ->where('id_producto','=',$deta->id_producto)->get();
                     $deta->stock= $stock;
 
-                    $detaSurtido= MeliSurtirDetaEnvioFullEntity::where('folio_full','=',$folioFull)
+                    $detaSurtido= MeliSurtirDetaEnvioFullEntity::where('folio_full','=',$folioFullConfig)
                         ->where('id_surtir_config_envio_full', '=', $deta->id_surtir_config_envio_full)->get();
 
                     $deta->detaSurtido= $detaSurtido;
@@ -66,7 +76,7 @@ class EnvioMeliController extends Controller{
             }else{
                 if($criterio == "PRODUCTO"){
                     $detaConfig = MeliSurtirConfigEnvioFullEntity::with('producto')
-                    ->where('folio_full', '=', $folioFull)
+                    ->whereIn('folio_full', $arrFoliosFull)
                     ->where(function ($query) use ($filtro) {
                         $query->where('codigo_producto', 'like', '%'.$filtro.'%')
                               ->orWhere('nombre_producto', 'like', '%'.$filtro.'%')
@@ -74,12 +84,12 @@ class EnvioMeliController extends Controller{
                     })->get();                        
                 }else{
                     $detaConfig = MeliSurtirConfigEnvioFullEntity::with('producto')
-                    ->where('folio_full', '=', $folioFull)->get();
+                    ->whereIn('folio_full', $arrFoliosFull)->get();
                 }
 
                 //~Agrega detalle de lo surtido
                 foreach ($detaConfig as $deta) {                                        
-                    $detaSurtido= MeliSurtirDetaEnvioFullEntity::where('folio_full','=',$folioFull)
+                    $detaSurtido= MeliSurtirDetaEnvioFullEntity::where('folio_full','=', $deta->folio_full)
                         ->where('id_surtir_config_envio_full', '=', $deta->id_surtir_config_envio_full)->get();
 
                     $deta->detaSurtido= $detaSurtido;
@@ -115,7 +125,16 @@ class EnvioMeliController extends Controller{
             $result= MeliSurtirDetaEnvioFullEntity::where('folio_full','=',$folioFull)
                         ->where('id_surtir_config_envio_full', '=', $idSurtirConfigEnvioFull)->get();                        
 
-            return [ 'xstatus'=>true, 'detaSurtido'=>$result];
+            //~Busca el nombre de la foto
+            $meliEnvioFull= MeliEnvioFull::where('folio_full','=',$folioFull)->first();
+            $fotoStockSurtir= $meliEnvioFull->foto_stock_surtir;
+
+            //~Calcula el nuevo stock en la foto
+            $stock= MeliSurtirFotoStockEnvioFullEntity::where('folio_full','=',$fotoStockSurtir)
+                ->where('codigo_ubicacion','=',$codigoUbicacion)
+                ->where('codigo_producto','=',$codigoProducto)->get();
+            
+            return [ 'xstatus'=>true, 'detaSurtido'=>$result, 'stockFoto'=> $stock];
         }catch(Exception $e){
             DB::rollBack();
             Log::error( $e->getTraceAsString() );            
@@ -129,6 +148,9 @@ class EnvioMeliController extends Controller{
             $folioFull = $request->folio_full;
             $idSurtirConfigEnvioFull = $request->id_surtir_config_envio_full;
             $idSurtirDetaEnvioFull = $request->id_surtir_deta_envio_full;            
+
+            //~Datos del Detalle por eliminar
+            $detaEnvioFull= MeliSurtirDetaEnvioFullEntity::findOrFail($idSurtirDetaEnvioFull);                        
             
             DB::select('call sp_meli_surtir_elimina_mov(?, ?, @err, @msg)', [$folioFull, $idSurtirDetaEnvioFull]);
             $results = DB::select('select @err as err, @msg as msg');            
@@ -140,9 +162,18 @@ class EnvioMeliController extends Controller{
             }
 
             $result= MeliSurtirDetaEnvioFullEntity::where('folio_full','=',$folioFull)
-                        ->where('id_surtir_config_envio_full', '=', $idSurtirConfigEnvioFull)->get();                        
+                        ->where('id_surtir_config_envio_full', '=', $idSurtirConfigEnvioFull)->get();
 
-            return [ 'xstatus'=>true, 'detaSurtido'=>$result];
+            //~Busca el nombre de la foto
+            $meliEnvioFull= MeliEnvioFull::where('folio_full','=',$folioFull)->first();
+            $fotoStockSurtir= $meliEnvioFull->foto_stock_surtir;
+
+            //~Calcula el nuevo stock en la foto            
+            $stock= MeliSurtirFotoStockEnvioFullEntity::where('folio_full','=',$fotoStockSurtir)
+                ->where('codigo_ubicacion','=',$detaEnvioFull->codigo_ubicacion)
+                ->where('codigo_producto','=',$detaEnvioFull->codigo_producto)->get();
+            
+            return [ 'xstatus'=>true, 'detaSurtido'=>$result, 'stockFoto'=> $stock];
         }catch(Exception $e){
             DB::rollBack();
             Log::error( $e->getTraceAsString() );            
@@ -155,12 +186,116 @@ class EnvioMeliController extends Controller{
         try{            
             $folioFull = $request->folio_full;
             $idProducto = $request->id_producto;
+
+            $meliEnvioFull= MeliEnvioFull::where('folio_full','=',$folioFull)->first();
+            $fotoStockSurtir= $meliEnvioFull->foto_stock_surtir;
             
             $stock= MeliSurtirFotoStockEnvioFullEntity::with('almacen')
-                    ->where('folio_full','=',$folioFull)                    
+                    ->where('folio_full','=',$fotoStockSurtir)                    
                     ->where('id_producto', '=', $idProducto)->get();                                   
 
             return [ 'xstatus'=>true, 'ubicaciones'=>$stock];
+        }catch(Exception $e){
+            DB::rollBack();
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+    public function getDetalleFotoStock(Request $request){
+        DB::beginTransaction();
+        try{            
+            $folioFull = $request->nameFotoStock;            
+            
+            $stock= MeliSurtirFotoStockEnvioFullEntity::with('almacen')->with('producto')
+                ->where('folio_full','=',$folioFull)->get();                      
+
+            return [ 'xstatus'=>true, 'deta'=>$stock];
+        }catch(Exception $e){
+            DB::rollBack();
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+    public function refreshFotoStock(Request $request){
+        DB::beginTransaction();
+        try{            
+            $nameFotoStock = $request->nameFotoStock;
+            $folioFull = $request->folioFull;
+
+            DB::select('call sp_meli_surtir_genera_foto_stock(?, ?, @err, @msg)', [$folioFull, $nameFotoStock]);
+            $results = DB::select('select @err as err, @msg as msg');            
+            $pError= $results[0]->err;
+            $pMsgError= $results[0]->msg;
+            
+            if($pError!=0){
+                throw new Exception('No fue posible refrescar la foto: '.$pMsgError);
+            }            
+
+            return [ 'xstatus'=>true];
+        }catch(Exception $e){
+            DB::rollBack();
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+    public function ligarFotoSotck(Request $request){
+        DB::beginTransaction();
+        try{            
+            $nameFotoStock = $request->nameFotoStock;
+            $renameFotoStock = $request->renameFotoStock;
+            $folioFull = $request->folioFull;
+
+            //~Valida que exista la nueva foto            
+            $isExiste= MeliSurtirFotoStockEnvioFullEntity::where('folio_full','=',$renameFotoStock)->first();
+            if($isExiste==null){
+                throw new Exception('La foto ingresada no existe');
+            }
+
+            $renameFotoStock= $isExiste->folio_full;
+            
+            //~Actualiza el folio de envio
+            $meliEnvioFull= MeliEnvioFull::where('folio_full','=',$folioFull)->first();
+            if($meliEnvioFull==null){
+                throw new Exception('Folio Envio no existe');
+            }
+            
+            $meliEnvioFull->foto_stock_surtir= $renameFotoStock;
+            $meliEnvioFull->update();
+
+            DB::commit();
+            return [ 'xstatus'=>true, 'nameFotoStock'=>$renameFotoStock];
+        }catch(Exception $e){
+            DB::rollBack();
+            Log::error( $e->getTraceAsString() );            
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+        }
+    }
+
+    public function generaMovimientosLoteSurtir(Request $request){
+        DB::beginTransaction();
+        try{            
+            $foliosFull = explode(",", $request->folios_full);
+            $lotes= array();
+            $lotesStr= "";
+            foreach ($foliosFull as $folioFull) {                                     
+                DB::select('call sp_meli_sutir_genera_lote_almacen(?, @lote, @err, @msg)', [$folioFull]);
+                $results = DB::select('select @lote lote, @err as err, @msg as msg');
+                $pLote= $results[0]->lote;
+                $pError= $results[0]->err;
+                $pMsgError= $results[0]->msg;
+
+                if($pError!=0){
+                    throw new Exception('No fue posible generar el lote para el folio '.$folioFull.' :'.$pMsgError);
+                }
+
+                array_push($lotes, $pLote);
+                $lotesStr.=$folioFull." : ".$pLote." | ";
+            }
+            
+            return [ 'xstatus'=>true, 'lotesGenerados'=>$lotes, 'cadenaLotes'=> substr($lotesStr, 0, -3)];
         }catch(Exception $e){
             DB::rollBack();
             Log::error( $e->getTraceAsString() );            
