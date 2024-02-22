@@ -82,6 +82,7 @@ Route::get('/almacenes/cat_ubica/depura/report-qr', 'AlmacenController@limpiarDi
 Route::post('/almacenes/cat_ubica/generate-qr-label', 'AlmacenController@generateQrPngLabel');
 Route::get('/almacenes/cat_ubica/get-almacen', 'AlmacenController@getAlmacenByUbicacion');
 Route::post('/almacenes/cat_ubica/set-almacen', 'AlmacenController@setAlmacenByUbicacion');
+Route::get('/almacenes/cat_ubica/get-last-ubica', 'AlmacenController@getLastUbicaciones');
 
 
 

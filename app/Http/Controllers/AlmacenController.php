@@ -712,53 +712,39 @@ class AlmacenController extends Controller{
     public function unificaUbicacion(Request $request){
         DB::beginTransaction();
         try{
-            throw new Exception('Modulo deshabilitado');
-            
             //~Busca que no exista la ubicacion
             $origen = CatUbicaProducto::where('codigo','=', $request->ubicacionOrigen)->first();
             if($origen==null){                
                 return [ 'xstatus'=>false, 'error' => 'No existe ubicacion origen' ];
+            }
+            if($origen->id_almacen==null){
+                return [ 'xstatus'=>false, 'error' => 'La ubicacion origen no esta ligada a ningun almacen' ];
             }
 
             $destino = CatUbicaProducto::where('codigo','=', $request->ubicacionDestino)->first();
             if($destino==null){                
                 return [ 'xstatus'=>false, 'error' => 'No existe ubicacion destino' ];
             }
+            if($destino->id_almacen==null){
+                return [ 'xstatus'=>false, 'error' => 'La ubicacion destino no esta ligada a ningun almacen' ];
+            }
 
             $codigoOrigen = $origen->codigo;
             $codigoDestino = $destino->codigo;
 
+            DB::select('call sp_genera_lote_unifica_ubica(?, ?, @lote, @err, @msg)', [$codigoOrigen, $codigoDestino]);
+            $results = DB::select('select @lote lote, @err as err, @msg as msg');
+            $pLote= $results[0]->lote;
+            $pError= $results[0]->err;
+            $pMsgError= $results[0]->msg;
 
-            //~Actualiza el codigo de ubicacion
-            $stockUbicaProductoTotal = StockUbicaProducto::where('codigo_ubica','=',$codigoOrigen) 
-            ->update(['codigo_ubica'=> $codigoDestino]);
-
-            if($stockUbicaProductoTotal > 0){
-                //~Realiza la unificacion
-                $sql= "select id_stock_producto, id_producto, codigo_ubica, sum(stock) stock
-                from stock_ubica_producto
-                where codigo_ubica = '".$codigoDestino."'
-                group by id_stock_producto, id_producto, codigo_ubica";            
-
-                $ubicaciones = DB::select( $sql );
-
-                StockUbicaProducto::where('codigo_ubica','=',$codigoDestino)->delete();
-
-
-                foreach($ubicaciones as $p){                                                
-                    $stockUbicaProducto = new StockUbicaProducto();
-                    $stockUbicaProducto->id_stock_producto=$p->id_stock_producto;
-                    $stockUbicaProducto->id_producto=$p->id_producto;
-                    $stockUbicaProducto->codigo_ubica=$p->codigo_ubica;  
-                    $stockUbicaProducto->stock=$p->stock;
-
-                    $stockUbicaProducto->save();
-                }
+            if($pError!=0){
+                throw new Exception('No fue posible generar el lote para el folio '.$folioFull.' :'.$pMsgError);
             }
 
             DB::commit();  
 
-            return [ 'xstatus'=>true, 'totalUnificados' => $stockUbicaProductoTotal ];
+            return [ 'xstatus'=>true, 'lote' => $pLote ];
         }catch (\Exception $e) {
             DB::rollBack();
 
@@ -1312,4 +1298,31 @@ class AlmacenController extends Controller{
         }                 
     }
 
+    /**
+     * Consulta del catalogo las ultimas entradas de ubicaciones
+     * 
+     * 
+     * 
+     */
+    public function getLastUbicaciones(Request $request){        
+        try{
+            $ubicaciones = CatUbicaProducto::orderBy('id_cat_ubica_producto', 'DESC')->get();
+
+            $cadenaUbica= "";
+            $limitResponse= 7;
+            foreach ($ubicaciones as $ubica) {
+                $cadenaUbica=$ubica->codigo." ".$cadenaUbica;                
+                $limitResponse--;
+                if($limitResponse<=0){
+                    $cadenaUbica.="-> next";
+                    break;
+                }
+            }
+            
+            return [ 'xstatus'=>true, 'lastUbicaStr' => $cadenaUbica, 'catUbicacion' => $ubicaciones];
+        }catch (\Exception $e) {
+            \Log::error($e->getTraceAsString());       
+            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];                 
+        }                 
+    }
 }
