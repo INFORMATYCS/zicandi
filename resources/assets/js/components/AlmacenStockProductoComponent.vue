@@ -543,6 +543,8 @@
                 </button>                
             </div>
             <div class="modal-body">
+                <small v-text="modalCatUbicacion.catUbicacionesLastStr"></small>
+                
                 <form>
                 <div class="form-group">
                     <label for="recipient-name" class="col-form-label">Codigo:</label>
@@ -717,7 +719,7 @@
                     codigoOrigen: '',
                     codigoDestino: '',
                     detalleOrigen: [],
-                    detalleDestino: [],
+                    detalleDestino: [],                    
                     mostrarBotonReporteQr: false,
                     almacenNombre: ''
                 },
@@ -737,7 +739,9 @@
                     codigo:'',
                     nombre:'',
                     mapAlmacen:[],
-                    idAlmacenSeleccion: 0
+                    idAlmacenSeleccion: 0,
+                    catUbicacionesLastStr: '',
+                    catUbicaciones: []
                 },
                 loteReferencia: '',
                 chkModoSet: false,
@@ -1104,7 +1108,12 @@
                                 this.modalCatUbicacion.tituloModal = 'Nueva ubicacion';
                                 this.modalCatUbicacion.tipoAccion = 1;
                                 this.modalCatUbicacion.modal = 1;   
-                                
+                                this.modalCatUbicacion.idAlmacenSeleccion= 22;
+                                let diaHoy = new Date();
+                                let prefixUbica= (diaHoy.getFullYear()+"").substring(2) + ("0" + (diaHoy.getMonth()+1)).slice (-2) +"-";
+                                this.modalCatUbicacion.codigo= prefixUbica;
+                                this.modalCatUbicacion.nombre= prefixUbica;
+                                this.onLastUbicaCat_async();
                                 break;
                             }
                             
@@ -1509,14 +1518,39 @@
                         'ubicacionDestino': codigoDestino                       
                 })
                 .then(function (response) {  
-                    me.isLoading = 0;           
-                    console.log(response);                
+                    me.isLoading = 0;
                     if(response.data.xstatus){ 
-                        if(response.data.totalUnificados>0){
+                        me.isLoading = 1;
+                        /*
+                        Aplica el lote
+                        */
+                        axios.post('/zicandi/public/lop/aplica-lote',{
+                            'lote_referencia': response.data.lote
+                        })
+                        .then(function (responseApl) {  
+                            me.isLoading = 0;                            
+                            me.loteOperacionProcesosDeta = responseApl.data.deta;
+                            let totalErrCtn=0;
+                            responseApl.data.deta.forEach( function(valor, indice) {
+                                if(valor.estado=='E'){
+                                    totalErrCtn++;
+                                }                                     
+                            });
+
                             me.onCargaDetalleUbicacion('origen', 'consulta');
-                            me.onCargaDetalleUbicacion('detino', 'consulta');
-                            util.AVISO('Perfecto, unificacion exitosa', util.tipoOk);
-                        }
+                            me.onCargaDetalleUbicacion('detino', 'consulta');                            
+
+                            if(totalErrCtn==0){                        
+                                me.aplicaLoteBtnVisible=0;                                
+                                util.MSG('Bien!','Unificacion exitosa!. Lote se aplico correctamente y completo', util.tipoOk);
+                            }else{
+                                util.MSG('Algo salio Mal!','Valide, hay '+totalErrCtn+' errores. El resto se aplicó CORRECTAMENTE', util.tipoErr);
+                            }
+                        })
+                        .catch(function (error) {       
+                            me.isLoading = 0;             
+                            util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                        });
                        
                     }else{
                         throw new Error(response.data.error);
@@ -1566,8 +1600,8 @@
                 let me = this;                
                 this.isLoading = 1;
                 axios.post('/zicandi/public/almacenes/cat_ubica/store',{
-                        'codigo': this.modalCatUbicacion.codigo,
-                        'nombre': this.modalCatUbicacion.nombre,
+                        'codigo': this.modalCatUbicacion.codigo.toUpperCase(),
+                        'nombre': this.modalCatUbicacion.nombre.toUpperCase(),
                         'id_almacen': this.modalCatUbicacion.idAlmacenSeleccion
                 })
                 .then(function (response) {  
@@ -1578,8 +1612,19 @@
                         me.mapUbicaciones.push(ubicacion);
                         me.$forceUpdate();
                         me.modalCatUbicacion.modal = 0;                
-                        me.modalCatUbicacion.tituloModal = '';
-                        util.AVISO('Se registro nueva ubicacion, seleccionala...', util.tipoOk);
+                        me.modalCatUbicacion.tituloModal = '';            
+                        me.onLastUbicaCat_async();            
+                        util.MSG_SI_NO('Etiqueta', 'Deseas imprimir la etiqueta?', util.tipoPreg).
+                        then((result) => {
+                            if(result==util.btnSi){
+                                me.modalTareasUbicacion.codigoOrigen= me.modalCatUbicacion.codigo.toUpperCase();
+                                me.onGenerateQrOnLine();
+
+                                util.AVISO('Se registro nueva ubicacion, Impresion OK', util.tipoOk);
+                            }else{
+                                util.AVISO('Se registro nueva ubicacion, seleccionala...', util.tipoOk);
+                            }
+                        });
                        
                     }else{
                         throw new Error(response.data.error);
@@ -1887,7 +1932,31 @@
                         util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                     });
                 }
-            }
+            },
+
+            onLastUbicaCat_async(){
+                let me = this;                            
+                this.isLoading = 1;
+
+                axios.get('/zicandi/public/almacenes/cat_ubica/get-last-ubica')
+                .then(function (response) {  
+                    me.isLoading = 0;           
+                    
+                    if(response.data.xstatus){
+                        me.modalCatUbicacion.catUbicacionesLastStr=response.data.lastUbicaStr;
+                        me.modalCatUbicacion.catUbicaciones=response.data.catUbicacion;                        
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+                                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+
+
 
         },
         mounted() {

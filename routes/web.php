@@ -82,6 +82,7 @@ Route::get('/almacenes/cat_ubica/depura/report-qr', 'AlmacenController@limpiarDi
 Route::post('/almacenes/cat_ubica/generate-qr-label', 'AlmacenController@generateQrPngLabel');
 Route::get('/almacenes/cat_ubica/get-almacen', 'AlmacenController@getAlmacenByUbicacion');
 Route::post('/almacenes/cat_ubica/set-almacen', 'AlmacenController@setAlmacenByUbicacion');
+Route::get('/almacenes/cat_ubica/get-last-ubica', 'AlmacenController@getLastUbicaciones');
 
 
 
@@ -134,6 +135,15 @@ Route::get('/meli/metricas/proyecto/select', 'MercadoLibreController@selectProye
 
 
 Route::get('/meli/buscador', 'MercadoLibreController@busquedaMeli');
+
+Route::get('/meli/surtir/envio/detalle', 'EnvioMeliController@getDetalleConfig');
+Route::post('/meli/surtir/envio/add/movimiento', 'EnvioMeliController@registrarMovimiento');
+Route::post('/meli/surtir/envio/del/movimiento', 'EnvioMeliController@eliminarMovimiento');
+Route::get('/meli/surtir/envio/ubicaciones/all', 'EnvioMeliController@getUbicacionesAll');
+Route::get('/meli/surtir/envio/foto/get', 'EnvioMeliController@getDetalleFotoStock');
+Route::post('/meli/surtir/envio/foto/refresh', 'EnvioMeliController@refreshFotoStock');
+Route::post('/meli/surtir/envio/foto/ligar', 'EnvioMeliController@ligarFotoSotck');
+Route::post('/meli/surtir/envio/lote/generar', 'EnvioMeliController@generaMovimientosLoteSurtir');
 
 
 // - Rutas API betterware

@@ -38,6 +38,7 @@
                             <th>Cuenta Meli</th>
                             <th>Folio Envio</th>
                             <th>Referencia</th>
+                            <th>Foto Stock</th>
                             <th>Fecha Cita</th>
                             <th>Hora Cita</th>
                             <th>Estado</th>
@@ -45,9 +46,9 @@
                     </thead>
                     <tbody>
                         <tr v-for="envio in enviosList.envios30" :key="envio.id_meli_envio_full">
-                            <td>
-                                <button type="button" class="btn btn-warning btn-sm" @click="showModal('proveedor','actualizar', proveedor)">
-                                    <i class="icon-pencil"></i>
+                            <td>                                
+                                <button type="button" class="btn btn-primary btn-sm" @click="showModal('envios','surtir', envio)">
+                                    <i class="icon-social-dropbox"></i>
                                 </button> &nbsp;                                
                             </td>
                             <td v-text="envio.cuentatienda.usuario"></td>
@@ -55,6 +56,9 @@
                                 <a href="#" @click="showModal('envios','detalle', envio)" v-text="envio.folio_full" ></a>
                             </td>
                             <td v-text="envio.referencia"></td>
+                            <td>
+                                <a href="#" @click="showModal('envios','deta-foto-stock', envio)" v-text="envio.foto_stock_surtir" ></a>
+                            </td>                            
                             <td v-text="envio.fecha_cita"></td>                                
                             <td v-text="envio.hora_cita"></td>
                             <td v-text="envio.estatus"></td>                                                            
@@ -282,6 +286,185 @@
         </div>
         <!--Fin del modal-->      
 
+        <!--Inicio del modal surtir envio-->
+        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true" :class="{'mostrar' : modalSurtirFolioEnvio.modal}">
+            <div class="modal-dialog modal-primary modal-lg" style="max-width: 90% !important;" role="document">
+                <div class="modal-content" :style="{height: modalSurtirFolioEnvio.h}">
+                    <div class="modal-header">
+                        <div class="row" style="width: 100%;">
+                            <div class="col-md-6">
+                                <h4 class="modal-title" v-text="modalSurtirFolioEnvio.tituloModal"></h4>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-primary"  @click="onAddFilterSurtir();">Add</button>
+                                |
+                                <button type="button" class="btn btn-primary"  @click="onCleanFilterSurtir();">Clean</button>
+                            </div>
+                            <div class="col-md-4">                                
+                                <div>
+                                    <button type="button" class="btn btn-danger" @click="onGeneraMovimientosSurtirEnvio();">Generar lote movimientos</button>
+                                    &nbsp;&nbsp;&nbsp;
+                                    <button type="button" class="close" aria-label="Close" @click="closeModal();">
+                                        <span aria-hidden="true">×</span>
+                                    </button>
+                                </div>        
+                            </div>
+                        </div>                                                
+                    </div>
+                    <div class="modal-body" style="max-height: calc(100% - 10px); overflow-y: scroll;">                        
+                        <div class="row">
+                            <div class="col-md-3">                                
+                                <button type="button" :class="[modalSurtirFolioEnvio.tipoBusqueda ==0 ? 'btn btn-primary': 'btn btn-outline-primary']" @click="onChangeTipoBusqueda(0);">Ubicacion</button>
+                                <button type="button" :class="[modalSurtirFolioEnvio.tipoBusqueda ==1 ? 'btn btn-primary': 'btn btn-outline-primary']" @click="onChangeTipoBusqueda(1);">Producto</button>
+                                <button type="button" :class="[modalSurtirFolioEnvio.tipoBusqueda ==2 ? 'btn btn-primary': 'btn btn-outline-primary']" @click="onChangeTipoBusqueda(2);">Todo</button>                                
+                            </div>
+                            <div class="col-md-7">
+                                <input type="text" class="form-control form-control-lg" maxlength="30" ref="filtroTxt" @focus="$event.target.select()" v-model="modalSurtirFolioEnvio.filtro" @keyup.enter="onGetDetalleSurtirEnvioFull();">
+                            </div>
+                            <div class="col-md-1">
+                                <div class="form-check" v-if="modalSurtirFolioEnvio.tipoBusqueda ==2">                                    
+                                    <input class="form-check-input" type="radio" v-model="modalSurtirFolioEnvio.opcionFiltro" id="exampleRadios1" value="TODO" checked>
+                                    <label class="form-check-label" for="exampleRadios1">
+                                        Todos
+                                    </label>
+                                    <br/>
+                                    <input class="form-check-input" type="radio" v-model="modalSurtirFolioEnvio.opcionFiltro" id="exampleRadios2" value="PENDIENTE">
+                                    <label class="form-check-label" for="exampleRadios2">
+                                        Pendientes
+                                    </label>
+                                </div>
+                                <div class="form-check" v-if="modalSurtirFolioEnvio.tipoBusqueda ==0">                                    
+                                    <input class="form-check-input" type="radio" v-model="modalSurtirFolioEnvio.opcionFiltroUbica" id="exampleRadios3" value="TODO">
+                                    <label class="form-check-label" for="exampleRadios3">
+                                        Todos
+                                    </label>
+                                    <br/>
+                                    <input class="form-check-input" type="radio" v-model="modalSurtirFolioEnvio.opcionFiltroUbica" id="exampleRadios4" value="PENDIENTE" checked>
+                                    <label class="form-check-label" for="exampleRadios4">
+                                        Pendientes
+                                    </label>
+                                </div>
+
+                            </div>
+                            <div class="col-md-1">
+                                <button type="button" class="btn btn-primary"  @click="onGetDetalleSurtirEnvioFull();">Buscar</button>
+                            </div>
+                        </div>
+                        <div class="row">                    
+                            <div class="col-md-1"><small class="text-muted">IMG</small></div>
+                            <div class="col-md-2"><small class="text-muted">PUBLICACION</small></div>
+                            <div class="col-md-2"><small class="text-muted">PRODUCTO</small></div>
+                            <div class="col-md-1"><small class="text-muted">PIEZAS SURTIR</small></div>
+                            <div class="col-md-1"><small class="text-muted">SURTIDAS</small></div>
+                            <div class="col-md-1"><small class="text-muted">PEN SURTIR</small></div>
+                            <div class="col-md-2"><small class="text-muted">ESTADO</small></div>
+                            <div class="col-md-2"><small class="text-muted">UBICACIONES</small></div>
+                        </div>
+                        <div v-for="deta in modalSurtirFolioEnvio.detalleEnvioFull" :key="deta.id_surtir_config_envio_full">
+                            <div class="card-header row" style="border-top: 1px solid #c2cfd6; border-bottom: none;">
+                                <div class="col-md-1">
+                                    <img :src="(deta.id_producto == 0 ? 'repositorio/sistema/no_disponible.png' : deta.producto[0].url_imagen)" alt="dog">
+                                </div>
+                                <div class="col-md-2">
+                                    <span v-text="deta.id_publicacion_tienda"></span>
+                                    <p>
+                                        <small v-text="(deta.id_producto == 0 ? '00000' : deta.producto[0].codigo)"></small>
+                                    </p>
+                                    <p>
+                                        <small v-text="deta.referencia" style="color: gray"></small>
+                                    </p>   
+                                    <p style="margin-top: 40px;" v-if="deta.detaSurtido.length>0">
+                                        <a href="#" @click="onShowDetaSurtir(deta)" v-if="deta.showDetalleSurtido==1">Ocultar detalle surtido</a>
+                                        <a href="#" @click="onShowDetaSurtir(deta)" v-else>Mostrar detalle surtido</a>
+                                    </p>
+                                </div>
+                                <div class="col-md-2">
+                                    <span v-text="(deta.id_producto == 0 ? 'No localizado' : deta.producto[0].nombre)"></span>
+                                </div>
+                                <div class="col-md-1">
+                                    <span style="font-weight: bold; font-size: 2rem;" v-text="deta.total_piezas_surtir"></span>
+                                </div>
+                                <div class="col-md-1">
+                                    <span style="font-weight: bold; font-size: 2rem;" v-text="deta.total_piezas_surtidas"></span>
+                                </div>
+                                <div class="col-md-1">
+                                    <span style="font-weight: bold; font-size: 2rem; color:green;" v-text="(deta.total_piezas_surtir - deta.total_piezas_surtidas)"></span>
+                                </div>
+                                <div class="col-md-2">
+                                    <span v-text="deta.estatus"></span>
+                                </div>                            
+                                <div class="col-md-2">
+                                    <div v-text="deta.ubicacion_1" style="font-weight: bold;"></div>
+                                    <div v-text="deta.ubicacion_2"></div>
+                                    <div v-text="deta.ubicacion_3"></div>                      
+                                    <a href="#" @click="showModal('envios','deta-ubicaciones', deta)">mas...</a>
+                                </div>
+                            </div>
+                            <!--Stock frame-->
+                            <div class="card-header row" style="background-color: #e9eef2; padding: 1px 10px 1px 10px;" v-for="detaStock in deta.stock" :key="detaStock.id_surtir_foto_stock_envio_full">
+                                <div class="col-md-2">
+                                    <h5 v-text="detaStock.codigo_ubicacion" style="color:gray; padding-top: 15px;"></h5>
+                                </div>
+                                <div class="col-md-1">
+                                    <small class="text-muted">stock</small>
+                                    <h4 v-text="detaStock.stock"></h4>
+                                </div>
+                                <div class="col-md-1">
+                                    <small class="text-muted">retenido</small>
+                                    <h4 v-text="detaStock.retenido"></h4>
+                                </div>                                        
+                                <div class="col-md-1">
+                                    <small class="text-muted">disponible</small>
+                                    <h4 v-text="detaStock.disponible"></h4>
+                                </div>                                        
+                                <div class="col-md-2">                                    
+                                    <input type="text" class="form-control form-control-lg" style="margin-top: 3px;" maxlength="4" 
+                                    v-model="detaStock.totalPiezas" value="0"
+                                    @focus="$event.target.select()" @keyup.enter="onAddMovimientoSurtir(deta, detaStock);">
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-success" style="margin-top: 10px;" :disabled="btnAplicarEstado" @click="onAddMovimientoSurtir(deta, detaStock);">
+                                        <i class="icon-check"></i>
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    
+                                </div>
+                            </div>
+                            <!--Detalle surtido-->
+                            <div v-if="deta.showDetalleSurtido==1">
+                                <div    class="card-header row" style="background-color: #d7dee3; margin-left: 10px;" 
+                                        v-for="detaSurtido in deta.detaSurtido" :key="detaSurtido.id_surtir_deta_envio_full">
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn btn-danger" @click="onDeleteMovimientoSurtir(deta, detaSurtido);">
+                                            <i class="icon-trash"></i>
+                                        </button>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <span v-text="detaSurtido.codigo_ubicacion"></span> (<span v-text="detaSurtido.id_almacen"></span>)
+                                    </div>
+                                    <div class="col-md-4">
+                                        <span v-text="detaSurtido.total_piezas"></span>
+                                    </div>                                        
+                                    <div class="col-md-5">
+                                        
+                                    </div>                                                                
+                                </div>
+                            </div>
+                        </div>
+                        <div v-show="modalSurtirFolioEnvio.error" class="form-group row div-error">
+                            <div class="text-center text-error">
+                                <div v-for="error in modalSurtirFolioEnvio.erroresMsjList" :key="error" v-text="error"></div>
+                            </div>
+                        </div>
+                    </div>                    
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!--Fin del modal-->   
+
 
         <!--Inicio del modal imprimir-->
         <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true" :class="{'mostrar' : modalPrinter.modal}">
@@ -304,8 +487,6 @@
                             <div class="col-md-3">
                                 <strong><span v-text="modalPrinter.idPublicacion"></span></strong>                                
                             </div>
-
-                            
                         </div>
                         <input type="text" class="form-control form-control-lg" maxlength="5" v-model="modalPrinter.etiquetasImprimir" @focus="$event.target.select()">
                     </div>
@@ -320,8 +501,139 @@
         </div>
         <!--Fin del modal-->    
 
+        <!--Inicio del Detalle Ubicacion Disponible Surtir-->
+        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true" :class="{'mostrar' : modalDetaUbicaDisponible.modal}">
+            <div class="modal-dialog modal-primary modal-dialog-centered" style="margin: 20vh auto 0px auto" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" v-text="modalDetaUbicaDisponible.tituloModal"></h4>
+                        <button type="button" class="close" aria-label="Close" @click="modalDetaUbicaDisponible.modal = 0;">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">                                                
+                        <div class="card-header row">
+                            <div class="col-md-3">
+                                Ubicacion
+                            </div>
+                            <div class="col-md-3">
+                                Almacen
+                            </div>
+                            <div class="col-md-2">
+                                Stk
+                            </div>
+                            <div class="col-md-2">
+                                Ret
+                            </div>
+                            <div class="col-md-2">
+                                Dis
+                            </div>                       
+                        </div>
+                        <div class="row" v-for="detaUbica in modalDetaUbicaDisponible.detalleUbicaciones" :key="detaUbica.id_surtir_foto_stock_envio_full">                
+                            <div class="col-md-3">
+                                <strong><span v-text="detaUbica.codigo_ubicacion"></span></strong>
+                            </div>
+                            <div class="col-md-3">
+                                <span v-text="detaUbica.almacen[0].nombre.substring(0,5)"></span> (<span v-text="detaUbica.id_almacen"></span>)
+                            </div>
+                            <div class="col-md-2">
+                                <span v-text="detaUbica.stock"></span>
+                            </div>
+                            <div class="col-md-2">
+                                <span v-text="detaUbica.retenido"></span>
+                            </div>
+                            <div class="col-md-2">
+                                <span v-text="detaUbica.disponible"></span>
+                            </div>                            
+                        </div>                        
+                    </div>                    
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!--Fin del modal-->    
 
-
+        <!--Inicio del Detalle Foto Stock-->
+        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="display: none;" aria-hidden="true" :class="{'mostrar' : modalDetaFotoStock.modal}">
+            <div class="modal-dialog modal-primary modal-dialog-centered" style="max-width: 70% !important;" role="document">
+                <div class="modal-content" style="height: 650px;">
+                    <div class="modal-header">
+                        <h4 class="modal-title" v-text="modalDetaFotoStock.tituloModal"></h4>
+                        <button type="button" class="close" aria-label="Close" @click="modalDetaFotoStock.modal = 0;">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="max-height: calc(100% - 50px); overflow-y: scroll;">                                                
+                        <div class="card-header row">
+                            <div class="col-md-3">
+                                Almacen
+                            </div>
+                            <div class="col-md-2">
+                                Ubicacion
+                            </div>
+                            <div class="col-md-4">
+                                Producto
+                            </div>
+                            <div class="col-md-1">
+                                Stock
+                            </div>
+                            <div class="col-md-1">
+                                Retenido
+                            </div>
+                            <div class="col-md-1">
+                                Disponible
+                            </div>   
+                        </div>
+                        <div class="row" v-for="detaFotoStock in modalDetaFotoStock.detalleStock" :key="detaFotoStock.id_surtir_foto_stock_envio_full">                
+                            <div class="col-md-3">
+                                <span v-text="detaFotoStock.almacen[0].nombre"></span> (<span v-text="detaFotoStock.id_almacen"></span>)
+                            </div>
+                            <div class="col-md-2">
+                                <span v-text="detaFotoStock.codigo_ubicacion"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <span v-text="detaFotoStock.codigo_producto"></span> <span v-text="detaFotoStock.producto[0].nombre"></span>
+                            </div>
+                            <div class="col-md-1">
+                                <span v-text="detaFotoStock.stock"></span>
+                            </div>
+                            <div class="col-md-1">
+                                <span v-text="detaFotoStock.retenido"></span>
+                            </div>
+                            <div class="col-md-1">
+                                <span v-text="detaFotoStock.disponible"></span>
+                            </div>                            
+                        </div>                        
+                    </div>
+                    <div class="modal-footer">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-5">                                    
+                                    <button type="button" class="btn btn-danger"  @click="onRefreshFotoStock();">Refresh</button>
+                                    <small>Ultima carga: </small><small v-text="modalDetaFotoStock.ultimaActualizacion"></small>
+                                </div>
+                                <div class="col-1">                                
+                                </div>
+                                <div class="col-6">
+                                    <div class="row" style="width: 100%;">
+                                        <div class="col-10">
+                                            <input type="text" class="form-control" placeholder="Ligar a foto existente" v-model="modalDetaFotoStock.renameFotoStock">
+                                        </div>
+                                        <div class="col-2">
+                                            <button type="button" class="btn btn-info"  @click="onLigarFotoStock();">Ligar foto</button>
+                                        </div>
+                                    </div>                                                                        
+                                </div>                                         
+                            </div>                 
+                        </div>                               
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!--Fin del modal-->    
     </main>    
 </template>
 
@@ -361,6 +673,21 @@
                     error: 0,
                     erroresMsjList: [],
                 },
+                modalSurtirFolioEnvio: {
+                    modal: 0,
+                    tituloModal: '',
+                    tipoBusqueda: 0,
+                    tipoAccion: 0,
+                    folioFull: 0,
+                    detalleEnvioFull: [],
+                    filtro: '',
+                    folioFullBuscador: '',
+                    opcionFiltro : 'TODO',
+                    opcionFiltroUbica: 'PENDIENTE',
+                    error: 0,
+                    erroresMsjList: [],
+                    h: (window.innerHeight-50)+'px'
+                },                
                 modalPrinter:{
                     modal: 0,
                     tituloModal: '',
@@ -374,8 +701,28 @@
                     error: 0,
                     erroresMsjList: [],
                 },
-                isLoading: 0
-                
+                modalDetaUbicaDisponible:{
+                    modal: 0,
+                    tituloModal: '',
+                    tipoAccion: 0,
+                    detalleUbicaciones: [],
+                    error: 0,
+                    erroresMsjList: [],
+                },
+                modalDetaFotoStock:{
+                    modal: 0,
+                    tituloModal: '',
+                    tipoAccion: 0,
+                    folioFull: '',
+                    nameFotoStock:'',
+                    detalleStock: [],
+                    renameFotoStock: '',
+                    ultimaActualizacion: '',
+                    error: 0,
+                    erroresMsjList: [],
+                },
+                isLoading: 0,
+                btnAplicarEstado: false                
             }
         },
         computed:{
@@ -484,6 +831,44 @@
                         
                                 break;
                             }
+
+                            case 'surtir':
+                            {
+                                this.modalSurtirFolioEnvio.modal = 1;                                
+                                this.modalSurtirFolioEnvio.tituloModal = 'Surtir envio full ' + this.onGetLocalStorageSurtir(data.folio_full);
+                                this.modalSurtirFolioEnvio.tipoAccion = 1;
+                                this.modalSurtirFolioEnvio.folioFull = data.folio_full;
+                                this.modalSurtirFolioEnvio.folioFullBuscador = this.onGetLocalStorageSurtir(data.folio_full);
+                                this.modalSurtirFolioEnvio.error = 0;
+                                this.modalSurtirFolioEnvio.erroresMsjList = [];
+                                this.onChangeTipoBusqueda(2);
+                                break;
+                            }
+
+                            case 'deta-ubicaciones':
+                            {
+                                this.modalDetaUbicaDisponible.modal = 1;                                
+                                this.modalDetaUbicaDisponible.tituloModal = 'Ubicaciones stock disponible';
+                                this.modalDetaUbicaDisponible.tipoAccion = 1;                    
+                                this.modalDetaUbicaDisponible.error = 0;
+                                this.modalDetaUbicaDisponible.erroresMsjList = [];             
+                                this.onConsultaUbicaDeta(data.id_producto, data.folio_full);
+                        
+                                break;
+                            }
+
+                            case 'deta-foto-stock':
+                            {
+                                this.modalDetaFotoStock.modal = 1;                                
+                                this.modalDetaFotoStock.tituloModal = 'Detalle foto stock: ' + data.foto_stock_surtir;
+                                this.modalDetaFotoStock.tipoAccion = 1;                    
+                                this.modalDetaFotoStock.error = 0;
+                                this.modalDetaFotoStock.erroresMsjList = [];
+                                this.modalDetaFotoStock.nameFotoStock= data.foto_stock_surtir;
+                                this.modalDetaFotoStock.folioFull= data.folio_full;
+                                this.onCargaDetalleFotoStock(data.foto_stock_surtir);
+                                break;
+                            }
                         }
                     }
                 }
@@ -492,7 +877,8 @@
                 this.modalNuevoFolioEnvio.modal = 0;
                 this.modalNuevoFolioEnvio.tituloModal = '';
                 this.modalDetalleNuevoFolioEnvio.modal = 0;
-                this.modalDetalleNuevoFolioEnvio.tituloModal = '';                             
+                this.modalDetalleNuevoFolioEnvio.tituloModal = '';
+                this.modalSurtirFolioEnvio.modal = 0;0
             },
 
             selectTienda(){                
@@ -549,10 +935,12 @@
                 .then(function (response) {  
                     me.isLoading = 0;   
                     let bandExito = true;        
-                    
+                    console.log(response);
                     if(response.data.xstatus){   
                         me.modalNuevoFolioEnvio.erroresMsjList = [];
                         me.modalNuevoFolioEnvio.error = 0;
+                        let surteEnvioOk= response.data.surtirEnvioOk;
+                        let surteEnvioErr= response.data.surtirEnvioErr;
                         for(let i=0; i<response.data.zpl.length; i++){
                             let msg = response.data.zpl[i];
 
@@ -564,8 +952,8 @@
                         }
 
                         if(bandExito){
-                            util.AVISO('Perfecto, registro correcto', util.tipoOk);  
-
+                            util.MSG('Envio registrado correctamente', 'Preparacion del envio '+surteEnvioOk+' ok, '+surteEnvioErr+' Err. Revise el detalle', util.tipoOk);  
+                            me.listaFoliosEnvio();
                             me.closeModal();
                         }
                         
@@ -683,6 +1071,413 @@
                     util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
                 });
             },
+
+            onChangeTipoBusqueda(tipo){
+                this.modalSurtirFolioEnvio.filtro="";
+                this.modalSurtirFolioEnvio.tipoBusqueda= tipo;
+                this.modalSurtirFolioEnvio.detalleEnvioFull= [];
+
+                if(tipo==2){
+                    this.onGetDetalleSurtirEnvioFull();
+                }
+            },
+
+            onGetDetalleSurtirEnvioFull(){
+                let me = this;
+                this.isLoading = 1;
+
+                let filtro = this.modalSurtirFolioEnvio.filtro;
+                let opcionFiltroAll = this.modalSurtirFolioEnvio.opcionFiltro;
+                let opcionFiltroUbica= this.modalSurtirFolioEnvio.opcionFiltroUbica;
+                let tipoBusqueda = "ALL";
+                if(this.modalSurtirFolioEnvio.tipoBusqueda==1){
+                    tipoBusqueda = "PRODUCTO";
+                }else if(this.modalSurtirFolioEnvio.tipoBusqueda==0){
+                    tipoBusqueda = "UBICACION";
+                }
+
+                let folioFull= this.modalSurtirFolioEnvio.folioFull;
+                let folioFullBuscador= this.modalSurtirFolioEnvio.folioFullBuscador;
+
+                axios.get('/zicandi/public/meli/surtir/envio/detalle?folio_full='+folioFull+'&filtro='+filtro+'&criterio='+tipoBusqueda+'&folios_full_complete='+folioFullBuscador)
+                .then(function (response) {  
+                    me.isLoading = 0;                 
+                    if(response.data.xstatus){
+                        let deta= response.data.deta;
+
+                        if((tipoBusqueda=="UBICACION" && opcionFiltroUbica=="PENDIENTE") || (tipoBusqueda=="ALL" && opcionFiltroAll=="PENDIENTE")){
+                            deta= [];
+                            console.log("Filter");
+                            response.data.deta.forEach( function(valor, indice) {
+                                if(valor.estatus!="SUR"){
+                                    deta.push(valor);
+                                }
+                            });
+                        }
+                        me.modalSurtirFolioEnvio.detalleEnvioFull= deta;                        
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+                                      
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });                                
+
+                this.$refs.filtroTxt.select();
+            },
+
+            onShowDetaSurtir(deta){
+                if(deta.showDetalleSurtido==1){
+                    deta.showDetalleSurtido=0;
+                }else{
+                    deta.showDetalleSurtido=1;
+                }
+                
+                this.$forceUpdate();
+            },
+
+            onAddMovimientoSurtir(deta, detaStock){
+                this.btnAplicarEstado=true;
+                let me= this;
+
+                setInterval(()=>{ me.btnAplicarEstado= false; }, 3000);
+
+                let piezasPendientes= deta.total_piezas_surtir-deta.total_piezas_surtidas;
+                let totalPiezasAplicar= detaStock.totalPiezas;                
+
+                let stock= detaStock.stock;
+                let retenido= detaStock.retenido;
+                let disponible= detaStock.disponible;
+
+                if(totalPiezasAplicar<=0){
+                    this.btnAplicarEstado=false;
+                    return;
+                }
+
+                if(totalPiezasAplicar>piezasPendientes){
+                    this.btnAplicarEstado=false;
+                    util.MSG('Algo salio Mal!','Se supera la cantidad de piezas esperadas', util.tipoErr);
+                    return;
+                }
+
+                if(totalPiezasAplicar>disponible){
+                    this.btnAplicarEstado=false;
+                    util.MSG('Algo salio Mal!','Stock disponible insuficiente', util.tipoErr);
+                    return;
+                }
+
+                let fdSurtirAdd = new FormData();
+                fdSurtirAdd.append('folio_full', deta.folio_full);
+                fdSurtirAdd.append('id_surtir_config_envio_full', deta.id_surtir_config_envio_full);
+                fdSurtirAdd.append('codigo_producto', detaStock.codigo_producto);
+                fdSurtirAdd.append('codigo_ubicacion', detaStock.codigo_ubicacion);
+                fdSurtirAdd.append('total_piezas', totalPiezasAplicar);                
+                
+                this.isLoading = 1;
+                axios.post('/zicandi/public/meli/surtir/envio/add/movimiento',fdSurtirAdd)
+                .then(function (response) {
+                    me.btnAplicarEstado=false;
+                    me.isLoading = 0;   
+                    let bandExito = true;        
+                    console.log(response);
+                    
+                    if(response.data.xstatus){
+                        //~Actualiza montos
+                        me.onCalculaStockPersisteMov(deta, response.data.detaSurtido, totalPiezasAplicar, response.data.stockFoto);
+                        detaStock.totalPiezas="";
+                        deta.showDetalleSurtido= 1;
+                        me.$forceUpdate();
+
+                    }else{
+                        throw new Error(response.data.error);
+                    } 
+                    
+                                    
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;
+                    me.btnAplicarEstado=false;
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+                
+            },
+
+            onDeleteMovimientoSurtir(deta, detaSurtido){
+                util.MSG_SI_NO('Deseas borrar el movimiento','Asegurarte de regresarlo a su caja',util.tipoPreg).
+                then((result) => {
+                    if(result==util.btnSi){
+                        this.isLoading = 1;
+                        let me = this;
+                        console.log(deta);
+                        console.log(detaSurtido);
+                        
+                        axios.post('/zicandi/public/meli/surtir/envio/del/movimiento',{
+                            'folio_full': detaSurtido.folio_full,
+                            'id_surtir_config_envio_full': detaSurtido.id_surtir_config_envio_full,
+                            'id_surtir_deta_envio_full': detaSurtido.id_surtir_deta_envio_full
+                        })
+                        .then(function (response) {
+                            me.isLoading = 0;                        
+                            if(response.data.xstatus){
+                                //~Actualiza montos                                
+                                me.onCalculaStockPersisteMov(deta, response.data.detaSurtido, detaSurtido.total_piezas*-1, response.data.stockFoto);                                                                
+                                util.AVISO('Eliminado!!!', util.tipoOk);                                                                       
+                                me.$forceUpdate();
+                            }else{
+                                throw new Error(response.data.error);
+                            }
+                        })
+                        .catch(function (error) {
+                            me.isLoading = 0;
+                            util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                        });
+                        
+                    }
+
+                });  
+
+                
+                
+            },
+
+            onCalculaStockPersisteMov(deta, detaSurtido, totalPiezas, detaStock){                
+                //~Sumariza el nuevo stock surtido
+                let totalPiezasSurtidas= 0;
+                detaSurtido.forEach( function(valor, indice) {
+                    totalPiezasSurtidas+=valor.total_piezas;
+                });
+                
+                //~Actualiza total
+                deta.total_piezas_surtidas= totalPiezasSurtidas;
+                if(totalPiezasSurtidas==0){
+                    deta.estatus= "PEN";
+                    deta.showDetalleSurtido= 0;
+                }else if(deta.total_piezas_surtir==deta.total_piezas_surtidas){
+                    deta.estatus= "SUR";
+                }
+                else{
+                    deta.estatus= "PRO";
+                }
+                
+                //~Actualiza stock
+                if(deta.stock){
+                    console.log("si hay stock");
+                    detaStock.forEach( function(valor, indice) {
+                        deta.stock[0].retenido=valor.retenido;
+                        deta.stock[0].disponible=valor.disponible;
+                    });                    
+                }
+
+                //~Reemplaza el detalle
+                deta.detaSurtido= detaSurtido;
+                
+                //~Evalua si existe la misma ubicacion y producto para replicar el nuevo stock
+                this.modalSurtirFolioEnvio.detalleEnvioFull.forEach( function(gralDetaSur, indice) {
+                    if(gralDetaSur.stock){
+                        if(gralDetaSur.codigo_producto == deta.codigo_producto){
+                            detaStock.forEach( function(valor, indice) {
+                                gralDetaSur.stock[0].retenido=valor.retenido;
+                                gralDetaSur.stock[0].disponible=valor.disponible;
+                            }); 
+                        }
+                    }
+                });
+            },
+
+            onConsultaUbicaDeta(idProducto, folioFull){
+                let me = this;
+                this.isLoading = 1;               
+
+                axios.get('/zicandi/public/meli/surtir/envio/ubicaciones/all?folio_full='+folioFull+'&id_producto='+idProducto)
+                .then(function (response) {  
+                    me.isLoading = 0;                 
+                    if(response.data.xstatus){                        
+                        me.modalDetaUbicaDisponible.detalleUbicaciones= response.data.ubicaciones;
+                    }else{
+                        me.modalDetaUbicaDisponible.detalleUbicaciones=[];
+                        throw new Error(response.data.error);
+                    } 
+                                      
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+
+            onCargaDetalleFotoStock(nameFotoStock){
+                let me = this;
+                this.isLoading = 1;
+                console.log(nameFotoStock);                
+
+                axios.get('/zicandi/public/meli/surtir/envio/foto/get?nameFotoStock='+nameFotoStock)
+                .then(function (response) {  
+                    me.isLoading = 0;                 
+                    if(response.data.xstatus){                        
+                        me.modalDetaFotoStock.detalleStock= response.data.deta;                        
+                        if(response.data.deta.length>0){
+                            me.modalDetaFotoStock.ultimaActualizacion=response.data.deta[0].created_at;                                                        
+                        }
+                    }else{
+                        me.modalDetaFotoStock.detalleStock=[];
+                        throw new Error(response.data.error);
+                    }                                       
+                })
+                .catch(function (error) {       
+                    me.isLoading = 0;             
+                    util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                });
+            },
+            onRefreshFotoStock(){                
+                let nameFotoStock= this.modalDetaFotoStock.nameFotoStock;
+                let folioFull= this.modalDetaFotoStock.folioFull;
+
+                util.MSG_SI_NO('Actualizar stock','Al actualizar se borran todos los cambios realizados',util.tipoPreg).
+                then((result) => {
+                    if(result==util.btnSi){
+                        this.isLoading = 1;
+                        let me = this;
+
+                        axios.post('/zicandi/public/meli/surtir/envio/foto/refresh',{
+                            'folioFull': folioFull,
+                            'nameFotoStock': nameFotoStock,
+                        })
+                        .then(function (response) {
+                            me.isLoading = 0;                        
+                            if(response.data.xstatus){                                
+                                me.onCargaDetalleFotoStock(nameFotoStock)                                
+                                util.AVISO('Foto actualizada!!!', util.tipoOk);
+                            }else{
+                                throw new Error(response.data.error);
+                            }
+                        })
+                        .catch(function (error) {
+                            me.isLoading = 0;
+                            util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                        });
+
+                    }
+
+                });
+            },
+            onLigarFotoStock(){                
+                let nameFotoStock= this.modalDetaFotoStock.nameFotoStock;
+                let folioFull= this.modalDetaFotoStock.folioFull;
+                let renameFotoStock= this.modalDetaFotoStock.renameFotoStock;
+
+                util.MSG_SI_NO('Ligar a foto stock','Estas seguro de ligarlo a otra foto de stock?',util.tipoPreg).
+                then((result) => {
+                    if(result==util.btnSi){
+                        this.isLoading = 1;
+                        let me = this;
+
+                        axios.post('/zicandi/public/meli/surtir/envio/foto/ligar',{
+                            'folioFull': folioFull,
+                            'nameFotoStock': nameFotoStock,
+                            'renameFotoStock': renameFotoStock
+                        })
+                        .then(function (response) {
+                            me.isLoading = 0;                        
+                            if(response.data.xstatus){                                
+                                me.onCargaDetalleFotoStock(response.data.nameFotoStock)   
+                                me.modalDetaFotoStock.tituloModal = 'Detalle foto stock: ' + response.data.nameFotoStock;
+                                me.modalDetaFotoStock.renameFotoStock= '';
+                                util.AVISO('Ligado al la nueva foto, ok!!!', util.tipoOk);
+                                me.listaFoliosEnvio();
+                            }else{
+                                throw new Error(response.data.error);
+                            }
+                        })
+                        .catch(function (error) {
+                            me.isLoading = 0;
+                            util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                        });
+
+                    }
+
+                });
+            },
+            onGetLocalStorageSurtir(folioFull){                
+                let folio=localStorage.getItem(folioFull);                
+                if(folio==null){
+                    localStorage.setItem(folioFull, folioFull);
+                    return folioFull;
+                }
+
+                return folio;
+            },
+            onAddFilterSurtir(){
+                let nuevoFolio = prompt('Nuevo folio para filtrar:');
+                console.log(nuevoFolio);
+                if(nuevoFolio!='' && nuevoFolio!=null){
+                    let folioFull= this.modalSurtirFolioEnvio.folioFull;
+                    let folioFullLS = this.onGetLocalStorageSurtir(folioFull);
+
+                    localStorage.setItem(folioFull, folioFullLS + "," + nuevoFolio);
+                    this.modalSurtirFolioEnvio.folioFullBuscador= this.onGetLocalStorageSurtir(folioFull);
+                    this.modalSurtirFolioEnvio.tituloModal = 'Surtir envio full ' + this.onGetLocalStorageSurtir(folioFull);
+
+                    this.onChangeTipoBusqueda(2);
+                }
+
+            },
+            onCleanFilterSurtir(){           
+                //~En caso de ya existir detalle surtido no se permite el borrado                
+                let folioFullAnfitrion= this.modalSurtirFolioEnvio.folioFull;
+                let isDetalleInvitado = false;
+
+                this.modalSurtirFolioEnvio.detalleEnvioFull.forEach( function(gralDetaSur, indice) {                    
+                    if(gralDetaSur.folio_full != folioFullAnfitrion){
+                        console.log(gralDetaSur.folio_full);
+                        console.log(folioFullAnfitrion);
+                        
+                        if(gralDetaSur.detaSurtido.length>0){
+                            console.log(gralDetaSur.detaSurtido);
+                            isDetalleInvitado=true;
+                            return;
+                        }
+                    }                    
+                });
+
+                if(isDetalleInvitado){
+                    util.MSG('Algo salio Mal!','Ya se surtieron algunos productos del folio invitado', util.tipoErr);
+                    return null;
+                }
+                
+                let folioFull= this.modalSurtirFolioEnvio.folioFull;
+                this.modalSurtirFolioEnvio.folioFullBuscador=folioFull;
+                localStorage.setItem(folioFull, folioFull);
+                this.modalSurtirFolioEnvio.tituloModal = 'Surtir envio full ' + this.onGetLocalStorageSurtir(folioFull);
+
+                this.onChangeTipoBusqueda(2);
+            },
+            onGeneraMovimientosSurtirEnvio(){
+                util.MSG_SI_NO('Generar movimientos','Estas seguro de generar movimientos para los siguientes folios: '+this.modalSurtirFolioEnvio.folioFullBuscador ,util.tipoPreg).
+                then((result) => {
+                    if(result==util.btnSi){
+                        this.isLoading = 1;
+                        let me = this;
+
+                        axios.post('/zicandi/public/meli/surtir/envio/lote/generar',{
+                            'folios_full': this.onGetLocalStorageSurtir(this.modalSurtirFolioEnvio.folioFull)                            
+                        })
+                        .then(function (response) {
+                            me.isLoading = 0;                        
+                            if(response.data.xstatus){                                                                
+                                util.MSG('Lotes generados y listos para aplicarse', response.data.cadenaLotes, util.tipoOk);
+                            }else{
+                                throw new Error(response.data.error);
+                            }
+                        })
+                        .catch(function (error) {
+                            me.isLoading = 0;
+                            util.MSG('Algo salio Mal!',util.getErrorMensaje(error), util.tipoErr);
+                        });
+                    }
+                });
+            }
         },
         mounted() {
             this.modalNuevoFolioEnvio.fechaCita = new Date();

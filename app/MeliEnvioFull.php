@@ -12,7 +12,7 @@ class MeliEnvioFull extends Model{
     protected $primaryKey = 'id_meli_envio_full'; 
 
     //~Por seguridad se agrega para evitar ataques. Toda las columnas de la tabla
-    protected $fillable = ['id_cuenta_tienda','folio_full','referencia','fecha_cita','hora_cita','estatus'];    
+    protected $fillable = ['id_cuenta_tienda','folio_full','referencia','fecha_cita','hora_cita','estatus','foto_stock_surtir'];    
 
     //~Relacion One To Many
     public function cuentatienda(){
