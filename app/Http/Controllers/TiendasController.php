@@ -466,17 +466,19 @@ class TiendasController extends Controller
         //~Busca la cuenta
         $cuenta = CuentaTienda::where('usuario','=',$request->usuario)->get();
         $refreshToken = $cuenta[0]->att_refresh_token;
+        $code = $cuenta[0]->att_code_login;
                 
-        $sesion = app(MercadoLibreController::class)->refreshToken($refreshToken);                     
+        $sesion = app(MercadoLibreController::class)->refreshToken($refreshToken, $code);                     
 
         if($sesion['httpCode']=="NO_SESSION"){
             $salida = 0;
-        }else if($sesion['httpCode']=="200"){               
+        }else if($sesion['httpCode']=="200"){
             //~Conecta la cuenta activa            
             $fechaExpira = date("Y-m-d H:i:s", Session::get('expires_in'));
             CuentaTienda::where('usuario','=',$cuenta[0]->usuario)
             ->update([  'estatus' => 'CONECTADO',                        
                         'att_access_token' => Session::get('access_token'),
+                        'att_refresh_token' => Session::get('refresh_token'),
                         'att_expira_token' => $fechaExpira ]);
 
 
@@ -513,14 +515,15 @@ class TiendasController extends Controller
             $usuario = $cuenta->usuario;
             $accessToken = $cuenta->att_access_token;
             $refreshToken = $cuenta->att_refresh_token;
-            $expiraToken = $cuenta->att_expira_token;                        
+            $expiraToken = $cuenta->att_expira_token;
+            $code = $cuenta->att_code_login;
 
             $request->accessToken = $accessToken;            
             $sesion = app(MercadoLibreController::class)->me($request);        
 
             if($sesion['httpCode']=="NO_SESSION"){
                 //~Actualiza la sesion con un nuevo token
-                $sesionToken = app(MercadoLibreController::class)->refreshToken($refreshToken);
+                $sesionToken = app(MercadoLibreController::class)->refreshToken($refreshToken, $code);
                 if( $sesionToken['httpCode']!="NO_SESSION" ){
                     $fechaExpira = date("Y-m-d H:i:s", $sesionToken['body']->expires_in);
                     CuentaTienda::where('usuario','=', $usuario)

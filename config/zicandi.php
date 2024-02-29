@@ -10,7 +10,7 @@ return [
     | 
     |
     */
-    'version'       => 'BETA-0.400',
+    'version'       => 'BETA-0.401',
     'entorno'       => 'pruebas', //pruebas | produccion
     'url_public'    => 'http://localhost/zicandi/public/',
 
@@ -24,8 +24,8 @@ return [
     |
     */
     'meli'  => [
-        'appId'                         => '3145687774408719',
-        'secretKey'                     => 'sQcT6u43C7J6UQtjVCJmYjEYG3ve77d3',
+        'appId'                         => '343517584154462',
+        'secretKey'                     => '6MjDqFND2NzLWsDVFlamGZ3xq2p6eu08',
         'redirectURI'                   => 'http://localhost/zicandi/public/meli/login',
         'siteId'                        => 'MLM',
         'fechaInicialConsultaVentas'    => '2020-10-01'       

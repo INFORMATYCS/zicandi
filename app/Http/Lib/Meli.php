@@ -58,11 +58,13 @@ class Meli {
      * @param string $access_token
      * @param string $refresh_token
      */
-    public function __construct($client_id, $client_secret, $access_token = null, $refresh_token = null) {
+    public function __construct($client_id, $client_secret, $access_token = null, $refresh_token = null, $redirect_uri = null, $code = null) {
         $this->client_id = $client_id;
         $this->client_secret = $client_secret;
         $this->access_token = $access_token;
         $this->refresh_token = $refresh_token;
+        $this->redirect_uri = $redirect_uri;
+        $this->code = $code;
     }
 
     /**
@@ -133,7 +135,7 @@ class Meli {
                 "grant_type" => "refresh_token", 
                 "client_id" => $this->client_id, 
                 "client_secret" => $this->client_secret, 
-                "refresh_token" => $this->refresh_token
+                "refresh_token" => $this->refresh_token                
             );
 
             $opts = array(
@@ -278,7 +280,14 @@ class Meli {
         if(!empty($opts)){
             curl_setopt_array($ch, $opts);
             curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, "grant_type=authorization_code&client_id=".$this->client_id."&client_secret=".$this->client_secret."&code=".$this->code."&redirect_uri=".$this->redirect_uri);
+            $data= $opts[CURLOPT_POSTFIELDS];
+            $parameter="grant_type=authorization_code&client_id=".$this->client_id."&client_secret=".$this->client_secret."&code=".$this->code."&redirect_uri=".$this->redirect_uri;
+            if($data!=null){
+                if($data["grant_type"]=="refresh_token"){
+                    $parameter="grant_type=refresh_token&client_id=".$this->client_id."&client_secret=".$this->client_secret."&refresh_token=".$data["refresh_token"];
+                }
+            }            
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $parameter);
         }
         
         
