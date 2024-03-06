@@ -185,6 +185,7 @@ Route::get('/tienda/calculaEstadistica', 'TiendasController@calculaVentaEstadist
 Route::get('/tienda/ventasList', 'TiendasController@getListaVentas');
 Route::get('/tienda/ventas/export', 'TiendasController@exportar');
 Route::get('/tienda/calculadora', 'TiendasController@simuladorCalculadoraPublicacion');
+Route::get('/tienda/calculaEstadisticasPublicacion', 'TiendasController@calculaEstadisticasPublicacion');
 
 // - Rutas para Publicaciones
 Route::get('/publicaciones', 'PublicacionesController@index');

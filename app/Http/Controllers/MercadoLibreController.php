@@ -122,8 +122,6 @@ class MercadoLibreController extends Controller
         $redirectURI = Config::get('zicandi.meli.redirectURI');
         $siteId = Config::get('zicandi.meli.siteId');
 
-        ///// Aqui va el cambiooooooooooooooooooooooooooooooooooooo
-
         $meli = new Meli($appId, $secretKey, null, $refreshToken, $redirectURI, $code);
         $refresh = null;
 
