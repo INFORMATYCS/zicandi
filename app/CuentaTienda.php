@@ -13,7 +13,7 @@ class CuentaTienda extends Model
     protected $primaryKey = 'id_cuenta_tienda'; 
 
     //~Por seguridad se agrega para evitar ataques. Toda las columnas de la tabla
-    protected $fillable = ['id_tienda','usuario','correo','telefono','att_id','att_user_id','att_access_token','att_refresh_token','att_expira_token','estatus'];
+    protected $fillable = ['id_tienda','usuario','correo','telefono','att_id','att_user_id','att_access_token','att_refresh_token','att_expira_token','att_code_login','estatus'];
 
     //~Relacion inversa One To Many Tienda
     public function tienda(){

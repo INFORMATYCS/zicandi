@@ -5,6 +5,8 @@ Use Config;
 Use Exception;
 Use Log;
 use DB;
+use Session;
+Use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\CuentaTienda;
 use App\Tienda;
@@ -14,10 +16,9 @@ use App\ControlVentasMeli;
 use App\VentaMeli;
 use App\Producto;
 use App\Parametria;
-use Session;
-use App\EstadisticaPublicacion;
+use App\MeliPublicacionHistorico;
+use App\MeliPublicacionEstadisticas;
 use App\Exports\VentasExport;
-
 
 class TiendasController extends Controller
 {
@@ -202,11 +203,17 @@ class TiendasController extends Controller
         $publicaciones = explode(",", $publicaciones20);            
 
         foreach($publicaciones as $publicacionProcesa){
-           
-
 
             //********* Consulta detalle de la publicacion **********
             $p = app(MercadoLibreController::class)->items($publicacionProcesa, $token);
+
+            //~Refresh Token
+            if($p['httpCode']=="401"){                           
+                $request->usuario = $usuarioMELI;     
+                app(TiendasController::class)->refreshTokenMeli($request);
+                $token= Session::get('access_token');
+                $p = app(MercadoLibreController::class)->items($publicacionProcesa, Session::get('access_token'));
+            }
 
             $offset = 0;
             $limit = 100;
@@ -392,19 +399,25 @@ class TiendasController extends Controller
 
                     $publicacion->update();
                 }
+                //~Borra posibles estadisticas del dia                
+                MeliPublicacionHistorico::where('id_publicacion', '=', $publicacion->id_publicacion)                
+                ->whereDate('fecha_consulta','=',Carbon::today())->delete();
 
                 //~Agrega estadisticas
-                $estadisticaPublicacion = new EstadisticaPublicacion();
-                $estadisticaPublicacion->id_publicacion = $publicacion->id_publicacion;
-                $estadisticaPublicacion->stock = (isset($pub['stock']) ? $pub['stock'] : null);
-                $estadisticaPublicacion->ventas = (isset($pub['ventas']) ? $pub['ventas'] : null);
-                $estadisticaPublicacion->visitas = (isset($pub['visitas']) ? $pub['visitas'] : $visitas); 
-                $estadisticaPublicacion->fecha_consulta = new \DateTime();
+                $publicacionHistorico = new MeliPublicacionHistorico();
+                $publicacionHistorico->id_publicacion= $publicacion->id_publicacion;
+                $publicacionHistorico->id_variante_publicacion= (isset($pub['idVariante']) ? $pub['idVariante'] : null);
+                $publicacionHistorico->id_publicacion_tienda= $pub['id'];
+                $publicacionHistorico->fecha_consulta= new \DateTime();
+                $publicacionHistorico->precio=  (isset($pub['precio']) ? $pub['precio'] : null);
+                $publicacionHistorico->stock= (isset($pub['stock']) ? $pub['stock'] : null);
+                $publicacionHistorico->ventas= (isset($pub['ventas']) ? $pub['ventas'] : null);
+                $publicacionHistorico->visitas= (isset($pub['visitas']) ? $pub['visitas'] : $visitas); 
+                $publicacionHistorico->envio_gratis= (isset($pub['envioGratis']) ? $pub['envioGratis'] : null);
+                $publicacionHistorico->full= ($pub['tipoEnvio'] == 'fulfillment' ? true : false);
+                $publicacionHistorico->estatus= (isset($pub['estatus']) ? $pub['estatus'] : null);
 
-                $estadisticaPublicacion->save();
-                
-
-
+                $publicacionHistorico->save();
             }
 
         }
@@ -466,17 +479,19 @@ class TiendasController extends Controller
         //~Busca la cuenta
         $cuenta = CuentaTienda::where('usuario','=',$request->usuario)->get();
         $refreshToken = $cuenta[0]->att_refresh_token;
+        $code = $cuenta[0]->att_code_login;
                 
-        $sesion = app(MercadoLibreController::class)->refreshToken($refreshToken);                     
+        $sesion = app(MercadoLibreController::class)->refreshToken($refreshToken, $code);                     
 
         if($sesion['httpCode']=="NO_SESSION"){
             $salida = 0;
-        }else if($sesion['httpCode']=="200"){               
+        }else if($sesion['httpCode']=="200"){
             //~Conecta la cuenta activa            
             $fechaExpira = date("Y-m-d H:i:s", Session::get('expires_in'));
             CuentaTienda::where('usuario','=',$cuenta[0]->usuario)
             ->update([  'estatus' => 'CONECTADO',                        
                         'att_access_token' => Session::get('access_token'),
+                        'att_refresh_token' => Session::get('refresh_token'),
                         'att_expira_token' => $fechaExpira ]);
 
 
@@ -513,14 +528,15 @@ class TiendasController extends Controller
             $usuario = $cuenta->usuario;
             $accessToken = $cuenta->att_access_token;
             $refreshToken = $cuenta->att_refresh_token;
-            $expiraToken = $cuenta->att_expira_token;                        
+            $expiraToken = $cuenta->att_expira_token;
+            $code = $cuenta->att_code_login;
 
             $request->accessToken = $accessToken;            
             $sesion = app(MercadoLibreController::class)->me($request);        
 
             if($sesion['httpCode']=="NO_SESSION"){
                 //~Actualiza la sesion con un nuevo token
-                $sesionToken = app(MercadoLibreController::class)->refreshToken($refreshToken);
+                $sesionToken = app(MercadoLibreController::class)->refreshToken($refreshToken, $code);
                 if( $sesionToken['httpCode']!="NO_SESSION" ){
                     $fechaExpira = date("Y-m-d H:i:s", $sesionToken['body']->expires_in);
                     CuentaTienda::where('usuario','=', $usuario)
@@ -1037,8 +1053,95 @@ class TiendasController extends Controller
         
     }
 
+    private function getParamEstPuntaje($proceso){
+        $tabla= array();
+        $parametria = Parametria::where('xstatus','=','1')
+        ->where('clave_proceso','=', $proceso)            
+        ->select('llave','valor')->get();
+                    
+        foreach($parametria as $param){
+            $tabla[$param["llave"]]=$param["valor"];                
+        }
 
+        return $tabla;
+    }
+
+    private function calculateRank($arrayProcesa, $tamanoMuestra, $tablaRefPuntaje, $key){        
+        $valorAnterior= 0;
+        $precio= $tamanoMuestra;
+        $puntaje= 0;
+        foreach($arrayProcesa as $hist){
+            if($hist[$key]==0){
+                $puntaje+= $tablaRefPuntaje["nostk"] * $precio;
+            }elseif($hist[$key]==$valorAnterior){
+                $puntaje+= $tablaRefPuntaje["eq"] * $precio;
+            }elseif($hist[$key]>$valorAnterior){
+                $puntaje+= $tablaRefPuntaje["up"] * $precio;
+            }else{                        
+                $puntaje+= $tablaRefPuntaje["down"] * $precio;
+            }
+            $valorAnterior= $hist[$key];
+            $precio--;
+        }
+
+        return $puntaje;
+    }
+
+    public function calculaEstadisticasPublicacion(Request $request){ 
+        try{           
+            $publicaciones20 = $request->publicaciones20;
+            $idCuentaTienda = $request->idCuentaTienda;
+            $cuenta = CuentaTienda::findOrFail($idCuentaTienda);
+            $idTienda = $cuenta->id_tienda;
+            $idUsuarioMELI = $cuenta->att_id;
+            $usuarioMELI = $cuenta->usuario;
+            $token = $cuenta->att_access_token; 
+            
+            $publicaciones = explode(",", $publicaciones20);            
+
+            //~Parametria            
+            $tablaStock= $this->getParamEstPuntaje("EST_CALIF_STOCK");
+            $tablaVisitas= $this->getParamEstPuntaje("EST_CALIF_VISIT");
+
+            $sizeParam = Parametria::where('xstatus','=','1')
+            ->where('clave_proceso','=', 'EST_CALIF')            
+            ->select('llave','valor')->get()->first();
+            $tamanoMuestra= $sizeParam["valor"];
     
+            foreach($publicaciones as $publicacion){
+                $publicacionHist= MeliPublicacionHistorico::where('id_publicacion_tienda', '=', $publicacion)                
+                ->orderBy('fecha_consulta', 'desc')->limit($tamanoMuestra)->get()->toArray();
+
+                if(count($publicacionHist)<=0){
+                    continue;
+                }
+                
+                $arrayProcesa= array_reverse($publicacionHist);
+
+                $puntajeStock= $this->calculateRank($arrayProcesa, $tamanoMuestra, $tablaStock, 'stock');
+                $puntajeVisitas= $this->calculateRank($arrayProcesa, $tamanoMuestra, $tablaStock, 'visitas');                
+
+                //~Borra posibles resultados del mismo dia        
+                MeliPublicacionEstadisticas::where('id_publicacion', '=', $publicacionHist[0]["id_publicacion"])                
+                ->whereDate('fecha_estadistica','=',Carbon::today())->delete();
+
+                //~Inserta resultado
+                $meliPublicacionEstadisticas = new MeliPublicacionEstadisticas();
+                $meliPublicacionEstadisticas->id_publicacion = $publicacionHist[0]["id_publicacion"];
+                $meliPublicacionEstadisticas->id_variante_publicacion = $publicacionHist[0]["id_variante_publicacion"];
+                $meliPublicacionEstadisticas->id_publicacion_tienda = $publicacionHist[0]["id_publicacion_tienda"];
+                $meliPublicacionEstadisticas->fecha_estadistica = new \DateTime();
+                $meliPublicacionEstadisticas->puntaje_stock_full = $puntajeStock;
+                $meliPublicacionEstadisticas->puntaje_visitas_full = $puntajeVisitas;
+                $meliPublicacionEstadisticas->save();
+            }
+            return ['resultado'=>'OK'];    
+        }catch (\Exception $e) {
+            $ERROR = $e->getMessage();
+            return ['resultado'=>'ERR', 'msg'=>$e->getMessage()];
+        }
+        
+        }
     
 
 }

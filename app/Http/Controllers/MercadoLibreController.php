@@ -71,7 +71,9 @@ class MercadoLibreController extends Controller
                         ->update([  'estatus' => 'CONECTADO',                        
                             'att_access_token' => $tokenLogeo,
                             'att_refresh_token' =>  $refreshTokenLogeo,
-                            'att_expira_token' =>  date("Y-m-d H:i:s", Session::get('expires_in')) ]);
+                            'att_expira_token' =>  date("Y-m-d H:i:s", Session::get('expires_in')),
+                            'att_code_login' => $code
+                        ]);
                     }
 
                     return View::make("loginMELI");
@@ -94,29 +96,33 @@ class MercadoLibreController extends Controller
                         ->update([  'estatus' => 'CONECTADO',                        
                             'att_access_token' => $user['body']->access_token,
                             'att_refresh_token' =>  $user['body']->refresh_token,
-                            'att_expira_token' =>  date("Y-m-d H:i:s", Session::get('expires_in')) ]);
+                            'att_expira_token' =>  date("Y-m-d H:i:s", Session::get('expires_in')),
+                            'att_code_login' => $user['body']->code
+                        
+                        ]);
                     } catch (Exception $e) {
                           echo "Exception: ",  $e->getMessage(), "\n";
                     }                    
                 }    
-                $salida = array('urlLogin'=>null, 'msg'=>'Sesion activa');            
+                $salida = array('urlLogin'=>null, 'msg'=>'Sesion activa');       
+                //Session::put('access_token', null);
             }
         }else{
             $urlLogin = $meli->getAuthUrl($redirectURI, Meli::$AUTH_URL["MLM"]);
-
+            
             $salida = array('urlLogin'=>$urlLogin, 'msg'=>'Inicia logeo con ML');            
         }
 
         return $salida;        
     }
 
-    public function refreshToken($refreshToken){        
+    public function refreshToken($refreshToken, $code){        
         $appId = Config::get('zicandi.meli.appId');
         $secretKey = Config::get('zicandi.meli.secretKey');
         $redirectURI = Config::get('zicandi.meli.redirectURI');
         $siteId = Config::get('zicandi.meli.siteId');
 
-        $meli = new Meli($appId, $secretKey, null, $refreshToken);
+        $meli = new Meli($appId, $secretKey, null, $refreshToken, $redirectURI, $code);
         $refresh = null;
 
         try{
@@ -1606,7 +1612,7 @@ class MercadoLibreController extends Controller
 
         //$offset = $offset + $limit;    
 
-        $cuenta = CuentaTienda::where('usuario','=','SHOP-CONECTA2')->first();
+        $cuenta = CuentaTienda::where('usuario','=','ILOVEBETTERWARE')->first();
         $token = $cuenta->att_access_token;
 
         $appId = Config::get('zicandi.meli.appId');
