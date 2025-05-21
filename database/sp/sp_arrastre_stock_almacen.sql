@@ -1,6 +1,6 @@
 DROP PROCEDURE sp_arrastre_stock_almacen;
 delimiter //
-CREATE PROCEDURE sp_arrastre_stock_almacen(		IN p_id_producto INTEGER, 
+CREATE DEFINER=`p-us-global-zicandi`@`%` PROCEDURE sp_arrastre_stock_almacen(		IN p_id_producto INTEGER, 
 													IN p_id_almacen INTEGER,                                                    
                                                     OUT p_error INTEGER, 
                                                     OUT p_msg_error VARCHAR(200))

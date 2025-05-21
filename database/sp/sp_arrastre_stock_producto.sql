@@ -1,6 +1,6 @@
 DROP PROCEDURE sp_arrastre_stock_producto;
 delimiter //
-CREATE PROCEDURE sp_arrastre_stock_producto(IN p_id_producto INTEGER)
+CREATE DEFINER=`p-us-global-zicandi`@`%` PROCEDURE sp_arrastre_stock_producto(IN p_id_producto INTEGER)
 BEGIN    
     DECLARE var_final_sprod INTEGER DEFAULT 0;    
     DECLARE v_ubicacion VARCHAR(50);

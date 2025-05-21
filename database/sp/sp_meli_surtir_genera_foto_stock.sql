@@ -1,6 +1,6 @@
 DROP PROCEDURE sp_meli_surtir_genera_foto_stock;
 delimiter //
-CREATE PROCEDURE sp_meli_surtir_genera_foto_stock(	IN p_id_folio_full VARCHAR(50),
+CREATE DEFINER=`p-us-global-zicandi`@`%` PROCEDURE sp_meli_surtir_genera_foto_stock(	IN p_id_folio_full VARCHAR(50),
 													IN p_name VARCHAR(50),
 	                                                OUT p_error INTEGER, 
 	                                                OUT p_msg_error VARCHAR(200))

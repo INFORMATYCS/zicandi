@@ -1,6 +1,6 @@
 DROP PROCEDURE sp_meli_surtir_elimina_mov;
 delimiter //
-CREATE PROCEDURE sp_meli_surtir_elimina_mov( IN p_folio_full varchar(15),
+CREATE DEFINER=`p-us-global-zicandi`@`%` PROCEDURE sp_meli_surtir_elimina_mov( IN p_folio_full varchar(15),
 											 IN p_id_surtir_deta_envio_full int(10),
 	                                         OUT p_error INTEGER,
 	                                         OUT p_msg_error VARCHAR(200))

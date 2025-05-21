@@ -1,6 +1,6 @@
 DROP PROCEDURE sp_genera_lote_unifica_ubica;
 delimiter //
-CREATE PROCEDURE sp_genera_lote_unifica_ubica(	IN p_ubica_origen VARCHAR(200), 
+CREATE DEFINER=`p-us-global-zicandi`@`%` PROCEDURE sp_genera_lote_unifica_ubica(	IN p_ubica_origen VARCHAR(200), 
 													IN p_ubica_destino VARCHAR(200), 
 													OUT p_lote VARCHAR(200), 
 													OUT p_error INTEGER, 

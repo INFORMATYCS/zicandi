@@ -1,6 +1,6 @@
 DROP PROCEDURE sp_aplica_movimiento_almacen;
 delimiter //
-CREATE PROCEDURE sp_aplica_movimiento_almacen(	IN p_id_producto INTEGER,
+CREATE DEFINER=`p-us-global-zicandi`@`%` PROCEDURE sp_aplica_movimiento_almacen(	IN p_id_producto INTEGER,
                                                     IN p_id_almacen INTEGER,
                                                     IN p_codigo_ubicacion VARCHAR(15),
                                                     IN p_tipo_movimiento VARCHAR(3),

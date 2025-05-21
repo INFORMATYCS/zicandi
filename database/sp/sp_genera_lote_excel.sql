@@ -1,7 +1,7 @@
 DROP PROCEDURE sp_genera_lote_excel;
 delimiter //
 
-CREATE PROCEDURE sp_genera_lote_excel(OUT p_lote VARCHAR(200), OUT p_error INTEGER, OUT p_msg_error VARCHAR(200))
+CREATE DEFINER=`p-us-global-zicandi`@`%` PROCEDURE sp_genera_lote_excel(OUT p_lote VARCHAR(200), OUT p_error INTEGER, OUT p_msg_error VARCHAR(200))
 BEGIN
     DECLARE V_LOTE VARCHAR(50);
 	DECLARE EXIT HANDLER FOR SQLEXCEPTION

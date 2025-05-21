@@ -1,7 +1,7 @@
-DROP PROCEDURE xxxxxxxxxxxxxxxxxxxxxxxx;
+DROP PROCEDURE sp_meli_sutir_genera_lote_almacen;
 delimiter //
 
-CREATE PROCEDURE sp_meli_sutir_genera_lote_almacen(	IN p_id_folio_full VARCHAR(50),
+CREATE DEFINER=`p-us-global-zicandi`@`%` PROCEDURE sp_meli_sutir_genera_lote_almacen(	IN p_id_folio_full VARCHAR(50),
                                                     	OUT p_id_lote VARCHAR(50),
 														OUT p_error INTEGER, 
                                                     	OUT p_msg_error VARCHAR(200))

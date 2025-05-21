@@ -2,7 +2,7 @@ DROP PROCEDURE sp_meli_surtir_registra_mov;
 delimiter //
 
 
-CREATE PROCEDURE sp_meli_surtir_registra_mov( IN p_folio_full varchar(15),
+CREATE DEFINER=`p-us-global-zicandi`@`%` PROCEDURE sp_meli_surtir_registra_mov( IN p_folio_full varchar(15),
 											 IN p_id_surtir_config_envio_full int(10),
 											 IN p_codigo_producto varchar(15),
 											 IN p_codigo_ubicacion varchar(15),

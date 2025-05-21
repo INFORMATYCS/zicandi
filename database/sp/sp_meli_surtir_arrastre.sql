@@ -1,6 +1,6 @@
 DROP PROCEDURE sp_meli_surtir_arrastre;
 delimiter //
-CREATE PROCEDURE sp_meli_surtir_arrastre( IN p_folio_full varchar(15),
+CREATE DEFINER=`p-us-global-zicandi`@`%` PROCEDURE sp_meli_surtir_arrastre( IN p_folio_full varchar(15),
 										 IN p_id_surtir_config_envio_full int(10),
 	                                     OUT p_error INTEGER,
 	                                     OUT p_msg_error VARCHAR(200))

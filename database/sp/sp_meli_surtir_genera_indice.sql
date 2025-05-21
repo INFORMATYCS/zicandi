@@ -1,7 +1,7 @@
 DROP PROCEDURE sp_meli_surtir_genera_indice;
 delimiter //
 
-CREATE PROCEDURE sp_meli_surtir_genera_indice(	IN p_id_folio_full VARCHAR(50),
+CREATE DEFINER=`p-us-global-zicandi`@`%` PROCEDURE sp_meli_surtir_genera_indice(	IN p_id_folio_full VARCHAR(50),
 												OUT p_total_ok INTEGER, 	
 												OUT p_total_err INTEGER,
                                                 OUT p_error INTEGER, 

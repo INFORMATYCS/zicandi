@@ -1,6 +1,6 @@
 DROP PROCEDURE sp_meli_procesa_producto;
 delimiter //
-CREATE PROCEDURE sp_meli_procesa_producto(IN p_folio_envio VARCHAR(50), IN p_codigo_producto VARCHAR(25), OUT p_resultado INTEGER)
+CREATE DEFINER=`p-us-global-zicandi`@`%` PROCEDURE sp_meli_procesa_producto(IN p_folio_envio VARCHAR(50), IN p_codigo_producto VARCHAR(25), OUT p_resultado INTEGER)
 BEGIN
     
     DECLARE var_final INTEGER DEFAULT 0;	

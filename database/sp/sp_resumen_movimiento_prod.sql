@@ -1,7 +1,7 @@
 DROP PROCEDURE sp_resumen_movimiento_prod;
 delimiter //
 
-CREATE PROCEDURE sp_resumen_movimiento_prod(		IN p_id_producto INTEGER,                                                 
+CREATE DEFINER=`p-us-global-zicandi`@`%` PROCEDURE sp_resumen_movimiento_prod(		IN p_id_producto INTEGER,                                                 
                                                     OUT p_error INTEGER, 
                                                     OUT p_msg_error VARCHAR(200))
 BEGIN
