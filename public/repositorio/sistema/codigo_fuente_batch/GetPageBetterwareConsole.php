@@ -5,32 +5,28 @@ include 'lib/Console.php';
 
 $logFisico = fopen("zicandi.log", 'a+') or die("Se produjo un error al crear el archivo"); 
 
-Console::log('ZICANDI Obtener catalogo betterware v2 (2025)', 'white', true, 'blue', $logFisico);
+Console::log('ZICANDI Obtener catalogo betterware v3 (2026)', 'white', true, 'blue', $logFisico);
 
 Console::log('Obteniendo catalogo BETTERWARE, espere...', 'green', true, 'black', $logFisico);
 $productos_totales = []; // Array para almacenar todos los productos
 
-$limpiezaTablaTemporal = "true";
-for($i=1; $i<=12; $i++)
-{    
-    Console::log('Haciendo scraping a betterware.com, pagina ' . $i, 'yellow', false, 'black', $logFisico);
-    
-    $scat = Restfull::sendGet(Param::$_BASE_PATH_API.'zicandi/public/bett/get/productos?page='.$i.'&isInit='.$limpiezaTablaTemporal);
-    $cat = json_decode($scat);
-    $xstatus = $cat->xstatus;
+Console::log('Haciendo scraping a betterware.com', 'yellow', false, 'black', $logFisico);
 
-    if($xstatus == true){
-        Console::log(' OK, ' . count($cat->productos) . ' productos recuperados.', 'green', true, 'black', $logFisico);
-        $productos_totales = array_merge($productos_totales, $cat->productos);
-    }else{
-        Console::log(' Sin Data ', 'red', true, 'black', $logFisico);
-    }
+$scat = Restfull::sendGet(Param::$_BASE_PATH_API.'zicandi/public/bett/get/productos');
+$cat = json_decode($scat);
+$xstatus = $cat->xstatus;
 
-    $limpiezaTablaTemporal = "false";
-    $xstatus = true;
+if($xstatus == true){
+    Console::log(' OK, ' . count($cat->productos) . ' productos recuperados.', 'green', true, 'black', $logFisico);
+    $productos_totales = array_merge($productos_totales, $cat->productos);
+}else{
+    Console::log(' Sin Data ', 'red', true, 'black', $logFisico);
 }
 
+$xstatus = true;
+
 Console::log('Se localizaron '.count($productos_totales).' productos por procesar', 'green', true, 'black', $logFisico);
+
 
 if($xstatus == true){
     $productosList = $productos_totales;
@@ -73,8 +69,6 @@ if($xstatus == true){
     Console::log('Error grave al consumir servicio ', 'red', true, 'black', $logFisico);
     Console::log($cat->error , 'red', true, 'black', $logFisico);
 }
-
-
 
 
 fclose($logFisico); 
