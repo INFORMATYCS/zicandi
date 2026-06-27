@@ -1,6 +1,6 @@
 DROP PROCEDURE sp_meli_calcular_retiro;
 delimiter //
-CREATE PROCEDURE sp_meli_calcular_retiro(
+CREATE DEFINER=`p-us-global-zicandi`@`%` PROCEDURE sp_meli_calcular_retiro(
     IN p_folio_envio VARCHAR(50))    
 BEGIN
     DECLARE var_final INTEGER DEFAULT 0;	

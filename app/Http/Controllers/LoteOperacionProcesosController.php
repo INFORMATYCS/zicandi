@@ -80,7 +80,7 @@ class LoteOperacionProcesosController extends Controller{
                                     from (
                                         select distinct lote_referencia, referencia, fecha_operacion
                                         from lote_operacion_procesos 
-                                        where lote_referencia like ? order by id_lote_operacion desc limit 30
+                                        where lote_referencia like ? order by fecha_operacion desc limit 30
                                     )x", [$prefix]);                        
             return [ 'xstatus'=>true, 'result' => $result ];
         }catch(Exception $e){            
