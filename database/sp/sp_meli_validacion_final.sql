@@ -1,6 +1,6 @@
 DROP PROCEDURE sp_meli_validacion_final;
 delimiter //
-CREATE PROCEDURE sp_meli_validacion_final(IN p_folio_envio VARCHAR(50))
+CREATE DEFINER=`p-us-global-zicandi`@`%` PROCEDURE sp_meli_validacion_final(IN p_folio_envio VARCHAR(50))
 BEGIN
 	DECLARE var_final INTEGER DEFAULT 0;
         

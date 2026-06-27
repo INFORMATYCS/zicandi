@@ -1,6 +1,6 @@
 DROP PROCEDURE sp_meli_carga_inicia_info;
 delimiter //
-CREATE PROCEDURE sp_meli_carga_inicia_info(IN p_folio_envio VARCHAR(50), OUT p_resultado INTEGER)
+CREATE DEFINER=`p-us-global-zicandi`@`%` PROCEDURE sp_meli_carga_inicia_info(IN p_folio_envio VARCHAR(50), OUT p_resultado INTEGER)
 BEGIN
     
     DECLARE var_final INTEGER DEFAULT 0;	
