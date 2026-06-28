@@ -9,7 +9,6 @@ use App\Http\Lib\ProcesadorImagenes;
 use App\TempCatBett;
 use App\Categoria;
 use App\Producto;
-use App\StockProducto;
 use App\Proveedor;
 use App\Asociada;
 use App\Semana;
@@ -407,42 +406,129 @@ class BetterwareController extends Controller{
 
 
     /**
-     * Recupera todos los productos
+     * Recupera todos los productos del catalogo de betterware
      * 
      * 
      * 
      */
-    public function getProductosBett(Request $request){
-        try{            
-            $totalProd = 2000;
-            $data = json_decode( file_get_contents('https://www.betterware.com.mx/mx/es/cms/product-grid?categoryId=categories&categoryName&offset=0&limit='.$totalProd.'&heroImageType=picture&thumbnailImageType=swatch&variationField=style&filter={"q":"","facets":{}}&t=54521545122'), true );            
-            
+    public function getProductosBett(Request $request)
+    {                          
+        $resp = array();
+        $insertados = 0;
+        
+        // Variables para controlar la paginación dinámica
+        $pagina = 1;
+        $limite = 250; // Solicitamos el máximo permitido por Shopify por petición
+        $seguirBuscando = true;
+
+        try {
+            // IMPORTANTE: Limpiar la tabla temporal una sola vez al inicio del proceso
             $this->limpiaTablaTemporal($request);
 
-            $productos = $data['products'];
-            $resp = array();
+            while ($seguirBuscando) {
+                
+                // Construimos la URL dinámica añadiendo el límite y el número de página
+                $url = "https://betterware.com.mx/products.json?limit={$limite}&page={$pagina}";
 
-            foreach ($productos as $p) {
-                $temp = new TempCatBett();
-                $temp->codigo = $p['id'];
-                $temp->nombre = $p['name'];
-                $temp->precio = $p['price']['value'];
-                $temp->precio_oferta = $p['offerPrice'];
-                $temp->url =Config::get('zicandi.betterware.path').$p['url'];
-                $temp->imagen =$p['heroImage'];
-                $temp->descripcion =$p['description'];
-                $temp->categoria =$p['primaryCategoryName'];
-                $temp->espec_json =json_encode($p['classificationData']);            
-                $temp->save();
-
-
-                array_push($resp, [$temp['id_temp_cat_bett'], $temp['nombre']]);
-            }            
-
-            return [ 'xstatus'=>true, 'productos'=>$resp ];
-        }catch(Exception $e){
-            Log::error( $e->getTraceAsString() );            
-            return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
+                // Inicializamos cURL nativo de PHP para la página actual
+                $ch = curl_init();
+                
+                // Configuramos la petición
+                curl_setopt($ch, CURLOPT_URL, $url);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
+                
+                // Ejecutamos la petición
+                $body = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                
+                if (curl_errno($ch)) {
+                    $errorCurl = curl_error($ch);
+                    curl_close($ch);
+                    throw new \Exception($errorCurl);
+                }
+                
+                curl_close($ch);
+                
+                // Validamos que el servidor nos haya respondido correctamente
+                if ($httpCode !== 200) {
+                    Log::error("Error HTTP {$httpCode} al consultar la página {$pagina} de Betterware.");
+                    // Rompemos el ciclo para retornar lo que se haya alcanzado a insertar antes del fallo
+                    break;
+                }
+                
+                $data = json_decode($body, true);
+                
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    Log::error("JSON inválido en la página {$pagina}: " . json_last_error_msg());
+                    break;
+                }
+                
+                $products = isset($data['products']) ? $data['products'] : [];
+                
+                // CONTROL DE AGOTAMIENTO: Si Shopify devuelve un arreglo vacío, terminamos el bucle
+                if (count($products) === 0) {
+                    $seguirBuscando = false;
+                    break;
+                }
+                
+                // Procesamiento e inserción de los productos de la página actual
+                foreach ($products as $product) {
+                    $nombreLimpio = $this->limpiarNombreProducto($product['title']);                    
+                    $descripcion = isset($product['body_html']) ? trim(html_entity_decode(strip_tags($product['body_html']), ENT_QUOTES, 'UTF-8')) : '';
+                    $handle       = isset($product['handle']) ? $product['handle'] : '';
+                    
+                    $imagenUrl = null;
+                    if (!empty($product['images']) && isset($product['images'][0]['src'])) {
+                        $imagenUrl = $product['images'][0]['src'];
+                    }
+                    
+                    if (isset($product['variants']) && is_array($product['variants'])) {
+                        foreach ($product['variants'] as $variant) {
+                            
+                            $precioOferta = 0;
+                            if (isset($variant['compare_at_price']) && !is_null($variant['compare_at_price']) && $variant['compare_at_price'] !== '') {
+                                $precioOferta = (float) $variant['compare_at_price'];
+                            }
+                            
+                            $urlProducto = 'https://betterware.com.mx/products/' . $handle . '?variant=' . $variant['id'];
+                            
+                            if($variant['sku']!=null){
+                                $temp = TempCatBett::create([
+                                    'codigo'          => isset($variant['sku']) ? $variant['sku'] : null,
+                                    'nombre'          => $nombreLimpio,
+                                    'precio'          => isset($variant['price']) ? (float) $variant['price'] : 0,
+                                    'precio_oferta'   => $precioOferta,
+                                    'url'             => $urlProducto,
+                                    'descripcion'     => $descripcion,
+                                    'imagen'          => $imagenUrl,
+                                    'imagen_mini'     => null,
+                                    'estatus_proceso' => 'PEN',
+                                ]);
+                                
+                                array_push($resp, [$temp['id_temp_cat_bett'], $temp['nombre']]);
+                                $insertados++;
+                            }
+                        }
+                    }
+                }
+                
+                // Avanzamos el puntero a la siguiente página
+                $pagina++;
+                
+                // delay preventivo de 1 segundo para respetar los límites de velocidad (Rate Limit) de Shopify
+                sleep(2);
+            }
+                            
+            return [ 
+                'xstatus'    => true, 
+                'productos'  => $resp
+            ];
+            
+        } catch (\Exception $e) {
+            Log::error('Error al scrapear o insertar el catálogo: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
 
@@ -459,7 +545,9 @@ class BetterwareController extends Controller{
         $urlPublicacion = "";
         $urlPublicacionMini = "";
         try{
-            $ext = substr($pathImagen, -3);            
+            $ruta = parse_url($pathImagen, PHP_URL_PATH);
+            $ext = pathinfo($ruta, PATHINFO_EXTENSION);
+
             $actual = file_get_contents($pathImagen);            
 
             $b64= base64_encode($actual);
@@ -477,7 +565,8 @@ class BetterwareController extends Controller{
                 $urlPublicacionMini = $procesadorImagenes->publicaImagenMini100Bett($imagen);     
             }
 
-            $urlPublicacion = $procesadorImagenes->publicaImagenRespBett($imagen);
+            //Se anula el respaldo de la imagen de alta resolucion
+            //$urlPublicacion = $procesadorImagenes->publicaImagenRespBett($imagen);
         }catch (\Exception $e) {
             $ERROR = $e->getMessage();                
             Log::error( $ERROR );
@@ -517,7 +606,7 @@ class BetterwareController extends Controller{
                         $precio_oferta = $temp->precio_oferta;
                         $url = $temp->url;
                         $imagen = $temp->imagen;
-                        $descripcion = $temp->descripcion;
+                        $descripcion = substr($temp->descripcion, 0, 299);                        
                         $categoria = $temp->categoria;
                         $espec_json = $temp->espec_json;
             
@@ -528,25 +617,10 @@ class BetterwareController extends Controller{
             
                         
                         //Procesa imagen 1 y mini
-                        list ($bandExito, $url_original, $url_imagen) = $this->getImagenBett($imagen, $codigo, $codigo, true);			
-            
-                        //~Intenta recuperar la segunda imagen
-                        if($bandExito){
-                            $pathAlterno = str_replace('_1.jpg','_2.jpg',$imagen);
-                            list ($bandExito, $url_original, $url_imagen_aux) = $this->getImagenBett($pathAlterno, $codigo, $codigo."_2", false);
-            
-                            if(!$bandExito){
-                                $pathAlterno = str_replace('-H_1.jpg','_2.jpg',$imagen);
-                                list ($bandExito, $url_original, $url_imagen_aux) = $this->getImagenBett($pathAlterno, $codigo, $codigo."_2", false);
-            
-                            }
-                        }else{
-                            Log::error( 'No fue posible descargar la imagen' );								
-                        }
-                        
+                        list ($bandExito, $url_original, $url_imagen) = $this->getImagenBett($imagen, $codigo, $codigo, true);
             
                         $temp->imagen_mini = $url_imagen;
-                        $temp->imagen_respaldo = $url_original;
+                        //$temp->imagen_respaldo = $url_original;
                         $temp->estatus_proceso = 'PRO';
             
                         $temp->update();
@@ -647,6 +721,29 @@ class BetterwareController extends Controller{
             Log::error( $e->getTraceAsString() );            
             return [ 'xstatus'=>false, 'error' => $e->getMessage() ];
         }
+    }
+
+    /**
+     * Remueve acentos y caracteres especiales dejando solo letras, números y espacios.
+     *
+     * @param string $cadena
+     * @return string
+     */
+    function limpiarNombreProducto($cadena)
+    {
+        $acentos = [
+            'á'=>'a', 'é'=>'e', 'í'=>'i', 'ó'=>'o', 'ú'=>'u', 
+            'Á'=>'A', 'É'=>'E', 'Í'=>'I', 'Ó'=>'O', 'Ú'=>'U',
+            'ñ'=>'n', 'Ñ'=>'N', 'ü'=>'u', 'Ü'=>'U'
+        ];
+        
+        // Reemplaza acentos y eñes
+        $cadena = strtr($cadena, $acentos);
+        
+        // Remueve caracteres especiales (solo deja letras, números y espacios)
+        $cadena = preg_replace('/[^A-Za-z0-9 ]/', '', $cadena);
+        
+        return trim($cadena);
     }
     
 }
